@@ -6,23 +6,6 @@ LAYER_HEIGHT = 192
 SQR_HEIGHT = 64
 SQR_WIDTH = 128
 
-'''
-def square_center(ox, oy):
-    return ox + SQR_WIDTH // 2, oy + LAYER_HEIGHT + SQR_HEIGHT // 2
-
-def square_left(ox, oy):
-    return ox, oy + LAYER_HEIGHT + SQR_HEIGHT // 2
-
-def square_right(ox, oy):
-    return ox + SQR_WIDTH, oy + LAYER_HEIGHT + SQR_HEIGHT // 2
-
-def square_top(ox, oy):
-    return ox + SQR_WIDTH // 2, oy + LAYER_HEIGHT
-
-def square_bottom(ox, oy):
-    return ox + SQR_WIDTH // 2, oy + LAYER_HEIGHT + SQR_HEIGHT
-'''
-
 def get_offset_in_tile(gx, gy):
     ox = (gx - 1) * SQR_WIDTH // 2
     oy = (gy - 7) * SQR_HEIGHT // 2
@@ -49,16 +32,6 @@ class DZI(object):
         gymax = None
         for cx, cy in self.cells:
             left, right, top, bottom = self.cell_grid_bound(cx, cy)
-            '''
-            # square coords
-            sx = cx * 300
-            sy = cy * 300
-            # grid coords
-            gy_top = sx + sy
-            gy_btm = sx + sy + 299 * 2
-            gx_left = sx - sy - 299
-            gx_right = sx - sy + 299
-            '''
             if gxmin is None:
                 gxmin = left
                 gxmax = right
@@ -70,12 +43,6 @@ class DZI(object):
                 gymin = min(top, gymin)
                 gymax = max(bottom, gymax)
 
-        '''
-        gxmin -= 4
-        gxmax += 4
-        gymin -= max(2 + 6 * layers, 16) # single layer jumbo tree or multi layers
-        gymax += 2
-        '''
         gxmin -= 2
         gxmax += 2
         gymin -= 2

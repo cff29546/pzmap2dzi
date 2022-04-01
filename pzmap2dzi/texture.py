@@ -70,7 +70,6 @@ class Texture(object):
             self.oy = oy
 
     def render(self, target, x, y):
-        #target.paste(self.im, (x + self.ox, y + self.oy), self.im)
         w, h = self.im.size
         x = x + self.ox
         y = y + self.oy
@@ -146,10 +145,6 @@ class TextureLibrary(object):
             return False
         t = mp.Task(save_img, path, parallel)
         t.run(list(self.lib.items()), True)
-        '''
-        for name, texture in self.lib.items():
-            texture.save(os.path.join(path, name + '.png'))
-        '''
                 
     def blend_textures(self, names, jumbo=False):
         if jumbo:

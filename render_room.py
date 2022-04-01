@@ -28,6 +28,10 @@ def room_border(rects):
 
         wflag = True if w > 1 else None
         hflag = True if h > 1 else None
+        # flag meannings:
+        #     True: the adjacent tile in this direction belongs to the same room
+        #     False: the adjacent tile in this direction is outside the room
+        #     None: Not sure, check later
         # corners
         m[x        , y        ] = ( None, wflag, hflag,  None)
         m[x        , y + h - 1] = (hflag, wflag,  None,  None)
@@ -42,6 +46,7 @@ def room_border(rects):
             m[x        , y + j] = ( True, wflag,  True,  None)
             m[x + w - 1, y + j] = ( True,  None,  True, wflag) 
 
+    # check and finalize None flags
     edges = []
     for x, y in m:
         flags = []

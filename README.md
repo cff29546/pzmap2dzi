@@ -32,12 +32,12 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 # Change rendering configurations
 - Change thread numbers (default is 16 threads)
     - In the `scripts/` folder, you can edit the starter command in the following files
-```
-unpack_texture.bat
-render_base.bat
-render_grid.bat
-render_room.bat
-```
+    ```
+    unpack_texture.bat
+    render_base.bat
+    render_grid.bat
+    render_room.bat
+    ```
     - Change `-m 16` to `-m 4` to use only four threads.
 - Do not render grid and room info
     - Remove the calling of `render_grid.bat` and `render_room.bat` from `run.bat`

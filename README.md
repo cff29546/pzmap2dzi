@@ -45,6 +45,9 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
     - Similar to the config of thread numbers, add `-s <hotkey>` to starter commands
         - For example, `-s "<f9>"` make the rendering process stop when you hit F9
     - To resume, run `run.bat` again
+- Change base layer file format
+    - Edit `scripts/render_base.bat`
+    - Change `--layer0-fmt png` to `--layer0-fmt jpg` to use jpg format for base layer
 
 # How to start the HTML viewer
 After the rendering, you get an `html` folder in your output path.

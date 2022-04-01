@@ -80,10 +80,10 @@ def process(args):
     util.ensure_folder(args.output)
     dzi = pzdzi.DZI(args.input, args.tile_size, args.layers, False)
     dzi.ensure_folders(args.output, 1)
-    dzi.save_dzi(args.output, 1)
+    dzi.save_dzi(args.output, 'png', 1)
     layer0_path = os.path.join(args.output, 'layer0_files')
     base_level_path = os.path.join(layer0_path, str(dzi.base_level))
-    groups = dzi.get_tile_groups(base_level_path, args.group_size)
+    groups = dzi.get_tile_groups(base_level_path, 'png', args.group_size)
 
     conf = (dzi, base_level_path, args.cell_grid, args.block_grid, args.save_empty_tile)
 
@@ -95,7 +95,7 @@ def process(args):
 
     if args.verbose:
         print('processing pyramid:')
-    if not dzi.merge_all_levels(layer0_path, args.mp, args.verbose, args.stop_key):
+    if not dzi.merge_all_levels(layer0_path, 'png', args.mp, args.verbose, args.stop_key):
         return False
 
 if __name__ == '__main__':

@@ -16,15 +16,21 @@ def get_all_cells(path):
 
 
 PENDING_PATTERN = re.compile('(\\d+)_(\\d+)\\.pending$')
-TILE_PATTERN = re.compile('(\\d+)_(\\d+)\\.png$')
-DONE_PATTERN = re.compile('(\\d+)_(\\d+)\\.(?:empty|png)$')
-def get_done_tiles(path):
+TILE_PATTERN = {
+    'png': re.compile('(\\d+)_(\\d+)\\.png$'),
+    'jpg': re.compile('(\\d+)_(\\d+)\\.jpg$'),
+}
+DONE_PATTERN = {
+    'png': re.compile('(\\d+)_(\\d+)\\.(?:empty|png)$'),
+    'jpg': re.compile('(\\d+)_(\\d+)\\.(?:empty|jpg)$'),
+}
+def get_done_tiles(path, ext):
     if not os.path.isdir(path):
         return set()
     done = set()
     pending = set()
     for f in os.listdir(path):
-        m = DONE_PATTERN.match(f)
+        m = DONE_PATTERN[ext].match(f)
         if m:
             x, y = map(int, m.groups())
             done.add((x, y))

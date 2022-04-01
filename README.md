@@ -3,7 +3,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 
 # Features
 
-- Supports both python 2.0 and python 3.0
+- Supports both python 2 and python 3
 - HTML viewer for viewing the generated Deep Zoom image.
 - Various plant rendering configurations (snow, flower, tree size, etc.).
 - Supports multi-thread acceleration

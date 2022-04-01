@@ -50,14 +50,14 @@ render_room.bat
 After the rendering, you get an `html` folder in your output path.
 ```
 html
-©À©¤©¤ base/
-©À©¤©¤ grid/
-©À©¤©¤ openseadragon/
-©À©¤©¤ room/
-©À©¤ chrome_allow_file(need close chrome first).bat
-©À©¤ chrome_no_sicurity.bat
-©À©¤ pzmap.html
-©¸©¤ run_server.bat
+â”œâ”€â”€ base/
+â”œâ”€â”€ grid/
+â”œâ”€â”€ openseadragon/
+â”œâ”€â”€ room/
+â”œâ”€ chrome_allow_file(need close chrome first).bat
+â”œâ”€ chrome_no_sicurity.bat
+â”œâ”€ pzmap.html
+â””â”€ run_server.bat
 ```
 
 Directly open `pzmap.html` will NOT work, as the Cross-Origin Resource Sharing (CORS) Policies will refuse to load Deep Zoom tiles from your locale disk by default.

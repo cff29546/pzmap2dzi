@@ -1,0 +1,130 @@
+
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PZ map</title>
+    <script type="text/javascript" src='openseadragon/openseadragon.js'></script>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+      html, body { height: 100%; margin: 0; padding: 0; background-color: white;}
+    </style>
+  </head>
+
+  <body>
+    <div style="display: flex; flex-flow: column; height: 100%;">
+      <div style="flex: 0 1 auto;">
+        <button type="button" onclick="toggleGrid(0)">Grid</button>
+        <button type="button" onclick="toggleRoom(0)">Room</button>
+        <button type="button" onclick="setLayer(0)">Layer 0</button>
+        <button type="button" onclick="setLayer(1)">Layer 1</button>
+        <button type="button" onclick="setLayer(2)">Layer 2</button>
+        <button type="button" onclick="setLayer(3)">Layer 3</button>
+        <button type="button" onclick="setLayer(4)">Layer 4</button>
+        <button type="button" onclick="setLayer(5)">Layer 5</button>
+        <button type="button" onclick="setLayer(6)">Layer 6</button>
+        <button type="button" onclick="setLayer(7)">Layer 7</button>
+
+      </div>
+      <div style="flex: 1 1 auto;">
+        <div id="contentDiv" allowfullscreen style="height: 100%"> </div>
+      </div>
+    </div>
+    <script type="text/javascript">
+        var _viewer = OpenSeadragon({
+            element: document.getElementById("contentDiv"),
+            tileSources:  "base/layer0.dzi",
+            homeFillsViewer: true,
+            showZoomControl: true,
+            constrainDuringPan: true,
+            visibilityRatio: 1,
+            prefixUrl: "openseadragon/images/",
+            minZoomImageRatio: 1
+        });
+        var tiles = [0, 0, 0, 0, 0, 0, 0]
+        var room = 0
+        var grid = 0
+        var curLayers = 0
+
+        function addLayer(layer) {
+            curLayers++;
+            var _viewer1 = _viewer.addTiledImage({
+                tileSource: "base/layer" + curLayers + ".dzi",
+                opacity: 1,
+                success: function (obj) {
+                    tiles[layer] = obj.item;
+                },
+            });
+        }
+        function removeLayer() {
+            if (curLayers == 0) {
+                return;
+            }
+            curLayers--;
+            item = tiles[curLayers];
+            _viewer.world.removeItem(item);
+            tiles[curLayers] = 0;
+        }
+        function setLayer(l) {
+            if (curLayers < l) {
+                for (i = curLayers; i < l; i++) {
+                    addLayer(i);
+                }
+                if (grid != 0) {
+                    toggleGrid();
+                    toggleGrid();
+                }
+                if (room != 0) {
+                    toggleRoom();
+                    toggleRoom();
+                }
+            }
+            if (curLayers > l) {
+                for (i = curLayers; i > l; i--) {
+                    removeLayer();
+                }
+                if (grid != 0) {
+                    toggleGrid();
+                    toggleGrid();
+                }
+                if (room != 0) {
+                    toggleRoom();
+                    toggleRoom();
+                }
+            }
+        }
+        function toggleRoom() {
+            if (room == 0) {
+                var _viewer1 = _viewer.addTiledImage({
+                    tileSource: "room/layer" + curLayers + ".dzi",
+                    opacity: 1,
+                    success: function (obj) {
+                        room = obj.item;
+                    },
+                });
+            } else {
+                _viewer.world.removeItem(room);
+                room = 0;
+            }
+        }
+        function toggleGrid() {
+            if (grid == 0) {
+                var p = _viewer.viewport.imageToViewportCoordinates(0, -192 * curLayers)
+                var _viewer1 = _viewer.addTiledImage({
+                    tileSource: "grid/layer0.dzi",
+                    opacity: 1,
+                    x: 0,
+                    y: p.y,
+                    success: function (obj) {
+                        grid = obj.item;
+                    },
+                });
+            } else {
+                _viewer.world.removeItem(grid);
+                grid = 0;
+            }
+        }
+    </script>
+  </body>
+</html>

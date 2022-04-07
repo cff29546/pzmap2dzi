@@ -18,5 +18,9 @@ echo Render grid done
 echo Render room ...
 call "%~dp0scripts\render_room.bat"
 echo Render room done
+
+echo Render zombie ...
+call "%~dp0scripts\render_zombie.bat"
+echo Render zombie done
 echo All done
 pause

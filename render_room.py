@@ -80,7 +80,7 @@ class Cell(object):
 def load_cell(path, cx, cy):
     name = os.path.join(path, '{}_{}.lotheader'.format(cx, cy))
     if not os.path.isfile(name):
-        return None 
+        return None
     header = lotheader.load_lotheader(name)
     if len(header['rooms']) == 0:
         return None

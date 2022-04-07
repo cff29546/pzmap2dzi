@@ -9,6 +9,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 - Supports multi-thread acceleration
 - Supports resuming from a breakpoint
 - Supports map grid and room info rendering
+- Supports zombie heatmap
 - Supports game version 41.68
 
 # Requirement
@@ -41,6 +42,8 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
     - Change `-m 16` to `-m 4` to use only four threads.
 - Do not render grid and room info
     - Remove the calling of `render_grid.bat` and `render_room.bat` from `run.bat`
+- Do not render zombie heatmap
+    - Remove the calling of `render_zombie.bat` from `run.bat`
 - Config a hotkey to elegantly stop rendering at a breakpoint so you can resume later
     - Similar to the config of thread numbers, add `-s <hotkey>` to starter commands
         - For example, `-s "<f9>"` make the rendering process stop when you hit F9
@@ -86,3 +89,6 @@ There are two ways to bypass CORS:
     - (Display room info of the current floor)
 
     ![Room Example](./docs/img/room.png)
+- To enable/disable zombie heatmap, use the `Zombie` button
+
+    ![Zombie Heatmap Example](./docs/img/zombie.png)

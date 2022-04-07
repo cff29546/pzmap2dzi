@@ -45,6 +45,7 @@ def render_zombie(dzi, tx, ty, in_path, out_path, save_empty, zombie_count):
     left, right, top, bottom = dzi.tile_grid_bound(tx, ty, 0)
     im = None
     draw = None
+    text = []
     for gy in range(top, bottom + 1 - 6):
         for gx in range(left, right + 1):
             if (gx + gy) & 1:
@@ -72,7 +73,9 @@ def render_zombie(dzi, tx, ty, in_path, out_path, save_empty, zombie_count):
             draw_square(draw, x, y, get_color(zpop, 128))
 
             if zombie_count and subx % 10 == 9 and suby % 10 == 0:
-                render_text(draw, x, y, "z:{}".format(zpop), get_color(zpop, 255), ZOMBIE_FONT)
+                text.append((x, y, "z:{}".format(zpop), get_color(zpop, 255), ZOMBIE_FONT))
+    for args in text:
+        render_text(draw, *args)
 
     if im:
         im = dzi.crop_tile(im, tx, ty)

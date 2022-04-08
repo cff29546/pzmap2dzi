@@ -19,7 +19,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 
 # How to run
 
-1. Install python
+1. Install [Python](https://www.python.org/downloads/)
 2. Clone or download the project
 3. install requirements
 
@@ -85,11 +85,11 @@ There are two ways to bypass CORS:
 - To enable/disable the grid, use the `Grid` button
     - (Position of the grid will adjust according to the current floor)
 
-    ![Grid Example](./docs/img/grid.png)
+    ![Grid Example](./docs/img/grid.jpg)
 - To enable/disable room info, use the `Room` button
     - (Display room info of the current floor)
 
-    ![Room Example](./docs/img/room.png)
+    ![Room Example](./docs/img/room.jpg)
 - To enable/disable zombie heatmap, use the `Zombie` button
 
-    ![Zombie Heatmap Example](./docs/img/zombie.png)
+    ![Zombie Heatmap Example](./docs/img/zombie.jpg)

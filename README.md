@@ -61,6 +61,7 @@ html
 ├── grid/
 ├── openseadragon/
 ├── room/
+├── zombie/
 ├─ chrome_allow_file(need close chrome first).bat
 ├─ chrome_no_sicurity.bat
 ├─ pzmap.html

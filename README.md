@@ -23,12 +23,12 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 2. Clone or download the project
 3. install requirements
 
-    `python -m pip install -r requirements.txt`
+   run `install_requirements.bat`
 4. Edit the `pz_path.txt` file to contain the correct path where your ProjectZomboid located on your computer
 5. Edit the `out_path.txt` file to contain the desired output path
 6. run the tool
 
-    `run.bat`
+   run `run.bat`
 
 # Change rendering configurations
 - Change thread numbers (default is 16 threads)
@@ -38,6 +38,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
     render_base.bat
     render_grid.bat
     render_room.bat
+    render_zombie.bat
     ```
     - Change `-m 16` to `-m 4` to use only four threads.
 - Do not render grid and room info

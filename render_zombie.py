@@ -95,7 +95,7 @@ def process(args):
     if args.verbose:
         print('processing base level:')
     util.ensure_folder(args.output)
-    dzi = pzdzi.DZI(args.input, args.tile_size, args.layers, False)
+    dzi = pzdzi.IsoDZI(args.input, args.tile_size, args.layers, False)
     dzi.ensure_folders(args.output, 1)
     dzi.save_dzi(args.output, 'png', 1)
     layer0_path = os.path.join(args.output, 'layer0_files')
@@ -118,7 +118,7 @@ def process(args):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='PZ map zombie heatmap render')
-    parser.add_argument('-o', '--output', type=str, default='./output/html/grid')
+    parser.add_argument('-o', '--output', type=str, default='./output/html/zombie')
     parser.add_argument('-m', '--mp', type=int, default=1)
     parser.add_argument('--tile-size', type=int, default=1024)
     parser.add_argument('--layers', type=int, default=8)

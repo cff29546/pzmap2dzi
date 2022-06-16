@@ -243,7 +243,7 @@ def process(args):
 
     if args.verbose:
         print('processing base level:')
-    dzi = pzdzi.DZI(args.input, args.tile_size, args.layers, False)
+    dzi = pzdzi.IsoDZI(args.input, args.tile_size, args.layers, False)
     dzi.ensure_folders(args.output)
     dzi.save_dzi(args.output, 'png')
     skip_cells = set()
@@ -271,7 +271,7 @@ def process(args):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='PZ map room render')
-    parser.add_argument('-o', '--output', type=str, default='./output/html/grid')
+    parser.add_argument('-o', '--output', type=str, default='./output/html/room')
     parser.add_argument('-m', '--mp', type=int, default=1)
     parser.add_argument('--tile-size', type=int, default=1024)
     parser.add_argument('--layers', type=int, default=8)

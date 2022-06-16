@@ -57,6 +57,13 @@ def load_pack(path):
         pages.append(page)
     return pages
 
+def color_sum(pixels):
+    total = len(pixels)
+    if total > 0:
+        r, g, b, _ = map(sum, zip(*pixels))
+        return r, g, b, total
+    return 0
+
 class Texture(object):
     def __init__(self, im, ox, oy):
         bbox = im.getbbox()
@@ -68,6 +75,7 @@ class Texture(object):
             self.im = im
             self.ox = ox
             self.oy = oy
+        self.color_sum = None
 
     def render(self, target, x, y):
         w, h = self.im.size
@@ -76,6 +84,12 @@ class Texture(object):
         base = target.crop((x, y, x + w, y + h))
         result = Image.alpha_composite(base, self.im)
         target.paste(result, (x, y))
+
+    def get_color_sum(self):
+        if self.color_sum is None:
+            pixels = list(filter(lambda x: x[3]==255, self.im.getdata()))
+            self.color_sum = color_sum(pixels)
+        return self.color_sum
 
     def save(self, path):
         w, h = self.im.size

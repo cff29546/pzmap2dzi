@@ -76,7 +76,7 @@ def process(args):
 
     if args.verbose:
         print('processing base level:')
-    dzi = pzdzi.DZI(args.input, args.tile_size, args.layers, args.jumbo_tree_size > 3)
+    dzi = pzdzi.IsoDZI(args.input, args.tile_size, args.layers, args.jumbo_tree_size > 3)
     dzi.ensure_folders(args.output)
     dzi.save_dzi(args.output, 'png')
     if args.layer0_fmt != 'png':

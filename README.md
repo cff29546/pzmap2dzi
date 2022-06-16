@@ -10,7 +10,8 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 - Supports resuming from a breakpoint
 - Supports map grid and room info rendering
 - Supports zombie heatmap
-- Supports game version 41.68
+- Supports isometric view and top view rendering
+- Supports game version 41.71
 
 # Requirement
 - The full output size for game version 41.68 is around 1.1TB and consists of 1.3M files. Make sure your output to a hard drive has enough free space.
@@ -45,6 +46,8 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
     - Remove the calling of `render_grid.bat` and `render_room.bat` from `run.bat`
 - Do not render zombie heatmap
     - Remove the calling of `render_zombie.bat` from `run.bat`
+- Do not render top view map
+    - Remove the calling of `render_zombie_top.bat` and `render_base_top.bat` from `run.bat`
 - Config a hotkey to elegantly stop rendering at a breakpoint so you can resume later
     - Similar to the config of thread numbers, add `-s <hotkey>` to starter commands
         - For example, `-s "<f9>"` make the rendering process stop when you hit F9
@@ -58,13 +61,16 @@ After the rendering, you get an `html` folder in your output path.
 ```
 html
 ├── base/
+├── base_top/
 ├── grid/
 ├── openseadragon/
 ├── room/
 ├── zombie/
+├── zombie_top/
 ├─ chrome_allow_file(need close chrome first).bat
 ├─ chrome_no_sicurity.bat
 ├─ pzmap.html
+├─ pzmap_top.html
 └─ run_server.bat
 ```
 
@@ -94,3 +100,7 @@ There are two ways to bypass CORS:
 - To enable/disable zombie heatmap, use the `Zombie` button
 
     ![Zombie Heatmap Example](./docs/img/zombie.jpg)
+
+- To switch between isometric view and top view, use the view switch link
+
+    ![Top View Example](./docs/img/topview.jpg)

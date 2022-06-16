@@ -78,7 +78,7 @@ def process(args):
     if args.verbose:
         print('processing base level:')
     util.ensure_folder(args.output)
-    dzi = pzdzi.DZI(args.input, args.tile_size, args.layers, False)
+    dzi = pzdzi.IsoDZI(args.input, args.tile_size, args.layers, False)
     dzi.ensure_folders(args.output, 1)
     dzi.save_dzi(args.output, 'png', 1)
     layer0_path = os.path.join(args.output, 'layer0_files')

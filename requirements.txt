@@ -1,1 +1,3 @@
 pynput
+lupa
+pyclipper

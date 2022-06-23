@@ -90,8 +90,8 @@ if __name__ == '__main__':
     parser.add_argument('--layers', type=int, default=8)
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('-e', '--save-empty-tile', action='store_true')
-    parser.add_argument('-s', '--square-size', type=int, default=4)
-    parser.add_argument('--stop-key', type=str, default='')
+    parser.add_argument('-S', '--square-size', type=int, default=4)
+    parser.add_argument('-s', '--stop-key', type=str, default='')
     parser.add_argument('input', type=str)
     args = parser.parse_args()
 

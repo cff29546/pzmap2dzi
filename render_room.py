@@ -61,7 +61,7 @@ def room_border(rects):
             edges.append(((x, y), flags))
     return (labelx, labely), edges
 
-class Cell(object):
+class CellRoom(object):
     def __init__(self, rooms):
         self.name = []
         self.edge = {}
@@ -77,14 +77,14 @@ class Cell(object):
                 self.edge[layer, x, y] = (i, flag)
 
 @lru_cache(maxsize=128)
-def load_cell(path, cx, cy):
+def load_cell_room(path, cx, cy):
     name = os.path.join(path, '{}_{}.lotheader'.format(cx, cy))
     if not os.path.isfile(name):
         return None
     header = lotheader.load_lotheader(name)
     if len(header['rooms']) == 0:
         return None
-    return Cell(header['rooms'])
+    return CellRoom(header['rooms'])
 
 
 SUFFIX = [
@@ -201,7 +201,7 @@ def render_tile(dzi, tx, ty, in_path, out_path, save_empty):
                 cy, suby = divmod(sy, 300)
                 if (cx, cy) not in dzi.cells:
                     continue
-                cell = load_cell(in_path, cx, cy)
+                cell = load_cell_room(in_path, cx, cy)
                 if not cell:
                     continue
                 x = (gx - gx0) * pzdzi.SQR_WIDTH // 2
@@ -248,7 +248,7 @@ def process(args):
     dzi.save_dzi(args.output, 'png')
     skip_cells = set()
     for x, y in dzi.cells:
-        if not load_cell(args.input, x, y):
+        if not load_cell_room(args.input, x, y):
             skip_cells.add((x, y))
     layer0_path = os.path.join(args.output, 'layer0_files', str(dzi.base_level))
     groups = dzi.get_tile_groups(layer0_path, 'png', args.group_size, skip_cells)

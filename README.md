@@ -9,7 +9,8 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 - Supports multi-thread acceleration
 - Supports resuming from a breakpoint
 - Supports map grid and room info rendering
-- Supports zombie heatmap
+- Supports zombie heatmap rendering
+- Supports foraging zones rendering
 - Supports isometric view and top view rendering
 - Supports game version 41.71
 
@@ -24,6 +25,8 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 2. Clone or download the project
 3. install requirements
 
+   If your python version is 2.7, install VCForPython27 first. You can find it [here](https://web.archive.org/web/20210106040224/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi) or [here](https://github.com/reider-roque/sulley-win-installer/blob/master/VCForPython27.msi)
+   
    run `install_requirements.bat`
 4. Edit the `pz_path.txt` file to contain the correct path where your ProjectZomboid located on your computer
 5. Edit the `out_path.txt` file to contain the desired output path
@@ -46,6 +49,8 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
     - Remove the calling of `render_grid.bat` and `render_room.bat` from `run.bat`
 - Do not render zombie heatmap
     - Remove the calling of `render_zombie.bat` from `run.bat`
+- Do not render foraging zones
+    - Remove the calling of `render_foraging.bat` from `run.bat`
 - Do not render top view map
     - Remove the calling of `render_zombie_top.bat` and `render_base_top.bat` from `run.bat`
 - Config a hotkey to elegantly stop rendering at a breakpoint so you can resume later
@@ -62,6 +67,7 @@ After the rendering, you get an `html` folder in your output path.
 html
 ├── base/
 ├── base_top/
+├── foraging/
 ├── grid/
 ├── openseadragon/
 ├── room/
@@ -100,6 +106,10 @@ There are two ways to bypass CORS:
 - To enable/disable zombie heatmap, use the `Zombie` button
 
     ![Zombie Heatmap Example](./docs/img/zombie.jpg)
+
+- To enable/disable foraging zones, use the `Foraging` button
+
+    ![Foraging zones Example](./docs/img/foraging.jpg)
 
 - To switch between isometric view and top view, use the view switch link
 

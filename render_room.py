@@ -1,65 +1,10 @@
 from PIL import Image, ImageDraw, ImageFont
 import os
-from pzmap2dzi import lotheader, util, mp, pzdzi
+from pzmap2dzi import lotheader, util, mp, pzdzi, geometry
 try:
     from functools import lru_cache
 except ImportError:
     from backports.functools_lru_cache import lru_cache
-
-
-def order(x, y):
-    return (x + y, x)
-
-# direction order:
-#   0
-# 3 x 1
-#   2
-_DIR = [(0, -1), (1, 0), (0, 1), (-1, 0)]
-
-def room_border(rects):
-    m = {}
-    labelx = None
-    labely = None
-    for r in rects:
-        x, y, w, h = r
-        if labelx is None or order(x, y) < order(labelx, labely):
-            labelx = x
-            labely = y
-
-        wflag = True if w > 1 else None
-        hflag = True if h > 1 else None
-        # flag meannings:
-        #     True: the adjacent tile in this direction belongs to the same room
-        #     False: the adjacent tile in this direction is outside the room
-        #     None: Not sure, check later
-        # corners
-        m[x        , y        ] = ( None, wflag, hflag,  None)
-        m[x        , y + h - 1] = (hflag, wflag,  None,  None)
-        m[x + w - 1, y        ] = ( None,  None, hflag, wflag)
-        m[x + w - 1, y + h - 1] = (hflag,  None,  None, wflag)
-
-        # edges
-        for i in range(1, w - 1):
-            m[x + i, y        ] = ( None,  True, hflag,  True)
-            m[x + i, y + h - 1] = (hflag,  True,  None,  True)
-        for j in range(1, h - 1):
-            m[x        , y + j] = ( True, wflag,  True,  None)
-            m[x + w - 1, y + j] = ( True,  None,  True, wflag) 
-
-    # check and finalize None flags
-    edges = []
-    for x, y in m:
-        flags = []
-        for i, flag in enumerate(m[x, y]):
-            if flag is not None:
-                flags.append(flag)
-            else:
-                xx = x + _DIR[i][0]
-                yy = y + _DIR[i][1]
-                flags.append((xx, yy) in m)
-        if False in flags:
-            edges.append(((x, y), flags))
-    return (labelx, labely), edges
 
 class CellRoom(object):
     def __init__(self, rooms):
@@ -69,8 +14,8 @@ class CellRoom(object):
         for i, r in enumerate(rooms):
             layer = r['layer']
             self.name.append(r['name'])
-            label, edge = room_border(r['rects'])
-            lx, ly = label
+            edge = geometry.rects_border(r['rects'])
+            lx, ly = geometry.label_square(r['rects'])
             self.label[layer, lx, ly] = r['name']
 
             for (x, y), flag in edge:

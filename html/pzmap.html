@@ -36,7 +36,6 @@
       </div>
     </div>
     <script type="text/javascript">
-        var legend = 0
         var legendHTML = `
             <div class="legend" style="background-color:#fff"></div>Road
             <div class="legend" style="background-color:#00f"></div>Urban Area
@@ -109,6 +108,10 @@
             if (curLayers > l) {
                 for (i = curLayers; i > l; i--) {
                     removeLayer();
+                }
+                if (foraging != 0) {
+                    toggleForaging();
+                    toggleForaging();
                 }
                 if (zombie != 0) {
                     toggleZombie();

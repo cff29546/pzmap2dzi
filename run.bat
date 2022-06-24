@@ -35,5 +35,9 @@ echo Render foraging ...
 call "%~dp0scripts\render_foraging.bat"
 echo Render foraging done
 
+echo Render top view foraging ...
+call "%~dp0scripts\render_foraging_top.bat"
+echo Render top view foraging done
+
 echo All done
 pause

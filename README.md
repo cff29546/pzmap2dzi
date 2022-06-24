@@ -15,9 +15,10 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 - Supports game version 41.71
 
 # Requirement
-- The full output size for game version 41.68 is around 1.1TB and consists of 1.3M files. Make sure your output to a hard drive has enough free space.
+- The full output size of isometric map for game version 41.68 is around 1.1TB and consists of 1.3M files. Make sure your output to a hard drive has enough free space.
 - The rending process will take a very long time, so it's better to have a high-performance CPU, hard drive, and large memory. 
     - (The rending took around 18 hours on an AMD 3700X with 64GB DDR4 2133 memory and a SATA3 mechanical hard drive using a 16 thread setting)
+- If you choose to render only top view map, output size will be around 250MB and can be done around 2 hours.
 
 # How to run
 
@@ -32,7 +33,9 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 5. Edit the `out_path.txt` file to contain the desired output path
 6. run the tool
 
-   run `run.bat`
+   run `run.bat` to render all isometric and top view maps
+
+   or run `run_top_view_only.bat` to render only top view maps
 
 # Change rendering configurations
 - Change thread numbers (default is 16 threads)
@@ -46,6 +49,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
     render_zombie.bat
     render_zombie_top.bat
     render_foraging.bat
+    render_foraging_top.bat
     
     ```
     - Change `-m 16` to `-m 4` to use only four threads.
@@ -72,6 +76,7 @@ html
 ├── base/
 ├── base_top/
 ├── foraging/
+├── foraging_top/
 ├── grid/
 ├── openseadragon/
 ├── room/

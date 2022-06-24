@@ -1,5 +1,10 @@
 import lupa
 from . import geometry
+from functools import partial
+try:
+    from functools import lru_cache
+except ImportError:
+    from backports.functools_lru_cache import lru_cache
 
 def isListKeys(keys):
     for key in keys:
@@ -44,11 +49,13 @@ FORAGING_TYPES = set([
     'FarmLand',
     'Farm'
 ])
-def load_foraging_raw(objects_path):
-    objects = load_objects_raw(objects_path)
+PARKING_TYPES = set(['ParkingStall'])
+def filter_objects_raw(objects, types, zlimit=None):
     output = []
     for o in objects:
-        if o['type'] in FORAGING_TYPES:
+        if zlimit is not None and o['z'] >= zlimit:
+            continue
+        if o['type'] in types:
             output.append(o)
     return output
 
@@ -56,7 +63,6 @@ class Obj(object):
     def __init__(self, obj):
         self.geo_type = obj.get('geometry', 'rect')
         self.type = obj.get('type', '')
-        self.id = obj['id']
         self.obj = obj
         if self.geo_type == 'rect':
             self.x = obj['x']
@@ -107,18 +113,20 @@ class Obj(object):
                     output.append((x, y))
         return output
 
-def load_cell_foraging_zones(path):
-    objects = load_foraging_raw(path)
-    cell_foraging = {}
-    for obj in objects:
-        if obj['z'] != 0:
-            continue
+def cell_map(objects_raw):
+    m = {}
+    for obj in objects_raw:
         o = Obj(obj)
         for c in o.cells():
-            if c not in cell_foraging:
-                cell_foraging[c] = []
-            cell_foraging[c].append(o)
-    return cell_foraging
+            if c not in m:
+                m[c] = []
+            m[c].append(o)
+    return m
+
+def load_cell_zones(path, types, zlimit):
+    objects_raw = load_objects_raw(path)
+    objects_raw = filter_objects_raw(objects_raw, types, zlimit)
+    return cell_map(objects_raw)
 
 def square_map(cell_zones, cx, cy):
     if (cx, cy) not in cell_zones:
@@ -131,3 +139,20 @@ def square_map(cell_zones, cx, cy):
             if (x, y) not in m:
                 m[x, y] = z.type
     return m 
+
+class CachedSquareMapGetter(object):
+    def __init__(self, path, types, zlimit):
+        self.path = path
+        self.types = types
+        self.zlimit = zlimit
+        self.getter = None
+
+    def build_getter(self):
+        self.cell_zones = load_cell_zones(self.path, self.types, self.zlimit)
+        getter = partial(square_map, self.cell_zones)
+        self.getter = lru_cache(maxsize=64)(getter)
+
+    def __call__(self, cx, cy):
+        if self.getter is None:
+            self.build_getter()
+        return self.getter(cx, cy)

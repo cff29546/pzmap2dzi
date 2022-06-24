@@ -1,5 +1,5 @@
 import lupa
-import geometry
+from . import geometry
 
 def isListKeys(keys):
     for key in keys:

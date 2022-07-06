@@ -100,32 +100,14 @@ def render_text(draw, x, y, text, color, font):
     #draw.rectangle([x - w // 2, y - h // 2, x + w // 2, y + h // 2], fill=(0, 0, 0, 0))
     draw.text((x - w // 2, y - h // 2), text, color, font, align='center')
 
-PADDING_Y = 5
-PADDING_X = 10
-
-START_POINT = [
-    [(0, PADDING_Y - pzdzi.SQR_HEIGHT // 2), (-PADDING_X, - (pzdzi.SQR_HEIGHT // 2))],
-    [(pzdzi.SQR_WIDTH // 2 - PADDING_X, 0), (pzdzi.SQR_WIDTH // 2, -PADDING_Y)],
-    [(0, pzdzi.SQR_HEIGHT // 2 - PADDING_Y), (PADDING_X, pzdzi.SQR_HEIGHT // 2)],
-    [(PADDING_X - pzdzi.SQR_WIDTH // 2, 0), (-(pzdzi.SQR_WIDTH // 2), PADDING_Y)],
-]
-
-END_POINT = [
-    [(pzdzi.SQR_WIDTH // 2 - PADDING_X, 0), (pzdzi.SQR_WIDTH // 2, PADDING_Y)],
-    [(0, pzdzi.SQR_HEIGHT // 2 - PADDING_Y), (-PADDING_X, pzdzi.SQR_HEIGHT // 2)],
-    [(PADDING_X - pzdzi.SQR_WIDTH // 2, 0), (-(pzdzi.SQR_WIDTH // 2), -PADDING_Y)],
-    [(0, PADDING_Y - pzdzi.SQR_HEIGHT // 2), (PADDING_X, - (pzdzi.SQR_HEIGHT // 2))],
-]
-
-def render_edge(draw, x, y, color, width, flags):
-    for i, flag in enumerate(flags):
-        if flag:
-            continue
-        f1 = flags[(i - 1) % 4]
-        f2 = flags[(i + 1) % 4]
-        x1, y1 = START_POINT[i][f1]
-        x2, y2 = END_POINT[i][f2]
-        draw.line([x + x1, y + y1, x + x2, y + y2], fill=color, width=width)
+_PAD_Y = 5
+_PAD_X = 10
+_WIDTH  = pzdzi.SQR_WIDTH // 2
+_HEIGHT = pzdzi.SQR_HEIGHT // 2
+def render_edge(draw, x, y, color, width, border_flags):
+    edges = geometry.get_edge_segments(border_flags, x, y, _WIDTH, _HEIGHT, _PAD_X, _PAD_Y)
+    for edge in edges:
+        draw.line(edge, fill=color, width=width)
 
 def render_tile(dzi, tx, ty, in_path, out_path, save_empty):
     flag_path = os.path.join(out_path, 'layer0_files', str(dzi.base_level))

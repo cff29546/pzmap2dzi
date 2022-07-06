@@ -9,16 +9,17 @@
     <meta charset="utf-8">
     <style>
       html, body { height: 100%; margin: 0; padding: 0; background-color: white;}
-      .legend { height: 1em; width: 1em; display: inline-block; border-color: #000; border-width: 1px; border-style: solid;}
+      .legend { height: 1em; width: 1em; display: inline-block; border-color: #000; background-color:#fff; border-width: 1px; border-style: solid;}
     </style>
   </head>
 
   <body>
     <div style="display: flex; flex-flow: column; height: 100%;">
       <div style="flex: 0 1 auto;">
-        <button type="button" onclick="toggleGrid(0)">Grid</button>
-        <button type="button" onclick="toggleRoom(0)">Room</button>
-        <button type="button" onclick="toggleZombie(0)">Zombie</button>
+        <button type="button" onclick="toggleGrid()">Grid</button>
+        <button type="button" onclick="toggleRoom()">Room</button>
+        <button type="button" onclick="toggleZombie()">Zombie</button>
+        <button type="button" onclick="toggleObjects()">Objects</button>
         <button type="button" onclick="toggleForaging()">Foraging</button>
         <button type="button" onclick="setLayer(0)">Layer 0</button>
         <button type="button" onclick="setLayer(1)">Layer 1</button>
@@ -29,14 +30,17 @@
         <button type="button" onclick="setLayer(6)">Layer 6</button>
         <button type="button" onclick="setLayer(7)">Layer 7</button>
         Switch to <a href="pzmap_top.html">Top View</a>
-        <div id="foraging_legend"></div>
+        <div>
+          <div id="foraging_legend"></div>
+          <div id="objects_legend"></div>
+        </div>
       </div>
       <div style="flex: 1 1 auto;">
         <div id="contentDiv" allowfullscreen style="height: 100%"> </div>
       </div>
     </div>
     <script type="text/javascript">
-        var legendHTML = `
+        var foragingLegendHTML = `
             <div class="legend" style="background-color:#fff"></div>Road
             <div class="legend" style="background-color:#00f"></div>Urban Area
             <div class="legend" style="background-color:#0ff"></div>Trailer Park
@@ -46,7 +50,11 @@
             <div class="legend" style="background-color:#f0f"></div>Farmland
             <div class="legend" style="background-color:#f00"></div>Farm
         `;
-
+        var objectsLegendHTML = `
+            <div class="legend" style="border-color:#f00; border-width: 3px;"></div>Zombies Type
+            <div class="legend" style="border-color:#00f; border-width: 3px;"></div>Car Spawn
+            <div class="legend" style="border-color:#ff0; border-width: 3px;"></div>Zone Story
+        `;
         var _viewer = OpenSeadragon({
             element: document.getElementById("contentDiv"),
             tileSources:  "base/layer0.dzi",
@@ -61,6 +69,7 @@
         var foraging = 0
         var room = 0
         var grid = 0
+        var objects = 0
         var zombie = 0
         var curLayers = 0
 
@@ -84,47 +93,38 @@
             tiles[curLayers] = 0;
         }
         function setLayer(l) {
+            if (curLayers == l) {
+                return;
+            }
             if (curLayers < l) {
                 for (i = curLayers; i < l; i++) {
                     addLayer(i);
-                }
-                if (foraging != 0) {
-                    toggleForaging();
-                    toggleForaging();
-                }
-                if (zombie != 0) {
-                    toggleZombie();
-                    toggleZombie();
-                }
-                if (grid != 0) {
-                    toggleGrid();
-                    toggleGrid();
-                }
-                if (room != 0) {
-                    toggleRoom();
-                    toggleRoom();
                 }
             }
             if (curLayers > l) {
                 for (i = curLayers; i > l; i--) {
                     removeLayer();
                 }
-                if (foraging != 0) {
-                    toggleForaging();
-                    toggleForaging();
-                }
-                if (zombie != 0) {
-                    toggleZombie();
-                    toggleZombie();
-                }
-                if (grid != 0) {
-                    toggleGrid();
-                    toggleGrid();
-                }
-                if (room != 0) {
-                    toggleRoom();
-                    toggleRoom();
-                }
+            }
+            if (foraging != 0) {
+                toggleForaging();
+                toggleForaging();
+            }
+            if (zombie != 0) {
+                toggleZombie();
+                toggleZombie();
+            }
+            if (grid != 0) {
+                toggleGrid();
+                toggleGrid();
+            }
+            if (room != 0) {
+                toggleRoom();
+                toggleRoom();
+            }
+            if (objects != 0) {
+                toggleObjects();
+                toggleObjects();
             }
         }
         function toggleRoom() {
@@ -139,6 +139,22 @@
             } else {
                 _viewer.world.removeItem(room);
                 room = 0;
+            }
+        }
+        function toggleObjects() {
+            if (objects == 0) {
+                var _viewer1 = _viewer.addTiledImage({
+                    tileSource: "objects/layer" + curLayers + ".dzi",
+                    opacity: 1,
+                    success: function (obj) {
+                        objects = obj.item;
+                    },
+                });
+                document.getElementById("objects_legend").innerHTML = objectsLegendHTML;
+            } else {
+                _viewer.world.removeItem(objects);
+                objects = 0;
+                document.getElementById("objects_legend").innerHTML = "";
             }
         }
         function toggleGrid() {
@@ -185,16 +201,13 @@
                         foraging = obj.item;
                     },
                 });
-                document.getElementById("foraging_legend").innerHTML = legendHTML;
+                document.getElementById("foraging_legend").innerHTML = foragingLegendHTML;
             } else {
                 _viewer.world.removeItem(foraging);
                 foraging = 0;
                 document.getElementById("foraging_legend").innerHTML = "";
             }
         }
-
-
-
     </script>
   </body>
 </html>

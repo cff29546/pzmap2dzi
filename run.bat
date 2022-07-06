@@ -19,6 +19,10 @@ echo Render room ...
 call "%~dp0scripts\render_room.bat"
 echo Render room done
 
+echo Render room ...
+call "%~dp0scripts\render_objects.bat"
+echo Render room done
+
 echo Render zombie ...
 call "%~dp0scripts\render_zombie.bat"
 echo Render zombie done

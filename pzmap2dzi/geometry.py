@@ -50,6 +50,21 @@ _INSIDE = True
 _OUTSIDE = False
 _MAYBE_OUTSIDE = None
 
+def get_border_from_square_map(m):
+    borders = []
+    for x, y in m:
+        flags = []
+        for i, flag in enumerate(m[x, y]):
+            if flag is _MAYBE_OUTSIDE:
+                xx = x + _DIR[i][0]
+                yy = y + _DIR[i][1]
+                flags.append(_INSIDE if (xx, yy) in m else _OUTSIDE)
+            else:
+                flags.append(flag)
+        if _OUTSIDE in flags:
+            borders.append(((x, y), flags))
+    return borders
+
 def rects_border(rects, may_overlap=False):
     m = {}
     for x, y, w, h in rects:
@@ -80,18 +95,7 @@ def rects_border(rects, may_overlap=False):
                 for j in range(1, h - 1):
                     m[x, y] = [_INSIDE] * 4
             
-    borders = []
-    for x, y in m:
-        flags = []
-        for i, flag in enumerate(m[x, y]):
-            if flag is _MAYBE_OUTSIDE:
-                xx = x + _DIR[i][0]
-                yy = y + _DIR[i][1]
-                flags.append(_INSIDE if (xx, yy) in m else _OUTSIDE)
-            else:
-                flags.append(flag)
-        if _OUTSIDE in flags:
-            borders.append(((x, y), flags))
+    borders = get_border_from_square_map(m)
     return borders
 
 def label_order(x, y):
@@ -105,3 +109,74 @@ def label_square(rects):
             labelx = x
             labely = y
     return labelx, labely
+
+
+# isometric direction order:
+# 3   0
+#   x
+# 2   1
+
+X_START_WEIGHT = [
+    # start_flag:
+    #  outside;  inside
+    #
+    #  w pad_x;  w pad_x;
+    [( 0,  0), ( 0, -1)], # dir = 0 (N)
+    [( 1, -1), ( 1,  0)], # dir = 1 (E)
+    [( 0,  0), ( 0,  1)], # dir = 2 (S)
+    [(-1,  1), (-1,  0)], # dir = 3 (W)
+]
+
+Y_START_WEIGHT = [
+    # start_flag:
+    #  outside;  inside
+    #
+    #  h pad_y;  h pad_y;
+    [(-1,  1), (-1,  0)], # dir = 0 (N)
+    [( 0,  0), ( 0, -1)], # dir = 1 (E)
+    [( 1, -1), ( 1,  0)], # dir = 2 (S)
+    [( 0,  0), ( 0,  1)], # dir = 3 (W)
+]
+
+X_END_WEIGHT = [
+    # start_flag:
+    #  outside;  inside
+    #
+    #  w pad_x;  w pad_x;
+    [( 1, -1), ( 1,  0)], # dir = 0 (N)
+    [( 0,  0), ( 0, -1)], # dir = 1 (E)
+    [(-1,  1), (-1,  0)], # dir = 2 (S)
+    [( 0,  0), ( 0,  1)], # dir = 3 (W)
+]
+
+Y_END_WEIGHT = [
+    # start_flag:
+    #  outside;  inside
+    #
+    #  h pad_y;  h pad_y;
+    [( 0,  0), ( 0,  1)], # dir = 0 (N)
+    [( 1, -1), ( 1,  0)], # dir = 1 (E)
+    [( 0,  0), ( 0, -1)], # dir = 2 (S)
+    [(-1,  1), (-1,  0)], # dir = 3 (W)
+]
+
+def get_edge(edge_dir, start_flag, end_flag, x, y, w, h, pad_x, pad_y):
+    ww, wpx = X_START_WEIGHT[edge_dir][start_flag]
+    x1 = x + ww * w + wpx * pad_x
+    wh, wpy = Y_START_WEIGHT[edge_dir][start_flag]
+    y1 = y + wh * h + wpy * pad_y
+    ww, wpx = X_END_WEIGHT[edge_dir][end_flag]
+    x2 = x + ww * w + wpx * pad_x
+    wh, wpy = Y_END_WEIGHT[edge_dir][end_flag]
+    y2 = y + wh * h + wpy * pad_y
+    return [x1, y1, x2, y2]
+
+def get_edge_segments(border_flags, x, y, w, h, pad_x, pad_y):
+    edges = []
+    for edge_dir, flag in enumerate(border_flags):
+        if flag == _INSIDE:
+            continue
+        start_flag = border_flags[(edge_dir - 1) % 4]
+        end_flag = border_flags[(edge_dir + 1) % 4]
+        edges.append(get_edge(edge_dir, start_flag, end_flag, x, y, w, h, pad_x, pad_y))
+    return edges

@@ -6,7 +6,7 @@ try:
 except ImportError:
     from backports.functools_lru_cache import lru_cache
 
-def isListKeys(keys):
+def is_list_keys(keys):
     for key in keys:
         if type(key) is not int:
             return False
@@ -14,27 +14,27 @@ def isListKeys(keys):
         return True
     return False
 
-def unpackTable(table):
+def unpack_lua_table(table):
     if lupa.lua_type(table) != 'table':
         return table
     d = dict(table)
     keys = list(d.keys())
-    isList = isListKeys(keys)
+    isList = is_list_keys(keys)
     if isList:
         output = [None] * len(keys)
         for key in keys:
-            output[key - 1] = unpackTable(d[key])
+            output[key - 1] = unpack_lua_table(d[key])
     else:
         output = {}
         for key in keys:
-            output[key] = unpackTable(d[key])
+            output[key] = unpack_lua_table(d[key])
     return output
 
 def load_objects_raw(objects_path):
     lua = lupa.LuaRuntime(unpack_returned_tuples=False)
     with open(objects_path, 'r') as f:
         lua.execute(f.read())
-    olist = unpackTable(lua.globals().objects)
+    olist = unpack_lua_table(lua.globals().objects)
     for i in range(len(olist)):
         olist[i]['id'] = i
     return olist
@@ -50,6 +50,8 @@ FORAGING_TYPES = set([
     'Farm'
 ])
 PARKING_TYPES = set(['ParkingStall'])
+ZOMBIE_TYPES = set(['ZombiesType'])
+STORY_TYPES = set(['ZoneStory'])
 def filter_objects_raw(objects, types, zlimit=None):
     output = []
     for o in objects:
@@ -64,6 +66,7 @@ class Obj(object):
         self.geo_type = obj.get('geometry', 'rect')
         self.type = obj.get('type', '')
         self.obj = obj
+        self.z = obj['z']
         if self.geo_type == 'rect':
             self.x = obj['x']
             self.y = obj['y']
@@ -113,6 +116,26 @@ class Obj(object):
                     output.append((x, y))
         return output
 
+    def label_square(self):
+        if self.geo_type == 'rect':
+            return self.x, self.y
+        sl = self.square_list()
+        if len(sl) == 0:
+            return self.x, self.y
+        lx, ly = sl[0]
+        for x, y in sl:
+             if geometry.label_order(x, y) < geometry.label_order(lx, ly):
+                 lx, ly = x, y
+        return lx, ly
+
+    def get_border(self):
+        if self.geo_type == 'rect':
+            return geometry.rects_border([[self.x, self.y, self.w, self.h]])
+        m = {}
+        for x, y in self.square_list():
+            m[x, y] = [geometry._MAYBE_OUTSIDE] * 4
+        return geometry.get_border_from_square_map(m)
+
 def cell_map(objects_raw):
     m = {}
     for obj in objects_raw:
@@ -123,10 +146,31 @@ def cell_map(objects_raw):
             m[c].append(o)
     return m
 
-def load_cell_zones(path, types, zlimit):
+def load_cell_zones(path, types, zlimit=None):
     objects_raw = load_objects_raw(path)
     objects_raw = filter_objects_raw(objects_raw, types, zlimit)
     return cell_map(objects_raw)
+
+def border_label_map(cell_zones, cx, cy):
+    if (cx, cy) not in cell_zones:
+        return {}, {}
+    l_map = {}
+    b_map = {}
+    for z in cell_zones[cx, cy]:
+        if z.z not in l_map:
+            l_map[z.z] = {}
+        if z.z not in b_map:
+            b_map[z.z] = {}
+        if z.obj['name'] != '':
+            x, y = z.label_square()
+            if (x, y) not in l_map[z.z]:
+                l_map[z.z][x, y] = []
+            l_map[z.z][x, y].append((z.type, z.obj['name']))
+        for (x, y), flag in z.get_border():
+            if (x, y) not in b_map[z.z]:
+                b_map[z.z][x, y] = []
+            b_map[z.z][x, y].append((z.type, flag))
+    return b_map, l_map
 
 def square_map(cell_zones, cx, cy):
     if (cx, cy) not in cell_zones:
@@ -141,7 +185,7 @@ def square_map(cell_zones, cx, cy):
     return m 
 
 class CachedSquareMapGetter(object):
-    def __init__(self, path, types, zlimit):
+    def __init__(self, path, types, zlimit=None):
         self.path = path
         self.types = types
         self.zlimit = zlimit
@@ -156,3 +200,21 @@ class CachedSquareMapGetter(object):
         if self.getter is None:
             self.build_getter()
         return self.getter(cx, cy)
+
+class CachedBorderLabelMapGetter(object):
+    def __init__(self, path, types, zlimit=None):
+        self.path = path
+        self.types = types
+        self.zlimit = zlimit
+        self.getter = None
+
+    def build_getter(self):
+        self.cell_zones = load_cell_zones(self.path, self.types, self.zlimit)
+        getter = partial(border_label_map, self.cell_zones)
+        self.getter = lru_cache(maxsize=64)(getter)
+
+    def __call__(self, cx, cy):
+        if self.getter is None:
+            self.build_getter()
+        return self.getter(cx, cy)
+

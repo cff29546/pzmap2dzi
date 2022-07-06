@@ -12,6 +12,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 - Supports zombie heatmap rendering
 - Supports foraging zones rendering
 - Supports isometric view and top view rendering
+- Supports map objects rendering (car spawn zones, special zombie spawn zones, map story zones)
 - Supports game version 41.71
 
 # Requirement
@@ -44,12 +45,13 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
     unpack_texture.bat
     render_base.bat
     render_base_top.bat
+    render_foraging.bat
+    render_foraging_top.bat
     render_grid.bat
+    render_objects.bat
     render_room.bat
     render_zombie.bat
     render_zombie_top.bat
-    render_foraging.bat
-    render_foraging_top.bat
     
     ```
     - Change `-m 16` to `-m 4` to use only four threads.
@@ -78,6 +80,7 @@ html
 ├── foraging/
 ├── foraging_top/
 ├── grid/
+├── objects/
 ├── openseadragon/
 ├── room/
 ├── zombie/

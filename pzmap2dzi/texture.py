@@ -117,7 +117,7 @@ class TextureLibrary(object):
                 ox, oy = t['ox'], t['oy']
                 texture = Texture(im.crop((x, y, x + w, y + h)), ox, oy)
                 if debug and self.lib.get(name, None):
-                    print('Overwrite t: {}'.format(name))
+                    print('Conflict texture: {}'.format(name))
                 self.lib[name] = texture
 
     def add_from_pz_path(self, pzmain, debug=False):

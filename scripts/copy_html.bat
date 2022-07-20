@@ -1,4 +1,5 @@
 pushd %~dp0..
-set /p out_path= <out_path.txt
+for /f "delims=" %%x in (config.txt) do set %%x
+
 xcopy /Q /E /I /Y html "%out_path%\html"
 popd

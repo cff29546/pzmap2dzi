@@ -1,0 +1,7 @@
+pz_path=D:\SteamLibrary\steamapps\common\ProjectZomboid
+out_path=E:\pzmap
+map_name=Muldraugh, KY
+
+comments= to render challenge maps, change the map_name variable
+comments= for example:
+comments= map_name=challengemaps\Kingsmouth

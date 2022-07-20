@@ -1,6 +1,6 @@
 pushd %~dp0..
-set /p out_path= <out_path.txt
-set /p pz_path= <pz_path.txt
+for /f "delims=" %%x in (config.txt) do set %%x
+
 python -m pzmap2dzi.texture -o "%out_path%\texture" -m 16 "%pz_path%"
 popd
 

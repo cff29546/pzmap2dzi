@@ -25,18 +25,19 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 
 1. Install [Python](https://www.python.org/downloads/)
 2. Clone or download the project
-3. install requirements
+3. Install requirements
 
    If your python version is 2.7, install VCForPython27 first. You can find it [here](https://web.archive.org/web/20210106040224/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi) or [here](https://github.com/reider-roque/sulley-win-installer/blob/master/VCForPython27.msi)
    
    run `install_requirements.bat`
-4. Edit the `pz_path.txt` file to contain the correct path where your ProjectZomboid located on your computer
-5. Edit the `out_path.txt` file to contain the desired output path
-6. run the tool
+4. Update variables in the `config.txt` file
+   - Change the `pz_path` variable to contain the correct path where your ProjectZomboid located on your computer
+   - Change the `out_path` variable to contain the desired output path
+5. Run the tool
 
-   run `run.bat` to render all isometric and top view maps
+   Run `run.bat` to render all isometric and top view maps
 
-   or run `run_top_view_only.bat` to render only top view maps
+   Or run `run_top_view_only.bat` to render only top view maps
 
 # Change rendering configurations
 - Change thread numbers (default is 16 threads)
@@ -69,7 +70,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
     - To resume, run `run.bat` again
 - Change base layer file format
     - Edit `scripts/render_base.bat`
-    - Change `--layer0-fmt png` to `--layer0-fmt jpg` to use jpg format for base layer
+    - Change `--layer0-fmt jpg` to `--layer0-fmt png` to use lossless png format for base layer
 
 # How to start the HTML viewer
 After the rendering, you get an `html` folder in your output path.

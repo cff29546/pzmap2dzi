@@ -49,6 +49,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
     render_foraging.bat
     render_foraging_top.bat
     render_grid.bat
+    render_grid_top.bat
     render_objects.bat
     render_room.bat
     render_zombie.bat
@@ -81,6 +82,7 @@ html
 ├── foraging/
 ├── foraging_top/
 ├── grid/
+├── grid_top/
 ├── objects/
 ├── openseadragon/
 ├── room/

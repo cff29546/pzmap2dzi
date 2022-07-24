@@ -35,6 +35,10 @@ echo Render top view zombie ...
 call "%~dp0scripts\render_zombie_top.bat"
 echo Render top view zombie done
 
+echo Render top view grid ...
+call "%~dp0scripts\render_grid_top.bat"
+echo Render top view grid done
+
 echo Render foraging ...
 call "%~dp0scripts\render_foraging.bat"
 echo Render foraging done

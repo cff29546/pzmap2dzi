@@ -1,5 +1,4 @@
 import os
-import re
 from . import lotheader, texture, util
 
 def read_block(data, pos, level):

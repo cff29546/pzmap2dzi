@@ -53,7 +53,7 @@ _render_func = {
     'avg': rc_avg,
 }
 
-def render_cell(tl, cell_data, layer=0, size=1, grid=0, render_mode='default'):
+def render_cell(tl, cell_data, layer=0, size=1, render_mode='default'):
     im = None
     draw = None
     tile_names = cell_data['header']['tiles']
@@ -77,15 +77,11 @@ def render_cell(tl, cell_data, layer=0, size=1, grid=0, render_mode='default'):
                         px = (bx * 10 + x) * size
                         py = (by * 10 + y) * size
                         draw.rectangle([px, py, px + size - 1, py + size - 1], fill=color)
-    if im is not None and grid > 0:
-        lines, rem = divmod(300, grid)
-        for b in range(lines):
-            draw.line([b * grid * size, 0, b * grid * size, 300 * size], 'lime')
-            draw.line([0, b * grid * size, 300 * size, b * grid * size], 'lime')
+
     return im
 
 def base_work(conf, tile):
-    dzi, texture_lib, in_path, out_path, ext0, square_size, grid, render_mode = conf
+    dzi, texture_lib, in_path, out_path, ext0, square_size, render_mode = conf
     tx, ty = tile
     cx, cy = dzi.tile2cell(tx, ty)
     
@@ -93,7 +89,7 @@ def base_work(conf, tile):
     flag_path = os.path.join(out_path, 'layer0_files', str(dzi.base_level))
     util.set_wip(flag_path, tx, ty)
     for layer in range(dzi.layers):
-        im = render_cell(texture_lib, data, layer, square_size, grid, render_mode)
+        im = render_cell(texture_lib, data, layer, square_size, render_mode)
         if im is not None and im.getbbox():
             layer_output = os.path.join(out_path, 'layer{}_files'.format(layer), str(dzi.base_level))
             ext = ext0 if layer == 0 else 'png'
@@ -119,7 +115,7 @@ def process(args):
     layer0_path = os.path.join(args.output, 'layer0_files', str(dzi.base_level))
     tiles = dzi.get_tiles(layer0_path, args.layer0_fmt)
 
-    conf = (dzi, texture_lib, args.input, args.output, args.layer0_fmt, args.square_size, args.grid, args.render_mode)
+    conf = (dzi, texture_lib, args.input, args.output, args.layer0_fmt, args.square_size, args.render_mode)
 
     t = mp.Task(base_work, conf, args.mp)
     if not t.run(tiles, args.verbose, args.stop_key):
@@ -156,7 +152,6 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('-e', '--save-empty-tile', action='store_true')
     parser.add_argument('-r', '--render-mode', type=str, default='base+water')
-    parser.add_argument('-g', '--grid', type=int, default=0)
     parser.add_argument('-s', '--stop-key', type=str, default='')
     parser.add_argument('input', type=str)
     #parser.add_argument('x', type=int)

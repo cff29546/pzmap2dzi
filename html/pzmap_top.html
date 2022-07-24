@@ -17,6 +17,7 @@
     <div style="display: flex; flex-flow: column; height: 100%;">
       <div style="flex: 0 1 auto;">
         <button type="button" onclick="toggleZombie()">Zombie</button>
+        <button type="button" onclick="toggleGrid()">Grid</button>
         <button type="button" onclick="toggleForaging()">Foraging</button>
         <button type="button" onclick="setLayer(0)">Layer 0</button>
         <button type="button" onclick="setLayer(1)">Layer 1</button>
@@ -102,6 +103,10 @@
                 toggleZombie();
                 toggleZombie();
             }
+            if (grid != 0) {
+                toggleGrid();
+                toggleGrid();
+            }
         }
         function toggleZombie() {
             if (zombie == 0) {
@@ -117,6 +122,22 @@
             } else {
                 _viewer.world.removeItem(zombie);
                 zombie = 0;
+            }
+        }
+        function toggleGrid() {
+            if (grid == 0) {
+                var _viewer1 = _viewer.addTiledImage({
+                    tileSource: "grid_top/layer0.dzi",
+                    opacity: 1,
+                    x: 0,
+                    y: 0,
+                    success: function (obj) {
+                        grid = obj.item;
+                    },
+                });
+            } else {
+                _viewer.world.removeItem(grid);
+                grid = 0;
             }
         }
         function toggleForaging() {

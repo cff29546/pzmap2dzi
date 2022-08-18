@@ -27,9 +27,9 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 2. Clone or download the project
 3. Install requirements
 
-   If your python version is 2.7, install VCForPython27 first. You can find it [here](https://web.archive.org/web/20210106040224/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi) or [here](https://github.com/reider-roque/sulley-win-installer/blob/master/VCForPython27.msi)
+   - If your python version is 2.7, install VCForPython27 first. You can find it [here](https://web.archive.org/web/20210106040224/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi) or [here](https://github.com/reider-roque/sulley-win-installer/blob/master/VCForPython27.msi)
    
-   run `install_requirements.bat`
+   - run `install_requirements.bat`
 4. Update variables in the `config.txt` file
    - Change the `pz_path` variable to contain the correct path where your ProjectZomboid located on your computer
    - Change the `out_path` variable to contain the desired output path

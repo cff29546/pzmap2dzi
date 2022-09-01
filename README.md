@@ -13,13 +13,13 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 - Supports foraging zones rendering
 - Supports isometric view and top view rendering
 - Supports map objects rendering (car spawn zones, special zombie spawn zones, map story zones)
-- Supports game version 41.72 (unstable)
+- Supports game version 41.74 (unstable)
 
 # Requirement
-- The full output size of isometric map for game version 41.72 (unstable) is around 230GB (or 1.3TB with lossless png format) and consists of 2.2M files. Make sure you output to a hard drive has enough free space.
+- The full output size of isometric map for game version 41.74 (unstable) is around 450GB (or 2.5TB with lossless png format) and consists of 4M files. Make sure you output to a hard drive has enough free space.
 - The rending process will take a very long time, so it's better to have a high-performance CPU, hard drive, and large memory. 
-    - The full rending took around 12 hours (or 22 hours with lossless png format) on an AMD 3700X with 64GB DDR4 2133 memory and a SATA3 mechanical hard drive using a 16 thread setting
-- If you choose to render only top view map, output size will be around 250MB and can be done around 2 hours.
+    - The full rending took around 32 hours (or even slower with lossless png format) on an AMD 3700X with 64GB DDR4 2133 memory and a SATA3 mechanical hard drive using a 16 thread setting
+- If you choose to render only top view map, output size will be around 500MB and can be done within 1 hour.
 
 # How to run
 

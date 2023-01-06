@@ -11,7 +11,7 @@ def calc_room_bound(room):
 def read_room(data, pos):
     room = {}
     name, pos = util.read_line(data, pos)
-    room['name'] = name.decode('utf8')
+    room['name'] = name
     room['layer'], pos = util.read_uint32(data, pos)
     rect_num, pos = util.read_uint32(data, pos)
     rects = []
@@ -107,7 +107,7 @@ def print_header(header):
          name = room['name']
          rmap[name] = rmap.get(name, 0) + 1
     for k, v in rmap.items():
-        print('  {}: {}'.format(k.decode('utf8'), v))
+        print('  {}: {}'.format(k, v))
 
     level = ['  ', '\u2591'*2, '\u2592'*2, '\u2593', '\u2588']
     for y in range(30):

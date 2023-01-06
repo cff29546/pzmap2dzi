@@ -109,7 +109,7 @@ def render_edge(draw, x, y, color, width, border_flags):
     for edge in edges:
         draw.line(edge, fill=color, width=width)
 
-def render_tile(dzi, tx, ty, in_path, out_path, save_empty):
+def render_tile(dzi, tx, ty, in_path, out_path, save_empty, encoding):
     flag_path = os.path.join(out_path, 'layer0_files', str(dzi.base_level))
     util.set_wip(flag_path, tx, ty)
     for layer in range(dzi.layers):
@@ -137,12 +137,12 @@ def render_tile(dzi, tx, ty, in_path, out_path, save_empty):
                 drawing = []
                 if (layer, subx, suby) in cell.label:
                     name = cell.label[layer, subx, suby]
-                    color = COLOR_MAP.get(name, DEFAULT_COLOR)
-                    drawing.append((render_text, (name, color, ROOM_FONT)))
+                    color = COLOR_MAP.get(name.decode(encoding, errors='ignore'), DEFAULT_COLOR)
+                    drawing.append((render_text, (name.decode(encoding, errors='ignore'), color, ROOM_FONT)))
                 if (layer, subx, suby) in cell.edge:
                     idx, flag = cell.edge[layer, subx, suby]
                     name = cell.name[idx]
-                    color = COLOR_MAP.get(name, DEFAULT_COLOR)
+                    color = COLOR_MAP.get(name.decode(encoding,errors='ignore'), DEFAULT_COLOR)
                     drawing.append((render_edge, (color, 3, flag)))
 
                 if drawing:
@@ -161,9 +161,9 @@ def render_tile(dzi, tx, ty, in_path, out_path, save_empty):
     return True
 
 def room_work(conf, tiles):
-    dzi, in_path, out_path, save_empty = conf
+    dzi, in_path, out_path, save_empty, encoding = conf
     for tx, ty in tiles:
-        render_tile(dzi, tx, ty, in_path, out_path, save_empty)
+        render_tile(dzi, tx, ty, in_path, out_path, save_empty, encoding)
 
 def process(args):
     util.ensure_folder(args.output)
@@ -180,7 +180,7 @@ def process(args):
     layer0_path = os.path.join(args.output, 'layer0_files', str(dzi.base_level))
     groups = dzi.get_tile_groups(layer0_path, 'png', args.group_size, skip_cells)
 
-    conf = (dzi, args.input, args.output, args.save_empty_tile)
+    conf = (dzi, args.input, args.output, args.save_empty_tile, args.encoding)
     t = mp.Task(room_work, conf, args.mp)
     if not t.run(groups, args.verbose, args.stop_key):
         return False
@@ -206,6 +206,7 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('-e', '--save-empty-tile', action='store_true')
     parser.add_argument('-s', '--stop-key', type=str, default='')
+    parser.add_argument('--encoding', type=str, default='utf8')
     parser.add_argument('input', type=str)
     args = parser.parse_args()
 

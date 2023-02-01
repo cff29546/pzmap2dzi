@@ -1,7 +1,14 @@
 pz_path=D:\SteamLibrary\steamapps\common\ProjectZomboid
 out_path=E:\pzmap
-map_name=Muldraugh, KY
+map_path=D:\SteamLibrary\steamapps\common\ProjectZomboid\media\maps\Muldraugh, KY
 
-comments= to render challenge maps, change the map_name variable
+additional_texture_packs=
+
+comments= to render challenge maps, change the map_path variable
 comments= for example:
-comments= map_name=challengemaps\Kingsmouth
+comments= map_path=D:\SteamLibrary\steamapps\common\ProjectZomboid\media\maps\challengemaps\Kingsmouth
+
+comments= to render mod maps, change the map_path variable, and add required textures
+comments= for example:
+comments= map_path=D:\SteamLibrary\steamapps\workshop\content\108600\2888082232\mods\CamdenCounty\media\maps\CamdenCounty
+comments= additional_texture_packs=D:\SteamLibrary\steamapps\workshop\content\108600\2888082232\mods\CamdenCounty\media\texturepacks\MyTiles.pack

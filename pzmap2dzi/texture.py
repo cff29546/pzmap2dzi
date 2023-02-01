@@ -189,10 +189,14 @@ if __name__ == '__main__':
     parser.add_argument('-o', '--output', type=str, default='.')
     parser.add_argument('-d', '--debug', action='store_true')
     parser.add_argument('-m', '--mp', type=int, default=1)
-    parser.add_argument('input', type=str)
+    parser.add_argument('-z', '--pz-path', type=str, default='')
+    parser.add_argument('packs', nargs=argparse.REMAINDER)
     args = parser.parse_args()
     
     lib = TextureLibrary()
-    lib.add_from_pz_path(args.input, args.debug)
+    if args.pz_path:
+        lib.add_from_pz_path(args.pz_path, args.debug)
+    for pack_path in args.packs:
+        lib.add_pack(pack_path, args.debug)
     lib.save_all(args.output, args.mp)
     

@@ -33,6 +33,8 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 4. Update variables in the `config.txt` file
    - Change the `pz_path` variable to contain the correct path where your ProjectZomboid located on your computer
    - Change the `out_path` variable to contain the desired output path
+   - Change the `map_path` variable to map source if you want to render a mod map or a challenge map
+   - Change the `additional_texture_packs` variable to needed non-vanilla texture packs (separated by space if more than one)
 5. Run the tool
 
    Run `run.bat` to render all isometric and top view maps

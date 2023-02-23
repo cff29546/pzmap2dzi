@@ -50,7 +50,7 @@ def render_tile(dzi, tx, ty, tl, in_path, out_path, save_empty, ext0):
                     continue
                 sx = (gx + gy) // 2
                 sy = (gy - gx) // 2
-                ox, oy = pzdzi.get_offset_in_tile(gx - gx0, gy - gy0)
+                ox, oy = pzdzi.get_sqr_bottom_center(gx - gx0, gy - gy0)
                 render_square(tl, im, ox, oy, in_path, sx, sy, layer)
         im = dzi.crop_tile(im, tx, ty)
         if im.getbbox():
@@ -82,7 +82,7 @@ def process(args):
     if args.layer0_fmt != 'png':
         dzi.save_dzi(args.output, args.layer0_fmt, 1)
     layer0_path = os.path.join(args.output, 'layer0_files', str(dzi.base_level))
-    groups = dzi.get_tile_groups(layer0_path, args.layer0_fmt, args.group_size)
+    groups = dzi.get_tile_groups(layer0_path, args.layer0_fmt, args.group_level)
 
     conf = (dzi, texture_lib, args.input, args.output, args.save_empty_tile, args.layer0_fmt)
 
@@ -116,7 +116,7 @@ if __name__ == '__main__':
     parser.add_argument('--jumbo-tree-type', type=int, default=0)
     parser.add_argument('--tile-size', type=int, default=1024)
     parser.add_argument('--layers', type=int, default=8)
-    parser.add_argument('--group-size', type=int, default=0)
+    parser.add_argument('--group-level', type=int, default=-1)
     parser.add_argument('--layer0-fmt', type=str, default='png', choices=['png', 'jpg'])
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('-e', '--save-empty-tile', action='store_true')

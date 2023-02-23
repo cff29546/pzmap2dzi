@@ -78,7 +78,7 @@ def process(args):
     objects_path = os.path.join(args.input, 'objects.lua')
     cell_zones = pzobjects.load_cell_zones(objects_path, pzobjects.FORAGING_TYPES, 1)
     skip_cells = dzi.cells - set(cell_zones.keys())
-    groups = dzi.get_tile_groups(base_level_path, 'png', args.group_size, skip_cells)
+    groups = dzi.get_tile_groups(base_level_path, 'png', args.group_level, skip_cells)
 
     cell_getter = pzobjects.CachedSquareMapGetter(objects_path, pzobjects.FORAGING_TYPES, 1)
     conf = (dzi, cell_getter, base_level_path, args.save_empty_tile)
@@ -101,7 +101,7 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--mp', type=int, default=1)
     parser.add_argument('--tile-size', type=int, default=1024)
     parser.add_argument('--layers', type=int, default=8)
-    parser.add_argument('--group-size', type=int, default=0)
+    parser.add_argument('--group-level', type=int, default=-1)
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('-e', '--save-empty-tile', action='store_true')
     parser.add_argument('-s', '--stop-key', type=str, default='')

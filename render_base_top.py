@@ -147,7 +147,6 @@ if __name__ == '__main__':
     parser.add_argument('--jumbo-tree-type', type=int, default=0)
     parser.add_argument('-S', '--square-size', type=int, default=4)
     parser.add_argument('--layers', type=int, default=8)
-    parser.add_argument('--group-size', type=int, default=0)
     parser.add_argument('--layer0-fmt', type=str, default='png', choices=['png', 'jpg'])
     parser.add_argument('-v', '--verbose', action='store_true')
     parser.add_argument('-e', '--save-empty-tile', action='store_true')

@@ -1,5 +1,6 @@
 from __future__ import print_function
 from PIL import Image
+from PIL.PngImagePlugin import PngInfo
 import io
 import os
 if __package__ is not None:
@@ -65,7 +66,14 @@ def color_sum(pixels):
     return 0
 
 class Texture(object):
-    def __init__(self, im, ox, oy):
+    def __init__(self, im, offset=None):
+        if offset:
+            ox, oy, ow, oh = offset
+            ox = ox - (ow // 2)
+            oy = oy - oh # + (pzdzi.SQR_HEIGHT // 2)
+        else:
+            ox = int(im.info.get('ox', 0))
+            oy = int(im.info.get('oy', 0))
         bbox = im.getbbox()
         if bbox:
             self.im = im.crop(bbox)
@@ -92,11 +100,10 @@ class Texture(object):
         return self.color_sum
 
     def save(self, path):
-        w, h = self.im.size
-        out_im = Image.new('RGBA', (self.ox + w, self.oy + h))
-        self.render(out_im, 0, 0)
-        out_im.save(path)
-
+        metadata = PngInfo()
+        metadata.add_text("ox", str(self.ox))
+        metadata.add_text("oy", str(self.oy))
+        self.im.save(path, pnginfo=metadata)
 
 class TextureLibrary(object):
     def __init__(self, texture_path=None):
@@ -106,16 +113,14 @@ class TextureLibrary(object):
     def add_pack(self, path, debug=False):
         pages = load_pack(path)
         total = len(pages)
-        done = 0
-        for page in pages:
-            print('Processing pages: {}/{}'.format(done, total), end='\r')
-            done += 1
+        for idx, page in enumerate(pages):
+            print('Processing pages: {}/{}'.format(idx + 1, total), end='\r')
             im = Image.open(io.BytesIO(page['png']))
             for t in page['textures']:
                 name = t['name']
                 x, y, w, h = t['x'], t['y'], t['w'], t['h']
-                ox, oy = t['ox'], t['oy']
-                texture = Texture(im.crop((x, y, x + w, y + h)), ox, oy)
+                ox, oy, ow, oh = t['ox'], t['oy'], t['ow'], t['oh']
+                texture = Texture(im.crop((x, y, x + w, y + h)), (ox, oy, ow, oh))
                 if debug and self.lib.get(name, None):
                     print('Conflict texture: {}'.format(name))
                 self.lib[name] = texture
@@ -146,10 +151,7 @@ class TextureLibrary(object):
             if os.path.exists(file_path):
                 im = Image.open(file_path)
                 if im:
-                    if 'JUMBO' in name:
-                        t = Texture(im, -128, -256)
-                    else:
-                        t = Texture(im, 0, 0)
+                    t = Texture(im)
                     self.lib[name] = t
                     return t
         return None
@@ -159,25 +161,23 @@ class TextureLibrary(object):
             return False
         t = mp.Task(save_img, path, parallel)
         t.run(list(self.lib.items()), True)
-                
-    def blend_textures(self, names, jumbo=False):
-        if jumbo:
-            im = Image.new('RGBA', (384, 512))
-            x, y = 128, 256
-        else:
-            im = Image.new('RGBA', (128, 256))
-            x, y = 0, 0
+
+    def blend_textures(self, names):
+        w, h = 384, 512
+        im = Image.new('RGBA', (w, h))
+        x = w // 2
+        y = h # - (pzdzi.SQR_HEIGHT // 2)
         for name in names:
             t = self.get_by_name(name)
             if t:
                 t.render(im, x, y)
-        return Texture(im, -x, -y)
+        return Texture(im, (0, 0, w, h))
 
     def config_plants(self, season='spring', snow=False, flower=False, large_bush=False,
                  tree_size=1, jumbo_size=3, jumbo_type=3):
         pi = plants.PlantsInfo(season, snow, flower, large_bush, tree_size, jumbo_size, jumbo_type)
         for key, names in pi.mapping.items():
-            self.lib[key] = self.blend_textures(names, key.startswith('jumbo_tree'))
+            self.lib[key] = self.blend_textures(names)
 
 def save_img(path, job):
     name, im = job
@@ -188,6 +188,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='PZ texture unpacker')
     parser.add_argument('-o', '--output', type=str, default='.')
     parser.add_argument('-d', '--debug', action='store_true')
+    parser.add_argument('-t', '--test-plants', action='store_true')
     parser.add_argument('-m', '--mp', type=int, default=1)
     parser.add_argument('-z', '--pz-path', type=str, default='')
     parser.add_argument('packs', nargs=argparse.REMAINDER)
@@ -198,5 +199,8 @@ if __name__ == '__main__':
         lib.add_from_pz_path(args.pz_path, args.debug)
     for pack_path in args.packs:
         lib.add_pack(pack_path, args.debug)
+    if args.test_plants:
+        lib.config_plants('summer2', True, True, True, 3, 5)
     lib.save_all(args.output, args.mp)
+    #lib.save_pages(args.output)
     

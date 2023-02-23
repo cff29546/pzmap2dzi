@@ -7,9 +7,29 @@ SQR_HEIGHT = 64
 SQR_WIDTH = 128
 CELL_SIZE = 300
 
-def get_offset_in_tile(gx, gy):
-    ox = (gx - 1) * SQR_WIDTH // 2
-    oy = (gy - 7) * SQR_HEIGHT // 2
+def zorder(x, y):
+    block = 1
+    bit = 1
+    idx = 0
+    m = max(x, y)
+    while bit <= m:
+       if bit & x:
+          idx |= block
+       block <<= 1
+       if bit & y:
+          idx |= block
+       block <<= 1
+       bit <<= 1
+    return idx
+
+def get_sqr_bottom_center(gx, gy):
+    ox = gx * SQR_WIDTH // 2
+    oy = (gy + 1) * SQR_HEIGHT // 2
+    return ox, oy
+
+def get_sqr_center(gx, gy):
+    ox = gx * SQR_WIDTH // 2
+    oy = gy * SQR_HEIGHT // 2
     return ox, oy
 
 def load_tile(path, tx, ty, ext):
@@ -201,24 +221,25 @@ class IsoDZI(DZI):
         tiles = [(tx, ty) for ty in range(tymin, tymax + 1) for tx in range(txmin, txmax + 1)]
         return tiles
 
-    def get_tile_groups(self, out_path, ext, max_group_size=0, skip_cells=set()):
+    def get_tile_groups(self, out_path, ext, group_level=-1, skip_cells=set()):
         done = util.get_done_tiles(out_path, ext)
-        groups = []
-        for cx, cy in sorted(list(self.cells)):
+        groups = {}
+        for cx, cy in self.cells:
             if (cx, cy) in skip_cells:
                 continue
             tiles = self.cell2tiles(cx, cy)
-            group = []
             for t in tiles:
                 if t not in done:
-                    group.append(t)
+                    if group_level < 0:
+                        group = (cx, cy)
+                    else:
+                        z = zorder(*t)
+                        group = z // (4 ** group_level)
+                    if group not in groups:
+                        groups[group] = []
+                    groups[group].append(t)
                     done.add(t)
-                    if max_group_size and len(group) == max_group_size:
-                        groups.append(group)
-                        group = []
-            if group:
-                groups.append(group)
-        return groups
+        return [t for n, t in sorted(groups.items())]
 
 class TopDZI(DZI):
     def __init__(self, map_path, square_size, layers=1):

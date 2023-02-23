@@ -83,7 +83,7 @@ def process(args):
     dzi.save_dzi(args.output, 'png', 1)
     layer0_path = os.path.join(args.output, 'layer0_files')
     base_level_path = os.path.join(layer0_path, str(dzi.base_level))
-    groups = dzi.get_tile_groups(base_level_path, 'png', args.group_size)
+    groups = dzi.get_tile_groups(base_level_path, 'png', args.group_level)
 
     conf = (dzi, base_level_path, args.cell_grid, args.block_grid, args.save_empty_tile)
 
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--mp', type=int, default=1)
     parser.add_argument('--tile-size', type=int, default=1024)
     parser.add_argument('--layers', type=int, default=8)
-    parser.add_argument('--group-size', type=int, default=0)
+    parser.add_argument('--group-level', type=int, default=-1)
     parser.add_argument('-c', '--cell-grid', action='store_true')
     parser.add_argument('-b', '--block-grid', action='store_true')
     parser.add_argument('-v', '--verbose', action='store_true')

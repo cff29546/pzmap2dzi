@@ -51,7 +51,7 @@
     - **zombie_param**: isometric zombie heatmap
     - **zombie_top_param**: top view zombie heatmap
 
-  - Task Related Option Values \
+  - Task Related Option Values
     - **--layer0-fmt <ext>** \
       The bottom layer map file format supports `jpg` or `png`. Using `jpg` can save up space at the cost of image quality. \
       Supported by: main map (top view and isometric view)

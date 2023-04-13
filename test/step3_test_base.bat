@@ -1,3 +1,6 @@
 pushd %~dp0..
-python render_base.py -o test_output\html\base -t test_output\texture -m 16 -v --group-level 2 --layer0-fmt jpg -s "<f9>" test_output\rosewood
+for /f "delims=" %%x in (config.txt) do set %%x
+for /f "delims=" %%x in (%~dp0config_update.txt) do set %%x
+
+%python% main.py -o test_output\html\base -t test_output\texture %common_param% %base_param% base test_output\rosewood
 popd

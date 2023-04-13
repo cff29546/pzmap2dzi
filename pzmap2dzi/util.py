@@ -4,53 +4,15 @@ import re
 
 HEADER_FILE_PATTERN = re.compile('(\\d+)_(\\d+)\\.lotheader$')
 def get_all_cells(path):
-    cells = []
+    cells = set()
     for f in os.listdir(path):
         m = HEADER_FILE_PATTERN.match(f)
         if not m:
             continue
 
         x, y = map(int, m.groups())
-        cells.append((x, y))
+        cells.add((x, y))
     return cells
-
-
-PENDING_PATTERN = re.compile('(\\d+)_(\\d+)\\.pending$')
-TILE_PATTERN = {
-    'png': re.compile('(\\d+)_(\\d+)\\.png$'),
-    'jpg': re.compile('(\\d+)_(\\d+)\\.jpg$'),
-}
-DONE_PATTERN = {
-    'png': re.compile('(\\d+)_(\\d+)\\.(?:empty|png)$'),
-    'jpg': re.compile('(\\d+)_(\\d+)\\.(?:empty|jpg)$'),
-}
-def get_done_tiles(path, ext):
-    if not os.path.isdir(path):
-        return set()
-    done = set()
-    pending = set()
-    for f in os.listdir(path):
-        m = DONE_PATTERN[ext].match(f)
-        if m:
-            x, y = map(int, m.groups())
-            done.add((x, y))
-            continue
-        m = PENDING_PATTERN.match(f)
-        if m:
-            x, y = map(int, m.groups())
-            pending.add((x, y))
-    return done - pending
-
-def set_empty(path, x, y):
-    with open(os.path.join(path, '{}_{}.empty'.format(x, y)), 'w') as f:
-        pass
-
-def set_wip(path, x, y):
-    with open(os.path.join(path, '{}_{}.pending'.format(x, y)), 'w') as f:
-        pass
-
-def clear_wip(path, x, y):
-    os.remove(os.path.join(path, '{}_{}.pending'.format(x, y)))
 
 def read_until(data, pos, pattern):
     end = data.index(pattern, pos) + len(pattern)

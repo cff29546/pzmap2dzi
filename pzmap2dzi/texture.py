@@ -4,7 +4,7 @@ from PIL.PngImagePlugin import PngInfo
 import io
 import os
 if __package__ is not None:
-    from . import util, mp, plants
+    from . import util, mptask, plants
 
 def get_version(data):
     if data[:4] == b'PZPK':
@@ -159,8 +159,8 @@ class TextureLibrary(object):
     def save_all(self, path, parallel=1):
         if not util.ensure_folder(path):
             return False
-        t = mp.Task(save_img, path, parallel)
-        t.run(list(self.lib.items()), True)
+        t = mptask.Task(SaveImg(path), mptask.SplitScheduler(True))
+        t.run(list(self.lib.items()), parallel)
 
     def blend_textures(self, names):
         w, h = 384, 512
@@ -179,9 +179,13 @@ class TextureLibrary(object):
         for key, names in pi.mapping.items():
             self.lib[key] = self.blend_textures(names)
 
-def save_img(path, job):
-    name, im = job
-    im.save(os.path.join(path, name + '.png'))
+class SaveImg(object):
+    def __init__(self, path):
+        self.path = path
+
+    def on_job(self, job):
+        name, im = job
+        im.save(os.path.join(self.path, name + '.png'))
 
 if __name__ == '__main__':
     import argparse

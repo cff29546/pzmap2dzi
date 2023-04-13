@@ -7,19 +7,23 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 - HTML viewer for viewing the generated Deep Zoom image.
 - Various plant rendering configurations (snow, flower, tree size, etc.).
 - Supports multi-thread acceleration
+- Supports image cache acceleration when building dzi pyramid (python 3.8+ only)
 - Supports resuming from a breakpoint
 - Supports map grid and room info rendering
 - Supports zombie heatmap rendering
 - Supports foraging zones rendering
 - Supports isometric view and top view rendering
 - Supports map objects rendering (car spawn zones, special zombie spawn zones, map story zones)
-- Supports game version 41.74 (unstable)
+- Supports game version 41.78
+
 
 # Requirement
-- The full output size of isometric map for game version 41.74 (unstable) is around 450GB (or 2.5TB with lossless png format) and consists of 4M files. Make sure you output to a hard drive has enough free space.
-- The rending process will take a very long time, so it's better to have a high-performance CPU, hard drive, and large memory. 
-    - The full rending took around 32 hours (or even slower with lossless png format) on an AMD 3700X with 64GB DDR4 2133 memory and a SATA3 mechanical hard drive using a 16 thread setting
-- If you choose to render only top view map, output size will be around 500MB and can be done within 1 hour.
+- **Storage**: The full output size of isometric map for game version 41.78 is around 450GB (or 2.5TB with lossless png format) and consists of 4M files. SSD is recommended as high I/O bandwidth can reduce render time.
+- **Memory**: Each worker requires approximately 1 GB of memory to work. An additional 4 GB of shared memory is needed if the cache is enabled. For example, the program will need 16 GB + 4 GB memory when using 16 threads.
+- **CPU**: The rending process will take a very long time, so it's better to have a high-performance CPU. 
+    - The isometric map rending took around 5 hours (or even slower with lossless png format) on an AMD 3700X with 64GB DDR4 2133 memory and a SATA3 mechanical hard drive using 16 threads with cache on
+    - The zombie heatmap and map grids took half of the isometric map render time each
+    - If you choose to render only top view map, output size will be around 500MB and can be done within half hour.
 
 # How to run
 
@@ -42,6 +46,8 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
    Or run `run_top_view_only.bat` to render only top view maps
 
 # Change rendering configurations
+   See [config manual](./doc/config_manual.md) for detials.
+
 - Change thread numbers (default is 16 threads)
     - In the `scripts/` folder, you can edit the starter command in the following files
     ```

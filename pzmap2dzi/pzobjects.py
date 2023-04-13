@@ -185,16 +185,17 @@ def square_map(cell_zones, cx, cy):
     return m 
 
 class CachedSquareMapGetter(object):
-    def __init__(self, path, types, zlimit=None):
+    def __init__(self, path, types, zlimit=None, cache_size=16):
         self.path = path
         self.types = types
         self.zlimit = zlimit
+        self.cache_size = cache_size
         self.getter = None
 
     def build_getter(self):
         self.cell_zones = load_cell_zones(self.path, self.types, self.zlimit)
         getter = partial(square_map, self.cell_zones)
-        self.getter = lru_cache(maxsize=64)(getter)
+        self.getter = lru_cache(maxsize=self.cache_size)(getter)
 
     def __call__(self, cx, cy):
         if self.getter is None:
@@ -202,16 +203,17 @@ class CachedSquareMapGetter(object):
         return self.getter(cx, cy)
 
 class CachedBorderLabelMapGetter(object):
-    def __init__(self, path, types, zlimit=None):
+    def __init__(self, path, types, zlimit=None, cache_size=16):
         self.path = path
         self.types = types
         self.zlimit = zlimit
+        self.cache_size = cache_size
         self.getter = None
 
     def build_getter(self):
         self.cell_zones = load_cell_zones(self.path, self.types, self.zlimit)
         getter = partial(border_label_map, self.cell_zones)
-        self.getter = lru_cache(maxsize=64)(getter)
+        self.getter = lru_cache(maxsize=self.cache_size)(getter)
 
     def __call__(self, cx, cy):
         if self.getter is None:

@@ -1,8 +1,25 @@
+python=python
 pz_path=D:\SteamLibrary\steamapps\common\ProjectZomboid
-out_path=E:\pzmap
+out_path=H:\pzmap
 map_path=D:\SteamLibrary\steamapps\common\ProjectZomboid\media\maps\Muldraugh, KY
 
 additional_texture_packs=
+
+common_param= -m 16 -v
+common_top_param= --square-size 1
+base_param= --layer0-fmt jpg
+base_top_param= --layer0-fmt jpg --top-color-mode avg
+grid_param= --cell-grid --block-grid
+grid_top_param= --cell-text
+foraging_param=
+foraging_top_param=
+objects_param=
+room_param=
+zombie_param= --zombie-count
+zombie_top_param=
+
+comments= to force python version, change python veriable, for example force python 3, use:
+comments= python=py -3
 
 comments= to render challenge maps, change the map_path variable
 comments= for example:

@@ -1,5 +1,5 @@
 # Configurations Variables
-  - How to find configurations variables
+  - How to find configurations variables \
     Configurations variables are located in the config.txt file in the root folder.
 
   - Basic Options

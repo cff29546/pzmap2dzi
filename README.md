@@ -57,12 +57,12 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 - Do not render top view map
     - Remove the calling of `render_zombie_top.bat` and `render_base_top.bat` from `run.bat`
 - Config a hotkey to elegantly stop rendering at a breakpoint so you can resume later
-    - Add `-s "<hotkey>"` to Common Render Options
-       See [config manual](./docs/config_manual.md) for more detials.
+    - Add `-s "<hotkey>"` to Common Render Options.
+       (See [config manual](./docs/config_manual.md) for more detials.)
     - To resume, run `run.bat` again
 - Change base layer file format
-    - Add `--layer0-fmt <ext>` to Base Map Options
-       See [config manual](./docs/config_manual.md) for more detials.
+    - Add `--layer0-fmt <ext>` to Task Related Options.
+       (See [config manual](./docs/config_manual.md) for more detials.)
 
 # How to start the HTML viewer
 After the rendering, you get an `html` folder in your output path.

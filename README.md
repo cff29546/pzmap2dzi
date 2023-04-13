@@ -46,25 +46,8 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
    Or run `run_top_view_only.bat` to render only top view maps
 
 # Change rendering configurations
-   See [config manual](./doc/config_manual.md) for detials.
+   See [config manual](./docs/config_manual.md) for more detials.
 
-- Change thread numbers (default is 16 threads)
-    - In the `scripts/` folder, you can edit the starter command in the following files
-    ```
-    unpack_texture.bat
-    render_base.bat
-    render_base_top.bat
-    render_foraging.bat
-    render_foraging_top.bat
-    render_grid.bat
-    render_grid_top.bat
-    render_objects.bat
-    render_room.bat
-    render_zombie.bat
-    render_zombie_top.bat
-    
-    ```
-    - Change `-m 16` to `-m 4` to use only four threads.
 - Do not render grid and room info
     - Remove the calling of `render_grid.bat` and `render_room.bat` from `run.bat`
 - Do not render zombie heatmap
@@ -74,12 +57,12 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 - Do not render top view map
     - Remove the calling of `render_zombie_top.bat` and `render_base_top.bat` from `run.bat`
 - Config a hotkey to elegantly stop rendering at a breakpoint so you can resume later
-    - Similar to the config of thread numbers, add `-s <hotkey>` to starter commands
-        - For example, `-s "<f9>"` make the rendering process stop when you hit F9
+    - Add `-s "<hotkey>"` to Common Render Options
+       See [config manual](./docs/config_manual.md) for more detials.
     - To resume, run `run.bat` again
 - Change base layer file format
-    - Edit `scripts/render_base.bat`
-    - Change `--layer0-fmt jpg` to `--layer0-fmt png` to use lossless png format for base layer
+    - Add `--layer0-fmt <ext>` to Base Map Options
+       See [config manual](./docs/config_manual.md) for more detials.
 
 # How to start the HTML viewer
 After the rendering, you get an `html` folder in your output path.

@@ -1,6 +1,6 @@
 python=python
 pz_path=D:\SteamLibrary\steamapps\common\ProjectZomboid
-out_path=H:\pzmap
+out_path=E:\pzmap
 map_path=D:\SteamLibrary\steamapps\common\ProjectZomboid\media\maps\Muldraugh, KY
 
 additional_texture_packs=

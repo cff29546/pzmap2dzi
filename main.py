@@ -20,7 +20,6 @@ if __name__ == '__main__':
     parser.add_argument('--tile-size', type=int, default=1024)
     parser.add_argument('--layers', type=int, default=8)
     parser.add_argument('--total-layers', type=int, default=8) # iso dzi
-    parser.add_argument('--fmt', type=str, default='png', choices=['png', 'jpg'])
     parser.add_argument('--layer0-fmt', type=str, default='png', choices=['png', 'jpg'])
     parser.add_argument('--skip-level', type=int, default=0)
     parser.add_argument('--compress-level', type=int, default=-1)

@@ -43,7 +43,7 @@ class DZI(object):
         self.tile_size = options.get('tile_size', 1024)
         self.save_empty = options.get('save_empty_tile', False)
         self.compress_level = options.get('compress_level', -1)
-        self.ext = options.get('fmt', 'png')
+        self.ext = 'png'
         self.ext0 = options.get('layer0_fmt', self.ext)
         self.done_pattern = re.compile('(\\d+)_(\\d+)\\.(?:empty|{})$'.format(self.ext0))
         self.layers = options.get('layers', 1)

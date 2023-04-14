@@ -195,10 +195,10 @@ class DziScheduler(object):
         if self.dzi.cache_enabled:
             mb = self.image_size * self.cache_max / 1024 / 1024
             print('cache max used: {:.2f} MB'.format(mb))
-        gets = sum(self.gets)
-        if gets:
-            hits = sum(self.hits)
-            print('cache hit: {}/{} = {:.2f}%'.format(hits, gets, 100*hits/gets))
+            gets = sum(self.gets)
+            if gets:
+                hits = sum(self.hits)
+                print('cache hit: {}/{} = {:.2f}%'.format(hits, gets, 100*hits/gets))
 
 def get_index(level, x, y, layer):
     return '{}_{}_{}_{}'.format(level, x, y, layer)

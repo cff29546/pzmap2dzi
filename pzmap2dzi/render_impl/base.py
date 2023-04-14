@@ -21,7 +21,7 @@ class TextureRender(object):
         jumbo_tree_size = options.get('jumbo_tree_size', 3)
         jumbo_tree_type = options.get('jumbo_tree_type', 0)
 
-        self.tl = texture.TextureLibrary(texture_path)
+        self.tl = texture.TextureLibrary(texture_path, True)
         self.tl.config_plants(season, snow, flower, large_bush,
                               tree_size, jumbo_tree_size, jumbo_tree_type)
 

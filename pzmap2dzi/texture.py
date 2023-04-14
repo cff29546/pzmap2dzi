@@ -3,8 +3,15 @@ from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 import io
 import os
+import struct
+import time
 if __package__ is not None:
     from . import util, mptask, plants
+
+try:
+    from . import mem_image
+except:
+    mem_image = None
 
 def get_version(data):
     if data[:4] == b'PZPK':
@@ -75,7 +82,7 @@ class Texture(object):
             ox = int(im.info.get('ox', 0))
             oy = int(im.info.get('oy', 0))
         bbox = im.getbbox()
-        if bbox:
+        if bbox and bbox != (0, 0) + im.size:
             self.im = im.crop(bbox)
             self.ox = bbox[0] + ox
             self.oy = bbox[1] + oy
@@ -105,9 +112,25 @@ class Texture(object):
         metadata.add_text("oy", str(self.oy))
         self.im.save(path, pnginfo=metadata)
 
+
+
 class TextureLibrary(object):
-    def __init__(self, texture_path=None):
+    @staticmethod
+    def get_size(shm):
+        while shm.buf[0] != 1:
+            #time.sleep(0.1)
+            pass
+
+        w, h = struct.unpack('ii', shm.buf[4:12])
+        return w, h
+
+
+    def __init__(self, texture_path=None, use_cache=False):
         self.texture_path = texture_path
+        self.use_cache = use_cache
+        self.mem = None
+        if use_cache and mem_image:
+            self.mem = mem_image.Memory('tl.{}.'.format(os.getpid()), 32)
         self.lib = {}
 
     def add_pack(self, path, debug=False):
@@ -141,20 +164,41 @@ class TextureLibrary(object):
     def set_texture_path(self, path):
         self.texture_path = path
 
-    def get_by_name(self, name):
-        t = self.lib.get(name, None)
-        if t:
-            return t
+    def load_texture(self, name):
+        t = None
+        if self.mem is not None:
+            im = self.mem.load(name, size_func=TextureLibrary.get_size)
+            if im:
+                extra = self.mem.get_extra(name)
+                ox, oy = struct.unpack('ii', extra[12:20])
+                t = Texture(im, (ox, oy, 0, 0))
 
-        if self.texture_path:
+        if t is None and self.texture_path:
             file_path = os.path.join(self.texture_path, name + '.png')
             if os.path.exists(file_path):
                 im = Image.open(file_path)
                 if im:
                     t = Texture(im)
-                    self.lib[name] = t
-                    return t
-        return None
+                    if self.mem is not None:
+                        cached_im = self.mem.create(name, *t.im.size)
+                        if cached_im:
+                            cached_im.paste(t.im, (0, 0))
+                            extra = self.mem.get_extra(name)
+                            info = t.im.size + (t.ox, t.oy)
+                            extra[4:20] = struct.pack('iiii', *info)
+                            extra[0] = 1
+                        return self.load_texture(name)
+
+        if t is None:
+            print('missing texture [{}]'.format(name))
+        self.lib[name] = t
+        return t
+
+    def get_by_name(self, name):
+        if name in self.lib:
+            return self.lib[name]
+
+        return self.load_texture(name)
 
     def save_all(self, path, parallel=1):
         if not util.ensure_folder(path):
@@ -178,6 +222,11 @@ class TextureLibrary(object):
         pi = plants.PlantsInfo(season, snow, flower, large_bush, tree_size, jumbo_size, jumbo_type)
         for key, names in pi.mapping.items():
             self.lib[key] = self.blend_textures(names)
+
+    def __del__(self):
+        if self.mem is not None:
+            self.lib = {}
+            self.mem.clear()
 
 class SaveImg(object):
     def __init__(self, path):

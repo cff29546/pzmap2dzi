@@ -1,40 +1,49 @@
 from multiprocessing import shared_memory
 from PIL import Image
 
-def _buffer_image(shm, width, height):
-    im = Image.frombuffer('RGBA', (width, height), shm.buf, 'raw', 'RGBA', 0, 1)
+def _buffer_image(shm, width, height, extra):
+    im = Image.frombuffer('RGBA', (width, height), shm.buf[extra:], 'raw', 'RGBA', 0, 1)
     im.readonly = 0
     return im
 
 class Memory(object):
-    def __init__(self, prefix):
+    def __init__(self, prefix, extra=0):
         self.prefix = prefix
         self.created = {}
+        self.extra = extra
         self.loaded = {}
 
     def create(self, index, width, height):
-        size = 4 * width * height
+        size = 4 * width * height + self.extra
         try:
             shm = shared_memory.SharedMemory(name=self.prefix+index, create=True, size=size)
         except:
             return None
 
         self.created[index]=shm
-        return _buffer_image(shm, width, height)
+        return _buffer_image(shm, width, height, self.extra)
 
-    def load(self, index, width, height):
+    def load(self, index, width=0, height=0, size_func=None):
+        shm = None
         if index in self.created:
-            return _buffer_image(self.created[index], width, height)
+            shm = self.created[index]
         if index in self.loaded:
-            return _buffer_image(self.loaded[index], width, height)
-        size = 4 * width * height
-        try:
-            shm = shared_memory.SharedMemory(name=self.prefix+index, size=size)
-        except:
-            return None
+            shm = self.loaded[index]
+        if shm is None:
+            try:
+                shm = shared_memory.SharedMemory(name=self.prefix+index)
+            except:
+                return None
+            self.loaded[index]=shm
+        if width * height == 0 and size_func:
+            width, height = size_func(shm)
+        return _buffer_image(shm, width, height, self.extra)
 
-        self.loaded[index]=shm
-        return _buffer_image(shm, width, height)
+    def get_extra(self, index):
+        if index in self.created:
+            return self.created[index].buf[0:self.extra]
+        if index in self.loaded:
+            return self.loaded[index].buf[0:self.extra]
 
     def release(self, index):
         if index in self.loaded:
@@ -47,6 +56,16 @@ class Memory(object):
 
     def __len__(self):
         return len(self.created)
+
+    def clear(self):
+        keys = set()
+        keys.update(self.loaded)
+        keys.update(self.created)
+        for key in keys:
+            self.release(key)
+
+    def __del__(self):
+        self.clear()
 
 def test():
     import random, os

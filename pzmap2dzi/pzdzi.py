@@ -2,7 +2,7 @@ from PIL import Image
 import os
 import sys
 import re
-from . import util, mptask, dzi_schd
+from . import util, mptask, scheduling
 
 CELL_SIZE = 300
 
@@ -238,8 +238,9 @@ class DZI(object):
                 if not render.valid_cell(x, y):
                     self.skip_cells.add((x, y))
         tasks, done = self.get_tasks(self.skip_cells)
-        schd = dzi_schd.DziScheduler(self, stop_key, verbose)
-        worker = dzi_schd.Worker(self, 'pzdzi.{}.'.format(os.getpid()), render)
+        schd = scheduling.TopologicalDziScheduler(self, stop_key, verbose)
+        cache_prefix = 'pzdzi.{}.'.format(os.getpid())
+        worker = scheduling.TopologicalDziWorker(self, cache_prefix, render)
         task = mptask.Task(worker, schd, profile)
         task.run((tasks, done), n)
         if verbose:

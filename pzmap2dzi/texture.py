@@ -9,9 +9,9 @@ if __package__ is not None:
     from . import util, mptask, plants
 
 try:
-    from . import mem_image
+    from . import shared_memory_image
 except:
-    mem_image = None
+    shared_memory_image = None
 
 def get_version(data):
     if data[:4] == b'PZPK':
@@ -118,7 +118,8 @@ class TextureLibrary(object):
     @staticmethod
     def get_size(shm):
         while shm.buf[0] != 1:
-            #time.sleep(0.1)
+            # spin lock wait
+            # time.sleep(0.1)
             pass
 
         w, h = struct.unpack('ii', shm.buf[4:12])
@@ -129,8 +130,9 @@ class TextureLibrary(object):
         self.texture_path = texture_path
         self.use_cache = use_cache
         self.mem = None
-        if use_cache and mem_image:
-            self.mem = mem_image.Memory('tl.{}.'.format(os.getpid()), 32)
+        if use_cache and shared_memory_image:
+            prefix = 'tl.{}.'.format(os.getpid())
+            self.mem = shared_memory_image.ImageSharedMemory(prefix, 32)
         self.lib = {}
 
     def add_pack(self, path, debug=False):

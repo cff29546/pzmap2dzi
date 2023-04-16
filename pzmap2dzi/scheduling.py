@@ -4,10 +4,10 @@ import sys
 import time
 import datetime
 from . import mptask, lru, util
-if sys.version_info >= (3,8):
-    from . import mem_image
-else:
-    mem_image = None
+try:
+    from . import shared_memory_image
+except:
+    shared_memory_image = None
 try:
     from . import hotkey
 except:
@@ -36,7 +36,7 @@ def depend_task(level, x, y):
     return [(level + 1, i + (x << 1), j + (y << 1))
             for i in (0, 1) for j in (0, 1)]
 
-class DziScheduler(object):
+class TopologicalDziScheduler(object):
     def __init__(self, dzi, stop_key=None, verbose=False):
         self.verbose = verbose
         self.cache_limit = dzi.cache_limit
@@ -248,10 +248,10 @@ class CacheLoader(object):
                 self.mem.release(index)
             self.cached = set()
 
-class Worker(object):
+class TopologicalDziWorker(object):
     def __init__(self, dzi, prefix, render):
-        if dzi.cache_enabled and mem_image:
-            self.mem = mem_image.Memory(prefix)
+        if dzi.cache_enabled and shared_memory_image:
+            self.mem = shared_memory_image.ImageSharedMemory(prefix)
         else:
             self.mem = None
         self.cache_map = {}

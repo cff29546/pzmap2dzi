@@ -5,6 +5,7 @@ import io
 import os
 import struct
 import time
+import yaml
 if __package__ is not None:
     from . import util, mptask, plants
 
@@ -75,9 +76,7 @@ def color_sum(pixels):
 class Texture(object):
     def __init__(self, im, offset=None):
         if offset:
-            ox, oy, ow, oh = offset
-            ox = ox - (ow // 2)
-            oy = oy - oh # + (pzdzi.SQR_HEIGHT // 2)
+            ox, oy = offset
         else:
             ox = int(im.info.get('ox', 0))
             oy = int(im.info.get('oy', 0))
@@ -126,9 +125,16 @@ class TextureLibrary(object):
         return w, h
 
 
-    def __init__(self, texture_path=None, use_cache=False):
+    def __init__(self, texture_path=None,
+                       use_cache=False,
+                       page_mode=False,
+                       page_size=1024):
         self.texture_path = texture_path
         self.use_cache = use_cache
+        self.page_mode = page_mode
+        self.page = []
+        self.page_buffer = None
+        self.mapping = {}
         self.mem = None
         if use_cache and shared_memory_image:
             prefix = 'tl.{}.'.format(os.getpid())
@@ -141,14 +147,21 @@ class TextureLibrary(object):
         for idx, page in enumerate(pages):
             print('Processing pages: {}/{}'.format(idx + 1, total), end='\r')
             im = Image.open(io.BytesIO(page['png']))
+            if self.page_mode:
+                page_id = len(self.page)
+                self.page.append(im)
             for t in page['textures']:
                 name = t['name']
                 x, y, w, h = t['x'], t['y'], t['w'], t['h']
                 ox, oy, ow, oh = t['ox'], t['oy'], t['ow'], t['oh']
-                texture = Texture(im.crop((x, y, x + w, y + h)), (ox, oy, ow, oh))
+                ox -= ow >>1
+                oy -= oh
+                texture = Texture(im.crop((x, y, x + w, y + h)), (ox, oy))
                 if debug and self.lib.get(name, None):
                     print('Conflict texture: {}'.format(name))
                 self.lib[name] = texture
+                if self.page_mode:
+                    self.mapping[name] = page_id, x, y, w, h, ox, oy
 
     def add_from_pz_path(self, pzmain, debug=False):
         files = [
@@ -166,30 +179,73 @@ class TextureLibrary(object):
     def set_texture_path(self, path):
         self.texture_path = path
 
-    def load_texture(self, name):
+    def load_raw_texture(self, name):
+        if self.texture_path:
+            file_path = os.path.join(self.texture_path, name + '.png')
+            if os.path.exists(file_path):
+                im = Image.open(file_path)
+                if im:
+                    return Texture(im)
+
+    def load_from_cache(self, name):
         t = None
         if self.mem is not None:
             im = self.mem.load(name, size_func=TextureLibrary.get_size)
             if im:
                 extra = self.mem.get_extra(name)
                 ox, oy = struct.unpack('ii', extra[12:20])
-                t = Texture(im, (ox, oy, 0, 0))
+                t = Texture(im, (ox, oy))
+        return t
 
-        if t is None and self.texture_path:
-            file_path = os.path.join(self.texture_path, name + '.png')
-            if os.path.exists(file_path):
-                im = Image.open(file_path)
-                if im:
-                    t = Texture(im)
-                    if self.mem is not None:
-                        cached_im = self.mem.create(name, *t.im.size)
-                        if cached_im:
-                            cached_im.paste(t.im, (0, 0))
-                            extra = self.mem.get_extra(name)
-                            info = t.im.size + (t.ox, t.oy)
-                            extra[4:20] = struct.pack('iiii', *info)
-                            extra[0] = 1
-                        return self.load_texture(name)
+    def save_to_cache(self, name, t):
+        if self.mem is not None:
+            cached_im = self.mem.create(name, *t.im.size)
+            if cached_im:
+                cached_im.paste(t.im, (0, 0))
+                extra = self.mem.get_extra(name)
+                info = t.im.size + (t.ox, t.oy)
+                extra[4:20] = struct.pack('iiii', *info)
+                extra[0] = 1
+
+            # free current and reload using shared memory
+            return self.load_from_cache(name)
+
+    def load_pages(self):
+        if self.texture_path:
+            page_ids = []
+            pattern = re.compile('(\\d+)\\.png')
+            for f in os.listdir(self.texture_path):
+                m = pattern.match(f)
+                if m:
+                    page_ids.append(int(m.groups()[0]))
+            path = os.path.join(self.texture_path, 'mapping.yaml')
+            if os.path.exists(path):
+                with open(path, 'r') as f:
+                    self.mapping = yaml.safe_load(f.read())
+            page_count = max(page_ids) + 1
+            w, h = self.page_size, self.page_size
+            self.page_buffer = memoryview(bytes(4 * w * h * page_count))
+            for pid in page_ids:
+                path = os.path.join(self.texture_path, '{}.png'.format(pid))
+                if os.path.exists(path):
+                    im = Image.open(path)
+                    if im:
+                        offset = 4 * w * h * pid
+                        buf_im = Image.frombuffer('RGBA', (w, h), 
+                                                  self.page_buffer[offset:],
+                                                  'raw', 'RGBA', 0, 1)
+                        buf_im.readonly = 0
+                        buf_im.paste(im, (0, 0))
+
+
+
+    def load_texture(self, name):
+        t = self.load_from_cache(name)
+
+        if t is None:
+            t = self.load_raw_texture(name)
+            if t is not None:
+                t = self.save_to_cache(name, t)
 
         if t is None:
             print('missing texture [{}]'.format(name))
@@ -206,18 +262,24 @@ class TextureLibrary(object):
         if not util.ensure_folder(path):
             return False
         t = mptask.Task(SaveImg(path), mptask.SplitScheduler(True))
-        t.run(list(self.lib.items()), parallel)
+        if self.page_mode:
+            tasks = list(enumerate(self.page))
+            with open(os.path.join(path, 'mapping.yaml'), 'w') as f:
+                f.write(yaml.safe_dump(self.mapping))
+        else:
+            tasks = list(self.lib.items())
+        t.run(tasks, parallel)
 
     def blend_textures(self, names):
         w, h = 384, 512
         im = Image.new('RGBA', (w, h))
-        x = w // 2
+        x = w >> 1
         y = h # - (pzdzi.SQR_HEIGHT // 2)
         for name in names:
             t = self.get_by_name(name)
             if t:
                 t.render(im, x, y)
-        return Texture(im, (0, 0, w, h))
+        return Texture(im, (-x, -y))
 
     def config_plants(self, season='spring', snow=False, flower=False, large_bush=False,
                  tree_size=1, jumbo_size=3, jumbo_type=3):
@@ -236,7 +298,7 @@ class SaveImg(object):
 
     def on_job(self, job):
         name, im = job
-        im.save(os.path.join(self.path, name + '.png'))
+        im.save(os.path.join(self.path, '{}.png'.format(name)))
 
 if __name__ == '__main__':
     import argparse
@@ -246,10 +308,11 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--test-plants', action='store_true')
     parser.add_argument('-m', '--mp', type=int, default=1)
     parser.add_argument('-z', '--pz-path', type=str, default='')
+    parser.add_argument('-p', '--page-mode', action='store_true')
     parser.add_argument('packs', nargs=argparse.REMAINDER)
     args = parser.parse_args()
     
-    lib = TextureLibrary()
+    lib = TextureLibrary(page_mode=args.page_mode)
     if args.pz_path:
         lib.add_from_pz_path(args.pz_path, args.debug)
     for pack_path in args.packs:

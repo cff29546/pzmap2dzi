@@ -75,7 +75,7 @@ def test():
     cmd = 'line'
     if len(sys.argv) > 1:
        cmd = sys.argv[1]
-    c = Memory('test')
+    c = ImageSharedMemory('test')
     im = c.load('a', 128, 128)
     if im:
         if cmd == 'line':
@@ -83,7 +83,7 @@ def test():
             draw.line((0, random.randint(0,127), 127, random.randint(0,127)), fill=(255,0,0,255))
             draw = None
         if cmd == 't':
-            r = im.resize((64,64), Image.ANTIALIAS)
+            r = im.resize((64,64), Image.LANCZOS)
             im.paste(r, (0,0))
         im.show()
     else:

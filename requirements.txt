@@ -2,3 +2,4 @@ pynput
 lupa
 pyclipper
 pillow
+pyyaml

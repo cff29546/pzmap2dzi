@@ -226,7 +226,7 @@ class DZI(object):
                     tile.paste(im, (self.tile_size * i, self.tile_size * j))
                     im = None
         if tile:
-            tile.thumbnail((self.tile_size, self.tile_size), Image.ANTIALIAS)
+            tile.thumbnail((self.tile_size, self.tile_size), Image.LANCZOS)
             im_getter.get().paste(tile, (0, 0))
 
     def render_all(self, render, n, stop_key=None, verbose=False, profile=False):

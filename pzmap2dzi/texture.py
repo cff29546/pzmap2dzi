@@ -208,7 +208,10 @@ class TextureLibrary(object):
                 extra[0] = 1
 
             # free current and reload using shared memory
-            return self.load_from_cache(name)
+            cached = self.load_from_cache(name)
+            if cached:
+                return cached
+        return t
 
     def load_pages(self):
         if self.texture_path:

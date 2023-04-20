@@ -36,6 +36,10 @@ class GridRender(object):
                     continue
                 sx = (gx + gy) >> 1
                 sy = (gy - gx) >> 1
+                cx = sx // pzdzi.CELL_SIZE
+                cy = sy // pzdzi.CELL_SIZE
+                if (cx, cy) not in self.cells:
+                    continue
                 
                 ox, oy = pzdzi.IsoDZI.get_sqr_center(gx - gx0, gy - gy0)
                 if self.cell and sx % pzdzi.CELL_SIZE == 0:
@@ -48,7 +52,7 @@ class GridRender(object):
                     drawing.append((render_gridy, (ox, oy, BLOCK_COLOR, 1)))
 
                 if self.cell and sx % pzdzi.CELL_SIZE == 1 and sy % pzdzi.CELL_SIZE == 1:
-                    text = '{},{}'.format(sx // pzdzi.CELL_SIZE, sy // pzdzi.CELL_SIZE)
+                    text = '{},{}'.format(cx, cy)
                     drawing.append((render_text, (ox, oy, text, CELL_COLOR, CELL_FONT)))
                 if self.block and sx % 10 == 0 and sy % 10 == 0:
                     text = '{},{}'.format(sx // 10, sy // 10)

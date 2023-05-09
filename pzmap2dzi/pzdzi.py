@@ -11,6 +11,13 @@ DZI_TEMPLATE = '''<?xml version="1.0" encoding="UTF-8"?>
   <Size Width="{}" Height="{}"/>
 </Image>'''
 
+EXTRA_TEMPLATE = '''
+var x0 = {x0}
+var y0 = {y0}
+var xstep = {xstep}
+var ystep = {ystep}
+'''
+
 PENDING_PATTERN = re.compile('(\\d+)_(\\d+)\\.pending$')
 
 def lower_level_depend(tx, ty):
@@ -155,6 +162,8 @@ class DZI(object):
             dzi_path = os.path.join(self.path, 'layer{}.dzi'.format(layer))
             with open(dzi_path, 'w') as f:
                 f.write(dzi)
+        if hasattr(self, 'save_extra_info'):
+            self.save_extra_info()
 
     def get_bottom_task_depend(self, skip_cells, done):
         tasks = {}
@@ -354,6 +363,17 @@ class IsoDZI(DZI):
                 ox, oy = IsoDZI.get_sqr_center(gx - gx0, gy - gy0)
                 render.square(im_getter, ox, oy, sx, sy, layer)
 
+    def save_extra_info(self):
+        extra = EXTRA_TEMPLATE.format(**{
+            'x0': -self.gxo * IsoDZI.HALF_SQR_WIDTH,
+            'y0': -self.gyo * IsoDZI.HALF_SQR_HEIGHT,
+            'xstep': [IsoDZI.HALF_SQR_WIDTH, IsoDZI.HALF_SQR_HEIGHT],
+            'ystep': [-IsoDZI.HALF_SQR_WIDTH, IsoDZI.HALF_SQR_HEIGHT],
+        })
+        path = os.path.join(self.path, 'extra.js')
+        with open(path, 'w') as f:
+            f.write(extra)
+
 class TopDZI(DZI):
     def __init__(self, map_path, **options):
         self.square_size = options.get('square_size', 1)
@@ -382,4 +402,13 @@ class TopDZI(DZI):
         cx, cy = self.tile2cell(tx, ty)
         render.tile(im_getter, cx, cy, layer, self.square_size)
 
-
+    def save_extra_info(self):
+        extra = EXTRA_TEMPLATE.format(**{
+            'x0': -(self.cxo * self.square_size * CELL_SIZE),
+            'y0': -(self.cyo * self.square_size * CELL_SIZE),
+            'xstep': [self.square_size, 0],
+            'ystep': [0, self.square_size],
+        })
+        path = os.path.join(self.path, 'extra.js')
+        with open(path, 'w') as f:
+            f.write(extra)

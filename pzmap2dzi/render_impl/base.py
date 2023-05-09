@@ -7,7 +7,7 @@ except ImportError:
     from backports.functools_lru_cache import lru_cache
 
 @lru_cache(maxsize=16)
-def load_cell_data(path, cx, cy):
+def load_cell_cached(path, cx, cy):
     return cell.load_cell(path, cx, cy)
 
 class TextureRender(object):
@@ -36,7 +36,7 @@ class BaseRender(TextureRender):
         cy, suby = divmod(sy, pzdzi.CELL_SIZE)
         bx, x = divmod(subx, 10)
         by, y = divmod(suby, 10)
-        data = load_cell_data(self.input, cx, cy)
+        data = load_cell_cached(self.input, cx, cy)
         if not data:
             return
         block = data['blocks'][bx * 30 + by]
@@ -116,15 +116,15 @@ class BaseTopRender(TextureRender):
         TextureRender.__init__(self, **options)
 
     def tile(self, im_getter, cx, cy, layer, size):
-        cell_data = load_cell_data(self.input, cx, cy)
-        tile_names = cell_data['header']['tiles']
+        data = cell.load_cell(self.input, cx, cy)
+        tile_names = data['header']['tiles']
         draw = None
         im = None
-        if not cell_data:
+        if not data:
             return
         for bx in range(30):
             for by in range(30):
-                block = cell_data['blocks'][bx * 30 + by]
+                block = data['blocks'][bx * 30 + by]
                 if block is None:
                     continue
                 layer_data = block[layer]

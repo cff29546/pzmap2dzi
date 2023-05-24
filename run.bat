@@ -11,10 +11,6 @@ echo Render pz map ...
 call "%~dp0scripts\render_base.bat"
 echo Render pz map done
 
-echo Render grid ...
-call "%~dp0scripts\render_grid.bat"
-echo Render grid done
-
 echo Render room ...
 call "%~dp0scripts\render_room.bat"
 echo Render room done
@@ -34,10 +30,6 @@ echo Render top view pz map done
 echo Render top view zombie ...
 call "%~dp0scripts\render_zombie_top.bat"
 echo Render top view zombie done
-
-echo Render top view grid ...
-call "%~dp0scripts\render_grid_top.bat"
-echo Render top view grid done
 
 echo Render foraging ...
 call "%~dp0scripts\render_foraging.bat"

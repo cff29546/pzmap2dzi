@@ -11,10 +11,6 @@ echo Render pz map ...
 call "%~dp0scripts\render_base.bat"
 echo Render pz map done
 
-echo Render grid ...
-call "%~dp0scripts\render_grid.bat"
-echo Render grid done
-
 echo Render room ...
 call "%~dp0scripts\render_room.bat"
 echo Render room done

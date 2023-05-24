@@ -9,12 +9,6 @@ pause
 echo step4_test_base_top
 call step4_test_base_top.bat
 pause
-echo step5_test_grid
-call step5_test_grid.bat
-pause
-echo step6_test_grid_top
-call step6_test_grid_top.bat
-pause
 echo step7_test_room
 call step7_test_room.bat
 pause

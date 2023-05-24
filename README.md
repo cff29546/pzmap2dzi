@@ -9,10 +9,11 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 - Supports multi-thread acceleration
 - Supports image cache acceleration when building dzi pyramid (python 3.8+ only)
 - Supports resuming from a breakpoint
-- Supports map grid and room info rendering
+- Supports room info rendering
 - Supports zombie heatmap rendering
 - Supports foraging zones rendering
 - Supports isometric view and top view rendering
+- Supports map grids in HTML viewer
 - Supports map objects rendering (car spawn zones, special zombie spawn zones, map story zones)
 - Supports game version 41.78
 
@@ -20,9 +21,16 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 # Requirement
 - **Storage**: The full output size of isometric map for game version 41.78 is around 450GB (or 2.5TB with lossless png format) and consists of 4M files. SSD is recommended as high I/O bandwidth can reduce render time.
 - **Memory**: Each worker requires approximately 1 GB of memory to work. An additional 4 GB of shared memory is needed if the cache is enabled. For example, the program will need 16 GB + 4 GB memory when using 16 threads.
-- **CPU**: The rending process will take a very long time, so it's better to have a high-performance CPU. 
-    - The isometric map rending took around 5 hours (or even slower with lossless png format) on an AMD 3700X with 64GB DDR4 2133 memory and a SATA3 mechanical hard drive using 16 threads with cache on
-    - The zombie heatmap and map grids took half of the isometric map render time each
+- **CPU**: High-performance multi-core CPU(s) recommended. 
+- **Render Time**
+    - Test machine spec & config
+        - CPU: AMD Ryzen 7 5700G @ 3.8 GHz (8 core, 16 threads)
+        - Memory: 64GB DDR4 2133
+        - Output Storage: NVME SSD
+        - Render Settings: 16 thread, cache enabled
+        - Game Version: 41.78.16
+    - The isometric map rending took around 3.5 hours (or even slower with lossless png format)
+    - The zombie heatmap took about half of the isometric map render time
     - If you choose to render only top view map, output size will be around 500MB and can be done within half hour.
 
 # How to run

@@ -66,6 +66,89 @@
         var zombie = 0
         var curLayers = 0
 
+        function drawCoord(ctx, c00, step, font, color, offset) {
+            ctx.font = font;
+            ctx.fillStyle = color;
+            let m = ctx.measureText('000,000');
+            if (m.width > step - 4) {
+                return;
+            }
+            let w = ctx.canvas.width;
+            let h = ctx.canvas.height;
+            let gx0 = -Math.floor(c00.x / step) - 1;
+            let cx0 = c00.x + (gx0 * step);
+            let gy0 = -Math.floor(c00.y / step) - 1;
+            let cy0 = c00.y + (gy0 * step);
+            let text = '01234,56789';
+            m = ctx.measureText(text);
+            let a = m.actualBoundingBoxAscent;
+            let line_height = a + m.actualBoundingBoxDescent + 2;
+            let cyo = a + 3 + line_height * offset;
+            for (let x = 0; x <= w / step + 1; x++) {
+                for (let y = 0; y <= h / step + 1; y++) {
+                    cx = cx0 + (x * step);
+                    cy = cy0 + (y * step);
+                    coordx = gx0 + x;
+                    coordy = gy0 + y;
+                    text = '' + coordx + ',' + coordy;
+                    m = ctx.measureText(text);
+                    ctx.fillText(text, cx + 2, cy + cyo);
+                }
+            }
+        }
+
+        function drawGrid(ctx, c00, step, line_width, color) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = line_width;
+            let w = ctx.canvas.width;
+            let h = ctx.canvas.height;
+            let x1 = c00.x;
+            let y1 = c00.y;
+            ctx.beginPath();
+            let offset = Math.floor(x1 / step) * step;
+            x1 -= offset;
+            while (x1 <= w) {
+                ctx.moveTo(x1, 0);
+                ctx.lineTo(x1, h);
+                x1 += step;
+            }
+            offset = Math.floor(y1 / step) * step;
+            y1 -= offset;
+            while (y1 <= h) {
+                ctx.moveTo(0, y1);
+                ctx.lineTo(w, y1);
+                y1 += step;
+            }
+            ctx.stroke();
+        }
+
+        _viewer.addHandler('update-viewport', function() {
+            if (grid != 0) {
+                let ctx = _viewer.drawer.context;
+                let zm = _viewer.viewport.getZoom();
+                zm = _viewer.viewport.viewportToImageZoom(zm);
+                let vp00 = _viewer.viewport.imageToViewportCoordinates(x0, y0);
+                let c00 = _viewer.viewport.pixelFromPoint(vp00);
+
+                let sqr = xstep[0]; // 1
+                let step_cell = sqr * 300 * zm;
+                let step_block = sqr * 10 * zm;
+
+                if (step_block >= 10) {
+                    drawGrid(ctx, c00, step_block, 1, 'lime');
+                    if (step_block >= 100) {
+                        drawCoord(ctx, c00, step_block, '12pt monospace', 'lime', 1);
+                    }
+                }
+                if (step_cell >= 64) {
+                    drawGrid(ctx, c00, step_cell, 3, 'yellow');
+                    drawCoord(ctx, c00, step_cell, '12pt bold monospace', 'yellow', 0);
+                } else if (step_cell >= 32) {
+                    drawGrid(ctx, c00, step_cell, 1, 'yellow');
+                }
+            }
+        })
+
         function addLayer(layer) {
             curLayers++;
             var _viewer1 = _viewer.addTiledImage({
@@ -127,18 +210,11 @@
         }
         function toggleGrid() {
             if (grid == 0) {
-                var _viewer1 = _viewer.addTiledImage({
-                    tileSource: "grid_top/layer0.dzi",
-                    opacity: 1,
-                    x: 0,
-                    y: 0,
-                    success: function (obj) {
-                        grid = obj.item;
-                    },
-                });
+                grid = 1;
+                _viewer.raiseEvent('update-viewport', {});
             } else {
-                _viewer.world.removeItem(grid);
                 grid = 0;
+                _viewer.forceRedraw();
             }
         }
         function toggleForaging() {

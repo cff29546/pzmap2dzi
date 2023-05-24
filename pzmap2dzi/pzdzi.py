@@ -366,7 +366,7 @@ class IsoDZI(DZI):
     def save_extra_info(self):
         extra = EXTRA_TEMPLATE.format(**{
             'x0': -self.gxo * IsoDZI.HALF_SQR_WIDTH,
-            'y0': -self.gyo * IsoDZI.HALF_SQR_HEIGHT,
+            'y0': -(self.gyo + 1) * IsoDZI.HALF_SQR_HEIGHT,
             'xstep': [IsoDZI.HALF_SQR_WIDTH, IsoDZI.HALF_SQR_HEIGHT],
             'ystep': [-IsoDZI.HALF_SQR_WIDTH, IsoDZI.HALF_SQR_HEIGHT],
         })

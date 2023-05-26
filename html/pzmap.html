@@ -138,10 +138,10 @@
         _viewer.addHandler('update-viewport', function() {
             if (grid != 0) {
                 let ctx = _viewer.drawer.context;
-                let zm = _viewer.viewport.getZoom();
+                let zm = _viewer.viewport.getZoom(true);
                 zm = _viewer.viewport.viewportToImageZoom(zm);
                 let vp00 = _viewer.viewport.imageToViewportCoordinates(x0, y0 - 192 * curLayers);
-                let c00 = _viewer.viewport.pixelFromPoint(vp00);
+                let c00 = _viewer.viewport.pixelFromPoint(vp00, true);
 
                 let sqr = xstep[0] - ystep[0]; // 128
                 let step_cell = sqr * 300 * zm;

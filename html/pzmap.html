@@ -15,7 +15,7 @@
 
   <body>
     <div style="display: flex; flex-flow: column; height: 100%;">
-      <div style="flex: 0 1 auto;">
+      <div style="flex: 0 1 auto;background-color:white;">
         <button type="button" onclick="toggleGrid()">Grid</button>
         <button type="button" onclick="toggleRoom()">Room</button>
         <button type="button" onclick="toggleZombie()">Zombie</button>
@@ -62,10 +62,13 @@
             homeFillsViewer: true,
             showZoomControl: true,
             constrainDuringPan: true,
-            visibilityRatio: 1,
+            visibilityRatio: 0.5,
             prefixUrl: "openseadragon/images/",
-            minZoomImageRatio: 1
+            navigatorBackground: 'black',
+            minZoomImageRatio: 0.5,
+            maxZoomPixelRatio: 2
         });
+        document.body.style.backgroundColor = 'black';
         var tiles = [0, 0, 0, 0, 0, 0, 0]
         var foraging = 0
         var room = 0
@@ -74,38 +77,39 @@
         var zombie = 0
         var curLayers = 0
 
-        function drawCoord(ctx, c00, step, font, color, offset) {
-            ctx.font = font;
-            ctx.fillStyle = color;
+        function textSize(ctx, text) {
+            let m = ctx.measureText('-01234,56789');
+            let ascent = m.actualBoundingBoxAscent;
+            let descent = m.actualBoundingBoxDescent;
+            let width = ctx.measureText(text).width;
+            return [width, ascent, descent];
+        }
+        function drawCoord(ctx, c00, step, yoffset) {
             let w = ctx.canvas.width;
             let h = ctx.canvas.height;
             let gx0 = -Math.floor(c00.x / (step / 2)) - 1;
             let cx0 = c00.x + (gx0 * step / 2);
             let gy0 = -Math.floor(c00.y / (step / 4)) - 1;
             let cy0 = c00.y + (gy0 * step / 4);
-            let s = 0;
-            let text = '01234,56789';
-            let m = ctx.measureText(text);
-            let a = m.actualBoundingBoxAscent;
-            let line_height = a + m.actualBoundingBoxDescent + 2;
-            m = ctx.measureText('000,000');
-            let cyo = m.width / 4 + a + line_height * offset;
+            let dx0 = gx0 + gy0;
+            let dy0 = gy0 - gx0;
+
+            let text = '';
+            let m = 0;
             for (let x = 0; x <= w / (step / 2) + 1; x++) {
-                s = (gx0 + gy0 + x) % 2;
-                for (let y = s; y <= h / (step / 4) + 1; y+=2) {
+                for (let y = (dx0 + x) % 2; y <= h / (step / 4) + 1; y+=2) {
                     cx = cx0 + (x * step / 2);
                     cy = cy0 + (y * step / 4);
-                    coordx = (gx0 + x + gy0 + y) / 2;
-                    coordy = (gy0 + y - gx0 - x) / 2;
+                    coordx = (dx0 + y + x) / 2;
+                    coordy = (dy0 + y - x) / 2;
                     text = '' + coordx + ',' + coordy;
                     m = ctx.measureText(text);
-                    ctx.fillText(text, cx - (m.width / 2), cy + cyo);
+                    ctx.fillText(text, cx - (m.width / 2), cy + yoffset);
                 }
             }
         }
 
-        function drawGrid(ctx, c00, step, line_width, color) {
-            ctx.strokeStyle = color;
+        function drawGrid(ctx, c00, step, line_width) {
             ctx.lineWidth = line_width;
             let w = ctx.canvas.width;
             let h = ctx.canvas.height;
@@ -140,22 +144,46 @@
                 let ctx = _viewer.drawer.context;
                 let zm = _viewer.viewport.getZoom(true);
                 zm = _viewer.viewport.viewportToImageZoom(zm);
+                zm *= window.devicePixelRatio;
                 let vp00 = _viewer.viewport.imageToViewportCoordinates(x0, y0 - 192 * curLayers);
                 let c00 = _viewer.viewport.pixelFromPoint(vp00, true);
+                c00.x *= window.devicePixelRatio;
+                c00.y *= window.devicePixelRatio;
 
                 let sqr = xstep[0] - ystep[0]; // 128
                 let step_cell = sqr * 300 * zm;
                 let step_block = sqr * 10 * zm;
 
-                if (step_block >= 128) {
-                    drawGrid(ctx, c00, step_block, 1, 'lime');
-                    drawCoord(ctx, c00, step_block, '12pt monospace', 'lime', 1);
-                }
-                if (step_cell >= 64) {
-                    drawGrid(ctx, c00, step_cell, 3, 'yellow');
-                    drawCoord(ctx, c00, step_cell, '12pt bold monospace', 'yellow', 0);
-                } else if (step_cell >= 32) {
-                    drawGrid(ctx, c00, step_cell, 1, 'yellow');
+                let cell_font = '12pt bold monospace';
+                let block_font = '12pt monospace';
+
+                // cell
+                ctx.font = cell_font;
+                let [cell_width, cell_ascent, cell_descent] = textSize(ctx, '-00,-00');
+                let yoffset = 2 + cell_width / 4 + cell_ascent;
+                if (step_cell >= yoffset * 4) {
+                    ctx.fillStyle = 'yellow';
+                    drawCoord(ctx, c00, step_cell, yoffset);
+
+                    // block
+                    ctx.font = block_font;
+                    let [width, ascent, descent] = textSize(ctx, '-0000,-0000');
+                    yoffset += cell_descent + ascent + 2;
+                    if (yoffset < 2 + width / 4 + ascent) {
+                        yoffset = 2 + width / 4 + ascent;
+                    }
+
+                    if (step_block >= yoffset * 4) {
+                        ctx.strokeStyle = 'lime';
+                        drawGrid(ctx, c00, step_block, 1);
+                        ctx.fillStyle = 'lime';
+                        drawCoord(ctx, c00, step_block, yoffset);
+                    }
+                    ctx.strokeStyle = 'yellow';
+                    drawGrid(ctx, c00, step_cell, 3);
+                } else {
+                    ctx.strokeStyle = 'yellow';
+                    drawGrid(ctx, c00, step_cell, 1);
                 }
             }
         })

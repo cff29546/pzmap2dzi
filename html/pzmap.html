@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html>
   <head>
@@ -8,313 +6,39 @@
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
     <style>
-      html, body { height: 100%; margin: 0; padding: 0; background-color: white;}
-      .legend { height: 1em; width: 1em; display: inline-block; border-color: #000; background-color:#fff; border-width: 1px; border-style: solid;}
+    html, body { height: 100%; margin: 0; padding: 0; background-color: black; }
+    .legend { height: 1em; width: 1em; display: inline-block; border-width: 1px;
+        border-style: solid; border-color: #000; background-color:#fff;
+        vertical-align: bottom; margin-left: 1em;}
+    .text-right { display: inline-block; float: right; }
     </style>
   </head>
-
   <body>
     <div style="display: flex; flex-flow: column; height: 100%;">
       <div style="flex: 0 1 auto;background-color:white;">
+        <select id="layer_selector" onchange="onLayerSelect()"></select>
         <button type="button" onclick="toggleGrid()">Grid</button>
-        <button type="button" onclick="toggleRoom()">Room</button>
         <button type="button" onclick="toggleZombie()">Zombie</button>
-        <button type="button" onclick="toggleObjects()">Objects</button>
         <button type="button" onclick="toggleForaging()">Foraging</button>
-        <button type="button" onclick="setLayer(0)">Layer 0</button>
-        <button type="button" onclick="setLayer(1)">Layer 1</button>
-        <button type="button" onclick="setLayer(2)">Layer 2</button>
-        <button type="button" onclick="setLayer(3)">Layer 3</button>
-        <button type="button" onclick="setLayer(4)">Layer 4</button>
-        <button type="button" onclick="setLayer(5)">Layer 5</button>
-        <button type="button" onclick="setLayer(6)">Layer 6</button>
-        <button type="button" onclick="setLayer(7)">Layer 7</button>
-        Switch to <a href="pzmap_top.html">Top View</a>
+        <button class="iso" type="button" onclick="toggleRoom()">Room</button>
+        <button class="iso" type="button" onclick="toggleObjects()">Objects</button>
+        <button type="button" onclick="toggleTrimmer()">Save File Trimmer</button>
+        <div id="main_output" style="display: inline-block"></div>
+        <div class="text-right">
+            Switch to
+            <a id='change_view' href="" onclick="return changeView();">Top View</a>
+        </div>
         <div>
           <div id="foraging_legend"></div>
-          <div id="objects_legend"></div>
+          <div class="iso" id="objects_legend"></div>
+          <div id="save_trimmer" style="background-color: lightskyblue"></div>
         </div>
       </div>
       <div style="flex: 1 1 auto;">
-        <div id="contentDiv" allowfullscreen style="height: 100%"> </div>
+        <div id="map_div" allowfullscreen style="height: 100%"> </div>
       </div>
     </div>
-    <script type="text/javascript" src='base/extra.js'></script>
-    <script type="text/javascript">
-        var foragingLegendHTML = `
-            <div class="legend" style="background-color:#fff"></div>Road
-            <div class="legend" style="background-color:#00f"></div>Urban Area
-            <div class="legend" style="background-color:#0ff"></div>Trailer Park
-            <div class="legend" style="background-color:#ff0"></div>Vegitation
-            <div class="legend" style="background-color:#0f0"></div>Forest
-            <div class="legend" style="background-color:#080"></div>Deep Forest
-            <div class="legend" style="background-color:#f0f"></div>Farmland
-            <div class="legend" style="background-color:#f00"></div>Farm
-        `;
-        var objectsLegendHTML = `
-            <div class="legend" style="border-color:#f00; border-width: 3px;"></div>Zombies Type
-            <div class="legend" style="border-color:#00f; border-width: 3px;"></div>Car Spawn
-            <div class="legend" style="border-color:#ff0; border-width: 3px;"></div>Zone Story
-        `;
-        var _viewer = OpenSeadragon({
-            element: document.getElementById("contentDiv"),
-            tileSources:  "base/layer0.dzi",
-            homeFillsViewer: true,
-            showZoomControl: true,
-            constrainDuringPan: true,
-            visibilityRatio: 0.5,
-            prefixUrl: "openseadragon/images/",
-            navigatorBackground: 'black',
-            minZoomImageRatio: 0.5,
-            maxZoomPixelRatio: 2
-        });
-        document.body.style.backgroundColor = 'black';
-        var tiles = [0, 0, 0, 0, 0, 0, 0]
-        var foraging = 0
-        var room = 0
-        var grid = 0
-        var objects = 0
-        var zombie = 0
-        var curLayers = 0
-
-        function textSize(ctx, text) {
-            let m = ctx.measureText('-01234,56789');
-            let ascent = m.actualBoundingBoxAscent;
-            let descent = m.actualBoundingBoxDescent;
-            let width = ctx.measureText(text).width;
-            return [width, ascent, descent];
-        }
-        function drawCoord(ctx, c00, step, yoffset) {
-            let w = ctx.canvas.width;
-            let h = ctx.canvas.height;
-            let gx0 = -Math.floor(c00.x / (step / 2)) - 1;
-            let cx0 = c00.x + (gx0 * step / 2);
-            let gy0 = -Math.floor(c00.y / (step / 4)) - 1;
-            let cy0 = c00.y + (gy0 * step / 4);
-            let dx0 = gx0 + gy0;
-            let dy0 = gy0 - gx0;
-
-            let text = '';
-            let m = 0;
-            for (let x = 0; x <= w / (step / 2) + 1; x++) {
-                for (let y = (dx0 + x) % 2; y <= h / (step / 4) + 1; y+=2) {
-                    cx = cx0 + (x * step / 2);
-                    cy = cy0 + (y * step / 4);
-                    coordx = (dx0 + y + x) / 2;
-                    coordy = (dy0 + y - x) / 2;
-                    text = '' + coordx + ',' + coordy;
-                    m = ctx.measureText(text);
-                    ctx.fillText(text, cx - (m.width / 2), cy + yoffset);
-                }
-            }
-        }
-
-        function drawGrid(ctx, c00, step, line_width) {
-            ctx.lineWidth = line_width;
-            let w = ctx.canvas.width;
-            let h = ctx.canvas.height;
-            let x1 = c00.x + 2 * c00.y;
-            let x2 = c00.x + 2 * (c00.y - h);
-            let x3 = c00.x - 2 * c00.y;
-            let x4 = c00.x - 2 * (c00.y - h);
-            ctx.beginPath();
-            let offset = Math.floor(x1 / step) * step;
-            x1 -= offset;
-            x2 -= offset;
-            while (x2 <= w) {
-                ctx.moveTo(x1, 0);
-                ctx.lineTo(x2, h);
-                x1 += step;
-                x2 += step;
-            }
-            offset = Math.floor(x4 / step) * step;
-            x3 -= offset;
-            x4 -= offset;
-            while (x3 <= w) {
-                ctx.moveTo(x3, 0);
-                ctx.lineTo(x4, h);
-                x3 += step;
-                x4 += step;
-            }
-            ctx.stroke();
-        }
-
-        _viewer.addHandler('update-viewport', function() {
-            if (grid != 0) {
-                let ctx = _viewer.drawer.context;
-                let zm = _viewer.viewport.getZoom(true);
-                zm = _viewer.viewport.viewportToImageZoom(zm);
-                zm *= window.devicePixelRatio;
-                let vp00 = _viewer.viewport.imageToViewportCoordinates(x0, y0 - 192 * curLayers);
-                let c00 = _viewer.viewport.pixelFromPoint(vp00, true);
-                c00.x *= window.devicePixelRatio;
-                c00.y *= window.devicePixelRatio;
-
-                let sqr = xstep[0] - ystep[0]; // 128
-                let step_cell = sqr * 300 * zm;
-                let step_block = sqr * 10 * zm;
-
-                let cell_font = '12pt bold monospace';
-                let block_font = '12pt monospace';
-
-                // cell
-                ctx.font = cell_font;
-                let [cell_width, cell_ascent, cell_descent] = textSize(ctx, '-00,-00');
-                let yoffset = 2 + cell_width / 4 + cell_ascent;
-                if (step_cell >= yoffset * 4) {
-                    ctx.fillStyle = 'yellow';
-                    drawCoord(ctx, c00, step_cell, yoffset);
-
-                    // block
-                    ctx.font = block_font;
-                    let [width, ascent, descent] = textSize(ctx, '-0000,-0000');
-                    yoffset += cell_descent + ascent + 2;
-                    if (yoffset < 2 + width / 4 + ascent) {
-                        yoffset = 2 + width / 4 + ascent;
-                    }
-
-                    if (step_block >= yoffset * 4) {
-                        ctx.strokeStyle = 'lime';
-                        drawGrid(ctx, c00, step_block, 1);
-                        ctx.fillStyle = 'lime';
-                        drawCoord(ctx, c00, step_block, yoffset);
-                    }
-                    ctx.strokeStyle = 'yellow';
-                    drawGrid(ctx, c00, step_cell, 3);
-                } else {
-                    ctx.strokeStyle = 'yellow';
-                    drawGrid(ctx, c00, step_cell, 1);
-                }
-            }
-        })
-
-        function addLayer(layer) {
-            curLayers++;
-            var _viewer1 = _viewer.addTiledImage({
-                tileSource: "base/layer" + curLayers + ".dzi",
-                opacity: 1,
-                success: function (obj) {
-                    tiles[layer] = obj.item;
-                },
-            });
-        }
-        function removeLayer() {
-            if (curLayers == 0) {
-                return;
-            }
-            curLayers--;
-            item = tiles[curLayers];
-            _viewer.world.removeItem(item);
-            tiles[curLayers] = 0;
-        }
-        function setLayer(l) {
-            if (curLayers == l) {
-                return;
-            }
-            if (curLayers < l) {
-                for (i = curLayers; i < l; i++) {
-                    addLayer(i);
-                }
-            }
-            if (curLayers > l) {
-                for (i = curLayers; i > l; i--) {
-                    removeLayer();
-                }
-            }
-            if (foraging != 0) {
-                toggleForaging();
-                toggleForaging();
-            }
-            if (zombie != 0) {
-                toggleZombie();
-                toggleZombie();
-            }
-            if (grid != 0) {
-                toggleGrid();
-                toggleGrid();
-            }
-            if (room != 0) {
-                toggleRoom();
-                toggleRoom();
-            }
-            if (objects != 0) {
-                toggleObjects();
-                toggleObjects();
-            }
-        }
-        function toggleRoom() {
-            if (room == 0) {
-                var _viewer1 = _viewer.addTiledImage({
-                    tileSource: "room/layer" + curLayers + ".dzi",
-                    opacity: 1,
-                    success: function (obj) {
-                        room = obj.item;
-                    },
-                });
-            } else {
-                _viewer.world.removeItem(room);
-                room = 0;
-            }
-        }
-        function toggleObjects() {
-            if (objects == 0) {
-                var _viewer1 = _viewer.addTiledImage({
-                    tileSource: "objects/layer" + curLayers + ".dzi",
-                    opacity: 1,
-                    success: function (obj) {
-                        objects = obj.item;
-                    },
-                });
-                document.getElementById("objects_legend").innerHTML = objectsLegendHTML;
-            } else {
-                _viewer.world.removeItem(objects);
-                objects = 0;
-                document.getElementById("objects_legend").innerHTML = "";
-            }
-        }
-        function toggleGrid() {
-            if (grid == 0) {
-                grid = 1;
-                _viewer.raiseEvent('update-viewport', {});
-            } else {
-                grid = 0;
-                _viewer.forceRedraw();
-            }
-        }
-        function toggleZombie() {
-            if (zombie == 0) {
-                var _viewer1 = _viewer.addTiledImage({
-                    tileSource: "zombie/layer0.dzi",
-                    opacity: 1,
-                    x: 0,
-                    y: 0,
-                    success: function (obj) {
-                        zombie = obj.item;
-                    },
-                });
-            } else {
-                _viewer.world.removeItem(zombie);
-                zombie = 0;
-            }
-        }
-        function toggleForaging() {
-            if (foraging == 0) {
-                var _viewer1 = _viewer.addTiledImage({
-                    tileSource: "foraging/layer0.dzi",
-                    opacity: 1,
-                    x: 0,
-                    y: 0,
-                    success: function (obj) {
-                        foraging = obj.item;
-                    },
-                });
-                document.getElementById("foraging_legend").innerHTML = foragingLegendHTML;
-            } else {
-                _viewer.world.removeItem(foraging);
-                foraging = 0;
-                document.getElementById("foraging_legend").innerHTML = "";
-            }
-        }
-    </script>
+    <script type="text/javascript" src='pzmap.js'></script>
+    <script id="extra" type="text/javascript" src='base/extra.js'></script>
   </body>
 </html>

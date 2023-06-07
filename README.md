@@ -16,7 +16,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 - Supports map grids in HTML viewer
 - Supports map objects rendering (car spawn zones, special zombie spawn zones, map story zones)
 - Supports game version 41.78
-
+- Supports save file trimmer to trim local saved games (server mode viewer only)
 
 # Requirement
 - **Storage**: The full output size of isometric map for game version 41.78 is around 450GB (or 2.5TB with lossless png format) and consists of 4M files. SSD is recommended as high I/O bandwidth can reduce render time.
@@ -80,18 +80,19 @@ html
 ├── base_top/
 ├── foraging/
 ├── foraging_top/
-├── grid/
-├── grid_top/
 ├── objects/
 ├── openseadragon/
 ├── room/
 ├── zombie/
 ├── zombie_top/
+├─ chrome.bat
 ├─ chrome_allow_file(need close chrome first).bat
 ├─ chrome_no_sicurity.bat
 ├─ pzmap.html
-├─ pzmap_top.html
-└─ run_server.bat
+├─ pzmap.js
+├─ run_server.bat
+├─ server.py
+└─ server_config.txt
 ```
 
 Directly open `pzmap.html` will NOT work, as the Cross-Origin Resource Sharing (CORS) Policies will refuse to load Deep Zoom tiles from your locale disk by default.
@@ -110,11 +111,11 @@ There are two ways to bypass CORS:
 # How to use the HTML viewer
 - To switch floors, use the button form `Layer0` to `Layer7` on top of the page
 - To enable/disable the grid, use the `Grid` button
-    - (Position of the grid will adjust according to the current floor)
+    - (Position of the grid will adjust according to the selected layer)
 
-    ![Grid Example](./docs/img/grid.jpg)
+    ![Grid Example](./docs/img/grid.gif)
 - To enable/disable room info, use the `Room` button
-    - (Display room info of the current floor)
+    - (Display room info of the current layer)
 
     ![Room Example](./docs/img/room.jpg)
 - To enable/disable zombie heatmap, use the `Zombie` button
@@ -128,3 +129,9 @@ There are two ways to bypass CORS:
 - To switch between isometric view and top view, use the view switch link
 
     ![Top View Example](./docs/img/topview.jpg)
+
+- To use Save File Trimmer
+    - Edit `server_config.txt` and set `save_path` variable to your save folder before start server (The default value is set for Windows 10)
+    - The viewer must start in server mode using `run_server.bat`
+
+    ![Save File Trimmer Example](./docs/img/trimmer.gif)

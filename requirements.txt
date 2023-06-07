@@ -3,3 +3,5 @@ lupa
 pyclipper
 pillow
 pyyaml
+flask
+waitress

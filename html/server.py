@@ -1,5 +1,6 @@
 import flask
 import waitress
+import sqlite3
 import json
 import os
 import re
@@ -82,10 +83,20 @@ def delete_save(save):
 
         if path:
             print('trimming [{}]'.format(save))
+            vehicles = None
+            cursor = None
+            if flask.request.form.get('vehicles', False):
+                db_path = os.path.join(path, save, 'vehicles.db')
+                if os.path.isfile(db_path):
+                    vehicles = sqlite3.connect(db_path)
+                    cursor = vehicles.cursor()
             for x, y in block:
                 name = os.path.join(path, save, 'map_{}_{}.bin'.format(x, y))
                 if os.path.isfile(name):
                     print('delete block {},{}'.format(x, y))
+                    if cursor:
+                        cursor.execute('DELETE FROM vehicles ' +
+                                       'WHERE wx = {} AND wy = {};'.format(x, y))
                     os.remove(name)
             for x, y in cell:
                 name = os.path.join(path, save, 'chunkdata_{}_{}.bin'.format(x, y))
@@ -96,6 +107,10 @@ def delete_save(save):
                 if os.path.isfile(name):
                     print('delete cell zpop {},{}'.format(x, y))
                     os.remove(name)
+                if cursor:
+                    cursor.execute('DELETE FROM vehicles ' +
+                                   'WHERE wx >= {} AND wx < {} '.format(x * 30, (x + 1) * 30) +
+                                   'AND wy >= {} AND wy < {};'.format(y * 30, (y + 1) * 30))
                 for i in range(30):
                     for j in range(30):
                         bx = x * 30 + i
@@ -104,6 +119,9 @@ def delete_save(save):
                         if os.path.isfile(name):
                             print('delete block {},{}'.format(bx, by))
                             os.remove(name)
+            if vehicles:
+                vehicles.commit()
+                vehicles.close()
 
     return 'done'
 

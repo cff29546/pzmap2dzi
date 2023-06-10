@@ -56,6 +56,8 @@ var saveTimmerHTML = `
         <option value="">(Select Save Slot)</option>
     </select>
     <button type="button" onclick="doRefresh()">Refresh Save List</button>
+    <input type="checkbox" id="vehicle">
+    <label for="vehicle"> Remove Vehicles </label>
     <button type="button" onclick="doDelete()">Delete Selected Area</button>
     <div id="trimmer_output" style="display: inline-block"></div>
     <button class="text-right" type="button" onclick="openExplorer()">Browse Folder</button>
@@ -431,8 +433,12 @@ function deleteSave(path) {
         setOutput('trimmer_output', 'red', '<b>Trim canceled</b>', 3000);
         return;
     }
+    let req = "cells=" + cells.join(';') + "&blocks=" + blocks.join(';');
+    if (document.getElementById('vehicle').checked) {
+        req += '&vehicles=1';
+    }
     try {
-        xhttp.send("cells=" + cells.join(';') + "&blocks=" + blocks.join(';'));
+        xhttp.send(req);
     } catch (error) {
     } 
     if (xhttp.status === 200) {
@@ -672,7 +678,7 @@ function drawGrid(ctx, c00, step, line_width) {
         ctx.lineTo(x1 + x_shift, h);
         x1 += step;
     }
-    y1 += Math.floor((h - y1) / step) * step;
+    y1 += Math.ceil((h - y1) / step) * step;
     while (y1 >= min_h) {
         ctx.moveTo(0, y1);
         ctx.lineTo(w, y1 + y_shift);

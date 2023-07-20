@@ -1,6 +1,6 @@
 import yaml
 import os
-import shutil
+from distutils.dir_util import copy_tree
 import re
 import json
 
@@ -121,7 +121,7 @@ def copy(args):
     script_path = os.path.dirname(os.path.realpath(__file__))
     src = os.path.join(script_path, 'html')
     dst = os.path.join(conf['output_path'], 'html')
-    shutil.copytree(src, dst, dirs_exist_ok=True)
+    copy_tree(src, dst)
 
 CMD = {
     'unpack': unpack,

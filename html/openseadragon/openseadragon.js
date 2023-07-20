@@ -18535,13 +18535,13 @@ $.Drawer.prototype = {
             return;
         }
         var context = this._getContext(useSketch);
-        context.beginPath();
         polygons.forEach(function (polygon) {
+          context.beginPath();
             polygon.forEach(function (coord, i) {
                 context[i === 0 ? 'moveTo' : 'lineTo'](coord.x, coord.y);
           });
+          context.clip();
         });
-        context.clip();
     },
 
     /**

@@ -89,7 +89,6 @@ OBJ_FONT = ImageFont.truetype("arial.ttf", 20)
 class ObjectsRender(object):
     def __init__(self, **options):
         self.input = options.get('input')
-        self.encoding = options.get('encoding')
         objects_path = os.path.join(self.input, 'objects.lua')
         types = set()
         if not options.get('no_car_spawn', False):

@@ -1,5 +1,6 @@
 
 _TREE_DEF = [
+    # tree name, prefix, evergreen
     ('American Holly', 'e_americanholly', True),
     ('Canadian Hemlock', 'e_canadianhemlock', True),
     ('Virginia Pine', 'e_virginiapine', True),
@@ -90,25 +91,9 @@ class PlantsInfo(object):
                 textures.append(_grass.format(offset + 8 + imod8))
             grass.append(textures)
         
-        # base on game version 41.68, only following vegetation_groundcover tiles are used:
-        # vegetation_groundcover_01_8 ~ _27
-        # vegetation_groundcover_01_32 ~ _39
-        # 8 ~ 15 : grass 0 ~ 7
-        for i in range(8, 16):
-            self.mapping['vegetation_groundcover_01_{}'.format(i)] = grass[i - 8]
-                
-        # 16 ~ 19 : grass 21
-        for i in range(16, 20):
-            self.mapping['vegetation_groundcover_01_{}'.format(i)] = grass[21]
-
-        # 20 ~ 27 : grass 8 ~ 15
-        for i in range(20, 28):
-            self.mapping['vegetation_groundcover_01_{}'.format(i)] = grass[i - 12]
-
-        # 32 ~ 39 : grass 16 ~ 23
-        for i in range(32, 40):
-            self.mapping['vegetation_groundcover_01_{}'.format(i)] = grass[i - 16]
-
+        # "randomly" map vegetation_groundcover_01_0 ~ _47
+        for i in range(48):
+            self.mapping['vegetation_groundcover_01_{}'.format(i)] = grass[i % 24]
 
         # small tree
         tree = []
@@ -116,17 +101,9 @@ class PlantsInfo(object):
         for _, prefix, evergreen in _TREE_DEF:
             tree.append(get_tree(prefix, season, snow, tree_size, evergreen))
 
-        # base on game version 41.68, only following vegetation_trees tiles are used:
-        # vegetation_trees_01_0, _2, _3
-        # vegetation_trees_01_8 ~ _15
-        # 0, 2, 3 : tree 0, 1, 2
-        self.mapping['vegetation_trees_01_0'] = tree[0]
-        self.mapping['vegetation_trees_01_2'] = tree[1]
-        self.mapping['vegetation_trees_01_3'] = tree[2]
-
-        # 8 ~ 15 : tree 3 ~ 10
-        for i in range(8, 16):
-            self.mapping['vegetation_trees_01_{}'.format(i)] = tree[i - 5]
+        # "randomly" map vegetation_trees_01_0 ~ _32
+        for i in range(33):
+            self.mapping['vegetation_trees_01_{}'.format(i)] = tree[i % len(_TREE_DEF)]
 
         # jumbo tree
         jumbo_size = max(tree_size, min(5, int(jumbo_size)))

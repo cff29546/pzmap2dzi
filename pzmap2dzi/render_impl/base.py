@@ -13,6 +13,7 @@ def load_cell_cached(path, cx, cy):
 class TextureRender(object):
     def __init__(self, **options):
         texture_path = options.get('texture')
+        cache_name = options.get('cache_name')
         season = options.get('season', 'summer2')
         snow = options.get('snow', False)
         flower = options.get('flower', False)
@@ -21,7 +22,7 @@ class TextureRender(object):
         jumbo_tree_size = options.get('jumbo_tree_size', 3)
         jumbo_tree_type = options.get('jumbo_tree_type', 0)
 
-        self.tl = texture.TextureLibrary(texture_path, True)
+        self.tl = texture.TextureLibrary(texture_path, cache_name)
         self.tl.config_plants(season, snow, flower, large_bush,
                               tree_size, jumbo_tree_size, jumbo_tree_type)
 
@@ -110,7 +111,7 @@ _top_color_func = {
 
 class BaseTopRender(TextureRender):
     def __init__(self, **options):
-        mode = options.get('top_color_mode', 'base+water')
+        mode = options.get('top_view_color_mode', 'base+water')
         self.color = _top_color_func[mode]
         self.input = options.get('input')
         TextureRender.__init__(self, **options)

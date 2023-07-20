@@ -1,1 +1,0 @@
-common_param= -m 16 -v -s "<f9>"

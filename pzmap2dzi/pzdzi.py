@@ -2,7 +2,8 @@ from PIL import Image
 import os
 import sys
 import re
-from . import util, mptask, scheduling
+import json
+from . import util, mptask, scheduling, geometry
 
 CELL_SIZE = 300
 
@@ -10,13 +11,6 @@ DZI_TEMPLATE = '''<?xml version="1.0" encoding="UTF-8"?>
 <Image xmlns="http://schemas.microsoft.com/deepzoom/2008" TileSize="{}" Overlap="0" Format="{}">
   <Size Width="{}" Height="{}"/>
 </Image>'''
-
-EXTRA_TEMPLATE = '''
-var x0 = {x0}
-var y0 = {y0}
-var xstep = {xstep}
-var ystep = {ystep}
-'''
 
 PENDING_PATTERN = re.compile('(\\d+)_(\\d+)\\.pending$')
 
@@ -49,7 +43,7 @@ class DZI(object):
         self.path = options.get('output', './dzi')
         self.tile_size = options.get('tile_size', 1024)
         self.save_empty = options.get('save_empty_tile', False)
-        self.compress_level = options.get('compress_level', -1)
+        self.compress_level = options.get('image_compress_level', -1)
         self.ext = 'png'
         self.ext0 = options.get('layer0_fmt', self.ext)
         self.done_pattern = re.compile('(\\d+)_(\\d+)\\.(?:empty|{})$'.format(self.ext0))
@@ -59,7 +53,7 @@ class DZI(object):
         self.cache_enabled = False
         self.cache_limit = 0
         if sys.version_info >= (3,8):
-            if not options.get('disable_cache', False):
+            if options.get('enable_cache', True):
                 self.cache_enabled = True
                 self.cache_limit = options.get('cache_limit_mb', 0)
         self.build_pyramid()
@@ -162,8 +156,8 @@ class DZI(object):
             dzi_path = os.path.join(self.path, 'layer{}.dzi'.format(layer))
             with open(dzi_path, 'w') as f:
                 f.write(dzi)
-        if hasattr(self, 'save_extra_info'):
-            self.save_extra_info()
+        if hasattr(self, 'save_map_info'):
+            self.save_map_info()
 
     def get_bottom_task_depend(self, skip_cells, done):
         tasks = {}
@@ -238,7 +232,7 @@ class DZI(object):
             tile.thumbnail((self.tile_size, self.tile_size), Image.LANCZOS)
             im_getter.get().paste(tile, (0, 0))
 
-    def render_all(self, render, n, stop_key=None, verbose=False, profile=False):
+    def render_all(self, render, n, break_key=None, verbose=False, profile=False):
         if verbose:
             print('Preparing data')
         self.create_empty_output()
@@ -247,13 +241,18 @@ class DZI(object):
                 if not render.valid_cell(x, y):
                     self.skip_cells.add((x, y))
         tasks, done = self.get_tasks(self.skip_cells)
-        schd = scheduling.TopologicalDziScheduler(self, stop_key, verbose)
+        schd = scheduling.TopologicalDziScheduler(self, break_key, verbose)
         cache_prefix = 'pzdzi.{}.'.format(os.getpid())
         worker = scheduling.TopologicalDziWorker(self, cache_prefix, render)
         task = mptask.Task(worker, schd, profile)
         task.run((tasks, done), n)
+        if schd.stop:
+            if verbose:
+                print('Render stopped by hotkey.')
+            return False
         if verbose:
             print('Done')
+        return True
 
 class IsoDZI(DZI):
     SQR_HEIGHT = 64
@@ -363,20 +362,23 @@ class IsoDZI(DZI):
                 ox, oy = IsoDZI.get_sqr_center(gx - gx0, gy - gy0)
                 render.square(im_getter, ox, oy, sx, sy, layer)
 
-    def save_extra_info(self):
-        extra = EXTRA_TEMPLATE.format(**{
+    def save_map_info(self):
+        w, h = self.pyramid[-1 - self.skip_level]
+        info = {
             'x0': -self.gxo * IsoDZI.HALF_SQR_WIDTH,
             'y0': -(self.gyo + 1) * IsoDZI.HALF_SQR_HEIGHT,
-            'xstep': [IsoDZI.HALF_SQR_WIDTH, IsoDZI.HALF_SQR_HEIGHT],
-            'ystep': [-IsoDZI.HALF_SQR_WIDTH, IsoDZI.HALF_SQR_HEIGHT],
-        })
-        path = os.path.join(self.path, 'extra.js')
+            'sqr': 2 * IsoDZI.HALF_SQR_WIDTH,
+            'w': w,
+            'h': h,
+            'cell_rects': geometry.rect_cover(self.cells),
+        }
+        path = os.path.join(self.path, 'map_info.json')
         with open(path, 'w') as f:
-            f.write(extra)
+            f.write(json.dumps(info))
 
 class TopDZI(DZI):
     def __init__(self, map_path, **options):
-        self.square_size = options.get('square_size', 1)
+        self.square_size = options.get('top_view_square_size', 1)
         self.cells = set(util.get_all_cells(map_path))
 
         cxmax, cymax = map(max, zip(*self.cells))            
@@ -402,13 +404,16 @@ class TopDZI(DZI):
         cx, cy = self.tile2cell(tx, ty)
         render.tile(im_getter, cx, cy, layer, self.square_size)
 
-    def save_extra_info(self):
-        extra = EXTRA_TEMPLATE.format(**{
+    def save_map_info(self):
+        w, h = self.pyramid[-1 - self.skip_level]
+        info = {
             'x0': -(self.cxo * self.square_size * CELL_SIZE),
             'y0': -(self.cyo * self.square_size * CELL_SIZE),
-            'xstep': [self.square_size, 0],
-            'ystep': [0, self.square_size],
-        })
-        path = os.path.join(self.path, 'extra.js')
+            'sqr': self.square_size,
+            'w': w,
+            'h': h,
+            'cell_rects': geometry.rect_cover(self.cells),
+        }
+        path = os.path.join(self.path, 'map_info.json')
         with open(path, 'w') as f:
-            f.write(extra)
+            f.write(json.dumps(info))

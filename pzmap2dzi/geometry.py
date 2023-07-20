@@ -180,3 +180,48 @@ def get_edge_segments(border_flags, x, y, w, h, pad_x, pad_y):
         end_flag = border_flags[(edge_dir + 1) % 4]
         edges.append(get_edge(edge_dir, start_flag, end_flag, x, y, w, h, pad_x, pad_y))
     return edges
+
+def rect_cover(tile_set):
+    m = []
+    xlast = None
+    ylast = None
+    current = None
+    xpos = 0
+    ypos = 0
+    length = 0
+    for x, y in sorted(tile_set) + [('end', 'end')]:
+        if x == xlast and y == ylast + 1:
+            length += 1
+        else:
+            if length:
+                current[1].append((ypos, length))
+            ypos = y
+            length = 1
+        if x != xlast:
+            if current:
+                m.append(current)
+            xpos = x
+            current = [x, []]
+        xlast = x
+        ylast = y
+
+    last = None
+    lastx = None
+    rects = []
+    length = 0
+    for x, slots in m:
+        if lastx == x - 1 and slots == last:
+            length += 1
+        else:
+            if last:
+                for y, l in last:
+                    rects.append([lastx - length + 1, y, length, l])
+            length = 1
+        last = slots
+        lastx = x
+    if last:
+        for y, l in last:
+            rects.append([lastx - length + 1, y, length, l])
+    return rects
+
+

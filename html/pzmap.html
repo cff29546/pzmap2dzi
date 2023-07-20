@@ -8,30 +8,34 @@
     <style>
     html, body { height: 100%; margin: 0; padding: 0; background-color: black; }
     .legend { height: 1em; width: 1em; display: inline-block; border-width: 1px;
-        border-style: solid; border-color: #000; background-color:#fff;
+        border-style: solid; border-color: black; background-color: white;
         vertical-align: bottom; margin-left: 1em;}
     .text-right { display: inline-block; float: right; }
+    button { border-radius: 4px; border-color: DarkGray; }
+    .active { background-color: LightSkyBlue; border-color: DeepSkyBlue; }
     </style>
   </head>
   <body>
     <div style="display: flex; flex-flow: column; height: 100%;">
       <div style="flex: 0 1 auto;background-color:white;">
         <select id="layer_selector" onchange="onLayerSelect()"></select>
-        <button type="button" onclick="toggleGrid()">Grid</button>
-        <button type="button" onclick="toggleZombie()">Zombie</button>
-        <button type="button" onclick="toggleForaging()">Foraging</button>
-        <button class="iso" type="button" onclick="toggleRoom()">Room</button>
-        <button class="iso" type="button" onclick="toggleObjects()">Objects</button>
-        <button type="button" onclick="toggleTrimmer()">Save File Trimmer</button>
+        <button id="map_btn" onclick="toggleModMapUI()">Mod Map</button>
+        <button id="grid_btn" onclick="toggleGrid()">Grid</button>
+        <button id="zombie_btn" onclick="toggleOverlay('zombie')">Zombie</button>
+        <button id="foraging_btn" onclick="toggleOverlay('foraging')">Foraging</button>
+        <button id="room_btn" class="iso" onclick="toggleOverlay('room')">Room</button>
+        <button id="objects_btn" class="iso" onclick="toggleOverlay('objects')">Objects</button>
+        <button id="trimmer_btn" onclick="toggleTrimmer()">Save File Trimmer</button>
         <div id="main_output" style="display: inline-block"></div>
         <div class="text-right">
             Switch to
             <a id='change_view' href="" onclick="return changeView();">Top View</a>
         </div>
         <div>
-          <div id="foraging_legend"></div>
-          <div class="iso" id="objects_legend"></div>
-          <div id="save_trimmer" style="background-color: lightskyblue"></div>
+          <div id="foraging_ui"></div>
+          <div class="iso" id="objects_ui"></div>
+          <div id="trimmer_ui" style="background-color: lightskyblue"></div>
+          <div id="map_ui"></div>
         </div>
       </div>
       <div style="flex: 1 1 auto;">
@@ -39,6 +43,5 @@
       </div>
     </div>
     <script type="text/javascript" src='pzmap.js'></script>
-    <script id="extra" type="text/javascript" src='base/extra.js'></script>
   </body>
 </html>

@@ -1,0 +1,297 @@
+textures:
+    Diederiks_tile_Palooza:
+        texture_root: mod_root
+        texture_path: |-
+            2337452747\mods\Diederiks_tile_Palooza\media\texturepacks
+        texture_file_patterns: ['.*[.]pack']
+
+    tkTiles_01:
+        texture_root: mod_root
+        texture_path: |-
+            2384329562\mods\tkTiles_01\media\texturepacks
+        texture_file_patterns: ['.*[.]pack']
+
+    DylansTiles:
+        texture_root: mod_root
+        texture_path: |-
+            2599752664\mods\DylansTiles\media\texturepacks
+        texture_file_patterns: ['.*[.]pack']
+
+    EN_Newburbs:
+        texture_root: mod_root
+        texture_path: |-
+            2774834715\mods\EN_Newburbs\media\texturepacks
+        texture_file_patterns: ['.*[.]pack']
+
+    EN_Flags:
+        texture_root: mod_root
+        texture_path: |-
+            2784607980\mods\EN_Flags\media\texturepacks
+        texture_file_patterns: ['.*[.]pack']
+
+    Perts Party Tiles:
+        texture_root: mod_root
+        texture_path: |-
+            2837923608\mods\Perts Party Tiles\media\texturepacks
+        texture_file_patterns: ['.*[.]pack']
+
+    Tryhonesty's Tiles:
+        texture_root: mod_root
+        texture_path: |-
+            2844685624\mods\Tryhonesty's Tiles\media\texturepacks
+        texture_file_patterns: ['.*[.]pack']
+
+    Oujinjin Tiles:
+        texture_root: mod_root
+        texture_path: |-
+            2844829195\mods\Oujinjin Tiles\media\texturepacks
+        texture_file_patterns: ['.*[.]pack']
+
+    Simon-MDs-Tiles:
+        texture_root: mod_root
+        texture_path: |-
+            2852704777\mods\Simon-MDs-Tiles\media\texturepacks
+        texture_file_patterns: ['.*[.]pack']
+
+    Melos Tiles for Miles:
+        texture_root: mod_root
+        texture_path: |-
+            2879745353\mods\Melos Tiles for Miles\media\texturepacks
+        texture_file_patterns: ['.*[.]pack']
+
+maps:
+    default:
+        map_root: pz_root
+        map_path: |- # map path from map root
+            media\maps\Muldraugh, KY
+        encoding: utf8
+        texture_root: pz_root
+        texture_path: |- # texture path from textrue root
+            media\texturepacks
+        texture_files:
+            - Erosion.pack
+            - ApCom.pack
+            - RadioIcons.pack
+            - ApComUI.pack
+            - JumboTrees2x.pack
+            - Tiles2x.floor.pack
+            - Tiles2x.pack
+
+    # challenge maps
+    Tutorial:
+        map_root: pz_root
+        map_path: |-
+            media\maps\challengemaps\Tutorial
+        encoding: utf8
+        depend_texutres:
+            - default
+
+    Studio:
+        map_root: pz_root
+        map_path: |-
+            media\maps\challengemaps\Studio
+        encoding: utf8
+        depend_texutres:
+            - default
+
+    Kingsmouth:
+        map_root: pz_root
+        map_path: |-
+            media\maps\challengemaps\Kingsmouth
+        encoding: utf8
+        depend_texutres:
+            - default
+
+    KnoxCounty:
+        map_root: pz_root
+        map_path: |-
+            media\maps\challengemaps\KnoxCounty
+        encoding: utf8
+        depend_texutres:
+            - default
+
+    Challenge1:
+        map_root: pz_root
+        map_path: |-
+            media\maps\challengemaps\Challenge1
+        encoding: utf8
+        depend_texutres:
+            - default
+
+    Challenge2:
+        map_root: pz_root
+        map_path: |-
+            media\maps\challengemaps\Challenge2
+        encoding: utf8
+        depend_texutres:
+            - default
+
+    # workshop maps
+    lakeivy:
+        map_root: mod_root
+        map_path: |-
+            1626052492\mods\lakeivy\media\maps\lakeivy
+        encoding: utf8
+        depend_texutres:
+            - default
+
+    li_township:
+        map_root: mod_root
+        map_path: |-
+            2252982049\mods\li_township\media\maps\li_township
+        encoding: utf8
+        depend_texutres:
+            - default
+
+    FortRedstone:
+        map_root: mod_root
+        map_path: |-
+            1516836158\mods\FortRedstone\media\maps\FortRedstone
+        encoding: utf8
+        depend_texutres:
+            - default
+        texture_root: mod_root
+        texture_path: |-
+            1516836158\mods\FortRedstone\media\texturepacks
+        texture_file_patterns: ['.*[.]pack']
+
+    RavenCreek:
+        map_root: mod_root
+        map_path: |-
+            2196102849\mods\RavenCreek\media\maps\RavenCreek
+        encoding: utf8
+        depend_texutres:
+            - default
+        texture_root: mod_root
+        texture_path: |-
+            2196102849\mods\RavenCreek\media\texturepacks
+        texture_file_patterns: ['.*[.]pack']
+
+    Grapeseed:
+        map_root: mod_root
+        map_path: |-
+            2463499011\mods\Grapeseed\media\maps\Grapeseed
+        encoding: utf8
+        depend_texutres:
+            - Diederiks_tile_Palooza
+            - DylansTiles
+            - tkTiles_01
+            - default
+        texture_root: mod_root
+        texture_path: |-
+            2463499011\mods\Grapeseed\media\texturepacks
+        texture_file_patterns: ['.*[.]pack']
+
+    Blueberry:
+        map_root: mod_root
+        map_path: |-
+            2671890843\mods\Blueberry\media\maps\Blueberry
+        encoding: utf8
+        depend_texutres:
+            - DylansTiles
+            - tkTiles_01
+            - default
+
+    Chinatown, KY:
+        map_root: mod_root
+        map_path: |-
+            2730975264\mods\Chinatown, KY\media\maps\Chinatown
+        encoding: utf8
+        depend_texutres:
+            - DylansTiles
+            - tkTiles_01
+            - Diederiks_tile_Palooza
+            - Oujinjin Tiles
+            - default
+
+    Greenleaf:
+        map_root: mod_root
+        map_path: |-
+            2778799110\mods\Greenleaf\media\maps\Greenleaf
+        encoding: utf8
+        depend_texutres:
+            - Diederiks_tile_Palooza
+            - DylansTiles
+            - tkTiles_01
+            - default
+        texture_root: mod_root
+        texture_path: |-
+            2778799110\mods\Greenleaf\media\texturepacks
+        texture_file_patterns: ['.*[.]pack']
+
+    Trelai_4x4_Steam:
+        map_root: mod_root
+        map_path: |-
+            2800337234\mods\Trelai_4x4_Steam\media\maps\Trelai_4x4
+        encoding: utf8
+        depend_texutres:
+            - default
+        texture_root: mod_root
+        texture_path: |-
+            2800337234\mods\Trelai_4x4_Steam\media\texturepacks
+        texture_file_patterns: ['.*[.]pack']
+
+    Ashenwoodmod:
+        map_root: mod_root
+        map_path: |-
+            2820363371\mods\Ashenwoodmod\media\maps\Ashenwood
+        encoding: utf8
+        depend_texutres:
+            - Diederiks_tile_Palooza
+            - DylansTiles
+            - tkTiles_01
+            - default
+
+    Petroville:
+        map_root: mod_root
+        map_path: |-
+            2886261613\mods\Petroville\media\maps\Petroville
+        encoding: utf8
+        depend_texutres:
+            - Diederiks_tile_Palooza
+            - EN_Newburbs
+            - Melos Tiles for Miles
+            - Oujinjin Tiles
+            - Perts Party Tiles
+            - Simon-MDs-Tiles
+            - tkTiles_01
+            - Tryhonesty's Tiles
+            - default
+
+    CamdenCounty:
+        map_root: mod_root
+        map_path: |-
+            2888082232\mods\CamdenCounty\media\maps\CamdenCounty
+        encoding: utf8
+        depend_texutres:
+            - default
+        texture_root: mod_root
+        texture_path: |-
+            2888082232\mods\CamdenCounty\media\texturepacks
+        texture_file_patterns: ['.*[.]pack']
+
+    Chinatown Expansion, KY:
+        map_root: mod_root
+        map_path: |-
+            2895386882\mods\Chinatown Expansion, KY\media\maps\Chinatown_EX
+        encoding: utf8
+        depend_texutres:
+            - DylansTiles
+            - tkTiles_01
+            - Diederiks_tile_Palooza
+            - Oujinjin Tiles
+            - EN_Flags
+            - EN_Newburbs
+            - Melos Tiles for Miles
+            - Perts Party Tiles
+            - Tryhonesty's Tiles
+            - default
+
+    Bedford Falls:
+        map_root: mod_root
+        map_path: |-
+            522891356\mods\Bedford Falls\media\maps\BedfordFalls
+        encoding: utf8
+        depend_texutres:
+            - default
+

@@ -111,8 +111,6 @@ class Texture(object):
         metadata.add_text("oy", str(self.oy))
         self.im.save(path, pnginfo=metadata)
 
-
-
 class TextureLibrary(object):
     @staticmethod
     def get_size(shm):
@@ -125,23 +123,25 @@ class TextureLibrary(object):
         return w, h
 
 
-    def __init__(self, texture_path=None,
-                       use_cache=False,
+    def __init__(self, texture_path=[],
+                       cache_name='',
                        page_mode=False,
                        page_size=1024):
         self.texture_path = texture_path
-        self.use_cache = use_cache
+        self.use_cache = True if cache_name else False
         self.page_mode = page_mode
         self.page = []
         self.page_buffer = None
         self.mapping = {}
         self.mem = None
-        if use_cache and shared_memory_image:
-            prefix = 'tl.{}.'.format(os.getpid())
+        if self.use_cache and shared_memory_image:
+            prefix = 'tl.{}.{}'.format(os.getpid(), cache_name)
             self.mem = shared_memory_image.ImageSharedMemory(prefix, 32)
         self.lib = {}
 
     def add_pack(self, path, debug=False):
+        if not os.path.isfile(path):
+            return
         pages = load_pack(path)
         total = len(pages)
         for idx, page in enumerate(pages):
@@ -180,8 +180,8 @@ class TextureLibrary(object):
         self.texture_path = path
 
     def load_raw_texture(self, name):
-        if self.texture_path:
-            file_path = os.path.join(self.texture_path, name + '.png')
+        for path in self.texture_path:
+            file_path = os.path.join(path, name + '.png')
             if os.path.exists(file_path):
                 im = Image.open(file_path)
                 if im:

@@ -15,14 +15,14 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 - Supports isometric view and top view rendering
 - Supports map grids in HTML viewer
 - Supports map objects rendering (car spawn zones, special zombie spawn zones, map story zones)
-- Supports game version 41.78
+- Supports render mod maps as switchable overlay
 - Supports save file trimmer to trim local saved games (server mode viewer only)
+- Tested with game version 41.78
 
 # Requirement
 - **Storage**: The full output size of isometric map for game version 41.78 is around 450GB (or 2.5TB with lossless png format) and consists of 4M files. SSD is recommended as high I/O bandwidth can reduce render time.
 - **Memory**: Each worker requires approximately 1 GB of memory to work. An additional 4 GB of shared memory is needed if the cache is enabled. For example, the program will need 16 GB + 4 GB memory when using 16 threads.
-- **CPU**: High-performance multi-core CPU(s) recommended. 
-- **Render Time**
+- **Time**
     - Test machine spec & config
         - CPU: AMD Ryzen 7 5700G @ 3.8 GHz (8 core, 16 threads)
         - Memory: 64GB DDR4 2133
@@ -42,35 +42,28 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
    - If your python version is 2.7, install VCForPython27 first. You can find it [here](https://web.archive.org/web/20210106040224/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi) or [here](https://github.com/reider-roque/sulley-win-installer/blob/master/VCForPython27.msi)
    
    - run `install_requirements.bat`
-4. Update variables in the `config.txt` file
-   - Change the `pz_path` variable to contain the correct path where your ProjectZomboid located on your computer
-   - Change the `out_path` variable to contain the desired output path
-   - Change the `map_path` variable to map source if you want to render a mod map or a challenge map
-   - Change the `additional_texture_packs` variable to needed non-vanilla texture packs (separated by space if more than one)
+4. Update variables in the `config.yaml` file
+   - Change the `pz_root` variable to ProjectZomboid game location on your computer
+   - Change the `output_path` variable to the desired output path
+   - Change the `mod_root` variable to steam workshop path if you want to render a mod map
+   - Add desired mod maps to `mod_maps` list (For more infor about how to add mod maps see [adding mod maps](./docs/adding_mod_maps.md))
+   - See [examples](./docs/examples) for more config details
+
 5. Run the tool
 
    Run `run.bat` to render all isometric and top view maps
 
-   Or run `run_top_view_only.bat` to render only top view maps
-
 # Change rendering configurations
-   See [config manual](./docs/config_manual.md) for more detials.
+   See `conf.yaml` for more detials.
 
-- Do not render grid and room info
-    - Remove the calling of `render_grid.bat` and `render_room.bat` from `run.bat`
 - Do not render zombie heatmap
-    - Remove the calling of `render_zombie.bat` from `run.bat`
+    - Remove arguments `zombie zombie_top` from `run.bat`
 - Do not render foraging zones
-    - Remove the calling of `render_foraging.bat` from `run.bat`
+    - Remove arguments `foraging foraging_top` from `run.bat`
 - Do not render top view map
-    - Remove the calling of `render_zombie_top.bat` and `render_base_top.bat` from `run.bat`
-- Config a hotkey to elegantly stop rendering at a breakpoint so you can resume later
-    - Add `-s "<hotkey>"` to Common Render Options.
-       (See [config manual](./docs/config_manual.md) for more detials.)
-    - To resume, run `run.bat` again
-- Change base layer file format
-    - Add `--layer0-fmt <ext>` to Task Related Options.
-       (See [config manual](./docs/config_manual.md) for more detials.)
+    - Use `run_isometric_only.bat` instead of `run.bat`
+- Do not render isometric view map
+    - Use `run_top_view_only.bat` instead of `run.bat`
 
 # How to start the HTML viewer
 After the rendering, you get an `html` folder in your output path.
@@ -81,6 +74,7 @@ html
 ├── foraging/
 ├── foraging_top/
 ├── objects/
+├── mod_maps/
 ├── openseadragon/
 ├── room/
 ├── zombie/
@@ -105,11 +99,15 @@ There are two ways to bypass CORS:
     - open `pzmap.html` in a standalone tab with all web security disabled.
         - To do this, run `chrome_no_sicurity.bat`
     - restart Chrome to allow locale HTML access to locale files.
-        - To do this, you close all opening Chrome tabs
+        - To do this, you need close all opening Chrome tabs
         - Then run `chrome_allow_file(need close chrome first).bat`
 
 # How to use the HTML viewer
 - To switch floors, use the button form `Layer0` to `Layer7` on top of the page
+- To enable mod maps overlay, use the `Mod Map` button and then select mod maps
+
+    ![Overlay Map Example](./docs/img/overlay_map.png)
+
 - To enable/disable the grid, use the `Grid` button
     - (Position of the grid will adjust according to the selected layer)
 

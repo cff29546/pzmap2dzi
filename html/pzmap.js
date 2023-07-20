@@ -1,13 +1,278 @@
 var map_type = "iso";
 var suffix = "";
-var totalLayers = 7;
-var tiles = Array(totalLayers).fill(0);
-var curLayers = 0;
-var foraging = 0;
-var room = 0;
+var viewer = 0;
+
+const Map = class {
+    layers = 0;
+    tiles = [];
+    overlays = {};
+    overlay_layer = 0;
+    room = 0;
+    foraging = 0;
+    zombie = 0;
+    objects = 0;
+    x0 = 0;
+    y0 = 0;
+    sqr = 1;
+    cell_rects = [];
+    clip_list = [];
+
+    constructor(name, is_base=false) {
+        this.name = name;
+        this.is_base = is_base;
+        this.init();
+    }
+
+    cell2pixel(cx, cy) {
+        let p = {}
+        if (map_type == 'iso') {
+            p.x = this.x0 + (cx - cy) * this.sqr * 150;
+            p.y = this.y0 + (cx + cy) * this.sqr * 75;
+        } else {
+            p.x = this.x0 + cx * this.sqr * 300;
+            p.y = this.y0 + cy * this.sqr * 300;
+        }
+        return p;
+    }
+
+    getClipPoints(rects, remove=true) {
+        let points = [];
+        if (remove) {
+            points.push({x: 0, y: 0});
+            points.push({x: 0, y: this.h});
+            points.push({x: this.w, y: this.h});
+            points.push({x: this.w, y: 0});
+        }
+        points.push({x: 0, y: 0});
+        for (let [x, y, w, h] of rects) {
+            points.push(this.cell2pixel(x, y));
+            points.push(this.cell2pixel(x + w, y));
+            points.push(this.cell2pixel(x + w, y + h));
+            points.push(this.cell2pixel(x, y + h));
+            points.push(this.cell2pixel(x, y));
+            points.push({x: 0, y: 0});
+        }
+        return points;
+    }
+
+    setClipFromOverlayMaps(maps) {
+        this.clip_list = [this.getClipPoints(this.cell_rects, false)];
+        for (let i = maps.length - 1; i >= 0; i--) {
+            let rlist = [];
+            for (let r of maps[i].cell_rects) {
+                for (let b of this.cell_rects) {
+                    if (rectIntersect(b, r)) {
+                        rlist.push(r);
+                        break;
+                    }
+                }
+            }
+            if (rlist.length > 0) {
+                this.clip_list.push(this.getClipPoints(rlist));
+            }
+        }
+        
+        for (let type of ['zombie', 'foraging']) {
+            if (this.overlays[type]) {
+                this.overlays[type].setCroppingPolygons(this.clip_list);
+            }
+        }
+        for (let type of ['room', 'objects']) {
+            if (this.overlays[type]) {
+                let clip_list = shiftClipList(this.clip_list);
+                this.overlays[type].setCroppingPolygons(clip_list);
+            }
+        }
+    }
+
+    getMapRoot() {
+        if (this.is_base) {
+            return '';
+        }
+        return 'mod_maps/' + this.name + '/'; 
+    }
+
+    _load(type, layer) {
+        if (viewer) {
+            let x = base_map.x0 - this.x0;
+            let y = base_map.y0 - this.y0;
+            let p = viewer.world.getItemAt(0).imageToViewportCoordinates(x, y);
+            let width = this.w / base_map.w;
+            if (type == 'base') {
+                if (layer < this.layers && this.tiles[layer] == 0) {
+                    this.tiles[layer] = null;
+                    viewer.addTiledImage({
+                        tileSource: this.getMapRoot() + type + suffix + "/layer" + layer + ".dzi",
+                        opacity: 1,
+                        x: p.x,
+                        y: p.y,
+                        width: width,
+                        success: (function (obj) {
+                            if (this.tiles[layer] == 'delete') {
+                                viewer.world.removeItem(obj.item);
+                                this.tiles[layer] = 0;
+                            } else {
+                                this.tiles[layer] = obj.item;
+                            }
+                        }).bind(this),
+                        error: (function (e) {
+                            if (['delete', 0, null].includes(this.tiles[layer])) {
+                                this.tiles[layer] = 0;
+                            }
+                        }).bind(this),
+                    });
+                }
+                return
+            }
+            let shift = true;
+            if (type == 'zombie' || type == 'foraging') {
+                layer = 0;
+                shift = false;
+            }
+            if (this.overlays[type] == 0) {
+                this.overlays[type] = null;
+                viewer.addTiledImage({
+                    tileSource: this.getMapRoot() + type + suffix + "/layer" + layer + ".dzi",
+                    opacity: 1,
+                    x: p.x,
+                    y: p.y,
+                    width: width,
+                    success: (function (obj) {
+                        if (this.overlays[type] == 'delete') {
+                            viewer.world.removeItem(obj.item);
+                            this.overlays[type] = 0;
+                        } else {
+                            this.overlays[type] = obj.item;
+                            if (shift) {
+                                let clip_list = shiftClipList(this.clip_list, layer);
+                                this.overlays[type].setCroppingPolygons(clip_list);
+                            } else {
+                                this.overlays[type].setCroppingPolygons(this.clip_list);
+                            }
+                        }
+                    }).bind(this),
+                    error: (function (e) {
+                        if (['delete', 0, null].includes(this.overlays[type])) {
+                            this.overlays[type] = 0;
+                        }
+                    }).bind(this),
+                });
+            }
+        }
+    }
+
+    _unload(type, layer) {
+        if (viewer) {
+            if (type == 'base') {
+                if (layer < this.layers && this.tiles[layer] != 0) {
+                    if (this.tiles[layer] == null || this.tiles[layer] == 'delete') {
+                        this.tiles[layer] = 'delete';
+                    } else {
+                        viewer.world.removeItem(this.tiles[layer]);
+                        this.tiles[layer] = 0;
+                    }
+                }
+                return
+            }
+            if (this.overlays[type] != 0) {
+                if (this.overlays[type] == null || this.overlays[type] == 'delete') {
+                    this.overlays[type] = 'delete';
+                } else {
+                    viewer.world.removeItem(this.overlays[type]);
+                    this.overlays[type] = 0;
+                }
+            }
+        }
+    }
+
+    getTotalLayers() {
+        let map_root = this.getMapRoot();
+        let layer = 0;
+        while (true) {
+            let xhttp = new XMLHttpRequest();
+            xhttp.open("GET", map_root + "base" + suffix + "/layer" + layer + ".dzi", false);
+            try {
+                xhttp.send(null);
+            } catch (error) {
+                return layer;
+            }
+            if (xhttp.status != 200) {
+                return layer;
+            }
+            layer++;
+        }
+    }
+
+    loadMapInfo() {
+        let xhttp = new XMLHttpRequest();
+        xhttp.open("GET", this.getMapRoot() + "base" + suffix + "/map_info.json", false);
+        try {
+            xhttp.send(null);
+        } catch (error) {
+        } 
+        if (xhttp.status === 200) {
+            let info = JSON.parse(xhttp.responseText);
+            this.x0 = info.x0;
+            this.y0 = info.y0;
+            this.w = info.w;
+            this.h = info.h;
+            this.sqr = info.sqr;
+            this.cell_rects = info.cell_rects;
+        }
+    }
+
+    init() {
+        this.layers = this.getTotalLayers();
+        this.tiles = Array(this.layers).fill(0);
+        this.loadMapInfo();
+        for (let type of ['zombie', 'foraging', 'room', 'objects']) {
+            this.overlays[type] = 0;
+        }
+    }
+
+    setBaseLayer(layer, reload) {
+        let start = 0;
+        if (this.is_base) {
+            start = 1;
+        }
+        for (let i = start; i < this.layers ; i++) {
+            if (reload || i > layer) {
+                this._unload('base', i);
+            }
+        }
+        for (let i = start; i <= layer && i < this.layers ; i++) {
+            this._load('base', i);
+        }
+    }
+
+    setOverlayLayer(overlay, layer, reload) {
+        for (let type of ['zombie', 'foraging', 'room', 'objects']) {
+            if (overlay[type]) {
+                if (reload || (layer != this.overlay_layer && 
+                    !['zombie', 'foraging'].includes(type))) {
+                    this._unload(type, layer);
+                }
+                this._load(type, layer);
+            } else {
+                this._unload(type, layer);
+            }
+        }
+        this.overlay_layer = layer;
+    }
+
+    destroy() {
+        this.setBaseLayer(-1, true);
+        this.setOverlayLayer({}, 0, true);
+    }
+}
+
+var base_map = 0;
+var mod_maps = [];
+var overlays = {};
+var currentLayer = 0;
+
+var mapui = 0;
 var grid = 0;
-var objects = 0;
-var zombie = 0;
 var trimmer = 0;
 var save_path = "";
 var saved_blocks = new Set();
@@ -16,6 +281,7 @@ var selected_blocks = new Set();
 var selected_cells = {};
 var cell_font = '12pt bold monospace';
 var block_font = '12pt monospace';
+
 var min_step_cell = 8;
 var min_step_block = 8;
 var rectLevel = 0;
@@ -23,10 +289,10 @@ var rectX1 = 0;
 var rectY1 = 0;
 var rectX2 = 0;
 var rectY2 = 0;
-var _viewer;
 var grid2key;
 
-var foragingLegendHTML = `
+var UI_HTML = {
+    foraging: `
     Foraging Legends:
     <div class="legend" style="background-color:#fff"></div>Road
     <div class="legend" style="background-color:#00f"></div>Urban Area
@@ -35,35 +301,34 @@ var foragingLegendHTML = `
     <div class="legend" style="background-color:#0f0"></div>Forest
     <div class="legend" style="background-color:#080"></div>Deep Forest
     <div class="legend" style="background-color:#f0f"></div>Farmland
-    <div class="legend" style="background-color:#f00"></div>Farm
-`;
-var objectsLegendHTML = `
+    <div class="legend" style="background-color:#f00"></div>Farm`,
+
+    objects: `
     Objects Legends:
     <div class="legend" style="border-color:#f00; border-width: 3px;"></div>Zombies Type
     <div class="legend" style="border-color:#00f; border-width: 3px;"></div>Car Spawn
-    <div class="legend" style="border-color:#ff0; border-width: 3px;"></div>Zone Story
-`;
-var saveTimmerHTML = `
+    <div class="legend" style="border-color:#ff0; border-width: 3px;"></div>Zone Story`,
+
+    trimmer: `
     <b>[Save File Trimmer]</b> Legends:
     <div class="legend" style="background-color:#0f0"></div>Saved Area
     <div class="legend" style="background-color:#00f"></div>Partial Saved Area
     <div class="legend" style="background-color:#f00"></div>Selected
     <div class="legend" style="background-color:#ff0"></div>Partial Selected
-    <a id="instruction_switch" href="" class="text-right" onclick="return toggleTrimmerInstruction();">Help</a>
-    <div id="trimmer_instruction"></div>
+    <a id="trimmer_help_btn" href="" class="text-right" onclick="return toggleTrimmerHelp();">Show Help</a>
+    <div id="trimmer_help"></div>
     <b>Select Save:</b>
     <select id="save_selector" onchange="onSaveSelect()">
         <option value="">(Select Save Slot)</option>
     </select>
     <button type="button" onclick="doRefresh()">Refresh Save List</button>
-    <input type="checkbox" id="vehicle">
+    <input type="checkbox" id="vehicle" checked>
     <label for="vehicle"> Remove Vehicles </label>
     <button type="button" onclick="doDelete()">Delete Selected Area</button>
     <div id="trimmer_output" style="display: inline-block"></div>
-    <button class="text-right" type="button" onclick="openExplorer()">Browse Folder</button>
-`;
-
-var trimmerInstruction = `
+    <button class="text-right" type="button" onclick="openExplorer()">Browse Folder</button>`,
+    
+    trimmer_help: `
     <b>Instructions</b><br/>
     <b>Step 1</b> Select save slot.<br/>
     <b>Step 2</b> Select unwanted area.<br/>
@@ -73,24 +338,14 @@ var trimmerInstruction = `
     <b>Click</b>: select/unselect a single grid.<br/>
     <b>Shift+Click</b>: select/unselect all area in a yellow grid.<br/>
     <b>Shift+Drag</b> Flip selection of a rectangle area.
-    </p>
-`;
+    </p>`,
 
-function getTotalLayers() {
-    let layer = 1;
-    while (true) {
-        let xhttp = new XMLHttpRequest();
-        xhttp.open("GET", "base" + suffix + "/layer" + layer + ".dzi", false);
-        try {
-            xhttp.send(null);
-        } catch (error) {
-            return layer - 1;
-        }
-        if (xhttp.status != 200) {
-            return layer - 1;
-        }
-        layer++;
-    }
+    map: `
+    <select id="map_selector" onchange="onMapSelect()">
+        <option value="">(Select Mod Map to Load)</option>
+    </select>
+    <b>Loaded maps:</b>
+    <div id="map_list" style="display: inline-block"></div>`
 }
 
 function changeView() {
@@ -99,17 +354,99 @@ function changeView() {
     } else {
         map_type = 'top';
     }
-    tiles = [];
-    _viewer.destroy();
+    viewer.destroy();
+    let map_names = [];
+    for (let i = 0; i < mod_maps.length; i++) {
+        map_names.push(mod_maps[i].name);
+    }
     init();
-    document.body.removeChild(document.getElementById('extra'));
-    let extra = document.createElement('script');
-    extra.id = "extra";
-    extra.src = "base" + suffix + "/extra.js";
-    extra.type = "text/javascript";
-    document.body.appendChild(extra);
+    if (map_names.length > 0) {
+        let callback = function (retry) {
+            let img = viewer.world.getItemAt(0);
+            if (img && img.getFullyLoaded()) {
+                for (let i = 0; i < map_names.length; i++) {
+                    addMap(map_names[i]);
+                }
+            } else {
+                setTimeout(retry, 1, retry);
+            }
+        }
+        callback(callback);
+    }
  
     return false;
+}
+
+function init_mapui() {
+    let xhttp = new XMLHttpRequest();
+    xhttp.open("GET", "./mod_maps/map_list.json", false);
+    try {
+        xhttp.send(null);
+    } catch (error) {
+    } 
+    if (xhttp.status === 200) {
+        let s = document.getElementById('map_selector')
+        let map_names = JSON.parse(xhttp.responseText);
+        for (let i = 0; i < map_names.length; i++) {
+            let o = document.createElement("option");
+            o.value = map_names[i];
+            o.text = map_names[i];
+            s.appendChild(o);
+        }
+    }
+}
+
+function updateClip() {
+    base_map.setClipFromOverlayMaps(mod_maps);
+    for (let i = 0; i < mod_maps.length; i++) {
+        mod_maps[i].setClipFromOverlayMaps(mod_maps.slice(i + 1));
+    }
+}
+
+function removeMap(name) {
+    let pos = 0;
+    for (pos = 0; pos < mod_maps.length; pos++) {
+        if (name == mod_maps[pos].name) {
+            break;
+        }
+    }
+    if (pos < mod_maps.length) {
+        mod_maps[pos].destroy();
+        mod_maps.splice(pos, 1);
+        if (mod_maps.length == 0) {
+            document.getElementById("map_btn").classList.remove('active');
+        }
+        updateMapUI();
+        updateClip();
+    }
+}
+
+function addMap(name) {
+    if (name != '') {
+        let pos = 0;
+        for (pos = 0; pos < mod_maps.length; pos++) {
+            if (name === mod_maps[pos].name) {
+                break;
+            }
+        }
+        if (pos >= mod_maps.length) {
+            mod_maps.push(new Map(name));
+            if (mod_maps.length == 1) {
+                document.getElementById("map_btn").classList.add('active');
+            }
+            updateMapUI();
+            updateClip();
+            updateMaps(currentLayer);
+        }
+    }
+}
+
+function onMapSelect() {
+    if (mapui) {
+        let s = document.getElementById('map_selector');
+        addMap(s.value);
+        s.value = '';
+    }
 }
 
 function initUI() {
@@ -130,12 +467,23 @@ function initUI() {
     for (let i = s.options.length - 1; i >= 0; i--) {
         s.remove(i);
     }
-    for (let i = 0; i <= totalLayers; i++) {
+    for (let i = 0; i < base_map.layers; i++) {
         let o = document.createElement("option");
         o.value = i;
         o.text = 'Layer ' + i;
         s.appendChild(o);
     }
+    for (let type of ['zombie', 'foraging', 'room', 'objects', 'grid', 'map']) {
+        let ui = document.getElementById(type + '_ui');
+        if (ui) {
+            ui.innerHTML = "";
+        }
+        let btn = document.getElementById(type + '_btn');
+        if (btn) {
+            btn.classList.remove('active');
+        }
+    }
+
     setOutput('main_output', 'green', '');
     document.body.style.background = 'black';
 }
@@ -146,14 +494,15 @@ function init() {
     } else {
         suffix = "";
     }
-    totalLayers = getTotalLayers();
-    tiles = Array(totalLayers).fill(0);
-    curLayers = 0;
-    foraging = 0;
-    room = 0;
+
+    base_map = new Map('', true);
+    mod_maps = [];
+    overlays = {};
+    currentLayer = 0;
+    viewer;
+
+    mapui = 0;
     grid = 0;
-    objects = 0;
-    zombie = 0;
     trimmer = 0;
     save_path = "";
     saved_blocks = new Set();
@@ -170,8 +519,9 @@ function init() {
     rectX2 = 0;
     rectY2 = 0;
     initUI();
+    updateClip();
 
-    _viewer = OpenSeadragon({
+    viewer = OpenSeadragon({
         element: document.getElementById("map_div"),
         tileSources:  "base" + suffix + "/layer0.dzi",
         homeFillsViewer: true,
@@ -184,8 +534,7 @@ function init() {
         maxZoomPixelRatio: map_type == "top" ? 12 : 2
     });
 
-    _viewer.addHandler('add-item-failed', function(event) {
-        console.log('add-item-failed', event);
+    viewer.addHandler('add-item-failed', function(event) {
         let info = '<b>Map not loaded. Use "run_server.bat" to start the viewer.</b>';
         if (window.location.protocol == 'http:' || window.location.protocol == 'https:') {
             let type_str = (map_type == "top") ? "top" : "isometric";
@@ -195,13 +544,12 @@ function init() {
         document.body.style.background = 'white';
     })
 
-    _viewer.addHandler('update-viewport', function() {
+    viewer.addHandler('update-viewport', function() {
         if (grid == 0 && trimmer == 0) {
             return;
         }
-        let ctx = _viewer.drawer.context;
+        let ctx = viewer.drawer.context;
         let [c00, step_cell, step_block] = getCanvasOriginAndStep();
-        //console.log(step_cell);
 
         let [cell, block, cell_text_offset, block_text_offset] = getGridLevel(ctx, step_cell, step_block);
 
@@ -228,12 +576,9 @@ function init() {
         }
     })
 
-    _viewer.addHandler('canvas-press', function(event) {
+    viewer.addHandler('canvas-press', function(event) {
         if (trimmer && event.originalEvent.shiftKey) {
-            console.log('press');
-            console.log(event);
-
-            let ctx = _viewer.drawer.context;
+            let ctx = viewer.drawer.context;
             let x = event.position.x * window.devicePixelRatio;
             let y = event.position.y * window.devicePixelRatio;
             let [c00, step_cell, step_block] = getCanvasOriginAndStep();
@@ -248,18 +593,15 @@ function init() {
             rectX2 = rectX1;
             rectY2 = rectY1;
 
-            _viewer.forceRedraw();
-            _viewer.raiseEvent('update-viewport', {});
+            viewer.forceRedraw();
+            viewer.raiseEvent('update-viewport', {});
             event.preventDefaultAction = true;
         }
     })
 
-    _viewer.addHandler('canvas-drag', function(event) {
+    viewer.addHandler('canvas-drag', function(event) {
         if (trimmer && rectLevel) {
-            console.log('drag');
-            console.log(event);
-
-            let ctx = _viewer.drawer.context;
+            let ctx = viewer.drawer.context;
             let x = event.position.x * window.devicePixelRatio;
             let y = event.position.y * window.devicePixelRatio;
             let [c00, step_cell, step_block] = getCanvasOriginAndStep();
@@ -273,20 +615,17 @@ function init() {
                 rectLevel = 0;
             }
 
-            _viewer.forceRedraw();
-            _viewer.raiseEvent('update-viewport', {});
+            viewer.forceRedraw();
+            viewer.raiseEvent('update-viewport', {});
             event.preventDefaultAction = true;
         }
     })
 
-    _viewer.addHandler('canvas-release', function(event) {
+    viewer.addHandler('canvas-release', function(event) {
         if (rectLevel) {
             if (trimmer && event.originalEvent.shiftKey) {
-                console.log('canvas-release');
-                console.log(event);
-
                 if (rectX1 != rectX2 || rectY1 != rectY2) {
-                    let ctx = _viewer.drawer.context;
+                    let ctx = viewer.drawer.context;
                     let x = event.position.x * window.devicePixelRatio;
                     let y = event.position.y * window.devicePixelRatio;
                     let [c00, step_cell, step_block] = getCanvasOriginAndStep();
@@ -303,17 +642,17 @@ function init() {
                 }
 
                 rectLevel = 0;
-                _viewer.forceRedraw();
-                _viewer.raiseEvent('update-viewport', {});
+                viewer.forceRedraw();
+                viewer.raiseEvent('update-viewport', {});
                 event.preventDefaultAction = true;
             }
             rectLevel = 0;
         }
     })
 
-    _viewer.addHandler('canvas-click', function(event) {
+    viewer.addHandler('canvas-click', function(event) {
         if (event.quick && trimmer != 0) {
-            let ctx = _viewer.drawer.context;
+            let ctx = viewer.drawer.context;
             let x = event.position.x * window.devicePixelRatio;
             let y = event.position.y * window.devicePixelRatio;
             let [c00, step_cell, step_block] = getCanvasOriginAndStep();
@@ -323,31 +662,53 @@ function init() {
             }
             if (block) {
                 let [bx, by] = getGridXY(c00, step_block, x, y);
-                console.log('block', bx, by);
                 flipBlock(bx, by);
             } else if (cell) {
                 let [bx, by] = getGridXY(c00, step_cell, x, y);
-                console.log('cell', bx, by);
                 flipCell(bx, by);
             }
-            _viewer.forceRedraw();
-            _viewer.raiseEvent('update-viewport', {});
+            viewer.forceRedraw();
+            viewer.raiseEvent('update-viewport', {});
             event.preventDefaultAction = true;
         }
     })
 
     if (map_type == "top") {
-        _viewer.drawer.context.imageSmoothingEnabled = false;
+        viewer.drawer.context.imageSmoothingEnabled = false;
         grid2key = grid2keyTop;
     } else {
         grid2key = grid2keyIso;
     }
 }
 
-function setOutput(id, color, text, timeout) {
+function shiftClipList(clip_list, layer=null) {
+    let clip_list_shift = [];
+    if (layer == null) {
+        layer = currentLayer;
+    }
+    let shift = -192 * layer;
+    for (let i = 0; i < clip_list.length; i++) {
+        let points = [];
+        for (let j = 0; j < clip_list[i].length; j++) {
+            points.push({x: clip_list[i][j].x, y: clip_list[i][j].y + shift})
+        }
+        clip_list_shift.push(points);
+    }
+    return clip_list_shift;
+}
+
+function rectIntersect(r1, r2) {
+    let [x1, y1, w1, h1] = r1;
+    let [x2, y2, w2, h2] = r2;
+    return (x1 < x2 + w2) && (x2 < x1 + w1) && (y1 < y2 + h2) && (y2 < y1 + h1);
+}
+
+function setOutput(id, color, text, timeout=0) {
     let output = document.getElementById(id);
-    output.style.color = color;
-    output.innerHTML = text;
+    if (output) {
+        output.style.color = color;
+        output.innerHTML = text;
+    }
     if (timeout > 0) {
        setTimeout(setOutput, timeout, id, color, '', 0); 
     }
@@ -424,10 +785,10 @@ function deleteSave(path) {
     }
     info += 'Details:\n'
     if (cell_info) {
-        info += 'Large Area (yellow grid(s)): ' + cell_info + '\n';
+        info += 'Cell (yellow grid(s)): ' + cell_info + '\n';
     }
     if (block_info) {
-        info += 'Small Area (green grid(s)): ' + block_info + '\n';
+        info += 'Block (green grid(s)): ' + block_info + '\n';
     }
     if (!confirm(info)) {
         setOutput('trimmer_output', 'red', '<b>Trim canceled</b>', 3000);
@@ -488,8 +849,8 @@ function loadSave(path) {
                 setOutput('trimmer_output', 'red', info, 5000);
             }
         }
-        _viewer.forceRedraw();
-        _viewer.raiseEvent('update-viewport', {});
+        viewer.forceRedraw();
+        viewer.raiseEvent('update-viewport', {});
     }
 }
 
@@ -536,8 +897,8 @@ function listSave() {
             }
             setOutput('trimmer_output', 'red', info, 5000);
         }
-        _viewer.forceRedraw();
-        _viewer.raiseEvent('update-viewport', {});
+        viewer.forceRedraw();
+        viewer.raiseEvent('update-viewport', {});
     }
 }
 
@@ -707,18 +1068,17 @@ function makeKey(x, y) {
 }
 
 function getCanvasOriginAndStep() {
-    let zm = _viewer.viewport.getZoom(true);
-    zm = _viewer.world.getItemAt(0).viewportToImageZoom(zm);
+    let zm = viewer.viewport.getZoom(true);
+    zm = viewer.world.getItemAt(0).viewportToImageZoom(zm);
     zm *= window.devicePixelRatio;
-    let yshift = (map_type == "top" ? 0 : 192 * curLayers);
-    let vp00 = _viewer.world.getItemAt(0).imageToViewportCoordinates(x0, y0 - yshift);
-    let c00 = _viewer.viewport.pixelFromPoint(vp00, true);
+    let yshift = (map_type == "top" ? 0 : 192 * currentLayer);
+    let vp00 = viewer.world.getItemAt(0).imageToViewportCoordinates(base_map.x0, base_map.y0 - yshift);
+    let c00 = viewer.viewport.pixelFromPoint(vp00, true);
     c00.x *= window.devicePixelRatio;
     c00.y *= window.devicePixelRatio;
 
-    let sqr = xstep[0] - ystep[0]; // iso:128 top:1
-    let step_cell = sqr * 300 * zm;
-    let step_block = sqr * 10 * zm;
+    let step_cell = base_map.sqr * 300 * zm;
+    let step_block = base_map.sqr * 10 * zm;
 
     return [c00, step_cell, step_block];
 }
@@ -813,178 +1173,110 @@ function flipCell(x, y) {
     }
 }
 
-function addLayer(layer) {
-    curLayers++;
-    var _viewer1 = _viewer.addTiledImage({
-        tileSource: "base" + suffix + "/layer" + curLayers + ".dzi",
-        opacity: 1,
-        success: function (obj) {
-            tiles[layer] = obj.item;
-        },
-    });
-}
-
-function removeLayer() {
-    if (curLayers == 0) {
-        return;
-    }
-    curLayers--;
-    item = tiles[curLayers];
-    _viewer.world.removeItem(item);
-    tiles[curLayers] = 0;
-}
-
-function onLayerSelect() {
-    let layer = Number(document.getElementById('layer_selector').value);
-    setLayer(layer);
-}
-
-function setLayer(l) {
-    if (curLayers == l) {
-        return;
-    }
-    if (curLayers < l) {
-        for (i = curLayers; i < l; i++) {
-            addLayer(i);
-        }
-    }
-    if (curLayers > l) {
-        for (i = curLayers; i > l; i--) {
-            removeLayer();
-        }
-    }
-    if (foraging != 0) {
-        toggleForaging();
-        toggleForaging();
-    }
-    if (zombie != 0) {
-        toggleZombie();
-        toggleZombie();
-    }
-    if (grid != 0) {
-        toggleGrid();
-        toggleGrid();
-    }
-    if (room != 0) {
-        toggleRoom();
-        toggleRoom();
-    }
-    if (objects != 0) {
-        toggleObjects();
-        toggleObjects();
-    }
-}
-
-function toggleRoom() {
-    if (room == 0) {
-        var _viewer1 = _viewer.addTiledImage({
-            tileSource: "room" + suffix + "/layer" + curLayers + ".dzi",
-            opacity: 1,
-            success: function (obj) {
-                room = obj.item;
-            },
-        });
-    } else {
-        _viewer.world.removeItem(room);
-        room = 0;
-    }
-}
-
-function toggleObjects() {
-    if (objects == 0) {
-        var _viewer1 = _viewer.addTiledImage({
-            tileSource: "objects" + suffix + "/layer" + curLayers + ".dzi",
-            opacity: 1,
-            success: function (obj) {
-                objects = obj.item;
-            },
-        });
-        document.getElementById("objects_legend").innerHTML = objectsLegendHTML;
-    } else {
-        _viewer.world.removeItem(objects);
-        objects = 0;
-        document.getElementById("objects_legend").innerHTML = "";
-    }
-}
-
 function toggleGrid() {
     if (grid == 0) {
         grid = 1;
+        document.getElementById("grid_btn").classList.add('active');
         if (trimmer == 1) {
-            _viewer.forceRedraw();
+            viewer.forceRedraw();
         }
-        _viewer.raiseEvent('update-viewport', {});
+        viewer.raiseEvent('update-viewport', {});
     } else {
         grid = 0;
-        _viewer.forceRedraw();
+        document.getElementById("grid_btn").classList.remove('active');
+        viewer.forceRedraw();
     }
 }
 
 function toggleTrimmer() {
     if (trimmer == 0) {
         trimmer = 1;
-        if (grid == 1) {
-            _viewer.forceRedraw();
-        }
-        _viewer.raiseEvent('update-viewport', {});
-        document.getElementById("save_trimmer").innerHTML = saveTimmerHTML;
+        document.getElementById("trimmer_btn").classList.add('active');
+        document.getElementById("trimmer_ui").innerHTML = UI_HTML['trimmer'];
         listSave();
+        if (grid == 1) {
+            viewer.forceRedraw();
+        }
+        viewer.raiseEvent('update-viewport', {});
     } else {
         trimmer = 0;
-        _viewer.forceRedraw();
-        document.getElementById("save_trimmer").innerHTML = "";
+        document.getElementById("trimmer_btn").classList.remove('active');
+        document.getElementById("trimmer_ui").innerHTML = "";
+        viewer.forceRedraw();
     }
 }
 
-function toggleTrimmerInstruction() {
+function toggleTrimmerHelp() {
     if (trimmer) {
-        let t = document.getElementById("trimmer_instruction");
-        let ins = document.getElementById("instruction_switch");
+        let t = document.getElementById("trimmer_help");
+        let ins = document.getElementById("trimmer_help_btn");
         if (t.textContent) {
             t.innerHTML = "";
-            ins.innerHTML = "Help";
+            ins.innerHTML = "Show Help";
         } else {
-            t.innerHTML = trimmerInstruction;
+            t.innerHTML = UI_HTML['trimmer_help'];;
             ins.innerHTML = "Hide Help";
         }
     }
     return false;
 }
 
-function toggleZombie() {
-    if (zombie == 0) {
-        var _viewer1 = _viewer.addTiledImage({
-            tileSource: "zombie" + suffix + "/layer0.dzi",
-            opacity: 1,
-            x: 0,
-            y: 0,
-            success: function (obj) {
-                zombie = obj.item;
-            },
-        });
+function toggleModMapUI() {
+    if (mapui == 0) {
+        mapui = 1;
+        document.getElementById("map_ui").innerHTML = UI_HTML['map'];
+        init_mapui();
+        updateMapUI();
     } else {
-        _viewer.world.removeItem(zombie);
-        zombie = 0;
+        mapui = 0;
+        document.getElementById("map_ui").innerHTML = "";
     }
 }
 
-function toggleForaging() {
-    if (foraging == 0) {
-        var _viewer1 = _viewer.addTiledImage({
-            tileSource: "foraging" + suffix + "/layer0.dzi",
-            opacity: 1,
-            x: 0,
-            y: 0,
-            success: function (obj) {
-                foraging = obj.item;
-            },
-        });
-        document.getElementById("foraging_legend").innerHTML = foragingLegendHTML;
-    } else {
-        _viewer.world.removeItem(foraging);
-        foraging = 0;
-        document.getElementById("foraging_legend").innerHTML = "";
+function updateMapUI() {
+    if (mapui) {
+        d = document.getElementById("map_list");
+        d.innerHTML = '';
+        for (let pos = 0; pos < mod_maps.length; pos++) {
+            d.innerHTML += `<button class="active" style="cursor: not-allowed"
+                onclick="removeMap('${mod_maps[pos].name}')">${mod_maps[pos].name}</button>`;
+        }
     }
+}
+
+function updateMaps(layer) {
+    base_map.setBaseLayer(layer, false);
+    for (let i = 0; i < mod_maps.length; i++) {
+        mod_maps[i].setBaseLayer(layer, layer > currentLayer);
+    }
+    for (let i = 0; i < mod_maps.length; i++) {
+        mod_maps[i].setOverlayLayer(overlays, layer, layer > currentLayer);
+    }
+    base_map.setOverlayLayer(overlays, layer, layer > currentLayer);
+    currentLayer = layer;
+}
+
+function toggleOverlay(type) {
+    overlays[type] = !overlays[type];
+    if (overlays[type]) {
+        document.getElementById(type + "_btn").classList.add('active');
+        let ui = document.getElementById(type + "_ui");
+        if (ui) {
+            ui.innerHTML = UI_HTML[type];
+        }
+    } else {
+        document.getElementById(type + "_btn").classList.remove('active');
+        let ui = document.getElementById(type + "_ui");
+        if (ui) {
+            ui.innerHTML = "";
+        }
+    }
+    updateMaps(currentLayer);
+}
+
+function onLayerSelect() {
+    let layer = Number(document.getElementById('layer_selector').value);
+    updateMaps(layer);
 }
 
 init();

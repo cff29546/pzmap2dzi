@@ -1,4 +1,5 @@
 import lupa
+import os
 from . import geometry
 from functools import partial
 try:
@@ -31,6 +32,8 @@ def unpack_lua_table(table):
     return output
 
 def load_objects_raw(objects_path):
+    if not os.path.isfile(objects_path):
+        return []
     lua = lupa.LuaRuntime(unpack_returned_tuples=False)
     with open(objects_path, 'r') as f:
         lua.execute(f.read())
@@ -66,6 +69,7 @@ class Obj(object):
         self.geo_type = obj.get('geometry', 'rect')
         self.type = obj.get('type', '')
         self.obj = obj
+        self.valid = True
         self.z = obj['z']
         if self.geo_type == 'rect':
             self.x = obj['x']
@@ -75,8 +79,11 @@ class Obj(object):
         if 'points' in obj:
             self.points = geometry.array2points(obj['points'])
         if self.geo_type == 'polyline':
-            self.points = geometry.clip(self.points, obj['lineWidth'])
-        if self.geo_type in ['polygon', 'polyline']:
+            if 'lineWidth' in obj:
+                self.points = geometry.clip(self.points, obj['lineWidth'])
+            else:
+                self.vaild = False
+        if self.valid and self.geo_type in ['polygon', 'polyline']:
             x1, y1, x2, y2 = geometry.points_bound(self.points)
             x1 = int(x1)
             x2 = int(x2 + 0.5) + 1
@@ -88,6 +95,8 @@ class Obj(object):
             self.h = y2 - y1
 
     def cells(self):
+        if not self.valid:
+            return []
         cxmin = self.x // 300
         cxmax = (self.x + self.w - 1) // 300
         cymin = self.y // 300

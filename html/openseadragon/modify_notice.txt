@@ -1,0 +1,3 @@
+The following functions have been modified to meet pzmap2dzi requirement.
+- Drawer.clipWithPolygons
+- TiledImage.setCroppingPolygons

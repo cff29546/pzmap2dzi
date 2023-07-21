@@ -70,6 +70,7 @@ render_conf:
     # base: only use the color of the floor tile
     # base+water: only use the color of the floor tile and water tile (if exist)
     # avg: caculate an average color of all tiles
+    # carto-zed: Carto-Zed like color theme
     top_view_color_mode: avg
     
     # zombie heatmap

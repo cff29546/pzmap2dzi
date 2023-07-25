@@ -113,6 +113,7 @@ const Map = class {
                                 this.tiles[layer] = 0;
                             } else {
                                 this.tiles[layer] = obj.item;
+                                positionItem(obj.item, this.name, layer);
                             }
                         }).bind(this),
                         error: (function (e) {
@@ -165,7 +166,7 @@ const Map = class {
         if (viewer) {
             if (type == 'base') {
                 if (layer < this.layers && this.tiles[layer] != 0) {
-                    if (this.tiles[layer] == null || this.tiles[layer] == 'delete') {
+                    if ([null, 'delete'].includes(this.tiles[layer])) {
                         this.tiles[layer] = 'delete';
                     } else {
                         viewer.world.removeItem(this.tiles[layer]);
@@ -175,7 +176,7 @@ const Map = class {
                 return
             }
             if (this.overlays[type] != 0) {
-                if (this.overlays[type] == null || this.overlays[type] == 'delete') {
+                if ([null, 'delete'].includes(this.overlays[type])) {
                     this.overlays[type] = 'delete';
                 } else {
                     viewer.world.removeItem(this.overlays[type]);
@@ -230,13 +231,13 @@ const Map = class {
         }
     }
 
-    setBaseLayer(layer, reload) {
+    setBaseLayer(layer) {
         let start = 0;
         if (this.is_base) {
             start = 1;
         }
         for (let i = start; i < this.layers ; i++) {
-            if (reload || i > layer) {
+            if (i > layer) {
                 this._unload('base', i);
             }
         }
@@ -245,12 +246,13 @@ const Map = class {
         }
     }
 
-    setOverlayLayer(overlay, layer, reload) {
+    setOverlayLayer(overlay, layer) {
         for (let type of ['zombie', 'foraging', 'room', 'objects']) {
             if (overlay[type]) {
-                if (reload || (layer != this.overlay_layer && 
-                    !['zombie', 'foraging'].includes(type))) {
-                    this._unload(type, layer);
+                if (!['zombie', 'foraging'].includes(type)) {
+                    if (layer != this.overlay_layer) {
+                        this._unload(type, layer);
+                    }
                 }
                 this._load(type, layer);
             } else {
@@ -261,8 +263,52 @@ const Map = class {
     }
 
     destroy() {
-        this.setBaseLayer(-1, true);
-        this.setOverlayLayer({}, 0, true);
+        this.setBaseLayer(-1);
+        this.setOverlayLayer({}, 0);
+    }
+}
+
+// order layered maps
+function positionItem(item, name, layer) {
+    //let cur = viewer.world.getIndexOfItem(item);
+    let pos = 0;
+    for (let i = 0; i < base_map.tiles.length; i++ ) {
+        if (name == '' && layer == i) {
+            viewer.world.setItemIndex(item, pos);
+            return;
+        }
+        if (![0, null, 'delete'].includes(base_map.tiles[i])) {
+            pos++;
+        }
+    }
+    for (let i = 0; i < mod_maps.length; i++ ) {
+        for (let j = 0; j < mod_maps[i].tiles.length; j++ ) {
+            if (name == mod_maps[i].name && layer == j) {
+                viewer.world.setItemIndex(item, pos);
+                return;
+            }
+            if (![0, null, 'delete'].includes(mod_maps[i].tiles[j])) {
+                pos++;
+            }
+        }
+    }
+}
+
+function positionAll() {
+    let pos = 0;
+    for (let i = 0; i < base_map.tiles.length; i++ ) {
+        if (![0, null, 'delete'].includes(base_map.tiles[i])) {
+            viewer.world.setItemIndex(base_map.tiles[i], pos);
+            pos++;
+        }
+    }
+    for (let i = 0; i < mod_maps.length; i++ ) {
+        for (let j = 0; j < mod_maps[i].tiles.length; j++ ) {
+            if (![0, null, 'delete'].includes(mod_maps[i].tiles[j])) {
+                viewer.world.setItemIndex(mod_maps[i].tiles[j], pos);
+                pos++;
+            }
+        }
     }
 }
 
@@ -359,21 +405,13 @@ function changeView() {
     for (let i = 0; i < mod_maps.length; i++) {
         map_names.push(mod_maps[i].name);
     }
-    init();
-    if (map_names.length > 0) {
-        let callback = function (retry) {
-            let img = viewer.world.getItemAt(0);
-            if (img && img.getFullyLoaded()) {
-                for (let i = 0; i < map_names.length; i++) {
-                    addMap(map_names[i]);
-                }
-            } else {
-                setTimeout(retry, 1, retry);
-            }
+    let setup_maps = function () {
+        for (let i = 0; i < map_names.length; i++) {
+            addMap(map_names[i]);
         }
-        callback(callback);
     }
- 
+    init(setup_maps);
+
     return false;
 }
 
@@ -488,7 +526,7 @@ function initUI() {
     document.body.style.background = 'black';
 }
 
-function init() {
+function init(callback=null) {
     if (map_type == "top") {
         suffix = "_top";
     } else {
@@ -679,6 +717,18 @@ function init() {
     } else {
         grid2key = grid2keyIso;
     }
+    let success_callback = function (retry) {
+        let img = viewer.world.getItemAt(0);
+        if (img && img.getFullyLoaded()) {
+            base_map.tiles[0] = img;
+            if (callback) {
+                callback();
+            }
+        } else {
+            setTimeout(retry, 1, retry);
+        }
+    }
+    success_callback(success_callback);
 }
 
 function shiftClipList(clip_list, layer=null) {
@@ -1245,14 +1295,12 @@ function updateMapUI() {
 }
 
 function updateMaps(layer) {
-    base_map.setBaseLayer(layer, false);
+    base_map.setBaseLayer(layer);
+    base_map.setOverlayLayer(overlays, layer);
     for (let i = 0; i < mod_maps.length; i++) {
-        mod_maps[i].setBaseLayer(layer, layer > currentLayer);
+        mod_maps[i].setBaseLayer(layer);
+        mod_maps[i].setOverlayLayer(overlays, layer);
     }
-    for (let i = 0; i < mod_maps.length; i++) {
-        mod_maps[i].setOverlayLayer(overlays, layer, layer > currentLayer);
-    }
-    base_map.setOverlayLayer(overlays, layer, layer > currentLayer);
     currentLayer = layer;
 }
 

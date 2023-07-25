@@ -2,7 +2,7 @@ pz_root: |- # project zomboid game folder
     D:\SteamLibrary\steamapps\common\ProjectZomboid
 
 output_path: |- # render output folder
-    G:\pzmap
+    E:\pzmap
 
 mod_root: |- # steam workshop folder for project zomboid
     D:\SteamLibrary\steamapps\workshop\content\108600

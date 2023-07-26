@@ -43,6 +43,21 @@ def unpack(args):
             output = os.path.join(conf['output_path'], 'texture', name)
             tl.save_all(output, conf['render_conf']['worker_count'])
 
+def get_conf(options, name, cmd, key, default):
+    value = options.get('{}[{}]({})'.format(key, name, cmd))
+    if value:
+        return value
+    value = options.get('{}({})'.format(key, cmd))
+    if value:
+        return value
+    value = options.get('{}[{}]'.format(key, name))
+    if value:
+        return value
+    value = options.get(key)
+    if value:
+        return value
+    return default
+
 def render_map(cmd, conf, map_data, map_name, is_base):
     from pzmap2dzi import render
     if cmd not in render.RENDER_CMD:
@@ -55,6 +70,7 @@ def render_map(cmd, conf, map_data, map_name, is_base):
     map_path = map_conf['map_path']
     options['input'] = os.path.join(map_root, map_path)
 
+    options['skip_level'] = get_conf(options, map_name, cmd, 'omit_levels', 0)
     # base / base_top
     options['cache_name'] = map_name
     options['texture'] = []

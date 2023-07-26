@@ -156,8 +156,23 @@ class DZI(object):
             dzi_path = os.path.join(self.path, 'layer{}.dzi'.format(layer))
             with open(dzi_path, 'w') as f:
                 f.write(dzi)
-        if hasattr(self, 'save_map_info'):
-            self.save_map_info()
+        self.save_map_info()
+
+    def save_map_info(self):
+        w, h = self.pyramid[-1 - self.skip_level]
+        info = {
+            'w': w,
+            'h': h,
+            'skip': self.skip_level,
+            'cell_rects': geometry.rect_cover(self.cells),
+        }
+        if hasattr(self, 'update_map_info'):
+            info = self.update_map_info(info)
+        path = os.path.join(self.path, 'map_info.json')
+        with open(path, 'w') as f:
+            f.write(json.dumps(info))
+
+
 
     def get_bottom_task_depend(self, skip_cells, done):
         tasks = {}
@@ -362,19 +377,11 @@ class IsoDZI(DZI):
                 ox, oy = IsoDZI.get_sqr_center(gx - gx0, gy - gy0)
                 render.square(im_getter, ox, oy, sx, sy, layer)
 
-    def save_map_info(self):
-        w, h = self.pyramid[-1 - self.skip_level]
-        info = {
-            'x0': -self.gxo * IsoDZI.HALF_SQR_WIDTH,
-            'y0': -(self.gyo + 1) * IsoDZI.HALF_SQR_HEIGHT,
-            'sqr': 2 * IsoDZI.HALF_SQR_WIDTH,
-            'w': w,
-            'h': h,
-            'cell_rects': geometry.rect_cover(self.cells),
-        }
-        path = os.path.join(self.path, 'map_info.json')
-        with open(path, 'w') as f:
-            f.write(json.dumps(info))
+    def update_map_info(self, info):
+        info['x0'] = -self.gxo * IsoDZI.HALF_SQR_WIDTH
+        info['y0'] = -(self.gyo + 1) * IsoDZI.HALF_SQR_HEIGHT
+        info['sqr'] = 2 * IsoDZI.HALF_SQR_WIDTH
+        return info
 
 class TopDZI(DZI):
     def __init__(self, map_path, **options):
@@ -404,16 +411,8 @@ class TopDZI(DZI):
         cx, cy = self.tile2cell(tx, ty)
         render.tile(im_getter, cx, cy, layer, self.square_size)
 
-    def save_map_info(self):
-        w, h = self.pyramid[-1 - self.skip_level]
-        info = {
-            'x0': -(self.cxo * self.square_size * CELL_SIZE),
-            'y0': -(self.cyo * self.square_size * CELL_SIZE),
-            'sqr': self.square_size,
-            'w': w,
-            'h': h,
-            'cell_rects': geometry.rect_cover(self.cells),
-        }
-        path = os.path.join(self.path, 'map_info.json')
-        with open(path, 'w') as f:
-            f.write(json.dumps(info))
+    def update_map_info(self, info):
+        info['x0'] = -(self.cxo * self.square_size * CELL_SIZE)
+        info['y0'] = -(self.cyo * self.square_size * CELL_SIZE)
+        info['sqr'] = self.square_size
+        return info

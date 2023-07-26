@@ -7,13 +7,6 @@ const Map = class {
     tiles = [];
     overlays = {};
     overlay_layer = 0;
-    room = 0;
-    foraging = 0;
-    zombie = 0;
-    objects = 0;
-    x0 = 0;
-    y0 = 0;
-    sqr = 1;
     cell_rects = [];
     clip_list = [];
 
@@ -24,15 +17,16 @@ const Map = class {
     }
 
     cell2pixel(cx, cy) {
-        let p = {}
+        let x = this.x0;
+        let y = this.y0;
         if (map_type == 'iso') {
-            p.x = this.x0 + (cx - cy) * this.sqr * 150;
-            p.y = this.y0 + (cx + cy) * this.sqr * 75;
+            x += (cx - cy) * this.sqr * 150;
+            y += (cx + cy) * this.sqr * 75;
         } else {
-            p.x = this.x0 + cx * this.sqr * 300;
-            p.y = this.y0 + cy * this.sqr * 300;
+            x += cx * this.sqr * 300;
+            y += cy * this.sqr * 300;
         }
-        return p;
+        return {x: x, y: y};
     }
 
     getClipPoints(rects, remove=true) {
@@ -74,12 +68,13 @@ const Map = class {
         
         for (let type of ['zombie', 'foraging']) {
             if (this.overlays[type]) {
-                this.overlays[type].setCroppingPolygons(this.clip_list);
+                let clip_list = shiftClipList(this.clip_list, this.info[type].scale, 0);
+                this.overlays[type].setCroppingPolygons(clip_list);
             }
         }
         for (let type of ['room', 'objects']) {
             if (this.overlays[type]) {
-                let clip_list = shiftClipList(this.clip_list);
+                let clip_list = shiftClipList(this.clip_list, this.info[type].scale, currentLayer);
                 this.overlays[type].setCroppingPolygons(clip_list);
             }
         }
@@ -94,9 +89,10 @@ const Map = class {
 
     _load(type, layer) {
         if (viewer) {
-            let x = base_map.x0 - this.x0;
-            let y = base_map.y0 - this.y0;
+            let x = (base_map.x0 - this.x0) / base_map.scale;
+            let y = (base_map.y0 - this.y0) / base_map.scale;
             let p = viewer.world.getItemAt(0).imageToViewportCoordinates(x, y);
+            console.log(this.name, type, x, y, p);
             let width = this.w / base_map.w;
             if (type == 'base') {
                 if (layer < this.layers && this.tiles[layer] == 0) {
@@ -145,10 +141,11 @@ const Map = class {
                         } else {
                             this.overlays[type] = obj.item;
                             if (shift) {
-                                let clip_list = shiftClipList(this.clip_list, layer);
+                                let clip_list = shiftClipList(this.clip_list, this.info[type].scale, layer);
                                 this.overlays[type].setCroppingPolygons(clip_list);
                             } else {
-                                this.overlays[type].setCroppingPolygons(this.clip_list);
+                                let clip_list = shiftClipList(this.clip_list, this.info[type].scale, 0);
+                                this.overlays[type].setCroppingPolygons(clip_list);
                             }
                         }
                     }).bind(this),
@@ -204,29 +201,34 @@ const Map = class {
         }
     }
 
-    loadMapInfo() {
+    loadMapInfo(type) {
         let xhttp = new XMLHttpRequest();
-        xhttp.open("GET", this.getMapRoot() + "base" + suffix + "/map_info.json", false);
+        xhttp.open("GET", this.getMapRoot() + type + suffix + "/map_info.json", false);
         try {
             xhttp.send(null);
         } catch (error) {
         } 
         if (xhttp.status === 200) {
             let info = JSON.parse(xhttp.responseText);
-            this.x0 = info.x0;
-            this.y0 = info.y0;
-            this.w = info.w;
-            this.h = info.h;
-            this.sqr = info.sqr;
-            this.cell_rects = info.cell_rects;
+            info.scale = 1 << info.skip;
+            this.info[type] = info;
         }
     }
 
     init() {
         this.layers = this.getTotalLayers();
         this.tiles = Array(this.layers).fill(0);
-        this.loadMapInfo();
+        this.info = {};
+        this.loadMapInfo('base');
+        this.w = this.info.base.w * this.info.base.scale;
+        this.h = this.info.base.h * this.info.base.scale;
+        this.scale = this.info.base.scale;
+        this.x0 = this.info.base.x0;
+        this.y0 = this.info.base.y0;
+        this.sqr = this.info.base.sqr;
+        this.cell_rects = this.info.base.cell_rects;
         for (let type of ['zombie', 'foraging', 'room', 'objects']) {
+            this.loadMapInfo(type);
             this.overlays[type] = 0;
         }
     }
@@ -569,7 +571,7 @@ function init(callback=null) {
         prefixUrl: "openseadragon/images/",
         navigatorBackground: 'black',
         minZoomImageRatio: 0.5,
-        maxZoomPixelRatio: map_type == "top" ? 12 : 2
+        maxZoomPixelRatio: (map_type == "top" ? 12 : 2) * base_map.scale
     });
 
     viewer.addHandler('add-item-failed', function(event) {
@@ -712,6 +714,9 @@ function init(callback=null) {
     })
 
     if (map_type == "top") {
+        viewer.drawer.context.mozImageSmoothingEnabled = false;
+        viewer.drawer.context.webkitImageSmoothingEnabled = false;
+        viewer.drawer.context.msImageSmoothingEnabled = false;
         viewer.drawer.context.imageSmoothingEnabled = false;
         grid2key = grid2keyTop;
     } else {
@@ -731,16 +736,13 @@ function init(callback=null) {
     success_callback(success_callback);
 }
 
-function shiftClipList(clip_list, layer=null) {
+function shiftClipList(clip_list, scale, layer) {
     let clip_list_shift = [];
-    if (layer == null) {
-        layer = currentLayer;
-    }
-    let shift = -192 * layer;
+    let yshift = (map_type == "top" ? 0 : 192 * currentLayer);
     for (let i = 0; i < clip_list.length; i++) {
         let points = [];
         for (let j = 0; j < clip_list[i].length; j++) {
-            points.push({x: clip_list[i][j].x, y: clip_list[i][j].y + shift})
+            points.push({x: clip_list[i][j].x / scale, y: (clip_list[i][j].y - yshift) / scale})
         }
         clip_list_shift.push(points);
     }
@@ -1122,13 +1124,15 @@ function getCanvasOriginAndStep() {
     zm = viewer.world.getItemAt(0).viewportToImageZoom(zm);
     zm *= window.devicePixelRatio;
     let yshift = (map_type == "top" ? 0 : 192 * currentLayer);
-    let vp00 = viewer.world.getItemAt(0).imageToViewportCoordinates(base_map.x0, base_map.y0 - yshift);
+    let x0 = base_map.x0 / base_map.scale;
+    let y0 = (base_map.y0 - yshift) / base_map.scale;
+    let vp00 = viewer.world.getItemAt(0).imageToViewportCoordinates(x0, y0);
     let c00 = viewer.viewport.pixelFromPoint(vp00, true);
     c00.x *= window.devicePixelRatio;
     c00.y *= window.devicePixelRatio;
 
-    let step_cell = base_map.sqr * 300 * zm;
-    let step_block = base_map.sqr * 10 * zm;
+    let step_cell = base_map.sqr * 300 * zm / base_map.scale;
+    let step_block = step_cell / 30;
 
     return [c00, step_cell, step_block];
 }

@@ -63,12 +63,18 @@ COLOR_MAP = {
     'emptyoutside': 'silver',
 }
 DEFAULT_COLOR = 'cyan'
-ROOM_FONT = ImageFont.truetype("arial.ttf", 20)
 
 class RoomRender(object):
     def __init__(self, **options):
         self.input = options.get('input')
         self.encoding = options.get('encoding')
+        font_name = options.get('room_font')
+        if not font_name:
+            font_name = options.get('default_font', 'arial.tff')
+        font_size = options.get('room_font_size')
+        if not font_size:
+            font_size = options.get('default_font_size', 20)
+        self.font = ImageFont.truetype(font_name, int(font_size))
 
     def square(self, im_getter, ox, oy, sx, sy, layer):
         cx, subx = divmod(sx, pzdzi.CELL_SIZE)
@@ -81,7 +87,7 @@ class RoomRender(object):
             raw_name = room.label[layer, subx, suby]
             name = raw_name.decode(self.encoding, errors='ignore')
             color = COLOR_MAP.get(name, DEFAULT_COLOR)
-            drawing.append((render_long_text, (name, color, ROOM_FONT)))
+            drawing.append((render_long_text, (name, color, self.font)))
         if (layer, subx, suby) in room.edge:
             idx, flag = room.edge[layer, subx, suby]
             raw_name = room.name[idx]    

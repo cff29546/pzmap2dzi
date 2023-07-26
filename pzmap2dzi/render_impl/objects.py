@@ -84,11 +84,17 @@ COLOR_MAP = {
     'ZoneStory': 'yellow',
 }
 DEFAULT_COLOR = 'white'
-OBJ_FONT = ImageFont.truetype("arial.ttf", 20)
 
 class ObjectsRender(object):
     def __init__(self, **options):
         self.input = options.get('input')
+        font_name = options.get('objects_font')
+        if not font_name:
+            font_name = options.get('default_font', 'arial.tff')
+        font_size = options.get('objects_font_size')
+        if not font_size:
+            font_size = options.get('default_font_size', 20)
+        self.font = ImageFont.truetype(font_name, int(font_size))
         objects_path = os.path.join(self.input, 'objects.lua')
         types = set()
         if not options.get('no_car_spawn', False):
@@ -120,7 +126,7 @@ class ObjectsRender(object):
             if (sx, sy) in label[layer]:
                 for t, name in label[layer][sx, sy]:
                     color = COLOR_MAP.get(t, DEFAULT_COLOR)
-                    drawing.append((render_long_text, (name, color, OBJ_FONT)))
+                    drawing.append((render_long_text, (name, color, self.font)))
         if drawing:
             im = im_getter.get()
             draw = ImageDraw.Draw(im)

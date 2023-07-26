@@ -84,11 +84,23 @@ render_conf:
     # carto-zed: Carto-Zed like color theme
     top_view_color_mode: avg
     
+    # font settings
+    default_font: arial.ttf
+    default_font_size: 20
+    # room font settings, using default font if omitted
+    # room_font: arial.ttf
+    # room_font_size: 20
+
     # zombie heatmap
     zombie_count: true
+    # zombie count font settings, using default font if omitted
+    # zombie_count_font: arial.ttf
+    zombie_count_font_size: 40
 
     # objects areas
     vehicle: true
     special_zombie: true
     stroy: true
-
+    # objects font settings, using default font if omitted
+    # objects_font: arial.ttf
+    # objects_font_size: 20

@@ -31,12 +31,17 @@ def get_color(zombie, alpha):
         b = 255 - g
     return (r, g, b, alpha)
 
-ZOMBIE_FONT = ImageFont.truetype("arial.ttf", 40)
-
 class ZombieRender(object):
     def __init__(self, **options):
         self.input = options.get('input')
         self.zombie_count = options.get('zombie_count', False)
+        font_name = options.get('zombie_count_font')
+        if not font_name:
+            font_name = options.get('default_font', 'arial.tff')
+        font_size = options.get('zombie_count_font_size')
+        if not font_size:
+            font_size = options.get('default_font_size', 40)
+        self.font = ImageFont.truetype(font_name, int(font_size))
 
     def update_options(self, options):
         options['layers'] = 1
@@ -70,7 +75,7 @@ class ZombieRender(object):
                 if self.zombie_count and x == 9 and y == 0:
                     color = get_color(zombie, 255)
                     t = 'z:{}'.format(zombie)
-                    text.append((render_text, (ox, oy, t, color, ZOMBIE_FONT)))
+                    text.append((render_text, (ox, oy, t, color, self.font)))
 
         if drawing or text:
             im = im_getter.get()
@@ -97,7 +102,7 @@ class ZombieRender(object):
         draw_square(draw, ox, oy, color)
         if self.zombie_count and x == 9 and y == 0:
             color = get_color(zombie, 255)
-            render_text(draw, ox, oy, str(zombie), color, ZOMBIE_FONT)
+            render_text(draw, ox, oy, str(zombie), color, self.font)
 
 class ZombieTopRender(object):
     def __init__(self, **options):

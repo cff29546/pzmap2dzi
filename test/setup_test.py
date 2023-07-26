@@ -8,7 +8,10 @@ def copy(dst, src, name):
     shutil.copy(source, target)
 
 def copy_map(dst, src, cells):
-    os.makedirs(dst, exist_ok=True)
+    try:
+        os.makedirs(dst)
+    except:
+        pass
     copy(dst, src, 'objects.lua')
     for x, y in cells:
         copy(dst, src, 'world_{}_{}.lotpack'.format(x, y))

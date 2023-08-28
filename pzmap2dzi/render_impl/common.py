@@ -1,8 +1,30 @@
 from .. import pzdzi, geometry
+import PIL
+from PIL import ImageFont
+
+class LazyFont(object):
+    def __init__(self, name, size):
+        self.name = name
+        self.size = size
+        self.font = None
+
+    def get(self):
+        if self.font is None:
+            self.font = ImageFont.truetype(self.name, self.size)
+        return self.font
+
+if tuple(map(int,PIL.__version__.split('.'))) >= (8,0,0):
+    def text_size(draw, text, font):
+        left, top, right, bottom = draw.textbbox((0, 0), text, font)
+        return left, top, right - left, bottom - top
+else:
+    def text_size(draw, text, font):
+        w, h = draw.textsize(text, font)
+        return 0, 0, w, h
 
 def render_text(draw, x, y, text, color, font):
-    w, h = draw.textsize(text, font)
-    draw.text((x - (w >> 1), y - (h >> 1)), text, color, font)
+    dx, dy, w, h = text_size(draw, text, font)
+    draw.text((x - (w >> 1) - dx, y - (h >> 1) - dy), text, color, font)
 
 def draw_square(draw, x, y, color):
     h = pzdzi.IsoDZI.HALF_SQR_HEIGHT
@@ -39,12 +61,11 @@ def break_long_text(text):
     return text[:l] + '\n' + text[l:]
 
 def render_long_text(draw, x, y, text, color, font):
-    w, h = draw.textsize(text, font)
+    dx, dy, w, h = text_size(draw, text, font)
     if w >= pzdzi.IsoDZI.SQR_WIDTH:
         text = break_long_text(text)
-        w, h = draw.textsize(text, font)
-    #draw.rectangle([x - w // 2, y - h // 2, x + w // 2, y + h // 2], fill=(0, 0, 0, 0))
-    draw.text((x - w // 2, y - h // 2), text, color, font, align='center')
+        dx, dy, w, h = text_size(draw, text, font)
+    draw.text((x - dx - w // 2, y - dy - h // 2), text, color, font, align='center')
 
 _PAD_Y = 5
 _PAD_X = 10

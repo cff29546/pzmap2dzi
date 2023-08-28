@@ -1,6 +1,6 @@
-from PIL import ImageDraw, ImageFont
+from PIL import ImageDraw
 import os
-from .common import draw_square, render_long_text, render_edge
+from .common import draw_square, render_long_text, render_edge, LazyFont
 from .. import pzdzi, pzobjects
 
 FORAGING_COLOR = {
@@ -94,7 +94,7 @@ class ObjectsRender(object):
         font_size = options.get('objects_font_size')
         if not font_size:
             font_size = options.get('default_font_size', 20)
-        self.font = ImageFont.truetype(font_name, int(font_size))
+        self.font = LazyFont(font_name, int(font_size))
         objects_path = os.path.join(self.input, 'objects.lua')
         types = set()
         if not options.get('no_car_spawn', False):
@@ -126,7 +126,7 @@ class ObjectsRender(object):
             if (sx, sy) in label[layer]:
                 for t, name in label[layer][sx, sy]:
                     color = COLOR_MAP.get(t, DEFAULT_COLOR)
-                    drawing.append((render_long_text, (name, color, self.font)))
+                    drawing.append((render_long_text, (name, color, self.font.get())))
         if drawing:
             im = im_getter.get()
             draw = ImageDraw.Draw(im)

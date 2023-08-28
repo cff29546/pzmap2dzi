@@ -1,0 +1,9 @@
+pynput
+lupa==1.7
+pyclipper
+pillow
+pyyaml
+backports.functools_lru_cache==1.6.6
+flask
+waitress
+

@@ -1,6 +1,6 @@
-from PIL import ImageDraw, ImageFont
+from PIL import ImageDraw
 import os
-from .common import render_long_text, render_edge
+from .common import render_long_text, render_edge, LazyFont
 from .. import lotheader, pzdzi, geometry
 
 try:
@@ -74,7 +74,7 @@ class RoomRender(object):
         font_size = options.get('room_font_size')
         if not font_size:
             font_size = options.get('default_font_size', 20)
-        self.font = ImageFont.truetype(font_name, int(font_size))
+        self.font = LazyFont(font_name, int(font_size))
 
     def square(self, im_getter, ox, oy, sx, sy, layer):
         cx, subx = divmod(sx, pzdzi.CELL_SIZE)
@@ -87,7 +87,7 @@ class RoomRender(object):
             raw_name = room.label[layer, subx, suby]
             name = raw_name.decode(self.encoding, errors='ignore')
             color = COLOR_MAP.get(name, DEFAULT_COLOR)
-            drawing.append((render_long_text, (name, color, self.font)))
+            drawing.append((render_long_text, (name, color, self.font.get())))
         if (layer, subx, suby) in room.edge:
             idx, flag = room.edge[layer, subx, suby]
             raw_name = room.name[idx]    

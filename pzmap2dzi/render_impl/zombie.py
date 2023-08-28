@@ -1,6 +1,6 @@
-from PIL import ImageDraw, ImageFont
+from PIL import ImageDraw
 import os
-from .common import render_text, draw_square
+from .common import render_text, draw_square, LazyFont
 from .. import lotheader, pzdzi
 
 try:
@@ -41,7 +41,7 @@ class ZombieRender(object):
         font_size = options.get('zombie_count_font_size')
         if not font_size:
             font_size = options.get('default_font_size', 40)
-        self.font = ImageFont.truetype(font_name, int(font_size))
+        self.font = LazyFont(font_name, int(font_size))
 
     def update_options(self, options):
         options['layers'] = 1
@@ -75,7 +75,7 @@ class ZombieRender(object):
                 if self.zombie_count and x == 9 and y == 0:
                     color = get_color(zombie, 255)
                     t = 'z:{}'.format(zombie)
-                    text.append((render_text, (ox, oy, t, color, self.font)))
+                    text.append((render_text, (ox, oy, t, color, self.font.get())))
 
         if drawing or text:
             im = im_getter.get()
@@ -102,7 +102,7 @@ class ZombieRender(object):
         draw_square(draw, ox, oy, color)
         if self.zombie_count and x == 9 and y == 0:
             color = get_color(zombie, 255)
-            render_text(draw, ox, oy, str(zombie), color, self.font)
+            render_text(draw, ox, oy, str(zombie), color, self.font.get())
 
 class ZombieTopRender(object):
     def __init__(self, **options):

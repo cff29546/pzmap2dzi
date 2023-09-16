@@ -220,16 +220,18 @@ const Map = class {
         this.tiles = Array(this.layers).fill(0);
         this.info = {};
         this.loadMapInfo('base');
-        this.w = this.info.base.w * this.info.base.scale;
-        this.h = this.info.base.h * this.info.base.scale;
-        this.scale = this.info.base.scale;
-        this.x0 = this.info.base.x0;
-        this.y0 = this.info.base.y0;
-        this.sqr = this.info.base.sqr;
-        this.cell_rects = this.info.base.cell_rects;
-        for (let type of ['zombie', 'foraging', 'room', 'objects']) {
-            this.loadMapInfo(type);
-            this.overlays[type] = 0;
+        if (this.info.base) {
+            this.w = this.info.base.w * this.info.base.scale;
+            this.h = this.info.base.h * this.info.base.scale;
+            this.scale = this.info.base.scale;
+            this.x0 = this.info.base.x0;
+            this.y0 = this.info.base.y0;
+            this.sqr = this.info.base.sqr;
+            this.cell_rects = this.info.base.cell_rects;
+            for (let type of ['zombie', 'foraging', 'room', 'objects']) {
+                this.loadMapInfo(type);
+                this.overlays[type] = 0;
+            }
         }
     }
 

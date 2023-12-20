@@ -76,7 +76,7 @@ render_conf:
     # png compress level: from 0 to 9. -1 for using default
     image_compress_level: -1
     # enable cache to accelerate pyramid building, require python 3.8+
-    enable_cache: true
+    enable_cache: false
     # cache limit in MB, 0 for unlimited
     cache_limit_mb: 0
     # width for a single tile in top view

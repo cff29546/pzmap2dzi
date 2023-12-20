@@ -21,17 +21,20 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 
 # Requirement
 - **Storage**: The full output size of isometric map for game version 41.78 is around 450GB (or 2.5TB with lossless png format) and consists of 4M files. SSD is recommended as high I/O bandwidth can reduce render time.
-- **Memory**: Each worker requires approximately 1 GB of memory to work. An additional 4 GB of shared memory is needed if the cache is enabled. For example, the program will need 16 GB + 4 GB memory when using 16 threads.
+- **Memory**: Each worker requires approximately 1 GB of memory to work. An additional 4 GB of shared memory is needed if the shared memory acceleration is enabled. For example, the program will need 16 GB + 4 GB memory when using 16 threads with shared memory acceleration.
 - **Time**
     - Test machine spec & config
         - CPU: AMD Ryzen 7 5700G @ 3.8 GHz (8 core, 16 threads)
         - Memory: 64GB DDR4 2133
         - Output Storage: NVME SSD
-        - Render Settings: 16 thread, cache enabled
+        - Render Settings: 16 thread, shared memory acceleration enabled
         - Game Version: 41.78.16
     - The isometric map rending took around 3.5 hours (or even slower with lossless png format)
     - The zombie heatmap took about half of the isometric map render time
     - If you choose to render only top view map, output size will be around 500MB and can be done within half hour.
+- **Note**
+    - Shared memory acceleration may not compatible with [Hybrid Architecture](https://www.intel.com/content/www/us/en/developer/articles/technical/hybrid-architecture.html) CPU
+        - To turn it on, see *Change rendering configurations* section below
 
 # How to run
 
@@ -54,7 +57,10 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
    Run `run.bat` to render all isometric and top view maps
 
 # Change rendering configurations
-   See `conf.yaml` for more detials.
+   See `conf.yaml` and `run.bat` for more detials.
+
+- Turn on shared memory acceleration
+    - In `render_conf` section of `conf.yaml`, set `enable_cache` to `ture`
 
 - Do not render zombie heatmap
     - Remove arguments `zombie zombie_top` from `run.bat`

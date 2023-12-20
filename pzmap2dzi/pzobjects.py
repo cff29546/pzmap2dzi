@@ -1,4 +1,4 @@
-import lupa
+import slpp
 import os
 from . import geometry
 from functools import partial
@@ -7,39 +7,12 @@ try:
 except ImportError:
     from backports.functools_lru_cache import lru_cache
 
-def is_list_keys(keys):
-    for key in keys:
-        if type(key) is not int:
-            return False
-    if sum(keys) == (len(keys) * (len(keys) + 1) // 2):
-        return True
-    return False
-
-def unpack_lua_table(table):
-    if lupa.lua_type(table) != 'table':
-        return table
-    d = dict(table)
-    keys = list(d.keys())
-    isList = is_list_keys(keys)
-    if isList:
-        output = [None] * len(keys)
-        for key in keys:
-            output[key - 1] = unpack_lua_table(d[key])
-    else:
-        output = {}
-        for key in keys:
-            output[key] = unpack_lua_table(d[key])
-    return output
-
 def load_objects_raw(objects_path):
     if not os.path.isfile(objects_path):
         return []
-    lua = lupa.LuaRuntime(unpack_returned_tuples=False)
     with open(objects_path, 'r') as f:
-        lua.execute(f.read())
-    olist = unpack_lua_table(lua.globals().objects)
-    for i in range(len(olist)):
-        olist[i]['id'] = i
+        text = f.read()
+    olist = slpp.slpp.decode(text.replace('objects = ', '', 1))
     return olist
 
 FORAGING_TYPES = set([

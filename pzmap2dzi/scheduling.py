@@ -157,10 +157,10 @@ class TopologicalDziScheduler(object):
             return None
         if state == 'error':
             print('worker[{}] error[{}]'.format(wid, result))
-            self.stop = True
+            self.stop = 'error'
             return None
         if self.hk and self.hk.peek():
-            self.stop = True
+            self.stop = 'hotkey'
             return None
         job = 'hold'
         if state == 'ready' and len(self.splits[wid]) > 0:

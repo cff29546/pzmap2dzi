@@ -1,5 +1,5 @@
 pynput
-lupa==1.7
+slpp
 pyclipper
 pillow
 pyyaml

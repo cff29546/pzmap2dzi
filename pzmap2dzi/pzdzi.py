@@ -263,7 +263,7 @@ class DZI(object):
         task.run((tasks, done), n)
         if schd.stop:
             if verbose:
-                print('Render stopped by hotkey.')
+                print('Render interrupted: {}'.format(schd.stop))
             return False
         if verbose:
             print('Done')

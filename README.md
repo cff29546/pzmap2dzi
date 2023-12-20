@@ -7,7 +7,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 - HTML viewer for viewing the generated Deep Zoom image.
 - Various plant rendering configurations (snow, flower, tree size, etc.).
 - Supports multi-thread acceleration
-- Supports image cache acceleration when building dzi pyramid (python 3.8+ only)
+- Supports shared memory acceleration when building dzi pyramid (python 3.8+ only)
 - Supports resuming from a breakpoint
 - Supports room info rendering
 - Supports zombie heatmap rendering
@@ -34,7 +34,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
     - If you choose to render only top view map, output size will be around 500MB and can be done within half hour.
 - **Note**
     - Shared memory acceleration
-        - May not compatible with [Hybrid Architecture](https://www.intel.com/content/www/us/en/developer/articles/technical/hybrid-architecture.html) CPUs and resulting in render failures
+        - May not compatible with [Hybrid Architecture](https://www.intel.com/content/www/us/en/developer/articles/technical/hybrid-architecture.html) CPUs and could result in render failures
         - Unstable with eariler python builds because of [buggy implementation](https://stackoverflow.com/questions/65968882/unlink-does-not-work-in-pythons-shared-memory-on-windows). Python 3.10.9+ or 3.11.1+ recommended
         - To turn it on, see *Change rendering configurations* section below
 

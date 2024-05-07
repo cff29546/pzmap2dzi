@@ -391,6 +391,7 @@ var UI_HTML = {
     </p>`,
 
     map: `
+    <button id="toggle_all_maps" type="button" onclick="toggleAllMaps()">Load All</button>
     <select id="map_selector" onchange="onMapSelect()">
         <option value="">(Select Mod Map to Load)</option>
     </select>
@@ -479,6 +480,27 @@ function addMap(name) {
             updateMapUI();
             updateClip();
             updateMaps(currentLayer);
+        }
+    }
+}
+
+function toggleAllMaps() {
+    if (mapui) {
+        if (mod_maps.length > 0) {
+            for (pos = 0; pos < mod_maps.length; pos++) {
+                mod_maps[pos].destroy();
+            }
+            mod_maps = [];
+            document.getElementById("map_btn").classList.remove('active');
+            updateMapUI();
+            updateClip();
+        } else {
+            let s = document.getElementById('map_selector');
+            for (let i = 0; i < s.options.length; i++) {
+                if (s.options[i].value) {
+                    addMap(s.options[i].value);
+                }
+            }
         }
     }
 }
@@ -1291,6 +1313,14 @@ function toggleModMapUI() {
 
 function updateMapUI() {
     if (mapui) {
+        let btn = document.getElementById("toggle_all_maps");
+        if (mod_maps.length > 0) {
+            btn.classList.add('active');
+            btn.innerText = 'Remove All';
+        } else {
+            btn.classList.remove('active');
+            btn.innerText = 'Load All';
+        }
         d = document.getElementById("map_list");
         d.innerHTML = '';
         for (let pos = 0; pos < mod_maps.length; pos++) {

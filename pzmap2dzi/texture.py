@@ -71,7 +71,7 @@ def color_sum(pixels):
     if total > 0:
         r, g, b, _ = map(sum, zip(*pixels))
         return r, g, b, total
-    return 0
+    return 0, 0, 0, 1
 
 class Texture(object):
     def __init__(self, im, offset=None):
@@ -81,7 +81,11 @@ class Texture(object):
             ox = int(im.info.get('ox', 0))
             oy = int(im.info.get('oy', 0))
         bbox = im.getbbox()
-        if bbox and bbox != (0, 0) + im.size:
+        if bbox is None:
+            self.im = Image.new('RGBA', (0, 0))
+            self.ox = 0
+            self.oy = 0
+        elif bbox != (0, 0) + im.size:
             self.im = im.crop(bbox)
             self.ox = bbox[0] + ox
             self.oy = bbox[1] + oy
@@ -284,9 +288,8 @@ class TextureLibrary(object):
                 t.render(im, x, y)
         return Texture(im, (-x, -y))
 
-    def config_plants(self, season='spring', snow=False, flower=False, large_bush=False,
-                 tree_size=1, jumbo_size=3, jumbo_type=3):
-        pi = plants.PlantsInfo(season, snow, flower, large_bush, tree_size, jumbo_size, jumbo_type)
+    def config_plants(self, conf):
+        pi = plants.PlantsInfo(conf)
         for key, names in pi.mapping.items():
             self.lib[key] = self.blend_textures(names)
 
@@ -321,7 +324,13 @@ if __name__ == '__main__':
     for pack_path in args.packs:
         lib.add_pack(pack_path, args.debug)
     if args.test_plants:
-        lib.config_plants('summer2', True, True, True, 3, 5)
+        lib.config_plants({
+            'snow': True,
+            'flower': True,
+            'large_bush': True,
+            'tree_size': 3,
+            'jumbo_tree_size': 5,
+        })
     lib.save_all(args.output, args.mp)
     #lib.save_pages(args.output)
     

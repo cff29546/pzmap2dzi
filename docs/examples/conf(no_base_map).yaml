@@ -50,21 +50,23 @@ render_conf:
     top_view_square_size: 1
 
     # base render
-    # eable snow on trees and bushes
-    snow: false
-    # use large bushes
-    large_bush: false
-    # eable flower on trees and bushes
-    flower: false
-    # supported season: spring, summer, summer2, autumn, winter
-    season: summer2
-    # normal tree size, range from 0 to 3 (inclusive)
-    tree_size: 2
-    # large tree size, range from 0 to 5 (inclusive)
-    jumbo_tree_size: 4
-    # large tree type, from: 0 to 10  (inclusive)
-    # see _TREE_DEF in pzmap2dzi/plants.py for more detail
-    jumbo_tree_type: 0
+    plants_conf:
+        # eable snow on trees and bushes
+        snow: false
+        # use large bushes
+        large_bush: false
+        # eable flower on trees and bushes
+        flower: false
+        # supported season: spring, summer, summer2, autumn, winter
+        season: summer2
+        # normal tree size, range from 0 to 3 (inclusive)
+        tree_size: 2
+        # large tree size, range from 0 to 5 (inclusive)
+        jumbo_tree_size: 4
+        # large tree type, from: 0 to 10  (inclusive)
+        # see _TREE_DEF in pzmap2dzi/plants.py for more detail
+        jumbo_tree_type: 0
+
     # square color method in top view mode
     # supported method:
     # base: only use the color of the floor tile

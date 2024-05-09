@@ -15,17 +15,10 @@ class TextureRender(object):
     def __init__(self, **options):
         texture_path = options.get('texture')
         cache_name = options.get('cache_name')
-        season = options.get('season', 'summer2')
-        snow = options.get('snow', False)
-        flower = options.get('flower', False)
-        large_bush = options.get('large_bush', False)
-        tree_size = options.get('tree_size', 2)
-        jumbo_tree_size = options.get('jumbo_tree_size', 3)
-        jumbo_tree_type = options.get('jumbo_tree_type', 0)
+        plants_conf = options.get('plants_conf', {})
 
         self.tl = texture.TextureLibrary(texture_path, cache_name)
-        self.tl.config_plants(season, snow, flower, large_bush,
-                              tree_size, jumbo_tree_size, jumbo_tree_type)
+        self.tl.config_plants(plants_conf)
 
 class BaseRender(TextureRender):
     def __init__(self, **options):

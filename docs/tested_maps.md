@@ -16,21 +16,246 @@ Following are maps that have been tested to work with pzmap2dzi.
 # Workshop maps
 Workshop maps may require downloading extra texture mods before rendering with pzmap2dzi.
 
+- [Addams Family Mansion](https://steamcommunity.com/sharedfiles/filedetails/?id=2879804540)
 - [Ashenwood](https://steamcommunity.com/sharedfiles/filedetails/?id=2820363371)
 - [Bedford Falls](https://steamcommunity.com/sharedfiles/filedetails/?id=522891356)
+- [Betsys Farm](https://steamcommunity.com/sharedfiles/filedetails/?id=2925086605)
+- [Big Bear Lake](https://steamcommunity.com/sharedfiles/filedetails/?id=2917162495)
 - [Blueberry](https://steamcommunity.com/sharedfiles/filedetails/?id=2671890843)
+- [Breakpoint](https://steamcommunity.com/sharedfiles/filedetails/?id=2852608098)
+- [Bunker: Day of the Dead](https://steamcommunity.com/sharedfiles/filedetails/?id=3081449196)
+- [Bunker: Last Minute Prepper](https://steamcommunity.com/sharedfiles/filedetails/?id=2889983340)
 - [Camden County](https://steamcommunity.com/sharedfiles/filedetails/?id=2888082232)
+- [Canvasback Studios](https://steamcommunity.com/sharedfiles/filedetails/?id=3125338860)
+- [Cedar Hill](https://steamcommunity.com/sharedfiles/filedetails/?id=2915656059)
+- [Chestown](https://steamcommunity.com/sharedfiles/filedetails/?id=2840889213)
+- [Chernaville](https://steamcommunity.com/sharedfiles/filedetails/?id=2734683361)
 - [Chinatown, KY](https://steamcommunity.com/sharedfiles/filedetails/?id=2730975264)
 - [Chinatown Expansion, KY](https://steamcommunity.com/sharedfiles/filedetails/?id=2895386882)
+- [Cigaro gated community](https://steamcommunity.com/sharedfiles/filedetails/?id=2810706046)
+- [Ciudad Madriguera](https://steamcommunity.com/sharedfiles/filedetails/?id=3107243597)
+- [C.O.N. Research & Testing Facility](https://steamcommunity.com/sharedfiles/filedetails/?id=2766626985)
+- [Corn Farm](https://steamcommunity.com/sharedfiles/filedetails/?id=1847175810)
+- [Coryerdon or Dirkerdam to Over the River road](https://steamcommunity.com/sharedfiles/filedetails/?id=2892795238)
+- [Coryerdon-科里尔登](https://steamcommunity.com/sharedfiles/filedetails/?id=2782415851)
+- [East Riverside](https://steamcommunity.com/sharedfiles/filedetails/?id=2851982772)
+- [Eerie Country](https://steamcommunity.com/sharedfiles/filedetails/?id=1254546530)
+- [Ekron](https://steamcommunity.com/sharedfiles/filedetails/?id=2712480036)
+- [Elliot Pond](https://steamcommunity.com/sharedfiles/filedetails/?id=3022165560)
+- [Elysium Island](https://steamcommunity.com/sharedfiles/filedetails/?id=2819655145)
+- [EVAC Muldraugh](https://steamcommunity.com/sharedfiles/filedetails/?id=2928391710)
+- [Exotics Rest Area](https://steamcommunity.com/sharedfiles/filedetails/?id=2967216697)
+- [Fort Boonesborough](https://steamcommunity.com/sharedfiles/filedetails/?id=2968421358)
+- [Fort Knox linked to Eerie Country](https://steamcommunity.com/sharedfiles/filedetails/?id=2595249356)
 - [Fort Redstone](https://steamcommunity.com/sharedfiles/filedetails/?id=1516836158)
+- [Fort Rock Ridge](https://steamcommunity.com/sharedfiles/filedetails/?id=2806456685)
+- [FoxWood](https://steamcommunity.com/sharedfiles/filedetails/?id=3048911564)
 - [Grapeseed](https://steamcommunity.com/sharedfiles/filedetails/?id=2463499011)
 - [Greenleaf](https://steamcommunity.com/sharedfiles/filedetails/?id=2778799110)
+- [Greenport, KY](https://steamcommunity.com/sharedfiles/filedetails/?id=3033014448)
+- [Heavens Hill](https://steamcommunity.com/sharedfiles/filedetails/?id=2834407334)
+- [Hilltop Manor](https://steamcommunity.com/sharedfiles/filedetails/?id=2812151695)
+- [Homepie](https://steamcommunity.com/sharedfiles/filedetails/?id=2911028142)
+- [Hopewell, KY](https://steamcommunity.com/sharedfiles/filedetails/?id=2817859141)
+- [Hunter's Base](https://steamcommunity.com/sharedfiles/filedetails/?id=3018062764)
+- [Irvington, KY](https://steamcommunity.com/sharedfiles/filedetails/?id=2803292383)
+- [Irvington Road](https://steamcommunity.com/sharedfiles/filedetails/?id=2803291537)
+- [Jasperville](https://steamcommunity.com/sharedfiles/filedetails/?id=3123362438)
+- [Kingsmouth in KY](https://steamcommunity.com/sharedfiles/filedetails/?id=2434339338)
 - [Lake Ivy Township](https://steamcommunity.com/sharedfiles/filedetails/?id=2252982049)
+- [Lalafell's Heartlake town](https://steamcommunity.com/sharedfiles/filedetails/?id=2900006618)
+- [Lande Desolate Camping](https://steamcommunity.com/sharedfiles/filedetails/?id=2782410640)
+- [Lake Cumberland](https://steamcommunity.com/sharedfiles/filedetails/?id=3013564297)
+- [Leavenburg](https://steamcommunity.com/sharedfiles/filedetails/?id=3085088928)
+- [Leavenburg-RiversideBridge](https://steamcommunity.com/sharedfiles/filedetails/?id=3085090251)
+- [Leavensburg and Coreydon Connector Road](https://steamcommunity.com/sharedfiles/filedetails/?id=3122593022)
+- [Little Township](https://steamcommunity.com/sharedfiles/filedetails/?id=2542249811)
+- [Louisville Lakehouse](https://steamcommunity.com/sharedfiles/filedetails/?id=2725036390)
+- [Louisville Mall Base](https://steamcommunity.com/sharedfiles/filedetails/?id=2977300651)
+- [Louisville Riverboat](https://steamcommunity.com/sharedfiles/filedetails/?id=2963883586)
+- [Louisville River Marina](https://steamcommunity.com/sharedfiles/filedetails/?id=2963467990)
+- [Louisville Quarantine Zone](https://steamcommunity.com/sharedfiles/filedetails/?id=2934132344)
+- [LV International Airport](https://steamcommunity.com/sharedfiles/filedetails/?id=3045726312)
+- [March Ridge Expansion](https://steamcommunity.com/sharedfiles/filedetails/?id=2778676843)
+- [Military Fuel Depot](https://steamcommunity.com/sharedfiles/filedetails/?id=2940881350)
+- [Monmouth County](https://steamcommunity.com/sharedfiles/filedetails/?id=2887123503)
+- [Muldraugh Checkpoint](https://steamcommunity.com/sharedfiles/filedetails/?id=2926652828)
+- [Muldraugh - West outskirts Shipping Company](https://steamcommunity.com/sharedfiles/filedetails/?id=2872461779)
+- [Muldraugh Fire Department](https://steamcommunity.com/sharedfiles/filedetails/?id=2789097802)
+- [Nettle Township](https://steamcommunity.com/sharedfiles/filedetails/?id=2965081618)
+- [NSCarWorkshop](https://steamcommunity.com/sharedfiles/filedetails/?id=2969621578)
+- [Northwest Blockade](https://steamcommunity.com/sharedfiles/filedetails/?id=2789257975)
+- [OldPark Town](https://steamcommunity.com/sharedfiles/filedetails/?id=2671414643)
+- [Orchidwood(official version)](https://steamcommunity.com/sharedfiles/filedetails/?id=2889235913)
+- [Overlook Hotel](https://steamcommunity.com/sharedfiles/filedetails/?id=2881386527)
+- [Over the River](https://steamcommunity.com/sharedfiles/filedetails/?id=926737806)
+- [Over the River - Secondary Road](https://steamcommunity.com/sharedfiles/filedetails/?id=2603239477)
+- [Papaville](https://steamcommunity.com/sharedfiles/filedetails/?id=2880557637)
 - [Petroville](https://steamcommunity.com/sharedfiles/filedetails/?id=2886261613)
+- [PortCity KY](https://steamcommunity.com/sharedfiles/filedetails/?id=3065569298)
+- [Portland](https://steamcommunity.com/sharedfiles/filedetails/?id=2996522730)
+- [Rabbit Hash, KY](https://steamcommunity.com/sharedfiles/filedetails/?id=2815966702)
+- [Ranger's Homestead](https://steamcommunity.com/sharedfiles/filedetails/?id=3014875368)
 - [Raven Creek](https://steamcommunity.com/sharedfiles/filedetails/?id=2196102849)
+- [Research Facility, KY (and the newer access road)](https://steamcommunity.com/sharedfiles/filedetails/?id=2807152393)
+- [Riverside Mansion](https://steamcommunity.com/sharedfiles/filedetails/?id=2886919248)
+- [Riverside Fire Department](https://steamcommunity.com/sharedfiles/filedetails/?id=2799120190)
+- [Road between Fort Knox and Bedford Falls](https://steamcommunity.com/sharedfiles/filedetails/?id=2595785944)
+- [Road from Monmouth County to Bedford Falls](https://steamcommunity.com/sharedfiles/filedetails/?id=2944975401)
+- [Redbird Ranger Station - Forest Ranger Outpost](https://steamcommunity.com/sharedfiles/filedetails/?id=2796134549)
+- [Reststop Louisville](https://steamcommunity.com/sharedfiles/filedetails/?id=2974686147)
+- [Rosewood Expansion](https://steamcommunity.com/sharedfiles/filedetails/?id=2718350686)
+- [Rosewood Cabins](https://steamcommunity.com/sharedfiles/filedetails/?id=2907242510)
+- [Rosewood VHS & Gun Stores](https://steamcommunity.com/sharedfiles/filedetails/?id=2922087098)
+- [Rusty Rascals Roadkill Restaurant](https://steamcommunity.com/sharedfiles/filedetails/?id=3038971885)
+- [Safe-Tech Cryogenic Facility](https://steamcommunity.com/sharedfiles/filedetails/?id=2838577147)
+- [Shortrest County](https://steamcommunity.com/sharedfiles/filedetails/?id=2946204583)
+- [Southwood 2.0,KY](https://steamcommunity.com/sharedfiles/filedetails/?id=2947314444)
+- [Spencer Mansion lootable](https://steamcommunity.com/sharedfiles/filedetails/?id=2932892342)
+- [Speck](https://steamcommunity.com/sharedfiles/filedetails/?id=2938016617)
+- [Springwood](https://steamcommunity.com/sharedfiles/filedetails/?id=2914532881)
+- [TeraMart - East Side](https://steamcommunity.com/sharedfiles/filedetails/?id=2873362550)
+- [The Eye Lake](https://steamcommunity.com/sharedfiles/filedetails/?id=2857335271)
+- [The Frigate](https://steamcommunity.com/sharedfiles/filedetails/?id=2991291149)
+- [The Mall South Muldraugh Fix](https://steamcommunity.com/sharedfiles/filedetails/?id=2909294200)
+- [The Museum](https://steamcommunity.com/sharedfiles/filedetails/?id=2881370621)
+- [The Oasis](https://steamcommunity.com/sharedfiles/filedetails/?id=3085593188)
+- [The Walking Dead : Prison](https://steamcommunity.com/sharedfiles/filedetails/?id=2905092251)
+- [The Walking Dead : Terminus](https://steamcommunity.com/sharedfiles/filedetails/?id=2928793794)
+- [The Yacht](https://steamcommunity.com/sharedfiles/filedetails/?id=2999704927)
 - [Trelai 4x4 Riverside Expansion](https://steamcommunity.com/sharedfiles/filedetails/?id=2800337234)
+- [Trimble County Power Station & La Grange](https://steamcommunity.com/sharedfiles/filedetails/?id=2802755864)
+- [Tugaland](https://steamcommunity.com/sharedfiles/filedetails/?id=2781180323)
+- [Uncle Red's Bunker Redux](https://steamcommunity.com/sharedfiles/filedetails/?id=2906125013)
+- [Utopia](https://steamcommunity.com/sharedfiles/filedetails/?id=2868565253)
+- [Ver's Roadside: Railroad House](https://steamcommunity.com/sharedfiles/filedetails/?id=3017402870)
+- [Waterlocked Pharmaceutical Factory](https://steamcommunity.com/sharedfiles/filedetails/?id=2958842745)
+- [Wellsburg Lake](https://steamcommunity.com/sharedfiles/filedetails/?id=3014975675)
+- [West Point Gated Community](https://steamcommunity.com/sharedfiles/filedetails/?id=3025055056)
+- [West Point Trailer Park & VHS Store](https://steamcommunity.com/sharedfiles/filedetails/?id=2721653030)
+- [Winchester, KY](https://steamcommunity.com/sharedfiles/filedetails/?id=2890129618)
 
 # Change Log
+
+- 2024-07-15 ([notCommitedYet]()) Added many maps (credit: @ethano8225 on github): 
+  - Addams Family Mansion
+  - Betsys Farm
+  - Big Bear Lake
+  - Breakpoint
+  - Bunker: Day of the Dead
+  - Bunker: Last Minute Prepper
+  - Canvasback Studios
+  - Cedar Hill
+  - Chestown
+  - Chernaville
+  - Cigaro gated community
+  - Ciudad Madriguera
+  - C.O.N. Research & Testing Facility
+  - Corn Farm
+  - Coryerdon or Dirkerdam to Over the River road
+  - Coryerdon-科里尔登
+  - East Riverside
+  - Eerie Country
+  - Ekron
+  - Elliot Pond
+  - Elysium Island
+  - EVAC Muldraugh
+  - Exotics Rest Area
+  - Fort Boonesborough
+  - Fort Knox linked to Eerie Country
+  - Fort Rock Ridge
+  - FoxWood
+  - Greenport, KY
+  - Heavens Hill
+  - Hilltop Manor
+  - Homepie
+  - Hopewell, KY
+  - Hunter's Base
+  - Irvington, KY
+  - Irvington Road
+  - Jasperville
+  - Kingsmouth in KY
+  - Lalafell's Heartlake town
+  - Lande Desolate Camping
+  - Lake Cumberland
+  - Leavenburg
+  - Leavenburg-RiversideBridge
+  - Leavensburg and Coreydon Connector Road
+  - Little Township
+  - Louisville Lakehouse
+  - Louisville Mall Base
+  - Louisville Riverboat
+  - Louisville River Marina
+  - Louisville Quarantine Zone
+  - LV International Airport
+  - March Ridge Expansion
+  - Military Fuel Depot
+  - Monmouth County
+  - Muldraugh Checkpoint
+  - Muldraugh - West outskirts Shipping Company
+  - Muldraugh Fire Department
+  - Nettle Township
+  - NSCarWorkshop
+  - Northwest Blockade
+  - OldPark Town
+  - Orchidwood(official version)
+  - Overlook Hotel
+  - Over the River
+  - Over the River - Secondary Road
+  - Papaville
+  - PortCity KY
+  - Portland
+  - Rabbit Hash, KY
+  - Ranger's Homestead
+  - Research Facility, KY (and the newer access road)
+  - Riverside Mansion
+  - Riverside Fire Department
+  - Road between Fort Knox and Bedford Falls
+  - Road from Monmouth County to Bedford Falls
+  - Redbird Ranger Station - Forest Ranger Outpost
+  - Reststop Louisville
+  - Rosewood Expansion
+  - Rosewood Cabins
+  - Rosewood VHS & Gun Stores
+  - Rusty Rascals Roadkill Restaurant
+  - Safe-Tech Cryogenic Facility
+  - Shortrest County
+  - Southwood 2.0,KY
+  - Spencer Mansion lootable
+  - Speck
+  - Springwood
+  - TeraMart - East Side
+  - The Eye Lake
+  - The Frigate
+  - The Mall South Muldraugh Fix
+  - The Museum
+  - The Oasis
+  - The Walking Dead : Prison
+  - The Walking Dead : Terminus
+  - The Yacht
+  - Trimble County Power Station & La Grange
+  - Tugaland
+  - Uncle Red's Bunker Redux
+  - Utopia
+  - Ver's Roadside: Railroad House
+  - Waterlocked Pharmaceutical Factory
+  - Wellsburg Lake
+  - West Point Gated Community
+  - West Point Trailer Park & VHS Store
+  - Winchester, KY
+
+- Additionally added support for the following tile packs:
+  - Azakaela's Mountain Tiles
+  - BigZombieMonkeys Tile Pack
+  - Cookie Tile Pack
+  - Dylan's 4 Maps Tile Bundle
+  - Fantasiado's More Street Details
+  - Fear's Funky Tiles
+  - Greens Custom Tiles
+  - MandoDB - Tiles Pack
+  - Skizot's Tiles
+  - Woodstock's Tiles for Elliot Pond
+
 
 - 2023-06-20 ([cff29546](https://github.com/cff29546)) Initial version. Vanilla map, challenge maps and following mod maps: 
   - Ashenwood

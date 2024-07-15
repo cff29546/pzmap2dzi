@@ -1,6 +1,6 @@
 Following are maps that have been tested to work with pzmap2dzi.
 
-# Vanilla maps
+# Vanilla map
 
 - Muldraugh, KY
 
@@ -30,3 +30,19 @@ Workshop maps may require downloading extra texture mods before rendering with p
 - [Raven Creek](https://steamcommunity.com/sharedfiles/filedetails/?id=2196102849)
 - [Trelai 4x4 Riverside Expansion](https://steamcommunity.com/sharedfiles/filedetails/?id=2800337234)
 
+# Change Log
+
+- 2023-06-20 ([cff29546](https://github.com/cff29546)) Initial version. Vanilla map, challenge maps and following mod maps: 
+  - Ashenwood
+  - Bedford Falls
+  - Blueberry
+  - Camden County
+  - Chinatown, KY
+  - Chinatown Expansion, KY
+  - Fort Redstone
+  - Grapeseed
+  - Greenleaf
+  - Lake Ivy Township
+  - Petroville
+  - Raven Creek
+  - Trelai 4x4 Riverside Expansion

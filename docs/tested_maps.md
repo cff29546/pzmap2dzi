@@ -137,137 +137,151 @@ Workshop maps may require downloading extra texture mods before rendering with p
 
 # Change Log
 
-- 2024-07-15 ([notCommitedYet]()) Added many maps (credit: @ethano8225 on github): 
-  - Addams Family Mansion
-  - Betsys Farm
-  - Big Bear Lake
-  - Breakpoint
-  - Bunker: Day of the Dead
-  - Bunker: Last Minute Prepper
-  - Canvasback Studios
-  - Cedar Hill
-  - Chestown
-  - Chernaville
-  - Cigaro gated community
-  - Ciudad Madriguera
-  - C.O.N. Research & Testing Facility
-  - Corn Farm
-  - Coryerdon or Dirkerdam to Over the River road
-  - Coryerdon-科里尔登
-  - East Riverside
-  - Eerie Country
-  - Ekron
-  - Elliot Pond
-  - Elysium Island
-  - EVAC Muldraugh
-  - Exotics Rest Area
-  - Fort Boonesborough
-  - Fort Knox linked to Eerie Country
-  - Fort Rock Ridge
-  - FoxWood
-  - Greenport, KY
-  - Heavens Hill
-  - Hilltop Manor
-  - Homepie
-  - Hopewell, KY
-  - Hunter's Base
-  - Irvington, KY
-  - Irvington Road
-  - Jasperville
-  - Kingsmouth in KY
-  - Lalafell's Heartlake town
-  - Lande Desolate Camping
-  - Lake Cumberland
-  - Leavenburg
-  - Leavenburg-RiversideBridge
-  - Leavensburg and Coreydon Connector Road
-  - Little Township
-  - Louisville Lakehouse
-  - Louisville Mall Base
-  - Louisville Riverboat
-  - Louisville River Marina
-  - Louisville Quarantine Zone
-  - LV International Airport
-  - March Ridge Expansion
-  - Military Fuel Depot
-  - Monmouth County
-  - Muldraugh Checkpoint
-  - Muldraugh - West outskirts Shipping Company
-  - Muldraugh Fire Department
-  - Nettle Township
-  - NSCarWorkshop
-  - Northwest Blockade
-  - OldPark Town
-  - Orchidwood(official version)
-  - Overlook Hotel
-  - Over the River
-  - Over the River - Secondary Road
-  - Papaville
-  - PortCity KY
-  - Portland
-  - Rabbit Hash, KY
-  - Ranger's Homestead
-  - Research Facility, KY (and the newer access road)
-  - Riverside Mansion
-  - Riverside Fire Department
-  - Road between Fort Knox and Bedford Falls
-  - Road from Monmouth County to Bedford Falls
-  - Redbird Ranger Station - Forest Ranger Outpost
-  - Reststop Louisville
-  - Rosewood Expansion
-  - Rosewood Cabins
-  - Rosewood VHS & Gun Stores
-  - Rusty Rascals Roadkill Restaurant
-  - Safe-Tech Cryogenic Facility
-  - Shortrest County
-  - Southwood 2.0,KY
-  - Spencer Mansion lootable
-  - Speck
-  - Springwood
-  - TeraMart - East Side
-  - The Eye Lake
-  - The Frigate
-  - The Mall South Muldraugh Fix
-  - The Museum
-  - The Oasis
-  - The Walking Dead : Prison
-  - The Walking Dead : Terminus
-  - The Yacht
-  - Trimble County Power Station & La Grange
-  - Tugaland
-  - Uncle Red's Bunker Redux
-  - Utopia
-  - Ver's Roadside: Railroad House
-  - Waterlocked Pharmaceutical Factory
-  - Wellsburg Lake
-  - West Point Gated Community
-  - West Point Trailer Park & VHS Store
-  - Winchester, KY
+- 2024-07-15 Added many maps and textures (credit: @ethano8225 on github):
+  - Maps
+    - Addams Family Mansion
+    - Betsys Farm
+    - Big Bear Lake
+    - Breakpoint
+    - Bunker: Day of the Dead
+    - Bunker: Last Minute Prepper
+    - Canvasback Studios
+    - Cedar Hill
+    - Chestown
+    - Chernaville
+    - Cigaro gated community
+    - Ciudad Madriguera
+    - C.O.N. Research & Testing Facility
+    - Corn Farm
+    - Coryerdon or Dirkerdam to Over the River road
+    - Coryerdon-科里尔登
+    - East Riverside
+    - Eerie Country
+    - Ekron
+    - Elliot Pond
+    - Elysium Island
+    - EVAC Muldraugh
+    - Exotics Rest Area
+    - Fort Boonesborough
+    - Fort Knox linked to Eerie Country
+    - Fort Rock Ridge
+    - FoxWood
+    - Greenport, KY
+    - Heavens Hill
+    - Hilltop Manor
+    - Homepie
+    - Hopewell, KY
+    - Hunter's Base
+    - Irvington, KY
+    - Irvington Road
+    - Jasperville
+    - Kingsmouth in KY
+    - Lalafell's Heartlake town
+    - Lande Desolate Camping
+    - Lake Cumberland
+    - Leavenburg
+    - Leavenburg-RiversideBridge
+    - Leavensburg and Coreydon Connector Road
+    - Little Township
+    - Louisville Lakehouse
+    - Louisville Mall Base
+    - Louisville Riverboat
+    - Louisville River Marina
+    - Louisville Quarantine Zone
+    - LV International Airport
+    - March Ridge Expansion
+    - Military Fuel Depot
+    - Monmouth County
+    - Muldraugh Checkpoint
+    - Muldraugh - West outskirts Shipping Company
+    - Muldraugh Fire Department
+    - Nettle Township
+    - NSCarWorkshop
+    - Northwest Blockade
+    - OldPark Town
+    - Orchidwood(official version)
+    - Overlook Hotel
+    - Over the River
+    - Over the River - Secondary Road
+    - Papaville
+    - PortCity KY
+    - Portland
+    - Rabbit Hash, KY
+    - Ranger's Homestead
+    - Research Facility, KY (and the newer access road)
+    - Riverside Mansion
+    - Riverside Fire Department
+    - Road between Fort Knox and Bedford Falls
+    - Road from Monmouth County to Bedford Falls
+    - Redbird Ranger Station - Forest Ranger Outpost
+    - Reststop Louisville
+    - Rosewood Expansion
+    - Rosewood Cabins
+    - Rosewood VHS & Gun Stores
+    - Rusty Rascals Roadkill Restaurant
+    - Safe-Tech Cryogenic Facility
+    - Shortrest County
+    - Southwood 2.0,KY
+    - Spencer Mansion lootable
+    - Speck
+    - Springwood
+    - TeraMart - East Side
+    - The Eye Lake
+    - The Frigate
+    - The Mall South Muldraugh Fix
+    - The Museum
+    - The Oasis
+    - The Walking Dead : Prison
+    - The Walking Dead : Terminus
+    - The Yacht
+    - Trimble County Power Station & La Grange
+    - Tugaland
+    - Uncle Red's Bunker Redux
+    - Utopia
+    - Ver's Roadside: Railroad House
+    - Waterlocked Pharmaceutical Factory
+    - Wellsburg Lake
+    - West Point Gated Community
+    - West Point Trailer Park & VHS Store
+    - Winchester, KY
 
-- Additionally added support for the following tile packs:
-  - Azakaela's Mountain Tiles
-  - BigZombieMonkeys Tile Pack
-  - Cookie Tile Pack
-  - Dylan's 4 Maps Tile Bundle
-  - Fantasiado's More Street Details
-  - Fear's Funky Tiles
-  - Greens Custom Tiles
-  - MandoDB - Tiles Pack
-  - Skizot's Tiles
-  - Woodstock's Tiles for Elliot Pond
+  - Textures
+    - Azakaela's Mountain Tiles
+    - BigZombieMonkeys Tile Pack
+    - Cookie Tile Pack
+    - Dylan's 4 Maps Tile Bundle
+    - Fantasiado's More Street Details
+    - Fear's Funky Tiles
+    - Greens Custom Tiles
+    - MandoDB - Tiles Pack
+    - Skizot's Tiles
+    - Woodstock's Tiles for Elliot Pond
 
 
-- 2023-06-20 ([cff29546](https://github.com/cff29546)) Initial version. Vanilla map, challenge maps and following mod maps: 
-  - Ashenwood
-  - Bedford Falls
-  - Blueberry
-  - Camden County
-  - Chinatown, KY
-  - Chinatown Expansion, KY
-  - Fort Redstone
-  - Grapeseed
-  - Greenleaf
-  - Lake Ivy Township
-  - Petroville
-  - Raven Creek
-  - Trelai 4x4 Riverside Expansion
+- 2023-06-20 Initial version. Vanilla map, challenge maps and following mod maps and textures:
+  - Maps
+    - Ashenwood
+    - Bedford Falls
+    - Blueberry
+    - Camden County
+    - Chinatown, KY
+    - Chinatown Expansion, KY
+    - Fort Redstone
+    - Grapeseed
+    - Greenleaf
+    - Lake Ivy Township
+    - Petroville
+    - Raven Creek
+    - Trelai 4x4 Riverside Expansion
+
+  - Textures
+    - Daddy Dirkie dirks tiles
+    - throttlekitty's tiles
+    - Dylan's Tile Pack
+    - ExtraNoise's Newburbs Tiles
+    - ExtraNoise's Flag Tiles
+    - PertsPartyTiles
+    - TryHonesty's Tiles
+    - Oujinjin's Tile Pack
+    - Simon MDs Tiles
+    - Melos Tiles for Miles Tilepack

@@ -1,0 +1,198 @@
+# Specify maps to be rendered. See map_data.yaml for map names
+# The base layer map to be rendered. default = Muldraugh, KY
+base_map: default
+# Additional overlay maps to be rendered
+mod_maps:		#mod maps credit @ethano8225
+    - Ashenwoodmod
+    - Bedford Falls
+    - Chinatown, KY
+    - Chinatown Expansion, KY
+    - FortRedstone
+    - Grapeseed
+    - Greenleaf
+    - li_township
+    - Petroville
+    - RavenCreek
+    - Canvasback
+    - Jasperville
+    - Uncle Red's Bunker Redux
+    - rosewoodcabins
+    - Otr
+    - Eerie Country
+    - FortRedstone
+    - Farm
+    - KingsmouthKY
+    - LittleTownship
+    - Fort Knox linked to Eerie Country
+    - Road from Fort Knox to Bedford Falls
+    - Over the River - Secondary Route
+    - ParkingLot
+    - NewEkron
+    - pz_rosewoodexp_map
+    - WestPointTrailerParkAndVhsStore
+    - louisvillelakehouse
+    - Chernaville
+    - CONRTF
+    - March Ridge Expansion
+    - Tugaland
+    - Lande Desolate Camping
+    - coryerdon
+    - Muldraugh Fire Department
+    - NWBlockade
+    - ForestRangerHideaway01
+    - Riverside Fire Department
+    - TrimbleCountyPowerStation
+    - Irvington_Rd
+    - Irvington_KY
+    - Fort Rock Ridge
+    - rbr
+    - rbrA2
+    - CigaroHouse
+    - Hilltop
+    - RabbitHashKY
+    - hopewell_eng_orig
+    - Elysium_Island
+    - Heavens Hill
+    - cryocompound
+    - Chestown
+    - catball_eastriverside
+    - Breakpoint
+    - TheEyeLake
+    - Utopia
+    - Muldraugh-Westoutskirts ShippingCo
+    - TeraMart - East Side
+    - AddamsMansion
+    - TheMuseumID
+    - OverlookHotel
+    - RiversidemansionBrang
+    - MonmouthCounty_new
+    - Orchidwood(official version)
+    - LastMinutePrepperReloaded
+    - Winchester
+    - CorOTRroad
+    - Lalafell's Heart Lake Town
+    - TheMallSouthMuldraughFIX
+    - Myhometown
+    - Springwood1
+    - CedarHill
+    - BBL
+    - TWDterminus
+    - EVAC_Muldraugh
+    - MuldraughCheckpoint
+    - DJBetsysFarm
+    - RosewoodVHSGunStores
+    - SimonMDSpencerMansionLootable
+    - Speck_Map
+    - Louisville_Quarantine_Zone
+    - military fuel depot
+    - RfMCtBF_addon
+    - Shortrest_County
+    - Southwood2.0
+    - Louisville_River_Marina
+    - Waterlocked Pharmaceutical Factory
+    - Louisville_Riverboat
+    - Nettle Township
+    - ExoticsRestArea
+    - Fort_Boonesborough
+    - NSCarWorkshop
+    - LouisvilleMallBase
+    - ReststopLouisville
+    - The Frigate
+    - Portland
+    - The Yacht
+    - LCv2
+    - Ranger'sHomestead
+    - Wellsburg
+    - railroadhouse
+    - Hunter'sBase
+    - Elliot Pond
+    - WestPointGatedCommunity
+    - SimonMDRRRR
+    - SimonMDLVInternationalAirport
+    - One cell life
+    - PortCityKYAbisimod
+    - BunkerDayOfTheDead
+    - Leavenburg
+    - LeavenburgRiversideBridge
+    - the_oasis
+    - CM_Rivendel
+    - LeavensburgCoreydonConnector
+
+render_conf:
+    # main conf
+    verbose: true
+    profile: false
+    worker_count: 16
+    # set hotkey to stop render (rerun render to resume)
+    # hotkey examples:
+    #     <ctrl>+<alt>+a    ctrl + alt + a
+    #     a                 the key "a"
+    #     <f8>              f8
+    #     <cmd>+<f2>        windows key + f2
+    break_key: ''
+
+    # dzi conf
+    # dzi tile size
+    tile_size: 1024
+    # how may layer of map to render
+    layers: 8
+    # use jpg for bottom level image format instead of png
+    # does not affect overlay mod maps
+    use_jpg_for_layer0: true
+    # discard bottom levels to save space at the cost of zoom in resolution
+    omit_levels: 0
+    # png compress level: from 0 to 9. -1 for using default
+    image_compress_level: -1
+    # enable cache to accelerate pyramid building, require python 3.8+
+    enable_cache: true
+    # cache limit in MB, 0 for unlimited
+    cache_limit_mb: 0
+    # width for a single tile in top view
+    top_view_square_size: 1
+
+    # base render
+    plants_conf:
+        # eable snow on trees and bushes
+        snow: false
+        # use large bushes
+        large_bush: false
+        # eable flower on trees and bushes
+        flower: false
+        # supported season: spring, summer, summer2, autumn, winter
+        season: summer2
+        # normal tree size, range from 0 to 3 (inclusive)
+        tree_size: 2
+        # large tree size, range from 0 to 5 (inclusive)
+        jumbo_tree_size: 4
+        # large tree type, from: 0 to 10  (inclusive)
+        # see _TREE_DEF in pzmap2dzi/plants.py for more detail
+        jumbo_tree_type: 0
+
+    # square color method in top view mode
+    # supported method:
+    # base: only use the color of the floor tile
+    # base+water: only use the color of the floor tile and water tile (if exist)
+    # avg: caculate an average color of all tiles
+    # carto-zed: Carto-Zed like color theme
+    top_view_color_mode: avg
+    
+    # font settings
+    default_font: arial.ttf
+    default_font_size: 20
+    # room font settings, using default font if omitted
+    # room_font: arial.ttf
+    # room_font_size: 20
+
+    # zombie heatmap
+    zombie_count: true
+    # zombie count font settings, using default font if omitted
+    # zombie_count_font: arial.ttf
+    zombie_count_font_size: 40
+
+    # objects areas
+    vehicle: true
+    special_zombie: true
+    stroy: true
+    # objects font settings, using default font if omitted
+    # objects_font: arial.ttf
+    # objects_font_size: 20

@@ -8,11 +8,12 @@ def _buffered_image(shm, width, height, extra_size):
     return im
 
 class ImageSharedMemory(object):
-    def __init__(self, prefix, extra_size=0):
+    def __init__(self, prefix, extra_size=0, no_free_on_destroy=False):
         self.prefix = prefix
         self.created = {}
         self.extra_size = extra_size
         self.loaded = {}
+        self.no_free = no_free_on_destroy
 
     def create(self, index, width, height):
         size = 4 * width * height + self.extra_size
@@ -66,7 +67,8 @@ class ImageSharedMemory(object):
             self.release(key)
 
     def __del__(self):
-        self.clear()
+        if not self.no_free:
+            self.clear()
 
 def test():
     import random, os

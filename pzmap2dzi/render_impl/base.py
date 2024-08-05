@@ -14,7 +14,7 @@ def load_cell_cached(path, cx, cy):
 class TextureRender(object):
     def __init__(self, **options):
         texture_path = options.get('texture')
-        cache_name = options.get('cache_name')
+        cache_name = options.get('cache_name') if options.get('enable_cache') else None
         plants_conf = options.get('plants_conf', {})
 
         self.tl = texture.TextureLibrary(texture_path, cache_name)

@@ -47,7 +47,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
    - If your python version is 2.7, install VCForPython27 first. You can find it [here](https://web.archive.org/web/20210106040224/https://download.microsoft.com/download/7/9/6/796EF2E4-801B-4FC4-AB28-B59FBF6D907B/VCForPython27.msi) or [here](https://github.com/reider-roque/sulley-win-installer/blob/master/VCForPython27.msi)
    
    - run `install_requirements.bat`
-4. Update variables in the `config.yaml` file
+4. Update variables in the `conf/conf.yaml` file
    - Change the `pz_root` variable to ProjectZomboid game location on your computer
    - Change the `output_path` variable to the desired output path
    - Change the `mod_root` variable to steam workshop path if you want to render a mod map
@@ -59,7 +59,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
    Run `run.bat` to render all isometric and top view maps
 
 # Change rendering configurations
-   See `conf.yaml` and `run.bat` for more detials.
+   See `conf/conf.yaml` and `run.bat` for more detials.
 
 - Turn on shared memory acceleration
     - In `render_conf` section of `conf.yaml`, set `enable_cache` to `ture`

@@ -1325,7 +1325,7 @@ function updateMapUI() {
         d.innerHTML = '';
         for (let pos = 0; pos < mod_maps.length; pos++) {
             d.innerHTML += `<button class="active" style="cursor: not-allowed"
-                onclick="removeMap('${mod_maps[pos].name}')">${mod_maps[pos].name}</button>`;
+                onclick="removeMap('${mod_maps[pos].name.replace("'","\\'")}')">${mod_maps[pos].name}</button>`;
         }
     }
 }

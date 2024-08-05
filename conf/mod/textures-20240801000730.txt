@@ -1,0 +1,110 @@
+jiggasGreenfireMod:
+  mod_name: jiggasGreenFire
+  steam_id: '1703604612'
+  texture: true
+
+Diederiks Tile Palooza:
+  mod_name: Diederiks_tile_Palooza
+  steam_id: '2337452747'
+  texture: true
+
+tkTiles_01:
+  mod_name: tkTiles_01
+  steam_id: '2384329562'
+  texture: true
+
+FantaStreetTiles_01:
+  mod_name: FantaStreetTiles_01
+  steam_id: '2554699200'
+  texture: true
+
+DylansTiles:
+  mod_name: DylansTiles
+  steam_id: '2599752664'
+  texture: true
+
+GreensTiles:
+  mod_name: Greens_CustomTiles
+  steam_id: '2734679675'
+  texture: true
+
+SkizotsTiles:
+  mod_name: SkizotsTiles
+  steam_id: '2740919036'
+  texture: true
+
+EN_Newburbs:
+  mod_name: EN_Newburbs
+  steam_id: '2774834715'
+  texture: true
+
+EN_Flags:
+  mod_name: EN_Flags
+  steam_id: '2784607980'
+  texture: true
+
+BigZombieMonkeys_tile_pack:
+  mod_name: bigzombiemonkeys_tiles_pack
+  steam_id: '2804428637'
+  texture: true
+
+PertsPartyTiles:
+  mod_name: Perts Party Tiles
+  steam_id: '2837923608'
+  texture: true
+
+TryhonestyTiles:
+  mod_name: Tryhonesty's Tiles
+  steam_id: '2844685624'
+  texture: true
+
+OujinjinTiles:
+  mod_name: Oujinjin Tiles
+  steam_id: '2844829195'
+  texture: true
+
+simonMDsTiles:
+  mod_name: Simon-MDs-Tiles
+  steam_id: '2852704777'
+  texture: true
+
+melos_tiles_for_miles_pack:
+  mod_name: Melos Tiles for Miles
+  steam_id: '2879745353'
+  texture: true
+
+AzaMountainTiles:
+  mod_name: Azakaela's Mountain Tiles
+  steam_id: '2898065560'
+  texture: true
+
+FearsFunkyTiles:
+  mod_name: Fears_Funky_Tiles
+  steam_id: '2901328637'
+  texture: true
+
+dylanstiles_bundle:
+  mod_name: Dylan's 4 Maps Tile Bundle
+  steam_id: '2923495608'
+  texture: true
+
+Cookie_Tiles:
+  mod_name: Cookie Tile Pack
+  steam_id: '2925574774'
+  texture: true
+
+DylansTiles_Elysium:
+  mod_name: ElysiumTiles
+  steam_id: '2977982429'
+  texture: true
+
+TileToItemConverter:
+  mod_name: TileToItemComverter
+  steam_id: '2991554892'
+  texture: true
+
+Ryu Tiles:
+  mod_name: ryu_tiles
+  steam_id: '3003792372'
+  texture: true
+

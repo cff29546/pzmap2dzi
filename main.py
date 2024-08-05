@@ -1,47 +1,77 @@
 import yaml
 import os
+import io
 from distutils.dir_util import copy_tree
 import re
 import json
 
-def parse_conf(args):
-    with open(args.conf, 'r') as f:
-        conf = yaml.safe_load(f.read())
-    return conf
+def load_yaml(path):
+    with io.open(path, 'r', encoding='utf8') as f:
+        data = yaml.safe_load(f.read())
+    return data
 
-def parse_map(args):
-    with open(args.map_data, 'r') as f:
-        map_data = yaml.safe_load(f.read())
-    return map_data
+def load_path(path):
+    if os.path.isfile(path):
+        return load_yaml(path)
+    data = {}
+    if os.path.isdir(path):
+        for name in os.listdir(path):
+            data.update(load_path(os.path.join(path, name)))
+    return data
+
+def set_default(data, dft):
+    for key in data:
+        for k in dft:
+            if k not in data[key]:
+                data[key][k] = dft[k]
+    return data
+
+def parse_map(conf_path):
+    conf = load_yaml(conf_path)
+    conf_path = os.path.dirname(conf_path)
+    maps = {}
+    for map_conf in conf['map_conf']:
+        map_conf_path = os.path.join(conf_path, map_conf)
+        maps.update(load_path(map_conf_path))
+    dft = load_yaml(os.path.join(conf_path, conf['map_conf_default']))
+    maps = set_default(maps, dft)
+    return conf, maps
+
+def get_dep(conf, maps, names):
+    dep = set([])
+    if conf.get('use_depend_texture_only'):
+        used = names.copy()
+        while len(used) > 0:
+            m = used.pop()
+            if m in maps and m not in dep:
+                dep.add(m)
+                used.extend(maps[m].get('depend', []))
+    else:
+        dep = set(maps.keys())
+    return dep
+
 
 def unpack(args):
     from pzmap2dzi import texture
-    conf = parse_conf(args)
-    map_data = parse_map(args)
-    items = list(map_data['textures'].items()) + list(map_data['maps'].items())
-    for name, t in items:
-        root = t.get('texture_root')
-        path = t.get('texture_path')
-        files = t.get('texture_files', [])
-        pattern = t.get('texture_file_patterns')
-        if root and path:
+    conf, maps = parse_map(args.conf)
+    mod_maps = conf['mod_maps'] if conf.get('mod_maps') else []
+    dep = get_dep(conf, maps, mod_maps + [conf['base_map'], 'default'])
+
+    for d in dep:
+        if maps[d].get('texture', False) is False:
+            continue
+        path = maps[d]['texture_path'].format(**dict(conf, **maps[d]))
+        if os.path.isdir(path):
             tl = texture.TextureLibrary()
-            folder = os.path.join(conf[root], path)
-            if os.path.isdir(folder):
-                for f in files:
-                    tl.add_pack(os.path.join(folder, f))
-                if pattern:
-                    for f in os.listdir(folder):
-                        for p in pattern:
-                            if re.match(p, f):
-                                tl.add_pack(os.path.join(folder, f))
-                                break
-                if not pattern and not files:
-                    for f in os.listdir(folder):
-                        if f.endswith('.pack'):
-                            tl.add_pack(os.path.join(folder, f))
-            output = os.path.join(conf['output_path'], 'texture', name)
+            for name in os.listdir(path):
+                for pattern in maps[d]['texture_files']:
+                    if re.match(pattern, name):
+                        tl.add_pack(os.path.join(path, name))
+                        break
+            output = os.path.join(conf['output_path'], 'texture', d)
             tl.save_all(output, conf['render_conf']['worker_count'])
+        else:
+            print('invalid texture_path: {}'.format(path))
 
 def get_conf(options, name, cmd, key, default):
     value = options.get('{}[{}]({})'.format(key, name, cmd))
@@ -58,27 +88,24 @@ def get_conf(options, name, cmd, key, default):
         return value
     return default
 
-def render_map(cmd, conf, map_data, map_name, is_base):
+def render_map(cmd, conf, maps, map_name, is_base):
     from pzmap2dzi import render
     if cmd not in render.RENDER_CMD:
         print('unspported render cmd: {}'.format(cmd))
         return False
     DZI, Render = render.RENDER_CMD[cmd]
     options = conf['render_conf'].copy()
-    map_conf = map_data['maps'][map_name]
-    map_root = conf[map_conf['map_root']]
-    map_path = map_conf['map_path']
-    options['input'] = os.path.join(map_root, map_path)
+    map_conf = maps[map_name]
+    map_path = map_conf['map_path'].format(**dict(conf, **map_conf))
+    options['input'] = map_path
 
     options['skip_level'] = get_conf(options, map_name, cmd, 'omit_levels', 0)
     # base / base_top
     options['cache_name'] = map_name
+    dep = get_dep(conf, maps, [map_name, 'default'])
     options['texture'] = []
-    texture_path = os.path.join(conf['output_path'], 'texture', map_name)
-    if os.path.isdir(texture_path):
-        options['texture'].append(texture_path)
-    for texture in map_conf.get('depend_texutres', []):
-        texture_path = os.path.join(conf['output_path'], 'texture', texture)
+    for d in dep:
+        texture_path = os.path.join(conf['output_path'], 'texture', d)
         if os.path.isdir(texture_path):
             options['texture'].append(texture_path)
     if is_base:
@@ -113,19 +140,18 @@ def save_mod_map_list(conf):
         f.write(json.dumps(maps))
 
 def render(args):
-    conf = parse_conf(args)
-    map_data = parse_map(args)
+    conf, maps = parse_map(args.conf)
     conf['render_conf']['total_layers'] = conf['render_conf']['layers']
     for cmd in args.args:
         # base map
         if conf.get('base_map'):
-            if not render_map(cmd, conf, map_data, conf['base_map'], True):
+            if not render_map(cmd, conf, maps, conf['base_map'], True):
                 break
         # mod maps
         if not conf.get('mod_maps'):
             continue
         for map_name in conf['mod_maps']:
-            if not render_map(cmd, conf, map_data, map_name, False):
+            if not render_map(cmd, conf, maps, map_name, False):
                 print('render [{}] for map [{}] error'.format(cmd, map_name))
                 save_mod_map_list(conf)
                 return
@@ -133,7 +159,7 @@ def render(args):
     save_mod_map_list(conf)
 
 def copy(args):
-    conf = parse_conf(args)
+    conf = load_yaml(args.conf)
     script_path = os.path.dirname(os.path.realpath(__file__))
     src = os.path.join(script_path, 'html')
     dst = os.path.join(conf['output_path'], 'html')
@@ -148,8 +174,7 @@ CMD = {
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='pzmap2dzi render')
-    parser.add_argument('-c', '--conf', type=str, default='conf.yaml')
-    parser.add_argument('-m', '--map-data', type=str, default='map_data.yaml')
+    parser.add_argument('-c', '--conf', type=str, default='conf/conf.yaml')
     parser.add_argument('cmd', type=str)
     parser.add_argument('args', nargs=argparse.REMAINDER)
     args = parser.parse_args()

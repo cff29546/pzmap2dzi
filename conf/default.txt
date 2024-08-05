@@ -1,0 +1,7 @@
+map_name: null
+texture: false
+map_path: '{mod_root}/{steam_id}/mods/{mod_name}/media/maps/{map_name}'
+texture_path: '{mod_root}/{steam_id}/mods/{mod_name}/media/texturepacks'
+encoding: utf8
+texture_files: ['.*[.]pack']
+depend: []

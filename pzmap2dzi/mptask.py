@@ -145,6 +145,7 @@ class Task(object):
             w.start()
             workers.append(w)
 
+        idle = []
         working = len(workers)
         while working > 0:
             wid, state, result = self.q.get()
@@ -175,8 +176,10 @@ class Task(object):
                     workers[wid].push_job(next_job)
                 else:
                     working -= 1
-                    workers[wid].stop()
+                    idle.append(workers[wid])
                     workers[wid] = None
+        for worker in idle:
+            worker.stop()
         if hasattr(self.scheduler, 'cleanup'):
             try:
                 self.scheduler.cleanup()

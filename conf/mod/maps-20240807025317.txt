@@ -1,0 +1,1126 @@
+EerieCountry:
+  display_name: Eerie Country
+  map_name: Eerie Country
+  mod_name: Eerie Country
+  steam_id: '1254546530'
+  texture: true
+
+FORTREDSTONE:
+  display_name: Fort Redstone - UPDATE 2.0!
+  map_name: FortRedstone
+  mod_name: FortRedstone
+  steam_id: '1516836158'
+  texture: true
+
+lakeivy:
+  display_name: Lake Ivy
+  map_name: lakeivy
+  mod_name: lakeivy
+  steam_id: '1626052492'
+
+FarmHouseMatrioshka:
+  display_name: Corn Farm
+  map_name: Farm house
+  mod_name: Farm
+  steam_id: '1847175810'
+
+RavenCreek:
+  display_name: "Raven \u0421reek"
+  map_name: RavenCreek
+  mod_name: RavenCreek
+  steam_id: '2196102849'
+  texture: true
+
+lakeivytownship:
+  display_name: Lake Ivy Township
+  map_name: li_township
+  mod_name: li_township
+  steam_id: '2252982049'
+
+KingsmouthKY:
+  display_name: Kingsmouth in KY
+  map_name: Kingsmouth
+  mod_name: KingsmouthKY
+  steam_id: '2434339338'
+
+Grapeseed:
+  depend:
+  - DylansTiles
+  - Diederiks Tile Palooza
+  - tkTiles_01
+  display_name: Grapeseed
+  map_name: Grapeseed
+  mod_name: Grapeseed
+  steam_id: '2463499011'
+  texture: true
+
+EdsAutoSalvage:
+  display_name: Ed's Auto Salvage
+  map_name: EdsAutoSalvage
+  mod_name: EdsAutoSalvage
+  steam_id: '2485420813'
+
+Blackwood:
+  depend:
+  - DylansTiles
+  - Diederiks Tile Palooza
+  - tkTiles_01
+  display_name: Blackwood
+  map_name: Blackwood
+  mod_name: Blackwood
+  steam_id: '2536865912'
+  texture: true
+
+LittleTownship:
+  display_name: Little Township
+  map_name: LittleTownship
+  mod_name: LittleTownship
+  steam_id: '2542249811'
+
+FortKnoxLinked:
+  depend:
+  - EerieCountry
+  - BedfordFalls
+  - FortKnoxRoad
+  display_name: Fort Knox linked to Eerie Country [Build 41.78]
+  map_name: Fort Knox linked to Eerie Country
+  mod_name: Fort Knox linked to Eerie Country
+  steam_id: '2595249356'
+  texture: true
+
+FortKnoxRoad:
+  depend:
+  - FortKnoxLinked
+  - BedfordFalls
+  - EerieCountry
+  display_name: Road between Fort Knox and Bedford Falls [41.78]
+  map_name: From Bedford Falls to Fort Knox
+  mod_name: Road from Fort Knox to Bedford Falls
+  steam_id: '2595785944'
+
+OtrSR:
+  depend:
+  - Otr
+  display_name: Over the River - Secondary Road
+  map_name: Over the River - Secondary Route
+  mod_name: Over the River - Secondary Route
+  steam_id: '2603239477'
+
+ParkingLot:
+  depend:
+  - DylansTiles
+  - Diederiks Tile Palooza
+  - tkTiles_01
+  - EN_Newburbs
+  display_name: OldPark
+  map_name: ParkingLot
+  mod_name: ParkingLot
+  steam_id: '2671414643'
+  texture: true
+
+Blueberry:
+  depend:
+  - DylansTiles
+  - tkTiles_01
+  display_name: "Blueberry  \u84DD\u8393\u9547"
+  map_name: Blueberry
+  mod_name: Blueberry
+  steam_id: '2671890843'
+
+NewEkron:
+  depend:
+  - DylansTiles
+  - Diederiks Tile Palooza
+  - tkTiles_01
+  display_name: Ekron
+  map_name: NewEkron
+  mod_name: NewEkron
+  steam_id: '2712480036'
+  texture: true
+
+pz_rosewoodexp_map:
+  depend:
+  - DylansTiles
+  - Diederiks Tile Palooza
+  - tkTiles_01
+  display_name: Rosewood Expansion
+  map_name: pz_rosewoodexp_map
+  mod_name: pz_rosewoodexp_map
+  steam_id: '2718350686'
+
+WestPointTrailerParkAndVhsStore:
+  depend:
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - tkTiles_01
+  display_name: West Point Trailer Park &amp; VHS Store
+  map_name: WestPointTrailerParkAndVhsStore
+  mod_name: WestPointTrailerParkAndVhsStore
+  steam_id: '2721653030'
+
+HouseLakeMatrioshka:
+  display_name: Louisville Lakehouse
+  map_name: HouseLuisMatrioshka
+  mod_name: louisvillelakehouse
+  steam_id: '2725036390'
+
+Chinatown:
+  depend:
+  - DylansTiles
+  - tkTiles_01
+  - Diederiks Tile Palooza
+  - OujinjinTiles
+  display_name: Chinatown, KY 2.0
+  map_name: Chinatown
+  mod_name: Chinatown, KY
+  steam_id: '2730975264'
+
+Chernaville:
+  depend:
+  - GreensTiles
+  - DylansTiles
+  display_name: Chernaville
+  map_name: chernaville
+  mod_name: Chernaville
+  steam_id: '2734683361'
+
+CONRTF:
+  display_name: C.O.N. Research &amp; Testing Facility
+  map_name: CONRTF
+  mod_name: C.O.N. Research & Testing Facility
+  steam_id: '2766626985'
+
+MRE:
+  display_name: March Ridge Expansion
+  map_name: MREX
+  mod_name: March Ridge Expansion
+  steam_id: '2778676843'
+
+Greenleaf:
+  depend:
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - tkTiles_01
+  display_name: "Greenleaf \u7EFF\u53F6\u9547"
+  map_name: Greenleaf
+  mod_name: Greenleaf
+  steam_id: '2778799110'
+  texture: true
+
+Tugaland:
+  display_name: Tugaland
+  map_name: Tugaland
+  mod_name: Tugaland
+  steam_id: '2781180323'
+
+Lande Desolate Camping:
+  depend:
+  - DylansTiles
+  - tkTiles_01
+  display_name: Lande Desolate Camping
+  map_name: Lande Desolate Camping
+  mod_name: Lande Desolate Camping
+  steam_id: '2782410640'
+
+coryerdon:
+  depend:
+  - melos_tiles_for_miles_pack
+  display_name: "Coryerdon-\u79D1\u91CC\u5C14\u767B"
+  map_name: coryerdon
+  mod_name: coryerdon
+  steam_id: '2782415851'
+
+Muldraugh Fire Department:
+  display_name: Muldraugh Fire Department
+  map_name: Muldraugh Fire Department
+  mod_name: Muldraugh Fire Department
+  steam_id: '2789097802'
+
+NWBlockade:
+  display_name: Northwest Blockade
+  map_name: Northwest Blockade
+  mod_name: Northwest Blockade
+  steam_id: '2789257975'
+
+ForestRangerHideaway01:
+  depend:
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - tkTiles_01
+  display_name: Redbird Ranger Station - Forest Ranger Outpost
+  map_name: Lone
+  mod_name: LoneRangersHideaway
+  steam_id: '2796134549'
+
+Riverside Fire Department:
+  display_name: Riverside Fire Department
+  map_name: Riverside Fire Department
+  mod_name: Riverside Fire Department
+  steam_id: '2799120190'
+
+Trelai_4x4_Steam:
+  display_name: Trelai_4x4 Riverside Expansion
+  map_name: Trelai_4x4
+  mod_name: Trelai_4x4_Steam
+  steam_id: '2800337234'
+  texture: true
+
+TrimbleCountyPowerStation:
+  depend:
+  - Diederiks Tile Palooza
+  - FantaStreetTiles_01
+  - tkTiles_01
+  - OujinjinTiles
+  - Cookie_Tiles
+  - simonMDsTiles
+  display_name: Trimble County Power Station &amp; La Grange
+  map_name: TrimbleCountyPowerStation
+  mod_name: TrimbleCountyPowerStation
+  steam_id: '2802755864'
+  texture: true
+
+Irvington_Rd:
+  depend:
+  - NWBlockade
+  display_name: Irvington Road
+  map_name: Irvington Road
+  mod_name: Irvington Road
+  steam_id: '2803291537'
+
+Irvington_KY:
+  depend:
+  - Irvington_Rd
+  display_name: Irvington, KY
+  map_name: Irvington, KY
+  mod_name: Irvington, KY
+  steam_id: '2803292383'
+
+Fort Rock Ridge:
+  display_name: Fort Rock Ridge
+  map_name: Fort Rock Ridge
+  mod_name: Fort Rock Ridge
+  steam_id: '2806456685'
+
+rbr:
+  depend:
+  - Diederiks Tile Palooza
+  display_name: Research Facility, KY
+  map_name: researchbase
+  mod_name: ResearchBase
+  steam_id: '2807152393'
+  texture: true
+
+rbrA2:
+  depend:
+  - Diederiks Tile Palooza
+  display_name: Research Facility, KY
+  map_name: researchbaseroad
+  mod_name: ResearchBaseAccessRoad
+  steam_id: '2807152393'
+
+rbrA:
+  depend:
+  - Diederiks Tile Palooza
+  display_name: Research Facility, KY
+  map_name: rbr_road
+  mod_name: ResearchBaseAccessRoadOld
+  steam_id: '2807152393'
+
+CigaroHouse:
+  display_name: Cigaro gated community
+  map_name: CigaroHouse
+  mod_name: CigaroHouse
+  steam_id: '2810706046'
+
+Hilltop:
+  depend:
+  - DylansTiles
+  - Diederiks Tile Palooza
+  - tkTiles_01
+  display_name: Hilltop Manor
+  map_name: Hilltop
+  mod_name: Hilltop
+  steam_id: '2812151695'
+
+RabbitHashKY:
+  display_name: Rabbit Hash, KY
+  map_name: RabbitHashKY
+  mod_name: RabbitHashKY
+  steam_id: '2815966702'
+  texture: true
+
+hopewell_eng_orig:
+  depend:
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - FantaStreetTiles_01
+  - tkTiles_01
+  display_name: Hopewell, KY (English)
+  map_name: Hopewell, KY
+  mod_name: Hopewell, KY (Original)
+  steam_id: '2817859141'
+
+hopewell_eng_zombies:
+  depend:
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - FantaStreetTiles_01
+  - tkTiles_01
+  display_name: Hopewell, KY (English)
+  map_name: Hopewell, KY
+  mod_name: Hopewell, KY (With Zombies)
+  steam_id: '2817859141'
+
+Elysium_Island:
+  depend:
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - EN_Newburbs
+  - tkTiles_01
+  display_name: Elysium Island
+  map_name: Elysium_Island
+  mod_name: Elysium_Island
+  steam_id: '2819655145'
+
+Ashenwood:
+  depend:
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - tkTiles_01
+  display_name: Ashenwood
+  map_name: Ashenwood
+  mod_name: Ashenwoodmod
+  steam_id: '2820363371'
+
+Heavens Hill:
+  display_name: Heavens Hill
+  map_name: Heavens Hill
+  mod_name: Heavens Hill
+  steam_id: '2834407334'
+
+cryocompound:
+  depend:
+  - Diederiks Tile Palooza
+  - tkTiles_01
+  - DylansTiles
+  display_name: Safe-Tech Cryogenic Facility
+  map_name: Cryo Compound
+  mod_name: Cryo Compound
+  steam_id: '2838577147'
+
+Chestown:
+  display_name: Chestown
+  map_name: Chestown
+  mod_name: Chestown
+  steam_id: '2840889213'
+
+catball_eastriverside:
+  display_name: East Riverside
+  map_name: EastTownofRiverside
+  mod_name: East Town of Riverside
+  steam_id: '2851982772'
+
+Breakpoint:
+  display_name: Breakpoint
+  map_name: Breakpoint
+  mod_name: Breakpoint
+  steam_id: '2852608098'
+
+TheEyeLake:
+  depend:
+  - BigZombieMonkeys_tile_pack
+  - DylansTiles
+  - EN_Newburbs
+  - OujinjinTiles
+  - PertsPartyTiles
+  - tkTiles_01
+  - Diederiks Tile Palooza
+  display_name: The Eye Lake
+  map_name: TheEyeLake
+  mod_name: TheEyeLake
+  steam_id: '2857335271'
+
+Utopia:
+  depend:
+  - DylansTiles
+  - Diederiks Tile Palooza
+  - tkTiles_01
+  - Grapeseed
+  - Blackwood
+  display_name: Utopia
+  map_name: Utopia
+  mod_name: Utopia
+  steam_id: '2868565253'
+
+Muldraugh-Westoutskirts ShippingCo:
+  depend:
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - tkTiles_01
+  display_name: Muldraugh - West outskirts Shipping Company.
+  map_name: Westoutskirts-shippingCo
+  mod_name: Muldraugh-Westoutskirts ShippingCo
+  steam_id: '2872461779'
+
+TeraMart - East Side:
+  depend:
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - tkTiles_01
+  display_name: TeraMart - East Side
+  map_name: TeraMart
+  mod_name: TeraMartEast
+  steam_id: '2873362550'
+
+AddamsMansion:
+  depend:
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - tkTiles_01
+  - PertsPartyTiles
+  - TryhonestyTiles
+  display_name: Addams Family Mansion
+  map_name: Addams Mansion
+  mod_name: AddamsMansion
+  steam_id: '2879804540'
+
+Papaville:
+  display_name: Papaville
+  map_name: PapaVilleModMap
+  mod_name: PapaVilleMod
+  steam_id: '2880557637'
+
+TheMuseumID:
+  depend:
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - EN_Newburbs
+  - PertsPartyTiles
+  - tkTiles_01
+  display_name: The Museum
+  map_name: The Museum
+  mod_name: The_Museum
+  steam_id: '2881370621'
+  texture: true
+
+OverlookHotel:
+  depend:
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - tkTiles_01
+  - PertsPartyTiles
+  - TryhonestyTiles
+  - FantaStreetTiles_01
+  display_name: Overlook Hotel
+  map_name: OverlookHotel
+  mod_name: OverlookMapJam
+  steam_id: '2881386527'
+
+Petroville:
+  depend:
+  - Diederiks Tile Palooza
+  - EN_Newburbs
+  - melos_tiles_for_miles_pack
+  - OujinjinTiles
+  - PertsPartyTiles
+  - simonMDsTiles
+  - tkTiles_01
+  - TryhonestyTiles
+  - DylansTiles
+  - DylansTiles_Elysium
+  display_name: Petroville
+  map_name: Petroville
+  mod_name: Petroville
+  steam_id: '2886261613'
+
+RiversidemansionBrang:
+  display_name: Riverside Mansion
+  map_name: riversidemansion
+  mod_name: Modriversidemansion
+  steam_id: '2886919248'
+
+MonmouthCounty_new:
+  depend:
+  - BigZombieMonkeys_tile_pack
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - PertsPartyTiles
+  - tkTiles_01
+  - melos_tiles_for_miles_pack
+  - jiggasGreenfireMod
+  display_name: Monmouth County
+  map_name: MonmouthCounty
+  mod_name: Monmouth County
+  steam_id: '2887123503'
+
+MonmouthCountyTributeLegacy:
+  depend:
+  - BigZombieMonkeys_tile_pack
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - PertsPartyTiles
+  - tkTiles_01
+  - melos_tiles_for_miles_pack
+  - jiggasGreenfireMod
+  display_name: Monmouth County
+  map_name: MonmouthCounty
+  mod_name: Mounmouth County Tribute Legacy
+  steam_id: '2887123503'
+  texture: true
+
+CamdenCounty:
+  display_name: Camden County
+  map_name: CamdenCounty
+  mod_name: CamdenCounty
+  steam_id: '2888082232'
+  texture: true
+
+Orchidwood(official version):
+  display_name: Orchidwood(official version)
+  map_name: orchidwood
+  mod_name: orchid
+  steam_id: '2889235913'
+
+LastMinutePrepper:
+  depend:
+  - Diederiks Tile Palooza
+  display_name: 'Bunker: Last Minute Prepper'
+  map_name: LastMinutePrepper
+  mod_name: LastMinutePrepper
+  steam_id: '2889983340'
+
+LastMinutePrepperReloaded:
+  depend:
+  - Diederiks Tile Palooza
+  display_name: 'Bunker: Last Minute Prepper'
+  map_name: LastMinutePrepperReloaded
+  mod_name: LastMinutePrepperReloaded
+  steam_id: '2889983340'
+
+Winchester:
+  display_name: Winchester, KY
+  map_name: Winchester, KY
+  mod_name: Winchester, KY
+  steam_id: '2890129618'
+
+CorOTRroad:
+  display_name: Coryerdon or Dirkerdam to OTR road
+  map_name: CorOTRroad
+  mod_name: CorOTRroad
+  steam_id: '2892795238'
+
+Chinatown expansion:
+  depend:
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - EN_Flags
+  - EN_Newburbs
+  - melos_tiles_for_miles_pack
+  - OujinjinTiles
+  - PertsPartyTiles
+  - TryhonestyTiles
+  - tkTiles_01
+  display_name: Chinatown Expansion, KY
+  map_name: Chinatown_EX
+  mod_name: Chinatown Expansion, KY
+  steam_id: '2895386882'
+
+Lalafell's Heart Lake Town:
+  depend:
+  - tkTiles_01
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - EN_Newburbs
+  - EN_Flags
+  - OujinjinTiles
+  display_name: Lalafell's Heartlake town
+  map_name: Lalafell's Fortress
+  mod_name: Lalafell's Heart Lake Town
+  steam_id: '2900006618'
+
+TWDprison:
+  depend:
+  - DylansTiles
+  - tkTiles_01
+  - Diederiks Tile Palooza
+  display_name: 'The Walking Dead : Prison'
+  map_name: PrisonTWD
+  mod_name: PrisonTWD
+  steam_id: '2905092251'
+
+UncleRedsBunker:
+  depend:
+  - Diederiks Tile Palooza
+  display_name: Uncle Red's Bunker Redux
+  map_name: UncleRedsBunker
+  mod_name: Uncle Red's Bunker (legacy)
+  steam_id: '2906125013'
+
+UncleRedsBunkerRedux:
+  depend:
+  - Diederiks Tile Palooza
+  display_name: Uncle Red's Bunker Redux
+  map_name: UncleRedsBunkerRedux
+  mod_name: Uncle Red's Bunker Redux
+  steam_id: '2906125013'
+
+rosewoodcabins:
+  display_name: Rosewood Cabins
+  map_name: rosewoodcabins
+  mod_name: rosewoodcabins
+  steam_id: '2907242510'
+
+TheMallSouthMuldraughFIX:
+  depend:
+  - DylansTiles
+  - SkizotsTiles
+  - tkTiles_01
+  display_name: The Mall South Muldraugh Fix
+  map_name: The Mall FIXED - use this
+  mod_name: TheMallSouthMuldraughFIXED
+  steam_id: '2909294200'
+
+Myhometown:
+  display_name: Homepie
+  map_name: Homepie
+  mod_name: Homepie
+  steam_id: '2911028142'
+  texture: true
+
+Springwood1:
+  display_name: Springwood
+  map_name: Springwood
+  mod_name: Springwood
+  steam_id: '2914532881'
+  texture: true
+
+CedarHill:
+  depend:
+  - TryhonestyTiles
+  - EN_Newburbs
+  - Diederiks Tile Palooza
+  display_name: Cedar Hill
+  map_name: Cedar Hill
+  mod_name: Cedar Hill
+  steam_id: '2915656059'
+  texture: true
+
+BBL:
+  depend:
+  - AzaMountainTiles
+  - EN_Newburbs
+  - TryhonestyTiles
+  - tkTiles_01
+  - simonMDsTiles
+  - PertsPartyTiles
+  - Diederiks Tile Palooza
+  - melos_tiles_for_miles_pack
+  display_name: Big Bear Lake
+  map_name: BBL
+  mod_name: BBL
+  steam_id: '2917162495'
+  texture: true
+
+RosewoodVHSGunStores:
+  display_name: Rosewood VHS &amp; Gun Stores
+  map_name: Rosewood VHS Store
+  mod_name: RosewoodVHSGunStores
+  steam_id: '2922087098'
+
+DJBetsysFarm:
+  display_name: Betsys Farm
+  map_name: betsysfarm
+  mod_name: BetsysFarm
+  steam_id: '2925086605'
+
+MuldraughCheckpoint:
+  display_name: Muldraugh Checkpoint
+  map_name: MuldraughCheckpoint
+  mod_name: Muldraugh Checkpoint
+  steam_id: '2926652828'
+
+MuldraughCheckpoint[HARDMODE]:
+  display_name: Muldraugh Checkpoint
+  map_name: MuldraughCheckpoint[H]
+  mod_name: Muldraugh Checkpoint[H]
+  steam_id: '2926652828'
+
+EVAC_Muldraugh:
+  display_name: EVAC Muldraugh
+  map_name: EVAC_Muldraugh
+  mod_name: EVAC_Muldraugh
+  steam_id: '2928391710'
+  texture: true
+
+TWDterminus:
+  depend:
+  - tkTiles_01
+  - DylansTiles
+  display_name: 'The Walking Dead : Terminus'
+  map_name: TerminusTWD
+  mod_name: TerminusTWD
+  steam_id: '2928793794'
+
+SimonMDSpencerMansionLootable:
+  depend:
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - tkTiles_01
+  - simonMDsTiles
+  display_name: Spencer-Mansion-lootable
+  map_name: spencermansionlootable
+  mod_name: SpencerMansionLootable
+  steam_id: '2932892342'
+
+Louisville_Quarantine_Zone:
+  display_name: Louisville Quarantine Zone
+  map_name: Louisville_Quarantine_Zone
+  mod_name: Louisville Quarantine Zone
+  steam_id: '2934132344'
+
+Speck_Map:
+  depend:
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - tkTiles_01
+  - PertsPartyTiles
+  display_name: Speck
+  map_name: Speck
+  mod_name: Speck
+  steam_id: '2938016617'
+
+military fuel depot:
+  display_name: Military Fuel Depot
+  map_name: Military Fuel Depot
+  mod_name: Military Fuel Depot
+  steam_id: '2940881350'
+
+RfMCtBF_addon:
+  display_name: Road from Monmouth County to Bedford Falls
+  map_name: Road from Monmouth County to Bedford Falls
+  mod_name: Road from Monmouth County to Bedford Falls
+  steam_id: '2944975401'
+
+Shortrest_County:
+  depend:
+  - BigZombieMonkeys_tile_pack
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - DylansTiles_Elysium
+  - EN_Flags
+  - EN_Newburbs
+  - FantaStreetTiles_01
+  - melos_tiles_for_miles_pack
+  - PertsPartyTiles
+  - simonMDsTiles
+  - SkizotsTiles
+  - TryhonestyTiles
+  - tkTiles_01
+  display_name: Shortrest County
+  map_name: Shortrest County
+  mod_name: Shortrest County
+  steam_id: '2946204583'
+
+Southwood2.0:
+  display_name: Southwood 2.0,KY
+  map_name: Southwood2.0
+  mod_name: Southwood2.0
+  steam_id: '2947314444'
+
+Waterlocked Pharmaceutical Factory:
+  display_name: Waterlocked Pharmaceutical Factory
+  map_name: Waterlocked Pharmaceutical Factory
+  mod_name: Waterlocked Pharmaceutical Factory
+  steam_id: '2958842745'
+
+Louisville_River_Marina:
+  display_name: Louisville River Marina
+  map_name: Louisville_River_Marina
+  mod_name: Louisville River Marina
+  steam_id: '2963467990'
+
+Louisville_Riverboat:
+  display_name: Louisville Riverboat
+  map_name: Louisville_Riverboat
+  mod_name: Louisville_Riverboat
+  steam_id: '2963883586'
+
+Nettle Township:
+  depend:
+  - DylansTiles
+  - Diederiks Tile Palooza
+  - tkTiles_01
+  - OujinjinTiles
+  display_name: Nettle Township
+  map_name: Nettle Township
+  mod_name: Nettle Township
+  steam_id: '2965081618'
+  texture: true
+
+LyzzExotics:
+  display_name: Exotics Rest Area
+  map_name: ExoticsRestArea
+  mod_name: ExoticsRestArea
+  steam_id: '2967216697'
+
+Fort_Boonesborough:
+  display_name: Fort Boonesborough
+  map_name: Fort_Boonesborough
+  mod_name: Fort Boonesborough
+  steam_id: '2968421358'
+
+nscarworkshop:
+  display_name: NSCarWorkshop
+  map_name: NSCarWorkshop
+  mod_name: NSCarWorkshop
+  steam_id: '2969621578'
+
+ReststopLouisville:
+  display_name: Reststop Louisville
+  map_name: Reststop Louisville
+  mod_name: Reststop Louisville
+  steam_id: '2974686147'
+
+LouisvilleMallBase:
+  display_name: Louisville Mall Base
+  map_name: Louisville Mall Base
+  mod_name: Louisville House
+  steam_id: '2977300651'
+
+SPH:
+  display_name: St Paulo's Hammer
+  map_name: St Paulo
+  mod_name: St Paulos Hammer
+  steam_id: '2985730744'
+  texture: true
+
+The Frigate:
+  depend:
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - melos_tiles_for_miles_pack
+  - PertsPartyTiles
+  - simonMDsTiles
+  - tkTiles_01
+  display_name: The Frigate
+  map_name: The Frigate
+  mod_name: The Frigate
+  steam_id: '2991291149'
+  texture: true
+
+Portland:
+  display_name: Portland
+  map_name: Portland
+  mod_name: Portland
+  steam_id: '2996522730'
+
+The Yacht:
+  depend:
+  - tkTiles_01
+  - melos_tiles_for_miles_pack
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - PertsPartyTiles
+  display_name: The Yacht
+  map_name: The Yacht
+  mod_name: The Yacht
+  steam_id: '2999704927'
+  texture: true
+
+LCv2:
+  depend:
+  - AzaMountainTiles
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - FantaStreetTiles_01
+  - EN_Newburbs
+  - melos_tiles_for_miles_pack
+  - OujinjinTiles
+  - simonMDsTiles
+  - SkizotsTiles
+  - tkTiles_01
+  - TryhonestyTiles
+  - DylansTiles_Elysium
+  - PertsPartyTiles
+  display_name: Lake Cumberland
+  map_name: LCV2
+  mod_name: LC
+  steam_id: '3013564297'
+  texture: true
+
+Ranger'sHomestead:
+  display_name: Ranger's Homestead
+  map_name: ranger's_homestead_map
+  mod_name: Ranger's Homestead
+  steam_id: '3014875368'
+
+Wellsburg:
+  display_name: Wellsburg Lake
+  map_name: Wellsburg Lake
+  mod_name: Wellsburg Lake
+  steam_id: '3014975675'
+
+railroadhouse:
+  depend:
+  - TileToItemConverter
+  - melos_tiles_for_miles_pack
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - simonMDsTiles
+  - PertsPartyTiles
+  - SkizotsTiles
+  - tkTiles_01
+  - TryhonestyTiles
+  display_name: 'Ver''s Roadside: Railroad House'
+  map_name: railroadhouse
+  mod_name: Railroad_House
+  steam_id: '3017402870'
+
+Hunter'sBase:
+  display_name: Hunter's Base
+  map_name: Hunter'sBase_map
+  mod_name: Hunter's Base
+  steam_id: '3018062764'
+
+Elliot Pond:
+  depend:
+  - Ryu Tiles
+  - Diederiks Tile Palooza
+  - dylanstiles_bundle
+  - DylansTiles
+  - EN_Newburbs
+  - PertsPartyTiles
+  - tkTiles_01
+  display_name: Elliot Pond
+  map_name: elliotpondec
+  mod_name: Elliot Pond
+  steam_id: '3022165560'
+
+WestPointGatedCommunity:
+  display_name: West Point Gated Community
+  map_name: WestPointGatedCommunity
+  mod_name: WestPointGatedCommunity
+  steam_id: '3025055056'
+
+Greenport:
+  display_name: Greenport, KY
+  map_name: Greenport
+  mod_name: Greenport
+  steam_id: '3033014448'
+
+SimonMDRRRR:
+  depend:
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - tkTiles_01
+  - simonMDsTiles
+  - melos_tiles_for_miles_pack
+  - PertsPartyTiles
+  display_name: Rusty_Rascals_Roadkill_Restaurant
+  map_name: rustyrascalsroadkillrestaurant
+  mod_name: rustyrascalsroadkillrestaurant
+  steam_id: '3038971885'
+
+SimonMDLVInternationalAirport:
+  depend:
+  - simonMDsTiles
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - tkTiles_01
+  - melos_tiles_for_miles_pack
+  - PertsPartyTiles
+  display_name: LV International Airport
+  map_name: lvinternationalairport
+  mod_name: LVInternationalAirport
+  steam_id: '3045726312'
+
+One cell life:
+  display_name: FoxWood
+  map_name: Foxwood
+  mod_name: FoxWood
+  steam_id: '3048911564'
+
+PortCityKYAbisimod:
+  display_name: PortCity KY
+  map_name: PortCityKY
+  mod_name: PortCityKYmod
+  steam_id: '3065569298'
+
+BunkerDayOfTheDead:
+  depend:
+  - SkizotsTiles
+  - Diederiks Tile Palooza
+  - DylansTiles
+  - PertsPartyTiles
+  display_name: 'Bunker: Day of the Dead'
+  map_name: DayOfTheDead
+  mod_name: BunkerDayOfTheDead
+  steam_id: '3081449196'
+
+Leavenburg:
+  depend:
+  - LeavenburgRiversideBridge
+  display_name: Leavenburg
+  map_name: Leavenburg
+  mod_name: Leavenburg
+  steam_id: '3085088928'
+
+LeavenburgRiversideBridge:
+  depend:
+  - Leavenburg
+  display_name: Leavenburg-RiversideBridge
+  map_name: RiversideMapFix
+  mod_name: Leavenburg-RiversideBridge
+  steam_id: '3085090251'
+
+the_oasis:
+  display_name: The Oasis
+  map_name: The Oasis
+  mod_name: The Oasis
+  steam_id: '3085593188'
+
+CM_Rivendel:
+  display_name: Ciudad Madriguera
+  map_name: C_Madriguera
+  mod_name: Madriguera
+  steam_id: '3107243597'
+
+LeavensburgCoreydonConnector:
+  depend:
+  - Leavenburg
+  - coryerdon
+  display_name: Leavensburg and Coreydon Connector Road
+  map_name: leavensburgcoreydonroad
+  mod_name: LeavensburgCoreydonConnector
+  steam_id: '3122593022'
+
+Jasperville:
+  depend:
+  - Leavenburg
+  - LeavenburgRiversideBridge
+  display_name: Jasperville
+  map_name: Jasperville
+  mod_name: Jasperville
+  steam_id: '3123362438'
+
+Canvasback Studios:
+  display_name: Canvasback Studios
+  map_name: Canvasback
+  mod_name: Canvasback
+  steam_id: '3125338860'
+
+BedfordFalls:
+  display_name: Bedford Falls
+  map_name: BedfordFalls
+  mod_name: Bedford Falls
+  steam_id: '522891356'
+
+Otr:
+  depend:
+  - OtrSR
+  display_name: Over the River
+  map_name: Otr
+  mod_name: Otr
+  steam_id: '926737806'
+  texture: true
+

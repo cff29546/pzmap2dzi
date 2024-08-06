@@ -1,84 +1,114 @@
 
 # Base Map and Mod Maps
-You can config only one base map. But you can config many mod maps as switchable overlays.
-To config the base map, put the map name in the `base_map` variable in `conf.yaml`. In the default `map_data.yaml` config, `default` is the map name for the vanilla game (i.e. Muldraugh, KY)
-To config overlay mod maps, put the map names in the `mod_maps` list variable in `conf.yaml`.
+When setting up maps, keep in mind that you can only configure one base map, but you can configure multiple mod maps as switchable overlays.
 
-# Textures
-Some maps may need extra textures. To config an extra texture pack, you need to download the texture pack and config its location in the `textures` section in `map_data.yaml`
+To configure the base map, simply place the map name in the `base_map` variable in `conf/conf.yaml`.
+To configure overlay mod maps, add the map names to the `mod_maps` list variable in `conf.yaml`.
 
-- Each texture pack has a sub-section named after the texture's name.
-- The sub-section has three variables
-    - `texture_root` indicate where the root path is stored in `conf.yaml`. For steam workshop texture packs, use `mod_root`
-    - `texture_path` indicate the texture folder relative path from the root path
-    - `texture_file_patterns` or `texture_files` indicate which texture pack(s) file under the texture folder is used. 
-        - `texture_file_patterns` is a list of regular expressions that match the texture file names
-        - `texture_files` the exact file name list
+The `map_conf` variable in the `conf/conf.yaml` file contains a list of all map description files (folders).
+In the default map description file `conf/vanilla.txt`, `default` represents the map name and texture name for the vanilla game (e.g. Muldraugh, KY).
 
-# Maps
-Maps are defined in the `maps` section in `map_data.yaml`
+# Mod discription section
+Every texture mod or map mod requires a unique description section. This section can be located in any file or folder listed in `map_conf`, but it is recommended to place additional mod sections in the `conf/mod/` folder.
 
-- Each map has a sub-section named after the map's name
-- The sub-section has several variables
-    - `map_root` indicate where the root path is stored in `conf.yaml`. Similar to `texture_root` in texture section.
-    - `map_path` indicate the map folder relative path from the root path
-    - `encoding` indicate the text encoding used by the map, useful for room overlay. Try `utf8` when it is unknown.
-    - optional texture-related variables which indicate private textures used by the map
-        - similar to the texture config, it has `texture_root`, `texture_path`, `texture_files`/`texture_file_patterns`
+# Texture section
+Some maps may require additional textures. To specify an extra texture pack, please download the texture pack and describe its location in the texture section.
 
-    - `depend_textures` (optional), a list of texture names it depends
-        - When depend on other map's private textures, you can also put that map's name in the list. For example, you can put `default` to use the vanilla textures.
-    
+```
+<mod_id>:
+  texture: true
+  mod_name: <mod_name>
+  steam_id: <steam_id>
+  texture_path: <texture_path_template>
+  texture_files: <a list with one or more file name patterns (regex)>
+```
+
+- `<mod_id>` is the reference name for declaring dependency.
+- `texture_path` is optional; if omitted, the default template is `{mod_root}/{steam_id}/mods/{mod_name}/media/texturepacks`. You can also provide an absolute path to override the `texture_path` for non-workshop textures. Template substitution uses key-value pairs from the current `<moc_id>` section and the global configuration (`conf/conf.yaml`).
+- `texture_files` is optional; if omitted, it will match all `.pack` files under `texture_path`.
+
+# Map section
+Maps are defined in the map sections.
+
+```
+<mod_id>:
+  texture: true
+  mod_name: <mod_name>
+  steam_id: <steam_id>
+  map_name: <map_name>
+  encoding: <encoding for map text>
+  map_path: <map_path_template>
+  depend: <a list with mod_id of depend textures and maps>
+```
+
+- `<mod_id>` serves as the reference name for the map.
+- If the map includes self-provided textures, `texture: true` is necessary; otherwise, it can be omitted.
+    - You can also utilize `texture_path` and `texture_files` like in texture sections for self-provided textures.
+- `encoding` is optional; the default is `utf8`.
+- `map_path`  is optional; if not included, the template `{mod_root}/{steam_id}/mods/{mod_name}/media/maps/{map_name}` will be used. You can also replace the `map_path` with an absolute path for non-workshop maps.
+- `depend` is optional; if not included, only the default vanilla textures `default` will be used.
+
+- Note: A map section can also be used as a texture section for another map to depend on.
+
+# Map discription generation
+To get map descriptions for all installed mod maps, you can use the auto-generation script.
+
+Navigate to the `script/` folder and execute the following command:
+```
+collect_mod_map_data.py -g
+```
+Please note that this script requires access to the Steam website to retrieve mod dependencies.
+
+The script will produce two output files, `maps-<timestamp>.txt` and `textures-<timestamp>.txt`, within the `script/` folder. After running the script, copy the output files to `conf/mod/` for further use.
+
+Instead of accessing Steam, you can use dependencies from an existing output by the following command:
+```
+collect_mod_map_data.py -d <map-description-file> -d <texture-description-file>
+```
+
 # Example
-A mod map named `MapName1` using vanilla textures and two extra textures named `TextureName1` and `TextureName2` rendered as an overlay. And the vanilla map is used as the base map.
+A mod map called "Grapeseed" uses a combination of vanilla textures, self-provided textures, and three additional mod textures named `DylansTiles`, `Diederiks Tile Palooza`, and `tkTiles_01` overlaid on the vanilla base map.
 
-- `map_data.yaml`
+- `conf/mod/example.txt`
 ```
-textures:
-    TextureName1:
-        texture_root: mod_root
-        texture_path: |-
-            2337452747\mods\Diederiks_tile_Palooza\media\texturepacks
-        texture_file_patterns: ['.*[.]pack']
+DylansTiles:
+  mod_name: DylansTiles
+  steam_id: '2599752664'
+  texture: true
 
-    TextureName2:
-        texture_root: mod_root
-        texture_path: |-
-            2384329562\mods\tkTiles_01\media\texturepacks
-        texture_files:
-            - tkTiles_01.pack
+Diederiks Tile Palooza:
+  mod_name: Diederiks_tile_Palooza
+  steam_id: '2337452747'
+  texture: true
 
-maps:
-    default:
-        ...
+tkTiles_01:
+  mod_name: tkTiles_01
+  steam_id: '2384329562'
+  texture: true
 
-    MapName1:
-        map_root: mod_root
-        map_path: |-
-            1516836158\mods\FortRedstone\media\maps\FortRedstone
-        encoding: utf8
-        depend_texutres:
-            - default
-            - TextureName1
-            - TextureName2
-        texture_root: mod_root
-        texture_path: |-
-            1516836158\mods\FortRedstone\media\texturepacks
-        texture_file_patterns: ['.*[.]pack']
+Grapeseed:
+  depend:
+  - DylansTiles
+  - Diederiks Tile Palooza
+  - tkTiles_01
+  map_name: Grapeseed
+  mod_name: Grapeseed
+  steam_id: '2463499011'
+  texture: true
 
 ```
-- `conf.yaml`
+- `conf/conf.yaml`
 ```
 ...
 
 mod_root: |- # steam workshop folder for project zomboid
-    D:\SteamLibrary\steamapps\workshop\content\108600
+    D:/SteamLibrary/steamapps/workshop/content/108600
 
 ...
 
 base_map: default
 mod_maps:
-    - MapName1
+    - Grapeseed
 
 ...
 ```

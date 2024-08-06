@@ -1,0 +1,34 @@
+# vanilla map
+default:
+    map_path: '{pz_root}/media/maps/Muldraugh, KY'
+    texture: true
+    texture_path: '{pz_root}/media/texturepacks'
+    texture_files:
+        - Erosion[.]pack
+        - ApCom[.]pack
+        - RadioIcons[.]pack
+        - ApComUI[.]pack
+        - JumboTrees2x[.]pack
+        - Tiles2x[.]floor.pack
+        - Tiles2x[.]pack
+
+# challenge maps
+Tutorial:
+    map_path: '{pz_root}/media/maps/challengemaps/Tutorial'
+
+Studio:
+    map_path: '{pz_root}/media/maps/challengemaps/Studio'
+
+Kingsmouth:
+    map_path: '{pz_root}/media/maps/challengemaps/Kingsmouth'
+
+KnoxCounty:
+    map_path: '{pz_root}/media/maps/challengemaps/KnoxCounty'
+
+Challenge1:
+    map_path: '{pz_root}/media/maps/challengemaps/Challenge1'
+
+Challenge2:
+    map_path: '{pz_root}/media/maps/challengemaps/Challenge2'
+
+

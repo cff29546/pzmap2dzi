@@ -1,0 +1,146 @@
+pz_root: |- # project zomboid game folder
+    D:/SteamLibrary/steamapps/common/ProjectZomboid
+
+output_path: |- # render output folder
+    E:/pzmap
+
+mod_root: |- # steam workshop folder for project zomboid
+    D:/SteamLibrary/steamapps/workshop/content/108600
+
+custom_root: |- # custom file folder
+    .
+
+# defult map or texture description fields
+# (relative from this config file location)
+map_conf_default: ../default.txt
+# maps and textures description files
+# (relative from this config file location)
+map_conf:
+    - ../vanilla.txt
+    - ../mod/
+
+# Specify maps to be rendered. See map_data.yaml for map names
+# The base layer map to be rendered. default = Muldraugh, KY
+base_map: default
+# Additional overlay maps to be rendered (mod_id)
+mod_maps:
+#    - Ashenwood
+#    - BedfordFalls
+#    - Blueberry
+#    - Chinatown
+#    - Chinatown expansion
+#    - FORTREDSTONE
+#    - Grapeseed
+#    - Greenleaf
+#    - lakeivytownship
+#    - Petroville
+#    - RavenCreek
+#    - Trelai_4x4_Steam
+
+render_conf:
+    # main conf
+    verbose: true
+    # show profiling infomation
+    profile: false
+    # thread count
+    worker_count: 16
+    # set hotkey to stop render (rerun render to resume)
+    # hotkey examples:
+    #     <ctrl>+<alt>+a    ctrl + alt + a
+    #     a                 the key "a"
+    #     <f8>              f8
+    #     <cmd>+<f2>        windows key + f2
+    break_key: ''
+
+    # dzi conf
+    # dzi tile size
+    tile_size: 1024
+    # how may layer of map to render
+    layers: 8
+    # use jpg for bottom level image format instead of png
+    # does not affect overlay mod maps or top view map
+    use_jpg_for_layer0: true
+
+    # discard bottom levels to save space at the cost of zoom in resolution
+    # require python 3.8+ with cache enabled
+    # you can customize this setting for each job by adding variables
+    # in following format:
+    #     omit_levels[<map name>](<render job>)
+    #     omit_levels(<render job>)
+    #     omit_levels[<map name>]
+    #
+    # Here is an example:
+    #     render main map with omit_levels = 2
+    #     render other mod maps with omit_levels = 1
+    #     render zombie heatmap and top view zombie heatmap of mod map Bedford Fall with omit_levels = 1
+    #     all other render with omit_levels = 0
+    # Example config:
+    #     omit_levels[default](base): 2
+    #     omit_levels(base): 1
+    #     omit_levels[Bedford Falls](zombie): 1
+    #     omit_levels[Bedford Falls](zombie_top): 1
+    #     omit_levels: 0
+    omit_levels: 2
+
+    # png compress level: from 0 to 9. -1 for using default
+    image_compress_level: -1
+    # enable cache to accelerate pyramid building, require python 3.8+
+    enable_cache: true
+    # cache limit in MB, 0 for unlimited
+    cache_limit_mb: 0
+    # width for a single tile in top view
+    top_view_square_size: 1
+
+    # base render
+    plants_conf:
+        # eable snow on trees and bushes
+        snow: false
+        # use large bushes
+        large_bush: false
+        # eable flower on trees and bushes
+        flower: false
+        # supported season: spring, summer, summer2, autumn, winter
+        season: summer2
+        # normal tree size, range from 0 to 3 (inclusive)
+        tree_size: 2
+        # large tree size, range from 0 to 5 (inclusive)
+        jumbo_tree_size: 4
+        # large tree type, from: 0 to 10  (inclusive)
+        # see _TREE_DEF in pzmap2dzi/plants.py for more detail
+        jumbo_tree_type: 0
+        # disable ground cover grass
+        no_ground_cover: false
+        # use only one type of tree
+        # supported values:
+        # -1        trees not unified
+        # 0 to 10   the unified tree type
+        unify_tree_type: -1
+
+    # square color method in top view mode
+    # supported method:
+    # base: only use the color of the floor tile
+    # base+water: only use the color of the floor tile and water tile (if exist)
+    # avg: caculate an average color of all tiles
+    # carto-zed: Carto-Zed like color theme
+    top_view_color_mode: avg
+    
+    # font settings
+    default_font: arial.ttf
+    default_font_size: 20
+    # room font settings, using default font if omitted
+    # room_font: arial.ttf
+    # room_font_size: 20
+
+    # zombie heatmap
+    zombie_count: true
+    # zombie count font settings, using default font if omitted
+    # zombie_count_font: arial.ttf
+    zombie_count_font_size: 40
+
+    # objects areas
+    vehicle: true
+    special_zombie: true
+    stroy: true
+    # objects font settings, using default font if omitted
+    # objects_font: arial.ttf
+    # objects_font_size: 20

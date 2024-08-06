@@ -1,32 +1,41 @@
 pz_root: |- # project zomboid game folder
-    D:\SteamLibrary\steamapps\common\ProjectZomboid
+    D:/SteamLibrary/steamapps/common/ProjectZomboid
 
 output_path: |- # render output folder
-    E:\pzmap
+    E:/pzmap
 
 mod_root: |- # steam workshop folder for project zomboid
-    D:\SteamLibrary\steamapps\workshop\content\108600
+    D:/SteamLibrary/steamapps/workshop/content/108600
 
 custom_root: |- # custom file folder
     .
 
+# defult map or texture description fields
+# (relative from this config file location)
+map_conf_default: ../default.txt
+# maps and textures description files
+# (relative from this config file location)
+map_conf:
+    - ../vanilla.txt
+    - ../mod/
+
 # Specify maps to be rendered. See map_data.yaml for map names
 # The base layer map to be rendered. default = Muldraugh, KY
 base_map: default
-# Additional overlay maps to be rendered
+# Additional overlay maps to be rendered (mod_id)
 mod_maps:
-#    - Ashenwoodmod
-#    - Bedford Falls
-#    - Blueberry
-#    - Chinatown, KY
-#    - Chinatown Expansion, KY
-#    - FortRedstone
-#    - Grapeseed
-#    - Greenleaf
-#    - li_township
-#    - Petroville
-#    - RavenCreek
-#    - Trelai_4x4_Steam
+    - Ashenwood
+    - BedfordFalls
+    - Blueberry
+    - Chinatown
+    - Chinatown expansion
+    - FORTREDSTONE
+    - Grapeseed
+    - Greenleaf
+    - lakeivytownship
+    - Petroville
+    - RavenCreek
+    - Trelai_4x4_Steam
 
 render_conf:
     # main conf

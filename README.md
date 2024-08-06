@@ -51,7 +51,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
    - Change the `output_path` variable to the desired output path
    - Change the `mod_root` variable to steam workshop path if you want to render a mod map
    - Add desired mod maps to `mod_maps` list (For more infor about how to add mod maps see [adding mod maps](./docs/adding_mod_maps.md))
-   - See [examples](./docs/examples) for more config details
+   - See [examples](./conf/examples) for more config details
 
 5. Run the tool
 

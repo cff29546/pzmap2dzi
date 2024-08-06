@@ -33,10 +33,9 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
     - The zombie heatmap took about half of the isometric map render time
     - If you choose to render only top view map, output size will be around 500MB and can be done within half hour.
 - **Note**
-    - Shared memory acceleration
-        - May not compatible with [Hybrid Architecture](https://www.intel.com/content/www/us/en/developer/articles/technical/hybrid-architecture.html) CPUs and could result in render failures
-        - Unstable with eariler python builds because of [buggy implementation](https://stackoverflow.com/questions/65968882/unlink-does-not-work-in-pythons-shared-memory-on-windows). Python 3.10.9+ or 3.11.1+ recommended
-        - To turn it on, see *Change rendering configurations* section below
+    - Shared memory acceleration may not compatible with [Hybrid Architecture](https://www.intel.com/content/www/us/en/developer/articles/technical/hybrid-architecture.html) CPUs and could result in render failures
+    - Shared memory acceleration is unstable with eariler python builds because of [buggy implementation](https://stackoverflow.com/questions/65968882/unlink-does-not-work-in-pythons-shared-memory-on-windows). Python 3.10.9+ or 3.11.1+ recommended
+    - To turn on shared memory acceleration, see *Change rendering configurations* section below
 
 # How to run
 

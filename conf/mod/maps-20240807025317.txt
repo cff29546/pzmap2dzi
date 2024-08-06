@@ -38,7 +38,6 @@ lakeivytownship:
   steam_id: '2252982049'
 
 KingsmouthKY:
-  depend: []
   display_name: Kingsmouth in KY
   map_name: Kingsmouth
   mod_name: KingsmouthKY
@@ -113,7 +112,7 @@ ParkingLot:
   - Diederiks Tile Palooza
   - tkTiles_01
   - EN_Newburbs
-  display_name: OldPark Town
+  display_name: OldPark
   map_name: ParkingLot
   mod_name: ParkingLot
   steam_id: '2671414643'

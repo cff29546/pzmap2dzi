@@ -4,6 +4,11 @@ import yaml
 import datetime
 import get_mod_dep
 
+def load_yaml(path):
+    with io.open(path, 'r', encoding='utf8') as f:
+        data = yaml.safe_load(f.read())
+    return data
+
 def get_depend(maps, textures):
     id2mod = {}
     mod2id = {}
@@ -134,22 +139,45 @@ def output_info(textures, maps, path):
         for mod_id, m in maps:
             mod = {}
             for key in ['steam_id', 'mod_name', 'map_name', 'display_name', 'depend', 'texture']:
-                if key in m:
+                if key in m and m[key]:
                     mod[key] = m[key]
             f.write(yaml.safe_dump({mod_id: mod}))
             f.write('\n')
 
+def update_depend(maps, textures, depends):
+    mod_ids = set()
+    for mod_id, t in maps + textures:
+        mod_ids.add(mod_id)
+    depend = {}
+    for d in depends:
+        depend.update(load_yaml(d))
+    for mod_id, mod in maps:
+        dep = depend.get(mod_id)
+        if dep:
+            mod['depend'] = []
+            for d in dep.get('depend', []):
+                if d in mod_ids:
+                    mod['depend'].append(d)
+            mod['display_name'] = dep.get('display_name')
+    return maps
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='collect mod map info for installed mods')
+    parser.add_argument('-c', '--conf', type=str, default='../conf/conf.yaml')
     parser.add_argument('-o', '--output', type=str, default='.')
-    parser.add_argument('-d', '--get-depend', action='store_true')
-    parser.add_argument('conf', type=str, nargs='?', default='../conf/conf.yaml')
+    parser.add_argument('-g', '--get-depend', action='store_true')
+    parser.add_argument('-d', '--depend', action='append', default=[])
     args = parser.parse_args()
 
     textures, maps = collect_info(args.conf)
+
+    if args.depend:
+        maps = update_depend(maps, textures, args.depend)
+
     if args.get_depend:
         maps = get_depend(maps, textures)
+
     output_info(textures, maps, args.output)
 
 

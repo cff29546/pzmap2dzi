@@ -55,11 +55,16 @@ To get map descriptions for all installed mod maps, you can use the auto-generat
 
 Navigate to the `script/` folder and execute the following command:
 ```
-collect_mod_map_data.py -d
+collect_mod_map_data.py -g
 ```
 Please note that this script requires access to the Steam website to retrieve mod dependencies.
 
 The script will produce two output files, `maps-<timestamp>.txt` and `textures-<timestamp>.txt`, within the `script/` folder. After running the script, copy the output files to `conf/mod/` for further use.
+
+Instead of accessing Steam, you can use dependencies from an existing output by the following command:
+```
+collect_mod_map_data.py -d <map-description-file> -d <texture-description-file>
+```
 
 # Example
 A mod map called "Grapeseed" uses a combination of vanilla textures, self-provided textures, and three additional mod textures named `DylansTiles`, `Diederiks Tile Palooza`, and `tkTiles_01` overlaid on the vanilla base map.

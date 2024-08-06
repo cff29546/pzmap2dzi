@@ -79,7 +79,7 @@ AzaMountainTiles:
   texture: true
 
 FearsFunkyTiles:
-  mod_name: Fears_Funky_Tiles
+  mod_name: Fear's Funky Tiles
   steam_id: '2901328637'
   texture: true
 

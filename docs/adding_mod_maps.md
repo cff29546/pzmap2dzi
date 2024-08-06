@@ -48,6 +48,8 @@ Maps are defined in the map sections.
 - `map_path`  is optional; if not included, the template `{mod_root}/{steam_id}/mods/{mod_name}/media/maps/{map_name}` will be used. You can also replace the `map_path` with an absolute path for non-workshop maps.
 - `depend` is optional; if not included, only the default vanilla textures `default` will be used.
 
+- Note: A map section can also be used as a texture section for another map to depend on.
+
 # Map discription generation
 To get map descriptions for all installed mod maps, you can use the auto-generation script.
 

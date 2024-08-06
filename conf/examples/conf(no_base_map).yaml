@@ -12,12 +12,12 @@ custom_root: |- # custom file folder
 
 # defult map or texture description fields
 # (relative from this config file location)
-map_conf_default: default.txt
+map_conf_default: ../default.txt
 # maps and textures description files
 # (relative from this config file location)
 map_conf:
-    - vanilla.txt
-    - mod/
+    - ../vanilla.txt
+    - ../mod/
 
 # Specify maps to be rendered. See map_data.yaml for map names
 # The base layer map to be rendered. default = Muldraugh, KY

@@ -140,7 +140,7 @@ class TextureLibrary(object):
         self.mem = None
         if self.use_cache and shared_memory_image:
             prefix = 'tl.{}.{}'.format(os.getpid(), cache_name)
-            self.mem = shared_memory_image.ImageSharedMemory(prefix, 32, True)
+            self.mem = shared_memory_image.ImageSharedMemory(prefix, 32)
         self.lib = {}
 
     def add_pack(self, path, debug=False):

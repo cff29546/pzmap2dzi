@@ -5,3 +5,4 @@ pillow
 pyyaml
 flask
 waitress
+requests

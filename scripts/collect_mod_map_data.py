@@ -132,8 +132,8 @@ def output_info(textures, maps, path):
             mod = {'texture': True}
             for key in ['steam_id', 'mod_name']:
                 mod[key] = t[key]
-            f.write(yaml.safe_dump({mod_id: mod}))
-            f.write('\n')
+            f.write(yaml.safe_dump({mod_id: mod}, encoding=None))
+            f.write(u'\n')
 
     with io.open(map_file, 'w', encoding='utf8') as f:
         for mod_id, m in maps:
@@ -141,8 +141,8 @@ def output_info(textures, maps, path):
             for key in ['steam_id', 'mod_name', 'map_name', 'display_name', 'depend', 'texture']:
                 if key in m and m[key]:
                     mod[key] = m[key]
-            f.write(yaml.safe_dump({mod_id: mod}))
-            f.write('\n')
+            f.write(yaml.safe_dump({mod_id: mod}, encoding=None))
+            f.write(u'\n')
 
 def update_depend(maps, textures, depends):
     mod_ids = set()

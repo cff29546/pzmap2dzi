@@ -80,46 +80,61 @@ class DZI(object):
         return im.crop((0, 0, w, h))
 
     def mark_empty(self, level, tx, ty, layer):
-        path = os.path.join(self.path,
-                           'layer{}_files'.format(layer),
-                           str(level),
-                           '{}_{}.empty'.format(tx, ty))
-        with open(path, 'w') as f:
-            pass
+        if self.save_empty:
+            ext, path = self.tile_path(level, tx, ty, layer, 'empty')
+            with open(path, 'w') as f:
+                pass
 
     def save_tile(self, im, level, tx, ty, layer, force=False):
-        if (not force and
-            self.cache_enabled and
-            level >= self.levels - self.skip_level):
+        write_all = force or not self.cache_enabled
+        if not write_all and level >= self.levels - self.skip_level:
             return 'skip'
         if im:
             im = self._crop_tile(im, level, tx, ty)
         if im and im.getbbox():
-            ext = self.ext0 if layer == 0 else self.ext
+            ext, path = self.tile_path(level, tx, ty, layer)
         else:
-            if self.save_empty:
-                self.mark_empty(level, tx, ty, layer)
+            self.mark_empty(level, tx, ty, layer)
             return 'empty'
 
         if ext == 'jpg':
            im = im.convert('RGB')
 
-        path = os.path.join(self.path,
-                           'layer{}_files'.format(layer),
-                           str(level),
-                           '{}_{}.{}'.format(tx, ty, ext))
         options = {}
         if self.compress_level >= 0:
             options['compress_level'] = self.compress_level
         im.save(path, **options)
+
+        if (write_all and level != self.levels and
+            level + 1 >= self.levels - self.skip_level):
+            self.delete_skip_tiles(level, tx, ty, layer)
+
         return 'saved'
 
-    def load_tile(self, level, tx, ty, layer):
-        ext = self.ext0 if layer == 0 else self.ext
+    def delete_skip_tiles(self, level, tx, ty, layer):
+        for i in [0, 1]:
+            for j in [0, 1]:
+                self.delete_tile(level + 1, i + tx*2, j + ty*2, layer)
+
+    def delete_tile(self, level, tx, ty, layer):
+        ext, path = self.tile_path(level, tx, ty, layer)
+        if os.path.isfile(path):
+            try:
+                os.remove(path)
+            except:
+                pass
+
+    def tile_path(self, level, tx, ty, layer, ext=None):
+        if ext is None:
+            ext = self.ext0 if layer == 0 else self.ext
         path = os.path.join(self.path,
                            'layer{}_files'.format(layer),
                            str(level),
                            '{}_{}.{}'.format(tx, ty, ext))
+        return ext, path
+
+    def load_tile(self, level, tx, ty, layer):
+        ext, path = self.tile_path(level, tx, ty, layer)
         im = None
         if os.path.isfile(path):
             im = Image.open(path)
@@ -128,20 +143,13 @@ class DZI(object):
         return im
 
     def set_wip(self, level, x, y):
-        path = os.path.join(self.path,
-                            'layer0_files',
-                            str(level),
-                            '{}_{}.pending'.format(x, y))
+        ext, path = self.tile_path(level, x, y, 0, 'pending')
         with open(path, 'w') as f:
             pass
 
     def clear_wip(self, level, x, y):
-        path = os.path.join(self.path,
-                            'layer0_files',
-                            str(level),
-                            '{}_{}.pending'.format(x, y))
+        ext, path = self.tile_path(level, x, y, 0, 'pending')
         os.remove(path)
-
  
     def create_empty_output(self):
         util.ensure_folder(self.path)

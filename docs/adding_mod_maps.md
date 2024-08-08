@@ -50,7 +50,7 @@ Maps are defined in the map sections.
 
 - Note: A map section can also be used as a texture section for another map to depend on.
 
-# Map discription generation
+# Map description generation
 To get map descriptions for all installed mod maps, you can use the auto-generation script.
 
 Navigate to the `script/` folder and execute the following command:

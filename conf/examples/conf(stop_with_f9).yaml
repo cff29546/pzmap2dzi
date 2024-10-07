@@ -140,7 +140,7 @@ break_key: '<f9>'
     # objects areas
     vehicle: true
     special_zombie: true
-    stroy: true
+    story: true
     # objects font settings, using default font if omitted
     # objects_font: arial.ttf
     # objects_font_size: 20

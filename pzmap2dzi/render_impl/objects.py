@@ -97,11 +97,11 @@ class ObjectsRender(object):
         self.font = LazyFont(font_name, int(font_size))
         objects_path = os.path.join(self.input, 'objects.lua')
         types = set()
-        if not options.get('no_car_spawn', False):
+        if options.get('vehicle', True):
             types = types.union(pzobjects.PARKING_TYPES)
-        if not options.get('no_zombie', False):
+        if options.get('special_zombie', True):
             types = types.union(pzobjects.ZOMBIE_TYPES)
-        if not options.get('no_story', False):
+        if options.get('story', True):
             types = types.union(pzobjects.STORY_TYPES)
         cell_zones = pzobjects.load_cell_zones(objects_path, types)
         self.cells = set(cell_zones.keys())

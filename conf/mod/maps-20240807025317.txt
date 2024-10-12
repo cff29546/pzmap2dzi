@@ -1124,3 +1124,62 @@ Otr:
   steam_id: '926737806'
   texture: true
 
+Fort Benning:
+  display_name: Fort Benning
+  map_name: Fort Benning
+  mod_name: Fort Benning
+  steam_id: '2693585128'
+  
+shelter-2424:
+  depend:
+  - Shelters Tileset
+  display_name: Shelter 24 24
+  map_name: Shelter 24 24
+  mod_name: Shelter 24 24
+  steam_id: '3327863658'
+
+shelter-2533:
+  depend:
+  - Shelters Tileset
+  display_name: Shelter 25 33
+  map_name: Shelter 25 33
+  mod_name: Shelter 25 33
+  steam_id: '3221273471'
+  
+shelter-2926:
+  depend:
+  - Shelters Tileset
+  display_name: Shelter 29 26
+  map_name: Shelter 29 26
+  mod_name: Shelter 29 26
+  steam_id: '3221276539'
+  
+OakDaleUniversityMapMod:
+  display_name: Oak Dale University, KY
+  map_name: OakDaleUniversity
+  mod_name: OakDaleUniversity
+  steam_id: '3323253551'
+  
+Pitstop:
+  display_name: Pitstop
+  map_name: Pitstop
+  mod_name: Pitstop
+  steam_id: '2597946327'
+
+Fort Waterfront:
+  display_name: Fort Waterfront
+  map_name: Fort Waterfront
+  mod_name: Fort Waterfront
+  steam_id: '2779248414'
+
+Muldraugh Factory:
+  display_name: Muldraugh Factory
+  map_name: RailyardIndustry
+  mod_name: Nuke's Tiny Additions-Muldraugh Factory
+  steam_id: '3282123598'
+  
+Fort Loid:
+  display_name: Fort Loid
+  map_name: Fort Loid
+  mod_name: Fort Loid
+  steam_id: '3265976822'

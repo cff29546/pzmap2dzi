@@ -108,3 +108,7 @@ Ryu Tiles:
   steam_id: '3003792372'
   texture: true
 
+Shelters Tileset:
+  mod_name: Shelters Tileset
+  steam_id: '3221270060'
+  texture: true

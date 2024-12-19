@@ -34,7 +34,7 @@ def get_depend(maps, textures):
 
 def read_info(path):
     info = {}
-    with open(path, 'r') as f:
+    with io.open(path, 'r', encoding='utf8') as f:
         for line in f:
             kv = line.strip().split('=', 1)
             if len(kv) == 2:
@@ -99,7 +99,7 @@ def get_steam_conf(mod_root, steam_id):
     return conf
 
 def collect_info(conf_path):
-    with open(conf_path, 'r') as f:
+    with io.open(conf_path, 'r', encoding='utf8') as f:
         conf = yaml.safe_load(f.read())
     mod_root = conf['mod_root']
     textures = []

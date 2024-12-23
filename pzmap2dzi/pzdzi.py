@@ -417,7 +417,7 @@ class IsoDZI(PZDZI):
                     continue
                 sx = (gx + gy) >> 1
                 sy = (gy - gx) >> 1
-                ox, oy = IsoDZI.get_sqr_center(gx - gx0, gy - gy0)
+                ox, oy = self.get_sqr_center(gx - gx0, gy - gy0)
                 render.square(im_getter, self, ox, oy, sx, sy, layer)
 
     def update_map_info(self, info):

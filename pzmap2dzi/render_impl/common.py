@@ -26,10 +26,16 @@ def render_text(draw, x, y, text, color, font):
     dx, dy, w, h = text_size(draw, text, font)
     draw.text((x - (w >> 1) - dx, y - (h >> 1) - dy), text, color, font)
 
-def draw_square(draw, x, y, color):
+def draw_square(draw, x, y, color, size=1):
     h = pzdzi.IsoDZI.HALF_SQR_HEIGHT
     w = pzdzi.IsoDZI.HALF_SQR_WIDTH
-    draw.polygon([x, y - h, x + w, y, x, y + h, x - w, y], fill=color)
+    path = [
+        x,          y - h,             #top
+        x + size*w, y + size*h - h,    #right
+        x,          y + 2*size*h - h,  #bottom
+        x - size*w, y + size*h - h,    #left
+    ]
+    draw.polygon(path, fill=color)
 
 SUFFIX = [
     'store',

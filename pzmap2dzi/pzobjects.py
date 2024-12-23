@@ -1,6 +1,6 @@
 import slpp
 import os
-from . import geometry
+from . import geometry, lotheader
 from functools import partial
 try:
     from functools import lru_cache
@@ -67,13 +67,13 @@ class Obj(object):
             self.y = y1
             self.h = y2 - y1
 
-    def cells(self):
+    def cells(self, cell_size):
         if not self.valid:
             return []
-        cxmin = self.x // 300
-        cxmax = (self.x + self.w - 1) // 300
-        cymin = self.y // 300
-        cymax = (self.y + self.h - 1) // 300
+        cxmin = self.x // cell_size
+        cxmax = (self.x + self.w - 1) // cell_size
+        cymin = self.y // cell_size
+        cymax = (self.y + self.h - 1) // cell_size
         output = []
         for cx in range(cxmin, cxmax + 1):
             for cy in range(cymin, cymax + 1):
@@ -118,20 +118,20 @@ class Obj(object):
             m[x, y] = [geometry._MAYBE_OUTSIDE] * 4
         return geometry.get_border_from_square_map(m)
 
-def cell_map(objects_raw):
+def cell_map(objects_raw, cell_size):
     m = {}
     for obj in objects_raw:
         o = Obj(obj)
-        for c in o.cells():
+        for c in o.cells(cell_size):
             if c not in m:
                 m[c] = []
             m[c].append(o)
     return m
 
-def load_cell_zones(path, types, zlimit=None):
+def load_cell_zones(path, cell_size, types, zlimit=None):
     objects_raw = load_objects_raw(path)
     objects_raw = filter_objects_raw(objects_raw, types, zlimit)
-    return cell_map(objects_raw)
+    return cell_map(objects_raw, cell_size)
 
 def border_label_map(cell_zones, cx, cy):
     if (cx, cy) not in cell_zones:
@@ -154,51 +154,47 @@ def border_label_map(cell_zones, cx, cy):
             b_map[z.z][x, y].append((z.type, flag))
     return b_map, l_map
 
-def square_map(cell_zones, cx, cy):
+def square_map(cell_zones, cell_size, cx, cy):
     if (cx, cy) not in cell_zones:
         return None
     m = {}
     for z in cell_zones[cx, cy]:
         for x, y in z.square_list():
-            if x < cx * 300 or x >= (cx + 1) * 300 or y < cy * 300 or y >= (cy + 1) * 300:
+            if (x < cx * cell_size or x >= (cx + 1) * cell_size or
+                y < cy * cell_size or y >= (cy + 1) * cell_size):
                 continue
             if (x, y) not in m:
                 m[x, y] = z.type
     return m 
 
-class CachedSquareMapGetter(object):
+class CachedGetter(object):
     def __init__(self, path, types, zlimit=None, cache_size=16):
         self.path = path
+        map_path = os.path.dirname(path)
+        version_info = lotheader.get_version_info(map_path, fast_mode=True)
+        self.cell_size = version_info['cell_size']
         self.types = types
         self.zlimit = zlimit
         self.cache_size = cache_size
         self.getter = None
 
-    def build_getter(self):
-        self.cell_zones = load_cell_zones(self.path, self.types, self.zlimit)
-        getter = partial(square_map, self.cell_zones)
-        self.getter = lru_cache(maxsize=self.cache_size)(getter)
+    def get_cell_zones(self):
+        return load_cell_zones(self.path, self.cell_size, self.types, self.zlimit)
 
     def __call__(self, cx, cy):
         if self.getter is None:
             self.build_getter()
         return self.getter(cx, cy)
 
-class CachedBorderLabelMapGetter(object):
-    def __init__(self, path, types, zlimit=None, cache_size=16):
-        self.path = path
-        self.types = types
-        self.zlimit = zlimit
-        self.cache_size = cache_size
-        self.getter = None
-
+class CachedSquareMapGetter(CachedGetter):
     def build_getter(self):
-        self.cell_zones = load_cell_zones(self.path, self.types, self.zlimit)
+        self.cell_zones = self.get_cell_zones()
+        getter = partial(square_map, self.cell_zones, self.cell_size)
+        self.getter = lru_cache(maxsize=self.cache_size)(getter)
+
+class CachedBorderLabelMapGetter(CachedGetter):
+    def build_getter(self):
+        self.cell_zones = self.get_cell_zones()
         getter = partial(border_label_map, self.cell_zones)
         self.getter = lru_cache(maxsize=self.cache_size)(getter)
-
-    def __call__(self, cx, cy):
-        if self.getter is None:
-            self.build_getter()
-        return self.getter(cx, cy)
 

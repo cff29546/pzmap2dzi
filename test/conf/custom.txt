@@ -1,2 +1,0 @@
-custom:
-    map_path: '{custom_root}/custom'

@@ -40,7 +40,7 @@ def parse_map(conf_path):
 def get_dep(conf, maps, names):
     dep = set([])
     if conf.get('use_depend_texture_only'):
-        used = names.copy()
+        used = list(names) # copy
         while len(used) > 0:
             m = used.pop()
             if m in maps and m not in dep:
@@ -112,10 +112,8 @@ def render_map(cmd, conf, maps, map_name, is_base):
         options['output'] = os.path.join(conf['output_path'], 'html', cmd)
     else:
         options['output'] = os.path.join(conf['output_path'], 'html', 'mod_maps', map_name, cmd)
-    if is_base and options.get('use_jpg_for_layer0') and cmd == 'base':
-        options['layer0_fmt'] = 'jpg'
-    else:
-        options['layer0_fmt'] = 'png'
+    if is_base and cmd == 'base':
+        options['image_fmt_layer0'] = conf.get('image_fmt_base_layer0', None)
 
     # room / objects
     options['encoding'] = map_conf['encoding']
@@ -141,7 +139,6 @@ def save_mod_map_list(conf):
 
 def render(args):
     conf, maps = parse_map(args.conf)
-    conf['render_conf']['total_layers'] = conf['render_conf']['layers']
     for cmd in args.args:
         # base map
         if conf.get('base_map'):

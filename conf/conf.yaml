@@ -63,13 +63,15 @@ render_conf:
     # dzi tile size
     tile_size: 1024
     # how may layer of map to render
-    layers: 8
-    # use jpg for bottom level image format instead of png
-    # does not affect overlay mod maps or top view map
-    use_jpg_for_layer0: true
-
+    # examples:
+    # render layer 0 to layer 7
+    #     layer_range: [0, 8]
+    # render layer -32 (basement) to layer 31
+    #     layer_range: [-32, 32]
+    # render all possible layers
+    #     layer_range: all
+    layer_range: all
     # discard bottom levels to save space at the cost of zoom in resolution
-    # require python 3.8+ with cache enabled
     # you can customize this setting for each job by adding variables
     # in following format:
     #     omit_levels[<map name>](<render job>)
@@ -89,8 +91,25 @@ render_conf:
     #     omit_levels: 0
     omit_levels: 0
 
-    # png compress level: from 0 to 9. -1 for using default
-    image_compress_level: -1
+    # output image format, affect base and all overlay map, mush support transparent
+    # supported formats: [png, webp]
+    image_fmt: png
+    # output image format for base map layer0, can use jpg to save space
+    # supported formats: [png, webp, jpg]
+    image_fmt_base_layer0: jpg
+    # output image options for each output format
+    # more options see:
+    #     https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#png-saving
+    #
+    # Here is an example:
+    #     use compress level = 1 (fastest) for png
+    #     use 95% quality for jpg
+    # Example config:
+    #     image_save_options:
+    #         png: {compress_level: 1}
+    #         jpg: {quality: 95}
+    image_save_options: {}
+
     # enable cache to accelerate pyramid building, require python 3.8+
     enable_cache: false
     # cache limit in MB, 0 for unlimited

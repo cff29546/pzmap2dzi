@@ -20,11 +20,11 @@ const Map = class {
         let x = this.x0;
         let y = this.y0;
         if (map_type == 'iso') {
-            x += (cx - cy) * this.sqr * 150;
-            y += (cx + cy) * this.sqr * 75;
+            x += (cx - cy) * this.sqr * this.cell_size / 2;
+            y += (cx + cy) * this.sqr * this.cell_size / 4;
         } else {
-            x += cx * this.sqr * 300;
-            y += cy * this.sqr * 300;
+            x += cx * this.sqr * this.cell_size;
+            y += cy * this.sqr * this.cell_size;
         }
         return {x: x, y: y};
     }
@@ -228,6 +228,10 @@ const Map = class {
             this.y0 = this.info.base.y0;
             this.sqr = this.info.base.sqr;
             this.cell_rects = this.info.base.cell_rects;
+            this.cell_size = this.info.base.cell_size;
+            this.block_size = this.info.base.block_size;
+            this.cell_in_block = this.cell_size / this.block_size;
+            this.pz_version = this.info.base.pz_version;
             for (let type of ['zombie', 'foraging', 'room', 'objects']) {
                 this.loadMapInfo(type);
                 this.overlays[type] = 0;
@@ -800,7 +804,7 @@ function grid2keyIso(gx, gy) {
 
 function block2cell(bkey) {
     let [x, y] = bkey.split(',');
-    return Math.floor(x / 30) + ',' + Math.floor(y / 30);
+    return Math.floor(x / base_map.cell_in_block) + ',' + Math.floor(y / base_map.cell_in_block);
 }
 
 function openExplorer() {
@@ -1071,10 +1075,10 @@ function drawEditState(ctx, c00, step, is_block) {
     if (rectLevel) {
         let scale = 1.0;
         if (rectLevel == 'cell' && is_block) {
-            scale = 30;
+            scale = base_map.cell_in_block;
         }
         if (rectLevel == 'block' && !is_block) {
-            scale = 1.0 / 30;
+            scale = 1.0 / base_map.cell_in_block;
         }
         let x = Math.min(rectX1, rectX2);
         let y = Math.min(rectY1, rectY2);
@@ -1155,8 +1159,8 @@ function getCanvasOriginAndStep() {
     c00.x *= window.devicePixelRatio;
     c00.y *= window.devicePixelRatio;
 
-    let step_cell = base_map.sqr * 300 * zm / base_map.scale;
-    let step_block = step_cell / 30;
+    let step_cell = base_map.sqr * base_map.cell_size * zm / base_map.scale;
+    let step_block = step_cell / base_map.cell_in_block;
 
     return [c00, step_cell, step_block];
 }
@@ -1207,7 +1211,7 @@ function getGridLevel(ctx, step_cell, step_block) {
 function flipBlock(x, y) {
     let key = makeKey(x, y);
     if (saved_blocks.has(key)) {
-        let ckey = makeKey(Math.floor(x/30), Math.floor(y/30));
+        let ckey = makeKey(Math.floor(x/base_map.cell_in_block), Math.floor(y/base_map.cell_in_block));
         if (selected_blocks.has(key)) {
             selected_blocks.delete(key);
             selected_cells[ckey] -= 1;
@@ -1229,9 +1233,9 @@ function flipCell(x, y) {
     if (saved_cells[key] != undefined) {
         if (selected_cells[key] == undefined || selected_cells[key] < saved_cells[key]) {
             selected_cells[key] = saved_cells[key];
-            for (let i = 0; i < 30; i++) {
-                for (let j = 0; j < 30; j++) {
-                    let bkey = makeKey(x * 30 + i, y * 30 + j);
+            for (let i = 0; i < base_map.cell_in_block; i++) {
+                for (let j = 0; j < base_map.cell_in_block; j++) {
+                    let bkey = makeKey(x * base_map.cell_in_block + i, y * base_map.cell_in_block + j);
                     if (saved_blocks.has(bkey)) {
                         selected_blocks.add(bkey);
                     }
@@ -1239,9 +1243,9 @@ function flipCell(x, y) {
             }
         } else {
             delete selected_cells[key];
-            for (let i = 0; i < 30; i++) {
-                for (let j = 0; j < 30; j++) {
-                    let bkey = makeKey(x * 30 + i, y * 30 + j);
+            for (let i = 0; i < base_map.cell_in_block; i++) {
+                for (let j = 0; j < base_map.cell_in_block; j++) {
+                    let bkey = makeKey(x * base_map.cell_in_block + i, y * base_map.cell_in_block + j);
                     if (selected_blocks.has(bkey)) {
                         selected_blocks.delete(bkey);
                     }

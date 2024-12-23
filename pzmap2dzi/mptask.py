@@ -32,7 +32,7 @@ class WorkerWarp(object):
             try:
                 init = self.worker.init()
             except Exception as e:
-                print('worker:[{}] init error, Exception: {}'.format(e))
+                print('worker init error, Exception: {}'.format(e))
                 traceback.print_exc()
                 init = False
                 result = e

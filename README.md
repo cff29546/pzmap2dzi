@@ -3,21 +3,14 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 
 # Features
 
-- Supports both python 2 and python 3
-- HTML viewer for viewing the generated Deep Zoom image.
-- Various plant rendering configurations (snow, flower, tree size, etc.).
-- Supports multi-thread acceleration
-- Supports shared memory acceleration when building dzi pyramid (python 3.8+ only)
-- Supports resuming from a breakpoint
-- Supports room info rendering
-- Supports zombie heatmap rendering
-- Supports foraging zones rendering
-- Supports isometric view and top view rendering
-- Supports map grids in HTML viewer
-- Supports map objects rendering (car spawn zones, special zombie spawn zones, map story zones)
-- Supports render mod maps as switchable overlay
-- Supports save file trimmer to trim local saved games (server mode viewer only)
-- Tested with game version 41.78
+- HTML viewer for viewing the generated Deep Zoom image in both isometric and top down
+- Render mod maps as switchable overlay
+- Featured overlay map: zombie-heatmap, foraging zones, story area, etc.
+- Tools for local saved games trimming
+- B42 basement viewer. And more...
+
+- Multi-thread acceleration
+- Tested with game version 41.78.16 and 42.0.2 UNSTABLE on both python 2.7 and python 3.11
 
 # Requirement
 - **Storage**: The full output size of isometric map for game version 41.78 is around 450GB (or 2.5TB with lossless png format) and consists of 4M files. SSD is recommended as high I/O bandwidth can reduce render time.
@@ -58,7 +51,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
    Run `run.bat` to render all isometric and top view maps
 
 # Change rendering configurations
-   See `conf/conf.yaml` and `run.bat` for more detials.
+   See `conf/conf.yaml` and `run.bat` for more detials. You can also use `scripts/gen_example_conf.py` to generate some configuration examples.
 
 - Turn on shared memory acceleration
     - In `render_conf` section of `conf.yaml`, set `enable_cache` to `ture`

@@ -1,7 +1,8 @@
 pushd %~dp0
-for /f "delims=" %%x in (python_version.txt) do set %%x
+for /f "delims=" %%x in (env.txt) do set %%x
 %python% setup_test.py
-%python% ../main.py copy
-%python% ../main.py unpack
+cd test_output
+%python% ../../main.py copy
+%python% ../../main.py unpack
 popd
 pause

@@ -268,7 +268,7 @@ class TopologicalDziWorker(object):
             return
         cmd, key = msg
         level, x, y = key
-        for layer in range(self.dzi.layers):
+        for layer in range(self.dzi.minlayer, self.dzi.maxlayer):
             index = get_index(level, x, y, layer)
             state = self.cache_map.pop((level, x, y, layer), 'empty')
             if state == 'empty':
@@ -290,7 +290,7 @@ class TopologicalDziWorker(object):
         cl = CacheLoader(self.mem, size)
         layer_map = [0] * self.dzi.layers
         self.dzi.set_wip(level, x, y)
-        for layer in reversed(range(self.dzi.layers)):
+        for layer in self.dzi.render_layers:
             index = get_index(level, x, y, layer)
             ic = ImageCreater(self.mem, index, size)
             if is_base:

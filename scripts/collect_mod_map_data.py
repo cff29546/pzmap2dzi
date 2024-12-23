@@ -165,7 +165,7 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='collect mod map info for installed mods')
     parser.add_argument('-c', '--conf', type=str, default='../conf/conf.yaml')
-    parser.add_argument('-o', '--output', type=str, default='.')
+    parser.add_argument('-o', '--output', type=str, default='./output')
     parser.add_argument('-g', '--get-depend', action='store_true')
     parser.add_argument('-d', '--depend', action='append', default=[])
     args = parser.parse_args()

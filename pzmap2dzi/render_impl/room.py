@@ -1,7 +1,6 @@
 from PIL import ImageDraw
-import os
 from .common import render_long_text, render_edge, LazyFont
-from .. import lotheader, pzdzi, geometry
+from .. import lotheader, geometry
 
 try:
     from functools import lru_cache
@@ -25,10 +24,9 @@ class CellRoom(object):
 
 @lru_cache(maxsize=128)
 def load_cell_room(path, cx, cy):
-    name = os.path.join(path, '{}_{}.lotheader'.format(cx, cy))
-    if not os.path.isfile(name):
+    header = lotheader.load_lotheader(path, cx, cy)
+    if not header:
         return None
-    header = lotheader.load_lotheader(name)
     if len(header['rooms']) == 0:
         return None
     return CellRoom(header['rooms'])
@@ -76,9 +74,9 @@ class RoomRender(object):
             font_size = options.get('default_font_size', 20)
         self.font = LazyFont(font_name, int(font_size))
 
-    def square(self, im_getter, ox, oy, sx, sy, layer):
-        cx, subx = divmod(sx, pzdzi.CELL_SIZE)
-        cy, suby = divmod(sy, pzdzi.CELL_SIZE)
+    def square(self, im_getter, dzi, ox, oy, sx, sy, layer):
+        cx, subx = divmod(sx, dzi.cell_size)
+        cy, suby = divmod(sy, dzi.cell_size)
         room = load_cell_room(self.input, cx, cy)
         if not room:
             return

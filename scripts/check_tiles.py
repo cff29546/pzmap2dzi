@@ -56,15 +56,5 @@ if __name__ == '__main__':
     print(len(missing))
     print(len(multi))
 
-    with open('missing.txt', 'wb') as f:
-        f.write(b'\r\n'.join(sorted(missing)))
-
-
-    '''
-    with open('used.txt', 'wb') as f:
-        for t in sorted(list(used)):
-            f.write(t)
-            f.write(b'\r\n')
-    '''
-
-
+    for tile in sorted(missing):
+        print(tile)

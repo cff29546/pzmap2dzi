@@ -590,6 +590,7 @@ function init(callback=null) {
     updateClip();
 
     viewer = OpenSeadragon({
+        drawer: "canvas",
         element: document.getElementById("map_div"),
         tileSources:  "base" + suffix + "/layer0.dzi",
         homeFillsViewer: true,

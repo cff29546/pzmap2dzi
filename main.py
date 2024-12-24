@@ -4,6 +4,7 @@ import io
 from distutils.dir_util import copy_tree
 import re
 import json
+import zipfile
 
 def load_yaml(path):
     with io.open(path, 'r', encoding='utf8') as f:
@@ -113,7 +114,7 @@ def render_map(cmd, conf, maps, map_name, is_base):
     else:
         options['output'] = os.path.join(conf['output_path'], 'html', 'mod_maps', map_name, cmd)
     if is_base and cmd == 'base':
-        options['image_fmt_layer0'] = conf.get('image_fmt_base_layer0', None)
+        options['image_fmt_layer0'] = options.get('image_fmt_base_layer0')
 
     # room / objects
     options['encoding'] = map_conf['encoding']
@@ -155,12 +156,17 @@ def render(args):
             print('render [{}] for map [{}] done'.format(cmd, map_name))
     save_mod_map_list(conf)
 
+def unzip(path):
+    with zipfile.ZipFile(path, 'r') as z:
+        z.extractall(os.path.dirname(path))
+
 def copy(args):
     conf = load_yaml(args.conf)
     script_path = os.path.dirname(os.path.realpath(__file__))
     src = os.path.join(script_path, 'html')
     dst = os.path.join(conf['output_path'], 'html')
     copy_tree(src, dst)
+    unzip(os.path.join(dst, 'openseadragon', 'openseadragon.zip'))
 
 CMD = {
     'unpack': unpack,

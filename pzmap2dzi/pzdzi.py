@@ -42,12 +42,12 @@ class DZI(object):
         assert self.tile_size != None
         self.save_empty = options.get('save_empty_tile', False)
         self.ext = options.get('image_fmt', 'png')
-        self.ext0 = options.get('image_fmt_layer0', self.ext)
+        self.ext0 = options.get('image_fmt_layer0')
+        if not self.ext0:
+            self.ext0 = self.ext
         self.save_options = {}
         self.save_options[self.ext] = options.get('image_save_options',{}).get(self.ext, {})
         self.save_options[self.ext0] = options.get('image_save_options',{}).get(self.ext0, {})
-        if not self.ext0:
-            self.ext0 = self.ext
         self.done_pattern = re.compile('(\\d+)_(\\d+)\\.(?:empty|{})$'.format(self.ext0))
         self.skip_level = options.get('skip_level', 0)
         self.skip_cells = set()

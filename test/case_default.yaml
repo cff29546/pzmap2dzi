@@ -1,0 +1,32 @@
+conf:
+    vanilla.txt:
+        default:
+            map_path: '{custom_root}/rosewood'
+        custom:
+            map_path: '{custom_root}/custom'
+
+    conf.yaml:
+        output_path: .
+        use_depend_texture_only: true
+        mod_maps: [custom]
+        render_conf:
+            enable_cache: true
+            break_key: <f9>
+            image_save_options:
+                png: {compress_level: 1}
+maps:
+    B41:
+        rosewood:
+            - [27, 38]
+            - [27, 39]
+        custom:
+            - [26, 38]
+            - [26, 39]
+    B42:
+        rosewood:
+            - [31, 44]
+            - [31, 45]
+        custom:
+            - [32, 44]
+            - [32, 45]
+

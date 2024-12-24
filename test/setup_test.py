@@ -1,5 +1,7 @@
 import os
+import io
 import sys
+import yaml
 sys.path.append('..')
 import main
 sys.path.append('../scripts')
@@ -16,34 +18,35 @@ def copy_conf(dst, src):
     copy(dst, src, 'default.txt')
     copy(dst, src, 'vanilla.txt')
 
+def get_map_path(conf_file):
+    conf, maps = main.parse_map(conf_file)
+    return maps['default']['map_path'].format(**dict(maps['default'], **conf))
+
 if __name__ == '__main__':
-    copy_conf('test_output/conf', '../conf')
-    conf, maps = main.parse_map('test_output/conf/conf.yaml')
-    map_path = maps['default']['map_path'].format(**dict(maps['default'], **conf))
-    update_conf('test_output/conf/vanilla.txt', {
-        'default': {'map_path': '{custom_root}/rosewood'},
-    })
-    update_conf('test_output/conf/custom.txt', {
-        'custom': {'map_path': '{custom_root}/custom'},
-    })
-    update_conf('test_output/conf/conf.yaml', {
-        'output_path': '.',
-        'map_conf': ['vanilla.txt', 'custom.txt'],
-        'use_depend_texture_only': True,
-        'mod_maps': ['custom'],
-        'render_conf': {
-            'enable_cache': True,
-            'break_key': '<f9>',
-            'image_save_options': {
-                'png': {'compress_level': 1},
-            },
-        },
-    })
+    import argparse
+    parser = argparse.ArgumentParser(description='pzmap2dzi test conf setter')
+    parser.add_argument('-c', '--conf', type=str, default='../conf')
+    parser.add_argument('-o', '--output', type=str, default='test_output')
+    parser.add_argument('case_file', type=str)
+    args = parser.parse_args()
 
-    if os.path.exists(os.path.join(map_path, '..', 'Echo Creek, KY')): # B42
-        copy_map('test_output/rosewood', map_path, [(31, 44), (31, 45)])
-        copy_map('test_output/custom', map_path, [(32, 44), (32, 45)])
-    else: # B41
-        copy_map('test_output/rosewood', map_path, [(27, 38), (27, 39)])
-        copy_map('test_output/custom', map_path, [(26, 38), (26, 39)])
+    case = {}
+    with io.open(args.case_file, 'r', encoding='utf8') as f:
+        case = yaml.safe_load(f.read())
+    
+    conf_path = os.path.join(args.output, 'conf')
+    copy_conf(conf_path, args.conf)
+    map_path = get_map_path(os.path.join(conf_path, 'conf.yaml'))
+    for name, value in case.get('conf', {}).items():
+        conf = os.path.join(conf_path, name)
+        if os.path.exists(conf):
+            update_conf(conf, value)
 
+    if os.path.exists(os.path.join(map_path, '..', 'Echo Creek, KY')):
+        version = 'B42'
+    else:
+        version = 'B41'
+
+    maps = case['maps'][version]
+    for name, cells in maps.items():
+        copy_map(os.path.join(args.output, name), map_path, cells)

@@ -126,6 +126,12 @@ def read_zpop(data, pos, blocks):
         zpop.append(line)
     return zpop, pos
 
+def get_version(data):
+    if data[:4] == b'LOTH':
+        return util.read_uint32(data, 4)
+    else:
+        return util.read_uint32(data, 0)
+
 def load_lotheader(path, x, y):
     data = b''
     header = {}
@@ -135,13 +141,12 @@ def load_lotheader(path, x, y):
 
     with open(lotheader, 'rb') as f:
         data = f.read()
-    pos = 0
-    if data[:4] == b'LOTH': #b42
-        pos = 4
+
     header['path'] = path
     header['x'] = x
     header['y'] = y
-    header['version'], pos = util.read_uint32(data, pos)
+
+    header['version'], pos = get_version(data)
     header.update(VERSION_LIMITATIONS[header['version']])
 
     tile_name_num , pos = util.read_uint32(data, pos)

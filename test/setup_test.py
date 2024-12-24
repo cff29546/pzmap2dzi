@@ -18,10 +18,6 @@ def copy_conf(dst, src):
     copy(dst, src, 'default.txt')
     copy(dst, src, 'vanilla.txt')
 
-def get_map_path(conf_file):
-    conf, maps = main.parse_map(conf_file)
-    return maps['default']['map_path'].format(**dict(maps['default'], **conf))
-
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='pzmap2dzi test conf setter')
@@ -35,8 +31,9 @@ if __name__ == '__main__':
         case = yaml.safe_load(f.read())
     
     conf_path = os.path.join(args.output, 'conf')
+    conf_yaml = os.path.join(conf_path, 'conf.yaml')
     copy_conf(conf_path, args.conf)
-    map_path = get_map_path(os.path.join(conf_path, 'conf.yaml'))
+    map_path = main.get_map_path(conf_yaml, 'default')
     for name, value in case.get('conf', {}).items():
         conf = os.path.join(conf_path, name)
         if os.path.exists(conf):

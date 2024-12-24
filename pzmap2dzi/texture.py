@@ -16,7 +16,7 @@ except:
 
 def get_version(data):
     if data[:4] == b'PZPK':
-        return util.read_uint32(data, 4)[0], 8
+        return util.read_uint32(data, 4)
     else:
         return 0, 0
 
@@ -126,7 +126,6 @@ class TextureLibrary(object):
         w, h = struct.unpack('ii', shm.buf[4:12])
         return w, h
 
-
     def __init__(self, texture_path=[],
                        cache_name='',
                        page_mode=False,
@@ -134,6 +133,7 @@ class TextureLibrary(object):
         self.texture_path = texture_path
         self.use_cache = True if cache_name else False
         self.page_mode = page_mode
+        self.page_size = page_size
         self.page = []
         self.page_buffer = None
         self.mapping = {}

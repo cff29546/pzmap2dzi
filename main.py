@@ -38,6 +38,10 @@ def parse_map(conf_path):
     maps = set_default(maps, dft)
     return conf, maps
 
+def get_map_path(conf_path, name):
+    conf, maps = parse_map(conf_path)
+    return maps[name]['map_path'].format(**dict(maps[name], **conf))
+
 def get_dep(conf, maps, names):
     dep = set([])
     if conf.get('use_depend_texture_only'):

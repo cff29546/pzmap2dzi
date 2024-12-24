@@ -1,6 +1,12 @@
 import os
 from . import lotheader, util
 
+def get_version(data):
+    if data[:4] == b'LOTP':
+        return util.read_uint32(data, 4)
+    else:
+        return 0, 0
+
 class Cell(object):
     def __init__(self, path, header):
         self.header = header
@@ -10,10 +16,7 @@ class Cell(object):
         data = b''
         with open(path, 'rb') as f:
             data = f.read()
-        self.version = 0
-        pos = 0
-        if data[:4] == b'LOTP': #b42
-            self.version, pos = util.read_uint32(data, 4)
+        self.version, pos = get_version(data)
         self.init_for_version()
         block_num, pos = util.read_uint32(data, pos)
         self.blocks = []

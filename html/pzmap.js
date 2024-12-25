@@ -87,47 +87,64 @@ const Map = class {
         return 'mod_maps/' + this.name + '/'; 
     }
 
-    _load(type, layer) {
+    getRelativePositionAndWidth(other_map) {
+        let x = (this.x0 - other_map.x0) / this.scale;
+        let y = (this.y0 - other_map.y0) / this.scale;
+        let p = viewer.world.getItemAt(0).imageToViewportCoordinates(x, y);
+        let width = other_map.w / this.w;
+        return [p, width];
+    }
+
+    _load_tile(layer, opacity=1) {
         if (viewer) {
-            let x = (base_map.x0 - this.x0) / base_map.scale;
-            let y = (base_map.y0 - this.y0) / base_map.scale;
-            let p = viewer.world.getItemAt(0).imageToViewportCoordinates(x, y);
-            console.log(this.name, type, x, y, p);
-            let width = this.w / base_map.w;
-            if (type == 'base') {
-                if (layer < this.layers && this.tiles[layer] == 0) {
-                    this.tiles[layer] = null;
+            let [p, width] = base_map.getRelativePositionAndWidth(this);
+            //console.log(this.name, 'tile', p, width);
+            if (layer < this.maxlayer && layer >= this.minlayer) {
+                if (this.getTile(layer) == 0) {
+                    this.setTile(layer, 'loading');
                     viewer.addTiledImage({
-                        tileSource: this.getMapRoot() + type + suffix + "/layer" + layer + ".dzi",
+                        tileSource: this.getMapRoot() + 'base' + suffix + "/layer" + layer + ".dzi",
                         opacity: 1,
                         x: p.x,
                         y: p.y,
                         width: width,
                         success: (function (obj) {
-                            if (this.tiles[layer] == 'delete') {
-                                viewer.world.removeItem(obj.item);
-                                this.tiles[layer] = 0;
-                            } else {
-                                this.tiles[layer] = obj.item;
+                            if ([0, 'loading'].includes(this.getTile(layer))) {
+                                this.setTile(layer, obj.item);
                                 positionItem(obj.item, this.name, layer);
+                                obj.item.setOpacity(opacity);
+                            } else {
+                                viewer.world.removeItem(obj.item);
+                                if (this.getTile(layer) == 'delete') {
+                                    this.setTile(layer, 0);
+                                }
                             }
                         }).bind(this),
                         error: (function (e) {
-                            if (['delete', 0, null].includes(this.tiles[layer])) {
-                                this.tiles[layer] = 0;
+                            if (['delete', 0, 'loading'].includes(this.getTile(layer))) {
+                                this.setTile(layer, 0);
                             }
                         }).bind(this),
                     });
+                } else {
+                    if (!['delete', 'loading'].includes(this.getTile(layer))) {
+                        this.getTile(layer).setOpacity(opacity);
+                    }
                 }
-                return
             }
+        }
+    }
+    _load_overlay(type, layer) {
+        if (viewer) {
+            let [p, width] = base_map.getRelativePositionAndWidth(this);
+            //console.log(this.name, type, p, width);
             let shift = true;
             if (type == 'zombie' || type == 'foraging') {
                 layer = 0;
                 shift = false;
             }
             if (this.overlays[type] == 0) {
-                this.overlays[type] = null;
+                this.overlays[type] = 'loading';
                 viewer.addTiledImage({
                     tileSource: this.getMapRoot() + type + suffix + "/layer" + layer + ".dzi",
                     opacity: 1,
@@ -135,10 +152,7 @@ const Map = class {
                     y: p.y,
                     width: width,
                     success: (function (obj) {
-                        if (this.overlays[type] == 'delete') {
-                            viewer.world.removeItem(obj.item);
-                            this.overlays[type] = 0;
-                        } else {
+                        if ([0, 'loading'].includes(this.overlays[type])) {
                             this.overlays[type] = obj.item;
                             if (shift) {
                                 let clip_list = shiftClipList(this.clip_list, this.info[type].scale, layer);
@@ -147,10 +161,15 @@ const Map = class {
                                 let clip_list = shiftClipList(this.clip_list, this.info[type].scale, 0);
                                 this.overlays[type].setCroppingPolygons(clip_list);
                             }
+                        } else {
+                            viewer.world.removeItem(obj.item);
+                            if (this.overlays[type] == 'delete') {
+                                this.overlays[type] = 0;
+                            }
                         }
                     }).bind(this),
                     error: (function (e) {
-                        if (['delete', 0, null].includes(this.overlays[type])) {
+                        if (['delete', 0, 'loading'].includes(this.overlays[type])) {
                             this.overlays[type] = 0;
                         }
                     }).bind(this),
@@ -159,46 +178,125 @@ const Map = class {
         }
     }
 
-    _unload(type, layer) {
-        if (viewer) {
-            if (type == 'base') {
-                if (layer < this.layers && this.tiles[layer] != 0) {
-                    if ([null, 'delete'].includes(this.tiles[layer])) {
-                        this.tiles[layer] = 'delete';
-                    } else {
-                        viewer.world.removeItem(this.tiles[layer]);
-                        this.tiles[layer] = 0;
-                    }
-                }
-                return
+    _unload_tile(layer) {
+        if (layer < this.maxlayer && layer >= this.minlayer && this.getTile(layer) != 0) {
+            if (['loading', 'delete'].includes(this.getTile(layer))) {
+                this.setTile(layer, 'delete');
+            } else {
+                viewer.world.removeItem(this.getTile(layer));
+                this.setTile(layer, 0);
             }
-            if (this.overlays[type] != 0) {
-                if ([null, 'delete'].includes(this.overlays[type])) {
-                    this.overlays[type] = 'delete';
-                } else {
-                    viewer.world.removeItem(this.overlays[type]);
-                    this.overlays[type] = 0;
-                }
+        }
+        return
+    }
+
+    _hide_tile(layer) {
+        if (layer < this.maxlayer && layer >= this.minlayer && this.getTile(layer) != 0) {
+            if (['loading', 'delete'].includes(this.getTile(layer))) {
+                this.setTile(layer, 'delete');
+            } else {
+                this.getTile(layer).setOpacity(0);
+            }
+        }
+        return
+    }
+
+    _unload_overlay(type) {
+        if (this.overlays[type] != 0) {
+            if (['loading', 'delete'].includes(this.overlays[type])) {
+                this.overlays[type] = 'delete';
+            } else {
+                viewer.world.removeItem(this.overlays[type]);
+                this.overlays[type] = 0;
             }
         }
     }
 
+    setTile(layer, tile) {
+        this.tiles[layer - this.minlayer] = tile;
+    }
+
+    getTile(layer) {
+        return this.tiles[layer - this.minlayer];
+    }
+
+    setBaseLayer(layer) {
+        let start = this.minlayer;
+        if (layer >= 0) {
+            start = 0;
+        }
+        for (let i = start; i < this.maxlayer ; i++) {
+            if (i > layer) {
+                if (i == layer + 1 && roof_opacity > 0) {
+                    this._load_tile(i, roof_opacity / 100);
+                } else {
+                    this._unload_tile(i);
+                }
+            } else {
+                this._load_tile(i);
+            }
+        }
+        if (layer >= 0) {
+            for (let i = this.minlayer; i < 0 ; i++) {
+                this._unload_tile(i);
+            }
+        }
+    }
+
+    setOverlayLayer(overlay, layer) {
+        for (let type of ['zombie', 'foraging', 'room', 'objects']) {
+            if (overlay[type]) {
+                if (!['zombie', 'foraging'].includes(type)) {
+                    if (layer != this.overlay_layer) {
+                        this._unload_overlay(type);
+                    }
+                }
+                this._load_overlay(type, layer);
+            } else {
+                this._unload_overlay(type);
+            }
+        }
+        this.overlay_layer = layer;
+    }
+
+    destroy() {
+        this.setOverlayLayer({}, 0);
+        for (let i = this.minlayer; i < this.maxlayer ; i++) {
+            this._unload_tile(i);
+        } 
+    }
+
     getTotalLayers() {
         let map_root = this.getMapRoot();
-        let layer = 0;
+        let maxlayer = 0;
+        let minlayer = -1;
         while (true) {
             let xhttp = new XMLHttpRequest();
-            xhttp.open("GET", map_root + "base" + suffix + "/layer" + layer + ".dzi", false);
+            xhttp.open("GET", map_root + "base" + suffix + "/layer" + maxlayer + ".dzi", false);
             try {
                 xhttp.send(null);
             } catch (error) {
-                return layer;
+                break;
             }
             if (xhttp.status != 200) {
-                return layer;
+                break;
             }
-            layer++;
+            maxlayer++;
         }
+        while (true) {
+            let xhttp = new XMLHttpRequest();
+            xhttp.open("GET", map_root + "base" + suffix + "/layer" + minlayer + ".dzi", false);
+            try {
+                xhttp.send(null);
+            } catch (error) {
+                break;
+            }
+            if (xhttp.status != 200) {
+                break;
+            }
+            minlayer--;
+        }
+        return [minlayer + 1, maxlayer];
     }
 
     loadMapInfo(type) {
@@ -216,8 +314,6 @@ const Map = class {
     }
 
     init() {
-        this.layers = this.getTotalLayers();
-        this.tiles = Array(this.layers).fill(0);
         this.info = {};
         this.loadMapInfo('base');
         if (this.info.base) {
@@ -232,70 +328,43 @@ const Map = class {
             this.block_size = this.info.base.block_size;
             this.cell_in_block = this.cell_size / this.block_size;
             this.pz_version = this.info.base.pz_version;
+            this.minlayer = this.info.base.minlayer;
+            this.maxlayer = this.info.base.maxlayer;
             for (let type of ['zombie', 'foraging', 'room', 'objects']) {
                 this.loadMapInfo(type);
                 this.overlays[type] = 0;
             }
         }
-    }
-
-    setBaseLayer(layer) {
-        let start = 0;
-        if (this.is_base) {
-            start = 1;
+        if (this.minlayer === undefined || this.maxlayer === undefined) {
+            [this.minlayer, this.maxlayer] = this.getTotalLayers();
         }
-        for (let i = start; i < this.layers ; i++) {
-            if (i > layer) {
-                this._unload('base', i);
-            }
-        }
-        for (let i = start; i <= layer && i < this.layers ; i++) {
-            this._load('base', i);
-        }
-    }
-
-    setOverlayLayer(overlay, layer) {
-        for (let type of ['zombie', 'foraging', 'room', 'objects']) {
-            if (overlay[type]) {
-                if (!['zombie', 'foraging'].includes(type)) {
-                    if (layer != this.overlay_layer) {
-                        this._unload(type, layer);
-                    }
-                }
-                this._load(type, layer);
-            } else {
-                this._unload(type, layer);
-            }
-        }
-        this.overlay_layer = layer;
-    }
-
-    destroy() {
-        this.setBaseLayer(-1);
-        this.setOverlayLayer({}, 0);
+        this.minlayer = this.minlayer > 0 ? 0: this.minlayer;
+        this.maxlayer = this.maxlayer < 1 ? 1: this.maxlayer;
+        this.layers = this.maxlayer - this.minlayer;
+        this.tiles = Array(this.layers).fill(0);
     }
 }
 
 // order layered maps
 function positionItem(item, name, layer) {
     //let cur = viewer.world.getIndexOfItem(item);
-    let pos = 0;
+    let pos = 1;
     for (let i = 0; i < base_map.tiles.length; i++ ) {
-        if (name == '' && layer == i) {
+        if (name == '' && (layer - base_map.minlayer) == i) {
             viewer.world.setItemIndex(item, pos);
             return;
         }
-        if (![0, null, 'delete'].includes(base_map.tiles[i])) {
+        if (![0, 'loading', 'delete'].includes(base_map.tiles[i])) {
             pos++;
         }
     }
     for (let i = 0; i < mod_maps.length; i++ ) {
         for (let j = 0; j < mod_maps[i].tiles.length; j++ ) {
-            if (name == mod_maps[i].name && layer == j) {
+            if (name == mod_maps[i].name && (layer - mod_maps[i].minlayer) == j) {
                 viewer.world.setItemIndex(item, pos);
                 return;
             }
-            if (![0, null, 'delete'].includes(mod_maps[i].tiles[j])) {
+            if (![0, 'loading', 'delete'].includes(mod_maps[i].tiles[j])) {
                 pos++;
             }
         }
@@ -303,16 +372,16 @@ function positionItem(item, name, layer) {
 }
 
 function positionAll() {
-    let pos = 0;
+    let pos = 1;
     for (let i = 0; i < base_map.tiles.length; i++ ) {
-        if (![0, null, 'delete'].includes(base_map.tiles[i])) {
+        if (![0, 'loading', 'delete'].includes(base_map.tiles[i])) {
             viewer.world.setItemIndex(base_map.tiles[i], pos);
             pos++;
         }
     }
     for (let i = 0; i < mod_maps.length; i++ ) {
         for (let j = 0; j < mod_maps[i].tiles.length; j++ ) {
-            if (![0, null, 'delete'].includes(mod_maps[i].tiles[j])) {
+            if (![0, 'loading', 'delete'].includes(mod_maps[i].tiles[j])) {
                 viewer.world.setItemIndex(mod_maps[i].tiles[j], pos);
                 pos++;
             }
@@ -364,7 +433,7 @@ var UI_HTML = {
     <div class="legend" style="border-color:#ff0; border-width: 3px;"></div>Zone Story`,
 
     trimmer: `
-    <b>[Save File Trimmer]</b> Legends:
+    <b>[Savegame Trimming Tool]</b> Legends:
     <div class="legend" style="background-color:#0f0"></div>Saved Area
     <div class="legend" style="background-color:#00f"></div>Partial Saved Area
     <div class="legend" style="background-color:#f00"></div>Selected
@@ -400,7 +469,8 @@ var UI_HTML = {
         <option value="">(Select Mod Map to Load)</option>
     </select>
     <b>Loaded maps:</b>
-    <div id="map_list" style="display: inline-block"></div>`
+    <div id="map_list" style="display: inline-block"></div>
+    <div id="mapui_output" style="display: inline-block"></div>`
 }
 
 function changeView() {
@@ -535,12 +605,13 @@ function initUI() {
     for (let i = s.options.length - 1; i >= 0; i--) {
         s.remove(i);
     }
-    for (let i = 0; i < base_map.layers; i++) {
+    for (let i = base_map.minlayer; i < base_map.maxlayer; i++) {
         let o = document.createElement("option");
         o.value = i;
         o.text = 'Layer ' + i;
         s.appendChild(o);
     }
+    s.selectedIndex = -base_map.minlayer;
     for (let type of ['zombie', 'foraging', 'room', 'objects', 'grid', 'map']) {
         let ui = document.getElementById(type + '_ui');
         if (ui) {
@@ -552,27 +623,29 @@ function initUI() {
         }
     }
 
-    setOutput('main_output', 'green', '');
+    setOutput('main_output', 'Green', '');
+    setOutput('version', 'Red', '[PZ version: ' + base_map.pz_version + ']');
     document.body.style.background = 'black';
 }
 
 function init(callback=null) {
-    if (map_type == "top") {
-        suffix = "_top";
+    if (map_type == 'top') {
+        suffix = '_top';
     } else {
-        suffix = "";
+        suffix = '';
     }
 
     base_map = new Map('', true);
     mod_maps = [];
     overlays = {};
     currentLayer = 0;
+    roof_opacity = 0;
     viewer;
 
     mapui = 0;
     grid = 0;
     trimmer = 0;
-    save_path = "";
+    save_path = '';
     saved_blocks = new Set();
     saved_cells = {};
     selected_blocks = new Set();
@@ -591,6 +664,7 @@ function init(callback=null) {
 
     viewer = OpenSeadragon({
         drawer: "canvas",
+        opacity: 1,
         element: document.getElementById("map_div"),
         tileSources:  "base" + suffix + "/layer0.dzi",
         homeFillsViewer: true,
@@ -754,7 +828,8 @@ function init(callback=null) {
     let success_callback = function (retry) {
         let img = viewer.world.getItemAt(0);
         if (img && img.getFullyLoaded()) {
-            base_map.tiles[0] = img;
+            base_map._load_tile(0);
+            img.setOpacity(0);
             if (callback) {
                 callback();
             }
@@ -1304,6 +1379,13 @@ function toggleTrimmerHelp() {
     return false;
 }
 
+function updateRoofOpacity() {
+    let slider = document.getElementById('roof_opacity');
+    slider.title = 'Roof Layer Opacity: ' + slider.value + '%';
+    roof_opacity = slider.value;
+    updateMaps(currentLayer);
+}
+
 function toggleModMapUI() {
     if (mapui == 0) {
         mapui = 1;
@@ -1326,11 +1408,21 @@ function updateMapUI() {
             btn.classList.remove('active');
             btn.innerText = 'Load All';
         }
-        d = document.getElementById("map_list");
+        let d = document.getElementById("map_list");
         d.innerHTML = '';
+        let warning = [];
         for (let pos = 0; pos < mod_maps.length; pos++) {
-            d.innerHTML += `<button class="active" style="cursor: not-allowed"
+            let state = 'active';
+            if (mod_maps[pos].pz_version != base_map.pz_version) {
+                state = 'warning';
+                warning.push(mod_maps[pos].name)
+            }
+            d.innerHTML += `<button class="${state}" style="cursor: not-allowed"
                 onclick="removeMap('${mod_maps[pos].name.replace("'","\\'")}')">${mod_maps[pos].name}</button>`;
+        }
+
+        if (warning.length > 0) {
+            setOutput('mapui_output', 'red', '<b>version conflict maps:</b> ' + warning.join(','), 5000);
         }
     }
 }

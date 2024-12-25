@@ -6,35 +6,39 @@
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
     <style>
-    html, body { height: 100%; margin: 0; padding: 0; background-color: black; }
+    html, body { height: 100%; margin: 0; padding: 0; background-color: Black; }
     .legend { height: 1em; width: 1em; display: inline-block; border-width: 1px;
-        border-style: solid; border-color: black; background-color: white;
+        border-style: solid; border-color: Black; background-color: White;
         vertical-align: bottom; margin-left: 1em;}
     .text-right { display: inline-block; float: right; }
     button { border-radius: 4px; border-color: DarkGray; }
     .active { background-color: LightSkyBlue; border-color: DeepSkyBlue; }
+    .warning { background-color: LightCoral; border-color: DarkRed; }
     </style>
   </head>
   <body>
     <div style="display: flex; flex-flow: column; height: 100%;">
       <div style="flex: 0 1 auto;background-color:white;">
-        <select id="layer_selector" onchange="onLayerSelect()"></select>
-        <button id="map_btn" onclick="toggleModMapUI()">Mod Map</button>
+        <select id="layer_selector" onchange="onLayerSelect()" title="Layer Selector"></select>
+        <input id="roof_opacity" type="range" min="0" max="100" value="0" step="10"
+               class="iso" oninput="updateRoofOpacity()" title="Roof Layer Opacity: 0%">
+        <button id="map_btn" onclick="toggleModMapUI()" title="Mod Map Selector">Mod Map</button>
         <button id="grid_btn" onclick="toggleGrid()">Grid</button>
         <button id="zombie_btn" onclick="toggleOverlay('zombie')">Zombie</button>
         <button id="foraging_btn" onclick="toggleOverlay('foraging')">Foraging</button>
         <button id="room_btn" class="iso" onclick="toggleOverlay('room')">Room</button>
         <button id="objects_btn" class="iso" onclick="toggleOverlay('objects')">Objects</button>
-        <button id="trimmer_btn" onclick="toggleTrimmer()">Save File Trimmer</button>
+        <button id="trimmer_btn" onclick="toggleTrimmer()" title="Savegame Trimming Tool">Trimmer</button>
         <div id="main_output" style="display: inline-block"></div>
         <div class="text-right">
+            <div id="version" style="display: inline-block"></div>
             Switch to
             <a id='change_view' href="" onclick="return changeView();">Top View</a>
         </div>
         <div>
           <div id="foraging_ui"></div>
           <div class="iso" id="objects_ui"></div>
-          <div id="trimmer_ui" style="background-color: lightskyblue"></div>
+          <div id="trimmer_ui" style="background-color: LightSkyBlue"></div>
           <div id="map_ui"></div>
         </div>
       </div>

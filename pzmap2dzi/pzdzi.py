@@ -175,8 +175,11 @@ class DZI(object):
         if hasattr(self, 'update_map_info'):
             info = self.update_map_info(info)
         path = os.path.join(self.path, 'map_info.json')
+
+        data = json.dumps(info, indent=1)
+        data = data.replace('\n  ', '').replace('\n ]', ']').replace('[ ', '[')
         with open(path, 'w') as f:
-            f.write(json.dumps(info))
+            f.write(data)
 
 
 
@@ -310,6 +313,8 @@ class PZDZI(DZI):
         info['cell_size'] = self.cell_size
         info['block_size'] = self.block_size
         info['pz_version'] = self.pz_version
+        info['maxlayer'] = self.maxlayer
+        info['minlayer'] = self.minlayer
         return info
 
 class IsoDZI(PZDZI):

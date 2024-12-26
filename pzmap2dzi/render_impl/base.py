@@ -14,11 +14,14 @@ def load_cell_cached(path, cx, cy):
 class TextureRender(object):
     def __init__(self, **options):
         texture_path = options.get('texture')
-        cache_name = options.get('cache_name') if options.get('enable_cache') else None
+        cache_name = None
+        if options.get('enable_cache'):
+            cahce_name = options.get('cache_name')
         plants_conf = options.get('plants_conf', {})
 
         self.tl = texture.TextureLibrary(texture_path, cache_name)
         self.tl.config_plants(plants_conf)
+
 
 class BaseRender(TextureRender):
     def __init__(self, **options):
@@ -26,7 +29,7 @@ class BaseRender(TextureRender):
         TextureRender.__init__(self, **options)
 
     def square(self, im_getter, dzi, ox, oy, sx, sy, layer):
-        oy += dzi.sqr_height >> 1 # center -> bottom center
+        oy += dzi.sqr_height >> 1  # center -> bottom center
         cx, subx = divmod(sx, dzi.cell_size)
         cy, suby = divmod(sy, dzi.cell_size)
         c = load_cell_cached(self.input, cx, cy)
@@ -42,12 +45,14 @@ class BaseRender(TextureRender):
             else:
                 print('missing tile: {}'.format(t))
 
+
 def color_from_sums(color_sums):
     if color_sums:
         r, g, b, n = map(sum, zip(*color_sums))
         color = (r // n, g // n, b // n, 255)
         return color
     return None
+
 
 def rc_base(tl, tiles, layer):
     base = next(iter(tiles), None)
@@ -57,6 +62,7 @@ def rc_base(tl, tiles, layer):
             return color_from_sums([tex.get_color_sum()])
     return None
 
+
 _half_water = set([
     'blends_natural_02_1',
     'blends_natural_02_2',
@@ -65,17 +71,16 @@ _half_water = set([
 ])
 def rc_base_water(tl, tiles, layer):
     color_sums = []
-    for tile in tiles:
-        tx = tl.get_by_name(tile)
-        if tx:
-            color_sum = tx.get_color_sum()
-            if color_sum:
-                if name in _half_water:
-                    color_sums.append(color_sum)
-                    break
-                if len(color_sums) == 0:
-                    color_sums.append(color_sum)
+    for i, tile in enumerate(tiles):
+        if i == 0 or tile in _half_water:
+            tx = tl.get_by_name(tile)
+            if tx:
+                color_sum = tx.get_color_sum()
+            color_sums.append(color_sum)
+            if i > 0:
+                break
     return color_from_sums(color_sums)
+
 
 def rc_avg(tl, tiles, layer):
     color_sums = []
@@ -88,6 +93,8 @@ def rc_avg(tl, tiles, layer):
     return color_from_sums(color_sums)
 
 
+# carto-zed rule for layer 0
+# begin position, end position, color, rule name, regex pattern
 _cz_rules0 = [
     [0,    5, (218, 165,  32, 255),      'corn', re.compile('vegetation_farm')],
     [1, None, ( 38,  53,  22, 255),      'tree', re.compile('(_trees|jumbo)')],
@@ -104,11 +111,11 @@ _cz_rules0 = [
     [0,    1, ( 91,  63,  21, 255),      'dirt', re.compile('_natural_(.*_)*0*1_0*(6[4-9]|7[0-9])$')],
     [0,    8, (132,  81,  76, 255),  'tilesand', re.compile('location_')],
 ]
-
+# carto-zed rule for non layer 0
+# begin position, end position, color, rule name, regex pattern
 _cz_rules1 = [
     [1,  100, ( 93,  44,  39, 255),     'walls', re.compile('^walls')],
 ]
-
 def rc_cartozed(tl, tiles, layer):
     tiles = list(tiles)
     rules = _cz_rules0 if layer == 0 else _cz_rules1
@@ -120,17 +127,18 @@ def rc_cartozed(tl, tiles, layer):
                 return color
     return None
 
-_top_color_func = {
-    'base': rc_base,
-    'base+water': rc_base_water,
-    'avg': rc_avg,
-    'carto-zed': rc_cartozed,
-}
 
 class BaseTopRender(TextureRender):
+    COLOR_FUNC = {
+        'base': rc_base,
+        'base+water': rc_base_water,
+        'avg': rc_avg,
+        'carto-zed': rc_cartozed,
+    }
+
     def __init__(self, **options):
         mode = options.get('top_view_color_mode', 'base+water')
-        self.color = _top_color_func[mode]
+        self.color = BaseTopRender.COLOR_FUNC[mode]
         self.input = options.get('input')
         TextureRender.__init__(self, **options)
 
@@ -140,6 +148,7 @@ class BaseTopRender(TextureRender):
             return
         im = im_getter.get()
         draw = ImageDraw.Draw(im)
+        box_size = dzi.square_size - 1
         for x in range(dzi.cell_size):
             for y in range(dzi.cell_size):
                 tiles = c.get_square(x, y, layer)
@@ -148,5 +157,5 @@ class BaseTopRender(TextureRender):
                 color = self.color(self.tl, tiles, layer)
                 px = x*dzi.square_size
                 py = y*dzi.square_size
-                box = [px, py, px + dzi.square_size - 1, py + dzi.square_size - 1]
+                box = [px, py, px + box_size, py + box_size]
                 draw.rectangle(box, fill=color)

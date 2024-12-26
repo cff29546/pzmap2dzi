@@ -1,8 +1,9 @@
 import sys
 import os
 sys.path.append('..')
-from pzmap2dzi import lotheader, texture
 import main
+from pzmap2dzi import lotheader, texture
+
 
 def get_used_tiles(path):
     headers = lotheader.load_all_headers(path)
@@ -11,10 +12,12 @@ def get_used_tiles(path):
         used.update(header['tiles'])
     return sorted(list(used))
 
+
 def get_pack_textures(path):
     tl = texture.TextureLibrary()
     tl.add_pack(path)
     return tl.lib.keys()
+
 
 if __name__ == '__main__':
     import argparse
@@ -44,7 +47,7 @@ if __name__ == '__main__':
                 count[tile].append(name)
                 hit += 1
         print('{}: {}/{}'.format(name, hit, len(tiles)))
-    
+
     missing = []
     multi = []
     for tile, names in count.items():

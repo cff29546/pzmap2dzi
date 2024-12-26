@@ -14,11 +14,13 @@ FORAGING_COLOR = {
     'Farm':        (255,   0,   0, 128),
 }
 
+
 class ForagingRender(object):
     def __init__(self, **options):
         self.input = options.get('input')
         objects_path = os.path.join(self.input, 'objects.lua')
-        self.getter = pzobjects.CachedSquareMapGetter(objects_path, pzobjects.FORAGING_TYPES, 1)
+        self.getter = pzobjects.CachedSquareMapGetter(
+            objects_path, pzobjects.FORAGING_TYPES, 1)
         self.cells = set(self.getter.get_cell_zones().keys())
 
     def update_options(self, options):
@@ -44,11 +46,13 @@ class ForagingRender(object):
         color = FORAGING_COLOR[zone_type]
         draw_square(draw, ox, oy, color)
 
+
 class ForagingTopRender(object):
     def __init__(self, **options):
         self.input = options.get('input')
         objects_path = os.path.join(self.input, 'objects.lua')
-        self.getter = pzobjects.CachedSquareMapGetter(objects_path, pzobjects.FORAGING_TYPES, 1)
+        self.getter = pzobjects.CachedSquareMapGetter(
+            objects_path, pzobjects.FORAGING_TYPES, 1)
 
     def update_options(self, options):
         options['render_layers'] = [0]
@@ -60,6 +64,7 @@ class ForagingTopRender(object):
             return
         im = None
         draw = None
+        size = dzi.square_size
         for x in range(dzi.cell_size):
             sx = x + cx*dzi.cell_size
             for y in range(dzi.cell_size):
@@ -69,10 +74,11 @@ class ForagingTopRender(object):
                     if draw is None:
                         im = im_getter.get()
                         draw = ImageDraw.Draw(im)
-                    ox = x*dzi.square_size
-                    oy = y*dzi.square_size
-                    shape = [ox, oy, ox + dzi.square_size, oy + dzi.square_size]
+                    ox = x*size
+                    oy = y*size
+                    shape = [ox, oy, ox + size, oy + size]
                     draw.rectangle(shape, fill=FORAGING_COLOR[zone_type])
+
 
 # objects
 COLOR_MAP = {
@@ -81,7 +87,6 @@ COLOR_MAP = {
     'ZoneStory': 'yellow',
 }
 DEFAULT_COLOR = 'white'
-
 class ObjectsRender(object):
     def __init__(self, **options):
         self.input = options.get('input')

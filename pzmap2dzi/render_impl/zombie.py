@@ -8,6 +8,7 @@ try:
 except ImportError:
     from backports.functools_lru_cache import lru_cache
 
+
 @lru_cache(maxsize=128)
 def load_cell(path, cx, cy):
     header = lotheader.load_lotheader(path, cx, cy)
@@ -20,6 +21,7 @@ def load_cell(path, cx, cy):
                 return zpop
     return None
 
+
 def get_color(zombie, alpha):
     r = g = b = 0
     if zombie >= 128:
@@ -29,6 +31,7 @@ def get_color(zombie, alpha):
         g = zombie << 1
         b = 255 - g
     return (r, g, b, alpha)
+
 
 class ZombieRender(object):
     def __init__(self, **options):
@@ -99,7 +102,9 @@ class ZombieRender(object):
         draw_square(draw, ox, oy, color)
         if self.zombie_count and x == 9 and y == 0:
             color = get_color(zombie, 255)
-            render_text(draw, ox, oy, 'z:{}'.format(zombie), color, self.font.get())
+            t = 'z:{}'.format(zombie)
+            render_text(draw, ox, oy, t, color, self.font.get())
+
 
 class ZombieTopRender(object):
     def __init__(self, **options):
@@ -113,7 +118,6 @@ class ZombieTopRender(object):
         zpop = load_cell(self.input, cx, cy)
         if not zpop:
             return
-        
         size = dzi.square_size*dzi.block_size
         im = im_getter.get()
         draw = ImageDraw.Draw(im)

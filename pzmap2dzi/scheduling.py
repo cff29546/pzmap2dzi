@@ -13,28 +13,32 @@ try:
 except:
     hotkey = None
 
+
 def zorder(x, y):
     block = 1
     bit = 1
     idx = 0
     m = max(x, y)
     while bit <= m:
-       if bit & x:
-          idx |= block
-       block <<= 1
-       if bit & y:
-          idx |= block
-       block <<= 1
-       bit <<= 1
+        if bit & x:
+            idx |= block
+        block <<= 1
+        if bit & y:
+            idx |= block
+        block <<= 1
+        bit <<= 1
     return idx
+
 
 def zorder_key_func(arg):
     level, x, y = arg
     return -level, zorder(x, y)
 
+
 def depend_task(level, x, y):
     return [(level + 1, i + (x << 1), j + (y << 1))
             for i in (0, 1) for j in (0, 1)]
+
 
 class TopologicalDziScheduler(object):
     def __init__(self, dzi, stop_key=None, verbose=False):
@@ -131,10 +135,11 @@ class TopologicalDziScheduler(object):
                     for key in depend_task(level, tx, ty):
                         self.release_cache(workers, key, 'drop')
 
-                    while self.cache_size and self.cache_used > self.cache_size:
-                        self.release_cache(workers, None, 'save')
+                    if self.cache_size:
+                        while self.cache_used > self.cache_size:
+                            self.release_cache(workers, None, 'save')
         self.info()
-            
+
     def get_layer_maps(self, job):
         level, x, y = job
         if level == self.dzi.levels - 1:
@@ -172,7 +177,7 @@ class TopologicalDziScheduler(object):
             self.done_task.add((level, x, y))
             if level:
                 key = level - 1, x >> 1, y >> 1
-                self.dep[key] -= 1   
+                self.dep[key] -= 1
                 if self.dep[key] == 0:
                     del self.dep[key]
                     self.splits[wid].append(key)
@@ -185,23 +190,27 @@ class TopologicalDziScheduler(object):
             job = job + (self.get_layer_maps(job),)
         self.last_job[wid] = job
         return job
-            
-    def cleanup(self): 
+
+    def cleanup(self):
         self.hk = None
         self.active = [0]
         self.info()
         print('')
-        print('time used', str(datetime.timedelta(0, time.time() - self.start_time)))
+        time_used = time.time() - self.start_time
+        print('time used', str(datetime.timedelta(0, time_used)))
         if self.dzi.cache_enabled:
             mb = self.image_size * self.cache_max / 1024 / 1024
             print('cache max used: {:.2f} MB'.format(mb))
             gets = sum(self.gets)
             if gets:
                 hits = sum(self.hits)
-                print('cache hit: {}/{} = {:.2f}%'.format(hits, gets, 100*hits/gets))
+                rate = 100*hits/gets
+                print('cache hit: {}/{} = {:.2f}%'.format(hits, gets, rate))
+
 
 def get_index(level, x, y, layer):
     return '{}_{}_{}_{}'.format(level, x, y, layer)
+
 
 class ImageCreater(object):
     def __init__(self, mem, index, size):
@@ -222,6 +231,7 @@ class ImageCreater(object):
 
     def is_created(self):
         return self.im is not None
+
 
 class CacheLoader(object):
     def __init__(self, mem, size):
@@ -247,6 +257,7 @@ class CacheLoader(object):
             for index in self.cached:
                 self.mem.release(index)
             self.cached = set()
+
 
 class TopologicalDziWorker(object):
     def __init__(self, dzi, prefix, render):
@@ -278,7 +289,7 @@ class TopologicalDziWorker(object):
                 self.dzi.save_tile(im, level, x, y, layer, force=True)
                 im = None
             self.mem.release(index)
-             
+
     def on_job(self, job):
         if job == 'hold':
             time.sleep(0.1)
@@ -326,8 +337,3 @@ class TopologicalDziWorker(object):
         cl.cleanup()
         self.dzi.clear_wip(level, x, y)
         return level, x, y, layer_map
-        
-
-
-
-

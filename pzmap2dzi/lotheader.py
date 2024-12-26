@@ -3,21 +3,23 @@ import re
 from . import util
 
 VERSION_LIMITATIONS = {
-    0: { # B41
-        'CELL_SIZE_IN_BLOCKS'  : 30,
+    0: {  # B41
+        'CELL_SIZE_IN_BLOCKS': 30,
         'BLOCK_SIZE_IN_SQUARES': 10,
-        'MIN_LAYER'            :  0,
-        'MAX_LAYER'            :  8,
+        'MIN_LAYER':  0,
+        'MAX_LAYER':  8,
     },
-    1: { # B42
-        'CELL_SIZE_IN_BLOCKS'  : 32,
+    1: {  # B42
+        'CELL_SIZE_IN_BLOCKS': 32,
         'BLOCK_SIZE_IN_SQUARES':  8,
-        'MIN_LAYER'            :-32,
-        'MAX_LAYER'            : 32,
+        'MIN_LAYER': -32,
+        'MAX_LAYER': 32,
     },
 }
 
 HEADER_FILE_PATTERN = re.compile('(\\d+)_(\\d+)\\.lotheader$')
+
+
 def load_all_headers(path, first_only=False):
     headers = {}
     for f in os.listdir(path):
@@ -31,6 +33,7 @@ def load_all_headers(path, first_only=False):
             return headers
     return headers
 
+
 def get_version_info(path, fast_mode=False):
     headers = load_all_headers(path, fast_mode)
     cells = set()
@@ -40,7 +43,7 @@ def get_version_info(path, fast_mode=False):
     cell_size_in_block = set()
     block_size = set()
     for (x, y), header in headers.items():
-        cells.add((x,y))
+        cells.add((x, y))
         version.add(header['version'])
         minlayer.append(header['minlayer'])
         maxlayer.append(header['maxlayer'])
@@ -62,12 +65,13 @@ def get_version_info(path, fast_mode=False):
         'version': version,
         'cells': cells,
         'cell_size_in_block': cell_size_in_block,
-        "block_size": block_size,
-        "cell_size": cell_size,
-        "minlayer": minlayer,
-        "maxlayer": maxlayer,
+        'block_size': block_size,
+        'cell_size': cell_size,
+        'minlayer': minlayer,
+        'maxlayer': maxlayer,
     }
     return version_info
+
 
 def calc_room_bound(room):
     for rect in room['rects']:
@@ -76,6 +80,7 @@ def calc_room_bound(room):
         room['xmax'] = max(room.get('xmax', x + w), x + w)
         room['ymin'] = min(room.get('ymin', y), y)
         room['ymax'] = max(room.get('ymax', y + h), y + h)
+
 
 def read_room(data, pos):
     room = {}
@@ -100,12 +105,13 @@ def read_room(data, pos):
     metas = []
     for i in range(meta_num):
         meta_type, pos = util.read_int32(data, pos)
-        x, pos = util.read_int32(data, pos) # relative to cell base
+        x, pos = util.read_int32(data, pos)  # relative to cell base
         y, pos = util.read_int32(data, pos)
         metas.append((meta_type, x, y))
     room['objects'] = metas
 
     return room, pos
+
 
 def read_building(data, pos):
     building = {}
@@ -115,6 +121,7 @@ def read_building(data, pos):
         room_id, pos = util.read_uint32(data, pos)
         building['rooms'].append(room_id)
     return building, pos
+
 
 def read_zpop(data, pos, blocks):
     zpop = []
@@ -126,11 +133,13 @@ def read_zpop(data, pos, blocks):
         zpop.append(line)
     return zpop, pos
 
+
 def get_version(data):
     if data[:4] == b'LOTH':
         return util.read_uint32(data, 4)
     else:
         return util.read_uint32(data, 0)
+
 
 def load_lotheader(path, x, y):
     data = b''
@@ -149,19 +158,19 @@ def load_lotheader(path, x, y):
     header['version'], pos = get_version(data)
     header.update(VERSION_LIMITATIONS[header['version']])
 
-    tile_name_num , pos = util.read_uint32(data, pos)
+    tile_name_num, pos = util.read_uint32(data, pos)
     tile_names = []
     for i in range(tile_name_num):
         name, pos = util.read_line(data, pos)
         tile_names.append(name.decode('utf8'))
     header['tiles'] = tile_names
 
-    if header['version'] == 0: #b41
-        pos += 1 # skip 0x00
+    if header['version'] == 0:  # B41
+        pos += 1  # skip 0x00
     header['width'], pos = util.read_uint32(data, pos)
     header['height'], pos = util.read_uint32(data, pos)
 
-    if header['version'] == 0: #b41
+    if header['version'] == 0:  # B41
         minlayer = 0
         maxlayer, pos = util.read_int32(data, pos)
     else:
@@ -189,12 +198,12 @@ def load_lotheader(path, x, y):
         building['id'] = i
         buildings.append(building)
     header['buildings'] = buildings
-    if header['version'] == 0: #b41
+    if header['version'] == 0:  # B41
         header['zpop'], pos = read_zpop(data, pos, 30)
-    else: #b42
+    else:  # B42
         header['zpop'], pos = read_zpop(data, pos, 32)
 
-    return header 
+    return header
 
 
 def print_header(header):
@@ -207,8 +216,8 @@ def print_header(header):
 
     rmap = {}
     for room in header['rooms']:
-         name = room['name']
-         rmap[name] = rmap.get(name, 0) + 1
+        name = room['name']
+        rmap[name] = rmap.get(name, 0) + 1
     for k, v in rmap.items():
         print('  {}: {}'.format(k, v))
 
@@ -229,8 +238,7 @@ if __name__ == '__main__':
     parser.add_argument('x', type=int)
     parser.add_argument('y', type=int)
     args = parser.parse_args()
-    
+
     header = load_lotheader(args.input, args.x, args.y)
     print_header(header)
     print(get_version_info(args.input, 1))
-    

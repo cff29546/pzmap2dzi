@@ -55,12 +55,13 @@ def test():
     for i in range(10):
         print(i, c.cache(i, i))
         print(c.m.keys())
-    for i in [7,8,9,10]:
+    for i in [7, 8, 9, 10]:
         print(i, c.pop(i))
         print(c.m.keys())
-    for i in [11,12,13,14]:
+    for i in [11, 12, 13, 14]:
         print(i, c.cache(i, i))
         print(c.m.keys())
+
 
 if __name__ == '__main__':
     test()

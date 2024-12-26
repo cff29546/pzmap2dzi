@@ -93,7 +93,7 @@ render_conf:
 
     # output image format, affect base and all overlay map, mush support transparent
     # supported formats: [png, webp]
-    image_fmt: png
+    image_fmt: webp
     # output image format for base map layer0, can use jpg to save space
     # supported formats: [png, webp, jpg]
     image_fmt_base_layer0: jpg

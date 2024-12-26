@@ -6,10 +6,12 @@ import re
 import json
 import zipfile
 
+
 def load_yaml(path):
     with io.open(path, 'r', encoding='utf8') as f:
         data = yaml.safe_load(f.read())
     return data
+
 
 def load_path(path):
     if os.path.isfile(path):
@@ -20,12 +22,14 @@ def load_path(path):
             data.update(load_path(os.path.join(path, name)))
     return data
 
+
 def set_default(data, dft):
     for key in data:
         for k in dft:
             if k not in data[key]:
                 data[key][k] = dft[k]
     return data
+
 
 def parse_map(conf_path):
     conf = load_yaml(conf_path)
@@ -38,14 +42,16 @@ def parse_map(conf_path):
     maps = set_default(maps, dft)
     return conf, maps
 
+
 def get_map_path(conf_path, name):
     conf, maps = parse_map(conf_path)
     return maps[name]['map_path'].format(**dict(maps[name], **conf))
 
+
 def get_dep(conf, maps, names):
     dep = set([])
     if conf.get('use_depend_texture_only'):
-        used = list(names) # copy
+        used = list(names)  # copy
         while len(used) > 0:
             m = used.pop()
             if m in maps and m not in dep:
@@ -78,6 +84,7 @@ def unpack(args):
         else:
             print('invalid texture_path: {}'.format(path))
 
+
 def get_conf(options, name, cmd, key, default):
     value = options.get('{}[{}]({})'.format(key, name, cmd))
     if value:
@@ -92,6 +99,7 @@ def get_conf(options, name, cmd, key, default):
     if value:
         return value
     return default
+
 
 def render_map(cmd, conf, maps, map_name, is_base):
     from pzmap2dzi import render
@@ -116,7 +124,8 @@ def render_map(cmd, conf, maps, map_name, is_base):
     if is_base:
         options['output'] = os.path.join(conf['output_path'], 'html', cmd)
     else:
-        options['output'] = os.path.join(conf['output_path'], 'html', 'mod_maps', map_name, cmd)
+        options['output'] = os.path.join(conf['output_path'], 'html',
+                                         'mod_maps', map_name, cmd)
     if is_base and cmd == 'base':
         options['image_fmt_layer0'] = options.get('image_fmt_base_layer0')
 
@@ -128,8 +137,10 @@ def render_map(cmd, conf, maps, map_name, is_base):
     if hasattr(r, 'update_options'):
         options = r.update_options(options)
     dzi = DZI(options['input'], **options)
-    suc = dzi.render_all(r, options['worker_count'], options['break_key'], options['verbose'], options['profile'])
+    suc = dzi.render_all(r, options['worker_count'], options['break_key'],
+                         options['verbose'], options['profile'])
     return suc
+
 
 def save_mod_map_list(conf):
     mod_maps = os.path.join(conf['output_path'], 'html', 'mod_maps')
@@ -141,6 +152,7 @@ def save_mod_map_list(conf):
             maps.append(f)
     with open(os.path.join(mod_maps, 'map_list.json'), 'w') as f:
         f.write(json.dumps(maps))
+
 
 def render(args):
     conf, maps = parse_map(args.conf)
@@ -160,9 +172,11 @@ def render(args):
             print('render [{}] for map [{}] done'.format(cmd, map_name))
     save_mod_map_list(conf)
 
+
 def unzip(path):
     with zipfile.ZipFile(path, 'r') as z:
         z.extractall(os.path.dirname(path))
+
 
 def copy(args):
     conf = load_yaml(args.conf)
@@ -171,6 +185,7 @@ def copy(args):
     dst = os.path.join(conf['output_path'], 'html')
     copy_tree(src, dst)
     unzip(os.path.join(dst, 'openseadragon', 'openseadragon.zip'))
+
 
 CMD = {
     'unpack': unpack,
@@ -187,5 +202,3 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     CMD[args.cmd](args)
-
-

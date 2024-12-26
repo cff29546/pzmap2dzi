@@ -1,5 +1,5 @@
-var map_type = "iso";
-var suffix = "";
+var map_type = 'iso';
+var suffix = '';
 var viewer = 0;
 
 const Map = class {
@@ -103,7 +103,7 @@ const Map = class {
                 if (this.getTile(layer) == 0) {
                     this.setTile(layer, 'loading');
                     viewer.addTiledImage({
-                        tileSource: this.getMapRoot() + 'base' + suffix + "/layer" + layer + ".dzi",
+                        tileSource: this.getMapRoot() + 'base' + suffix + '/layer' + layer + '.dzi',
                         opacity: 1,
                         x: p.x,
                         y: p.y,
@@ -135,7 +135,7 @@ const Map = class {
         }
     }
     _load_overlay(type, layer) {
-        if (viewer) {
+        if (viewer && layer < this.maxlayer && layer >= this.minlayer) {
             let [p, width] = base_map.getRelativePositionAndWidth(this);
             //console.log(this.name, type, p, width);
             let shift = true;
@@ -146,7 +146,7 @@ const Map = class {
             if (this.overlays[type] == 0) {
                 this.overlays[type] = 'loading';
                 viewer.addTiledImage({
-                    tileSource: this.getMapRoot() + type + suffix + "/layer" + layer + ".dzi",
+                    tileSource: this.getMapRoot() + type + suffix + '/layer' + layer + '.dzi',
                     opacity: 1,
                     x: p.x,
                     y: p.y,
@@ -272,7 +272,7 @@ const Map = class {
         let minlayer = -1;
         while (true) {
             let xhttp = new XMLHttpRequest();
-            xhttp.open("GET", map_root + "base" + suffix + "/layer" + maxlayer + ".dzi", false);
+            xhttp.open('GET', map_root + 'base' + suffix + '/layer' + maxlayer + '.dzi', false);
             try {
                 xhttp.send(null);
             } catch (error) {
@@ -285,7 +285,7 @@ const Map = class {
         }
         while (true) {
             let xhttp = new XMLHttpRequest();
-            xhttp.open("GET", map_root + "base" + suffix + "/layer" + minlayer + ".dzi", false);
+            xhttp.open('GET', map_root + 'base' + suffix + '/layer' + minlayer + '.dzi', false);
             try {
                 xhttp.send(null);
             } catch (error) {
@@ -301,7 +301,7 @@ const Map = class {
 
     loadMapInfo(type) {
         let xhttp = new XMLHttpRequest();
-        xhttp.open("GET", this.getMapRoot() + type + suffix + "/map_info.json", false);
+        xhttp.open('GET', this.getMapRoot() + type + suffix + '/map_info.json', false);
         try {
             xhttp.send(null);
         } catch (error) {
@@ -347,24 +347,21 @@ const Map = class {
 
 // order layered maps
 function positionItem(item, name, layer) {
-    //let cur = viewer.world.getIndexOfItem(item);
     let pos = 1;
-    for (let i = 0; i < base_map.tiles.length; i++ ) {
-        if (name == '' && (layer - base_map.minlayer) == i) {
+    for (let i = minLayer; i < maxLayer; i++) {
+        if (name == '' && layer == i) {
             viewer.world.setItemIndex(item, pos);
             return;
         }
-        if (![0, 'loading', 'delete'].includes(base_map.tiles[i])) {
+        if (![undefined, 0, 'loading', 'delete'].includes(base_map.getTile(i))) {
             pos++;
         }
-    }
-    for (let i = 0; i < mod_maps.length; i++ ) {
-        for (let j = 0; j < mod_maps[i].tiles.length; j++ ) {
-            if (name == mod_maps[i].name && (layer - mod_maps[i].minlayer) == j) {
+        for (let j = 0; j < mod_maps.length; j++ ) {
+            if (name == mod_maps[j].name && layer == i) {
                 viewer.world.setItemIndex(item, pos);
                 return;
             }
-            if (![0, 'loading', 'delete'].includes(mod_maps[i].tiles[j])) {
+            if (![undefined, 0, 'loading', 'delete'].includes(mod_maps[j].getTile(i))) {
                 pos++;
             }
         }
@@ -373,16 +370,14 @@ function positionItem(item, name, layer) {
 
 function positionAll() {
     let pos = 1;
-    for (let i = 0; i < base_map.tiles.length; i++ ) {
-        if (![0, 'loading', 'delete'].includes(base_map.tiles[i])) {
-            viewer.world.setItemIndex(base_map.tiles[i], pos);
+    for (let i = minLayer; i < maxLayer; i++) {
+        if (![undefined, 0, 'loading', 'delete'].includes(base_map.getTile(i))) {
+            viewer.world.setItemIndex(base_map.getTile(i), pos);
             pos++;
         }
-    }
-    for (let i = 0; i < mod_maps.length; i++ ) {
-        for (let j = 0; j < mod_maps[i].tiles.length; j++ ) {
-            if (![0, 'loading', 'delete'].includes(mod_maps[i].tiles[j])) {
-                viewer.world.setItemIndex(mod_maps[i].tiles[j], pos);
+        for (let j = 0; j < mod_maps.length; j++ ) {
+            if (![undefined, 0, 'loading', 'delete'].includes(mod_maps[j].getTile(i))) {
+                viewer.world.setItemIndex(mod_maps[j].getTile(i), pos);
                 pos++;
             }
         }
@@ -393,11 +388,13 @@ var base_map = 0;
 var mod_maps = [];
 var overlays = {};
 var currentLayer = 0;
+var minLayer = 0;
+var maxLayer = 0;
 
 var mapui = 0;
 var grid = 0;
 var trimmer = 0;
-var save_path = "";
+var save_path = '';
 var saved_blocks = new Set();
 var saved_cells = {};
 var selected_blocks = new Set();
@@ -474,7 +471,7 @@ var UI_HTML = {
 }
 
 function changeView() {
-    if (map_type == "top") {
+    if (map_type == 'top') {
         map_type = 'iso';
     } else {
         map_type = 'top';
@@ -496,7 +493,7 @@ function changeView() {
 
 function init_mapui() {
     let xhttp = new XMLHttpRequest();
-    xhttp.open("GET", "./mod_maps/map_list.json", false);
+    xhttp.open('GET', './mod_maps/map_list.json', false);
     try {
         xhttp.send(null);
     } catch (error) {
@@ -505,7 +502,7 @@ function init_mapui() {
         let s = document.getElementById('map_selector')
         let map_names = JSON.parse(xhttp.responseText);
         for (let i = 0; i < map_names.length; i++) {
-            let o = document.createElement("option");
+            let o = document.createElement('option');
             o.value = map_names[i];
             o.text = map_names[i];
             s.appendChild(o);
@@ -531,10 +528,11 @@ function removeMap(name) {
         mod_maps[pos].destroy();
         mod_maps.splice(pos, 1);
         if (mod_maps.length == 0) {
-            document.getElementById("map_btn").classList.remove('active');
+            document.getElementById('map_btn').classList.remove('active');
         }
         updateMapUI();
         updateClip();
+        updateLayerSelector();
     }
 }
 
@@ -549,11 +547,12 @@ function addMap(name) {
         if (pos >= mod_maps.length) {
             mod_maps.push(new Map(name));
             if (mod_maps.length == 1) {
-                document.getElementById("map_btn").classList.add('active');
+                document.getElementById('map_btn').classList.add('active');
             }
             updateMapUI();
             updateClip();
             updateMaps(currentLayer);
+            updateLayerSelector();
         }
     }
 }
@@ -565,9 +564,10 @@ function toggleAllMaps() {
                 mod_maps[pos].destroy();
             }
             mod_maps = [];
-            document.getElementById("map_btn").classList.remove('active');
+            document.getElementById('map_btn').classList.remove('active');
             updateMapUI();
             updateClip();
+            updateLayerSelector();
         } else {
             let s = document.getElementById('map_selector');
             for (let i = 0; i < s.options.length; i++) {
@@ -587,35 +587,49 @@ function onMapSelect() {
     }
 }
 
-function initUI() {
-    if (map_type == "top") {
-        for (let e of document.getElementsByClassName('iso')) {
-            e.style.display = "none";
-        }
-        document.getElementById('change_view').innerHTML = "Isometric View";
-        document.title = "PZ map (Top View)";
-    } else {
-        for (let e of document.getElementsByClassName('iso')) {
-            e.style.display = "";
-        }
-        document.getElementById('change_view').innerHTML = "Top View";
-        document.title = "PZ map";
-    }
+function updateLayerSelector() {
     let s = document.getElementById('layer_selector')
     for (let i = s.options.length - 1; i >= 0; i--) {
         s.remove(i);
     }
-    for (let i = base_map.minlayer; i < base_map.maxlayer; i++) {
-        let o = document.createElement("option");
+    minLayer = base_map.minlayer;
+    maxLayer = base_map.maxlayer;
+    for (let i = 0; i < mod_maps.length; i++) {
+        if (minLayer > mod_maps[i].minlayer) {
+            minLayer = mod_maps[i].minlayer;
+        }
+        if (maxLayer < mod_maps[i].maxlayer) {
+            maxLayer = mod_maps[i].maxlayer;
+        }
+    }
+    for (let i = minLayer; i < maxLayer; i++) {
+        let o = document.createElement('option');
         o.value = i;
         o.text = 'Layer ' + i;
         s.appendChild(o);
     }
-    s.selectedIndex = -base_map.minlayer;
+    s.selectedIndex = currentLayer - minLayer;
+}
+
+function initUI() {
+    if (map_type == 'top') {
+        for (let e of document.getElementsByClassName('iso')) {
+            e.style.display = 'none';
+        }
+        document.getElementById('change_view').innerHTML = 'Isometric View';
+        document.title = 'PZ map (Top View)';
+    } else {
+        for (let e of document.getElementsByClassName('iso')) {
+            e.style.display = '';
+        }
+        document.getElementById('change_view').innerHTML = 'Top View';
+        document.title = 'PZ map';
+    }
+    updateLayerSelector();
     for (let type of ['zombie', 'foraging', 'room', 'objects', 'grid', 'map']) {
         let ui = document.getElementById(type + '_ui');
         if (ui) {
-            ui.innerHTML = "";
+            ui.innerHTML = '';
         }
         let btn = document.getElementById(type + '_btn');
         if (btn) {
@@ -663,24 +677,24 @@ function init(callback=null) {
     updateClip();
 
     viewer = OpenSeadragon({
-        drawer: "canvas",
+        drawer: 'canvas',
         opacity: 1,
-        element: document.getElementById("map_div"),
-        tileSources:  "base" + suffix + "/layer0.dzi",
+        element: document.getElementById('map_div'),
+        tileSources:  'base' + suffix + '/layer0.dzi',
         homeFillsViewer: true,
         showZoomControl: true,
         constrainDuringPan: true,
         visibilityRatio: 0.5,
-        prefixUrl: "openseadragon/images/",
+        prefixUrl: 'openseadragon/images/',
         navigatorBackground: 'black',
         minZoomImageRatio: 0.5,
-        maxZoomPixelRatio: (map_type == "top" ? 12 : 2) * base_map.scale
+        maxZoomPixelRatio: (map_type == 'top' ? 12 : 2) * base_map.scale
     });
 
     viewer.addHandler('add-item-failed', function(event) {
         let info = '<b>Map not loaded. Use "run_server.bat" to start the viewer.</b>';
         if (window.location.protocol == 'http:' || window.location.protocol == 'https:') {
-            let type_str = (map_type == "top") ? "top" : "isometric";
+            let type_str = (map_type == 'top') ? 'top' : 'isometric';
             info = '<b>Failed to load ' + type_str + ' view map.</b>';
         }
         setOutput('main_output', 'red', info);
@@ -816,7 +830,7 @@ function init(callback=null) {
         }
     })
 
-    if (map_type == "top") {
+    if (map_type == 'top') {
         viewer.drawer.context.mozImageSmoothingEnabled = false;
         viewer.drawer.context.webkitImageSmoothingEnabled = false;
         viewer.drawer.context.msImageSmoothingEnabled = false;
@@ -842,7 +856,7 @@ function init(callback=null) {
 
 function shiftClipList(clip_list, scale, layer) {
     let clip_list_shift = [];
-    let yshift = (map_type == "top" ? 0 : 192 * currentLayer);
+    let yshift = (map_type == 'top' ? 0 : 192 * currentLayer);
     for (let i = 0; i < clip_list.length; i++) {
         let points = [];
         for (let j = 0; j < clip_list[i].length; j++) {
@@ -930,6 +944,12 @@ function deleteSave(path) {
         }
     }
     
+    let version = 'You are using PZ VERSION: [' + base_map.pz_version + ']\n';
+    version += '\nPlease make sure your save is VERSION [' + base_map.pz_version + ']';
+    if (!confirm(version)) {
+        setOutput('trimmer_output', 'red', '<b>Trim canceled</b>', 3000);
+        return;
+    }
     let info = 'Are you sure to delete ' + count + ' block(s)?\n\n';
     let cell_info = cells.join(';');
     if (cells.length > 20) {
@@ -950,7 +970,7 @@ function deleteSave(path) {
         setOutput('trimmer_output', 'red', '<b>Trim canceled</b>', 3000);
         return;
     }
-    let req = "cells=" + cells.join(';') + "&blocks=" + blocks.join(';');
+    let req = 'cells=' + cells.join(';') + '&blocks=' + blocks.join(';');
     if (document.getElementById('vehicle').checked) {
         req += '&vehicles=1';
     }
@@ -985,7 +1005,7 @@ function loadSave(path) {
         clearSelection();
         if (path) {
             let xhttp = new XMLHttpRequest();
-            xhttp.open("GET", "./load/" + path, false);
+            xhttp.open('GET', './load/' + path, false);
             try {
                 xhttp.send(null);
             } catch (error) {
@@ -1025,7 +1045,7 @@ function listSave() {
         }
 
         let xhttp = new XMLHttpRequest();
-        xhttp.open("GET", "./list_save", false);
+        xhttp.open('GET', './list_save', false);
         try {
             xhttp.send(null);
         } catch (error) {
@@ -1033,7 +1053,7 @@ function listSave() {
         if (xhttp.status === 200) {
             let saves = JSON.parse(xhttp.responseText);
             for (let i = 0; i < saves.length; i++) {
-                let o = document.createElement("option");
+                let o = document.createElement('option');
                 o.value = saves[i];
                 o.text = saves[i];
                 s.appendChild(o);
@@ -1073,7 +1093,7 @@ function* inScreenCoords(ctx, c00, step, border) {
     let step_y = step;
     let y_start = 0;
     let y_inc = 1;
-    if (map_type != "top") {
+    if (map_type != 'top') {
         step_x = step / 2;
         step_y = step / 4;
         y_inc = 2;
@@ -1088,7 +1108,7 @@ function* inScreenCoords(ctx, c00, step, border) {
     let dy0 = gy0 - gx0;
 
     for (let x = 0; x <= w / step_x + border * 2 - 1; x++) {
-        if (map_type != "top") {
+        if (map_type != 'top') {
             y_start = (dx0 + x) % 2;
         }
         for (let y = y_start; y <= h / step_y + border * 2 - 1; y+=y_inc) {
@@ -1109,7 +1129,7 @@ function drawCoord(ctx, c00, step, yoffset) {
         let cx = gx * step_x;
         let cy = gy * step_y;
         let text = makeKey(kx, ky);
-        if (map_type != "top") {
+        if (map_type != 'top') {
             xoffset = - ctx.measureText(text).width / 2;
         }
         ctx.fillText(text, cx + xoffset, cy + yoffset);
@@ -1121,7 +1141,7 @@ function drawCoord(ctx, c00, step, yoffset) {
 function drawEditState(ctx, c00, step, is_block) {
     let coords = inScreenCoords(ctx, c00, step, 2);
     let [step_x, step_y] = coords.next().value;
-    if (map_type == "top") {
+    if (map_type == 'top') {
         ctx.setTransform(1, 0, 0, 1, c00.x, c00.y);
     } else {
         ctx.setTransform(0.5,0.25, -0.5 ,0.25, c00.x, c00.y);
@@ -1179,7 +1199,7 @@ function drawGrid(ctx, c00, step, line_width) {
     let x_shift = 0;
     let y_shift = 0;
     let y_step = step;
-    if (map_type != "top") {
+    if (map_type != 'top') {
         x1 += 2 * c00.y;
         y1 -= c00.x / 2;
         max_w += 2 * h;
@@ -1207,7 +1227,7 @@ function drawGrid(ctx, c00, step, line_width) {
 function getGridXY(c00, step, x, y) {
     let gx = 0;
     let gy = 0;
-    if (map_type == "top") {
+    if (map_type == 'top') {
         gx = Math.floor((x - c00.x)/step);
         gy = Math.floor((y - c00.y)/step);
     } else {
@@ -1227,7 +1247,7 @@ function getCanvasOriginAndStep() {
     let zm = viewer.viewport.getZoom(true);
     zm = viewer.world.getItemAt(0).viewportToImageZoom(zm);
     zm *= window.devicePixelRatio;
-    let yshift = (map_type == "top" ? 0 : 192 * currentLayer);
+    let yshift = (map_type == 'top' ? 0 : 192 * currentLayer);
     let x0 = base_map.x0 / base_map.scale;
     let y0 = (base_map.y0 - yshift) / base_map.scale;
     let vp00 = viewer.world.getItemAt(0).imageToViewportCoordinates(x0, y0);
@@ -1256,7 +1276,7 @@ function getGridLevel(ctx, step_cell, step_block) {
         block = 1;
     }
     let min_step_cell_text = 0;
-    if (map_type == "top") {
+    if (map_type == 'top') {
         min_step_cell_text = 8 + Math.max(cell_width, cell_height);
     } else {
         min_step_cell_text = 8 + cell_width + 2 * cell_height;
@@ -1266,7 +1286,7 @@ function getGridLevel(ctx, step_cell, step_block) {
         let [block_width, block_ascent, block_descent] = textSize(ctx, '-0000,-0000');
         let block_height = block_ascent + block_descent;
         let min_step_block_text = 0;
-        if (map_type == "top") {
+        if (map_type == 'top') {
             cell_text_offset = 4 + cell_ascent;
             min_step_block_text = 8 + Math.max(block_width, 2 + block_height + cell_height);
         } else {
@@ -1334,14 +1354,14 @@ function flipCell(x, y) {
 function toggleGrid() {
     if (grid == 0) {
         grid = 1;
-        document.getElementById("grid_btn").classList.add('active');
+        document.getElementById('grid_btn').classList.add('active');
         if (trimmer == 1) {
             viewer.forceRedraw();
         }
         viewer.raiseEvent('update-viewport', {});
     } else {
         grid = 0;
-        document.getElementById("grid_btn").classList.remove('active');
+        document.getElementById('grid_btn').classList.remove('active');
         viewer.forceRedraw();
     }
 }
@@ -1349,8 +1369,8 @@ function toggleGrid() {
 function toggleTrimmer() {
     if (trimmer == 0) {
         trimmer = 1;
-        document.getElementById("trimmer_btn").classList.add('active');
-        document.getElementById("trimmer_ui").innerHTML = UI_HTML['trimmer'];
+        document.getElementById('trimmer_btn').classList.add('active');
+        document.getElementById('trimmer_ui').innerHTML = UI_HTML['trimmer'];
         listSave();
         if (grid == 1) {
             viewer.forceRedraw();
@@ -1358,22 +1378,22 @@ function toggleTrimmer() {
         viewer.raiseEvent('update-viewport', {});
     } else {
         trimmer = 0;
-        document.getElementById("trimmer_btn").classList.remove('active');
-        document.getElementById("trimmer_ui").innerHTML = "";
+        document.getElementById('trimmer_btn').classList.remove('active');
+        document.getElementById('trimmer_ui').innerHTML = '';
         viewer.forceRedraw();
     }
 }
 
 function toggleTrimmerHelp() {
     if (trimmer) {
-        let t = document.getElementById("trimmer_help");
-        let ins = document.getElementById("trimmer_help_btn");
+        let t = document.getElementById('trimmer_help');
+        let ins = document.getElementById('trimmer_help_btn');
         if (t.textContent) {
-            t.innerHTML = "";
-            ins.innerHTML = "Show Help";
+            t.innerHTML = '';
+            ins.innerHTML = 'Show Help';
         } else {
             t.innerHTML = UI_HTML['trimmer_help'];;
-            ins.innerHTML = "Hide Help";
+            ins.innerHTML = 'Hide Help';
         }
     }
     return false;
@@ -1389,18 +1409,18 @@ function updateRoofOpacity() {
 function toggleModMapUI() {
     if (mapui == 0) {
         mapui = 1;
-        document.getElementById("map_ui").innerHTML = UI_HTML['map'];
+        document.getElementById('map_ui').innerHTML = UI_HTML['map'];
         init_mapui();
         updateMapUI();
     } else {
         mapui = 0;
-        document.getElementById("map_ui").innerHTML = "";
+        document.getElementById('map_ui').innerHTML = '';
     }
 }
 
 function updateMapUI() {
     if (mapui) {
-        let btn = document.getElementById("toggle_all_maps");
+        let btn = document.getElementById('toggle_all_maps');
         if (mod_maps.length > 0) {
             btn.classList.add('active');
             btn.innerText = 'Remove All';
@@ -1408,7 +1428,7 @@ function updateMapUI() {
             btn.classList.remove('active');
             btn.innerText = 'Load All';
         }
-        let d = document.getElementById("map_list");
+        let d = document.getElementById('map_list');
         d.innerHTML = '';
         let warning = [];
         for (let pos = 0; pos < mod_maps.length; pos++) {
@@ -1440,16 +1460,16 @@ function updateMaps(layer) {
 function toggleOverlay(type) {
     overlays[type] = !overlays[type];
     if (overlays[type]) {
-        document.getElementById(type + "_btn").classList.add('active');
-        let ui = document.getElementById(type + "_ui");
+        document.getElementById(type + '_btn').classList.add('active');
+        let ui = document.getElementById(type + '_ui');
         if (ui) {
             ui.innerHTML = UI_HTML[type];
         }
     } else {
-        document.getElementById(type + "_btn").classList.remove('active');
-        let ui = document.getElementById(type + "_ui");
+        document.getElementById(type + '_btn').classList.remove('active');
+        let ui = document.getElementById(type + '_ui');
         if (ui) {
-            ui.innerHTML = "";
+            ui.innerHTML = '';
         }
     }
     updateMaps(currentLayer);
@@ -1461,4 +1481,3 @@ function onLayerSelect() {
 }
 
 init();
-

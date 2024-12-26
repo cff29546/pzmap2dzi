@@ -7,6 +7,7 @@ try:
 except ImportError:
     from backports.functools_lru_cache import lru_cache
 
+
 def load_objects_raw(objects_path):
     if not os.path.isfile(objects_path):
         return []
@@ -14,6 +15,7 @@ def load_objects_raw(objects_path):
         text = f.read()
     olist = slpp.slpp.decode(text.replace('objects = ', '', 1))
     return olist
+
 
 FORAGING_TYPES = set([
     'Nav',
@@ -28,6 +30,8 @@ FORAGING_TYPES = set([
 PARKING_TYPES = set(['ParkingStall'])
 ZOMBIE_TYPES = set(['ZombiesType'])
 STORY_TYPES = set(['ZoneStory'])
+
+
 def filter_objects_raw(objects, types, zlimit=None):
     output = []
     for o in objects:
@@ -36,6 +40,7 @@ def filter_objects_raw(objects, types, zlimit=None):
         if o['type'] in types:
             output.append(o)
     return output
+
 
 class Obj(object):
     def __init__(self, obj):
@@ -82,9 +87,9 @@ class Obj(object):
 
     def is_inside(self, x, y):
         if self.geo_type == 'rect':
-            if (x >= self.x and x < self.x + self.w
-               and y >= self.y and y < self.y + self.h):
-               return True
+            if (x >= self.x and x < self.x + self.w and
+                y >= self.y and y < self.y + self.h):
+                return True
             return False
         if self.geo_type in ['polygon', 'polyline']:
             return geometry.point_in_polygon(self.points, x + 0.5, y + 0.5)
@@ -106,8 +111,8 @@ class Obj(object):
             return self.x, self.y
         lx, ly = sl[0]
         for x, y in sl:
-             if geometry.label_order(x, y) < geometry.label_order(lx, ly):
-                 lx, ly = x, y
+            if geometry.label_order(x, y) < geometry.label_order(lx, ly):
+                lx, ly = x, y
         return lx, ly
 
     def get_border(self):
@@ -117,6 +122,7 @@ class Obj(object):
         for x, y in self.square_list():
             m[x, y] = [geometry._MAYBE_OUTSIDE] * 4
         return geometry.get_border_from_square_map(m)
+
 
 def cell_map(objects_raw, cell_size):
     m = {}
@@ -128,10 +134,12 @@ def cell_map(objects_raw, cell_size):
             m[c].append(o)
     return m
 
+
 def load_cell_zones(path, cell_size, types, zlimit=None):
     objects_raw = load_objects_raw(path)
     objects_raw = filter_objects_raw(objects_raw, types, zlimit)
     return cell_map(objects_raw, cell_size)
+
 
 def border_label_map(cell_zones, cx, cy):
     if (cx, cy) not in cell_zones:
@@ -154,6 +162,7 @@ def border_label_map(cell_zones, cx, cy):
             b_map[z.z][x, y].append((z.type, flag))
     return b_map, l_map
 
+
 def square_map(cell_zones, cell_size, cx, cy):
     if (cx, cy) not in cell_zones:
         return None
@@ -165,7 +174,8 @@ def square_map(cell_zones, cell_size, cx, cy):
                 continue
             if (x, y) not in m:
                 m[x, y] = z.type
-    return m 
+    return m
+
 
 class CachedGetter(object):
     def __init__(self, path, types, zlimit=None, cache_size=16):
@@ -186,15 +196,16 @@ class CachedGetter(object):
             self.build_getter()
         return self.getter(cx, cy)
 
+
 class CachedSquareMapGetter(CachedGetter):
     def build_getter(self):
         self.cell_zones = self.get_cell_zones()
         getter = partial(square_map, self.cell_zones, self.cell_size)
         self.getter = lru_cache(maxsize=self.cache_size)(getter)
 
+
 class CachedBorderLabelMapGetter(CachedGetter):
     def build_getter(self):
         self.cell_zones = self.get_cell_zones()
         getter = partial(border_label_map, self.cell_zones)
         self.getter = lru_cache(maxsize=self.cache_size)(getter)
-

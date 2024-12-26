@@ -14,11 +14,13 @@ try:
 except:
     shared_memory_image = None
 
+
 def get_version(data):
     if data[:4] == b'PZPK':
         return util.read_uint32(data, 4)
     else:
         return 0, 0
+
 
 def read_texture(data, pos):
     texture = {}
@@ -34,6 +36,7 @@ def read_texture(data, pos):
     texture['oh'], pos = util.read_int32(data, pos)
     return texture, pos
 
+
 def read_page(data, pos, version):
     page = {}
     page['name'], pos = util.read_bytes_with_length(data, pos)
@@ -45,13 +48,15 @@ def read_page(data, pos, version):
         textures.append(texture)
     page['textures'] = textures
     if version == 0:
-        page['png'], pos = util.read_until(data, pos, b'\xef\xbe\xad\xde') # 0xdeadbeef little endian
+        # magic 0xdeadbeef little endian
+        page['png'], pos = util.read_until(data, pos, b'\xef\xbe\xad\xde')
     elif version == 1:
         page['png'], pos = util.read_bytes_with_length(data, pos)
     else:
         print('Unsupported pack version {}'.format(version))
 
     return page, pos
+
 
 def load_pack(path):
     data = b''
@@ -66,12 +71,14 @@ def load_pack(path):
         pages.append(page)
     return pages
 
+
 def color_sum(pixels):
     total = len(pixels)
     if total > 0:
         r, g, b, _ = map(sum, zip(*pixels))
         return r, g, b, total
     return 0, 0, 0, 1
+
 
 class Texture(object):
     def __init__(self, im, offset=None):
@@ -105,15 +112,16 @@ class Texture(object):
 
     def get_color_sum(self):
         if self.color_sum is None:
-            pixels = list(filter(lambda x: x[3]==255, self.im.getdata()))
+            pixels = list(filter(lambda x: x[3] == 255, self.im.getdata()))
             self.color_sum = color_sum(pixels)
         return self.color_sum
 
     def save(self, path):
         metadata = PngInfo()
-        metadata.add_text("ox", str(self.ox))
-        metadata.add_text("oy", str(self.oy))
+        metadata.add_text('ox', str(self.ox))
+        metadata.add_text('oy', str(self.oy))
         self.im.save(path, pnginfo=metadata)
+
 
 class TextureLibrary(object):
     @staticmethod
@@ -126,10 +134,8 @@ class TextureLibrary(object):
         w, h = struct.unpack('ii', shm.buf[4:12])
         return w, h
 
-    def __init__(self, texture_path=[],
-                       cache_name='',
-                       page_mode=False,
-                       page_size=1024):
+    def __init__(self, texture_path=[], cache_name='',
+                 page_mode=False, page_size=1024):
         self.texture_path = texture_path
         self.use_cache = True if cache_name else False
         self.page_mode = page_mode
@@ -158,7 +164,7 @@ class TextureLibrary(object):
                 name = t['name']
                 x, y, w, h = t['x'], t['y'], t['w'], t['h']
                 ox, oy, ow, oh = t['ox'], t['oy'], t['ow'], t['oh']
-                ox -= ow >>1
+                ox -= ow >> 1
                 oy -= oh
                 texture = Texture(im.crop((x, y, x + w, y + h)), (ox, oy))
                 if debug and self.lib.get(name, None):
@@ -177,9 +183,10 @@ class TextureLibrary(object):
             'Tiles2x.floor.pack',
             'Tiles2x.pack',
         ]
+        packs = os.path.join(pzmain, 'media', 'texturepacks')
         for f in files:
-            self.add_pack(os.path.join(pzmain, 'media', 'texturepacks', f), debug)
-    
+            self.add_pack(os.path.join(packs, f), debug)
+
     def set_texture_path(self, path):
         self.texture_path = path
 
@@ -238,13 +245,11 @@ class TextureLibrary(object):
                     im = Image.open(path)
                     if im:
                         offset = 4 * w * h * pid
-                        buf_im = Image.frombuffer('RGBA', (w, h), 
+                        buf_im = Image.frombuffer('RGBA', (w, h),
                                                   self.page_buffer[offset:],
                                                   'raw', 'RGBA', 0, 1)
                         buf_im.readonly = 0
                         buf_im.paste(im, (0, 0))
-
-
 
     def load_texture(self, name):
         t = self.load_from_cache(name)
@@ -281,7 +286,7 @@ class TextureLibrary(object):
         w, h = 384, 512
         im = Image.new('RGBA', (w, h))
         x = w >> 1
-        y = h # - (pzdzi.SQR_HEIGHT // 2)
+        y = h  # - (pzdzi.SQR_HEIGHT // 2)
         for name in names:
             t = self.get_by_name(name)
             if t:
@@ -298,6 +303,7 @@ class TextureLibrary(object):
             self.lib = {}
             self.mem.clear()
 
+
 class SaveImg(object):
     def __init__(self, path):
         self.path = path
@@ -305,6 +311,7 @@ class SaveImg(object):
     def on_job(self, job):
         name, im = job
         im.save(os.path.join(self.path, '{}.png'.format(name)))
+
 
 if __name__ == '__main__':
     import argparse
@@ -317,7 +324,7 @@ if __name__ == '__main__':
     parser.add_argument('-p', '--page-mode', action='store_true')
     parser.add_argument('packs', nargs=argparse.REMAINDER)
     args = parser.parse_args()
-    
+
     lib = TextureLibrary(page_mode=args.page_mode)
     if args.pz_path:
         lib.add_from_pz_path(args.pz_path, args.debug)
@@ -332,5 +339,4 @@ if __name__ == '__main__':
             'jumbo_tree_size': 5,
         })
     lib.save_all(args.output, args.mp)
-    #lib.save_pages(args.output)
-    
+    # lib.save_pages(args.output)

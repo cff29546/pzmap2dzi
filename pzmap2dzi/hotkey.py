@@ -4,6 +4,7 @@ try:
 except:
     import Queue as queue
 
+
 def is_hotkey(k):
     try:
         if pynput.keyboard.HotKey.parse(k):
@@ -12,19 +13,21 @@ def is_hotkey(k):
         return False
     return False
 
+
 class _hotkey(object):
-    """
+    '''
     hotkey format:
         <ctrl>+<alt>+a    ctrl + alt + a
-        a                 the key "a"
+        a                 the key 'a'
         <f8>              f8
         <cmd>+<f2>        windows + f2
-    """
+    '''
+
     def __init__(self, hotkeys=[]):
         self.q = None
         self.gh = None
         hotkeys = list(filter(is_hotkey, hotkeys))
-        self.hotkey_map = {hotkey: self._make_func(hotkey) 
+        self.hotkey_map = {hotkey: self._make_func(hotkey)
                            for hotkey in hotkeys}
         self._start()
 
@@ -47,7 +50,8 @@ class _hotkey(object):
             self.q = None
 
     def _make_func(self, hotkey):
-        return lambda : self._on_hotkey(hotkey)
+        return lambda: self._on_hotkey(hotkey)
+
     def _on_hotkey(self, hotkey):
         self.q.put(hotkey)
 
@@ -70,7 +74,8 @@ class _hotkey(object):
             raise Exception('Listener not start.')
 
     def __del__(self):
-        self.stop() 
+        self.stop()
+
 
 def wait_any(hotkeys=['<f{}>'.format(i) for i in range(1, 13)]):
     h = _hotkey(hotkeys)
@@ -78,6 +83,6 @@ def wait_any(hotkeys=['<f{}>'.format(i) for i in range(1, 13)]):
     h.stop()
     return key
 
+
 def listener(hotkeys=['<f{}>'.format(i) for i in range(1, 13)]):
     return _hotkey(hotkeys)
-

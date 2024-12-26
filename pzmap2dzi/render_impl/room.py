@@ -7,6 +7,7 @@ try:
 except ImportError:
     from backports.functools_lru_cache import lru_cache
 
+
 class CellRoom(object):
     def __init__(self, rooms):
         self.name = []
@@ -22,6 +23,7 @@ class CellRoom(object):
             for (x, y), flag in edge:
                 self.edge[layer, x, y] = (i, flag)
 
+
 @lru_cache(maxsize=128)
 def load_cell_room(path, cx, cy):
     header = lotheader.load_lotheader(path, cx, cy)
@@ -30,6 +32,7 @@ def load_cell_room(path, cx, cy):
     if len(header['rooms']) == 0:
         return None
     return CellRoom(header['rooms'])
+
 
 COLOR_MAP = {
     # DumbBell/BarBell
@@ -61,7 +64,6 @@ COLOR_MAP = {
     'emptyoutside': 'silver',
 }
 DEFAULT_COLOR = 'cyan'
-
 class RoomRender(object):
     def __init__(self, **options):
         self.input = options.get('input')
@@ -88,7 +90,7 @@ class RoomRender(object):
             drawing.append((render_long_text, (name, color, self.font.get())))
         if (layer, subx, suby) in room.edge:
             idx, flag = room.edge[layer, subx, suby]
-            raw_name = room.name[idx]    
+            raw_name = room.name[idx]
             name = raw_name.decode(self.encoding, errors='ignore')
             color = COLOR_MAP.get(name, DEFAULT_COLOR)
             drawing.append((render_edge, (color, 3, flag)))
@@ -97,4 +99,3 @@ class RoomRender(object):
             draw = ImageDraw.Draw(im)
             for func, args in drawing:
                 func(draw, ox, oy, *args)
-

@@ -3,6 +3,13 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 
 # Now fully suport B42 basement
 
+<p float="left">
+  <img src="/docs/img/markedit.jpg" width="192" alt="marking" />
+  <img src="/docs/img/basement.jpg" width="192" alt="basement" /> 
+  <img src="/docs/img/trimmer.jpg" width="192" alt="trimmer" />
+  <img src="/docs/img/i18n.jpg" width="192" alt="i18n" />
+</p>
+
 # Features
 
 - HTML viewer for viewing the generated Deep Zoom image in both isometric and top down

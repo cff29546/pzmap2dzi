@@ -1,70 +1,118 @@
 import os
-from . import lotheader, texture, util
+from . import lotheader, util
 
-def read_block(data, pos, level):
-    next_pos = pos + 8
-    pos, _ = util.read_uint32(data, pos)
-    level = min(level, 8)
-    skip = 0
-    block = [None] * level
-    valid_tiles = 0
-    for l in range(level):
-        if skip >= 100:
-            skip -= 100
-            continue
-        lv = [None] * 10
-        for x in range(10):
-            if skip >= 10:
-                skip -= 10
+
+def get_version(data):
+    if data[:4] == b'LOTP':
+        return util.read_uint32(data, 4)
+    else:
+        return 0, 0
+
+
+class Cell(object):
+    def __init__(self, path, header):
+        self.header = header
+        self.path = path
+        self.x = header['x']
+        self.y = header['y']
+        data = b''
+        with open(path, 'rb') as f:
+            data = f.read()
+        self.version, pos = get_version(data)
+        self.init_for_version()
+        block_num, pos = util.read_uint32(data, pos)
+        self.blocks = []
+        for i in range(block_num):
+            self.read_block(data, pos + i*8)
+
+    def init_for_version(self):
+        if self.version != self.header['version']:
+            raise Exception('Inconsistent version: H:{} P:{} path:{}'.format(
+                            self.header['version'], self.version, self.path))
+        self.block_per_cell = self.header['CELL_SIZE_IN_BLOCKS']
+        self.block_size = self.header['BLOCK_SIZE_IN_SQUARES']
+        self.cell_size = self.block_per_cell * self.block_size
+        self.minlayer = self.header['minlayer']
+        self.maxlayer = self.header['maxlayer']
+
+    def read_block(self, data, pos):
+        pos, _ = util.read_uint32(data, pos)
+        size = self.block_size
+        sqr_size = size*size
+        skip = 0
+        block = [None] * (self.maxlayer - self.minlayer)
+        valid_tiles = 0
+        for z in range(self.minlayer, self.maxlayer):
+            if skip >= sqr_size:
+                skip -= sqr_size
                 continue
-            row = [None] * 10
-            for y in range(10):
-                if skip > 0:
-                    skip -= 1
+            layer = [None] * size
+            for x in range(size):
+                if skip >= size:
+                    skip -= size
                     continue
-                count, pos = util.read_int32(data, pos)
-                if count == -1:
-                    skip, pos = util.read_int32(data, pos)
+                row = [None] * size
+                for y in range(size):
                     if skip > 0:
                         skip -= 1
                         continue
-                if count <= 1:
-                    continue
-                room, pos = util.read_int32(data, pos)
-                tiles = []
-                for i in range(count - 1):
-                    tile, pos = util.read_int32(data, pos)
-                    tiles.append(tile)
-                row[y] = {'room': room, 'tiles': tiles}
-                valid_tiles += 1
-            if row != [None] * 10:
-                lv[x] = row
-        if lv != [None] * 10:
-            block[l] = lv
-    return block, next_pos
+                    count, pos = util.read_int32(data, pos)
+                    if count == -1:
+                        skip, pos = util.read_int32(data, pos)
+                        if skip > 0:
+                            skip -= 1
+                            continue
+                    if count <= 1:
+                        continue
+                    room, pos = util.read_int32(data, pos)
+                    tiles = []
+                    for i in range(count - 1):
+                        tile, pos = util.read_int32(data, pos)
+                        tiles.append(tile)
+                    row[y] = tiles  # drop room here as it is not used
+                    valid_tiles += 1
+                if row != [None] * size:
+                    layer[x] = row
+            if layer != [None] * size:
+                block[z] = layer
+        self.blocks.append(block)
 
-def load_lotpack(path, header):
-    data = b''
-    with open(path, 'rb') as f:
-        data = f.read()
-    block_num, pos = util.read_uint32(data, 0)
-    blocks = []
-    for i in range(block_num):
-        block, pos = read_block(data, pos, header['level'])
-        blocks.append(block)
-    return blocks
+    def get_square(self, subx, suby, layer):
+        if layer < self.minlayer or layer >= self.maxlayer:
+            return None
+        bx, x = divmod(subx, self.block_size)
+        by, y = divmod(suby, self.block_size)
+        block = self.blocks[bx * self.block_per_cell + by]
+        layer = block[layer]
+        if not layer:
+            return None
+        row = layer[x]
+        if not row:
+            return None
+        tiles = row[y]
+        if not tiles:
+            return None
+        return map(lambda t: self.header['tiles'][t], tiles)
+
 
 def load_cell(path, x, y):
-    lotheader_name = os.path.join(path, '{}_{}.lotheader'.format(x, y))
-    lotpack_name = os.path.join(path, 'world_{}_{}.lotpack'.format(x, y))
-
-    if not os.path.isfile(lotheader_name):
+    header = lotheader.load_lotheader(path, x, y)
+    if not header:
         return None
+    lotpack_name = os.path.join(path, 'world_{}_{}.lotpack'.format(x, y))
     if not os.path.isfile(lotpack_name):
         return None
-    header = lotheader.load_lotheader(lotheader_name)
-    blocks = load_lotpack(lotpack_name, header)
+    return Cell(lotpack_name, header)
 
-    cell = {'header': header, 'blocks': blocks}
-    return cell
 
+if __name__ == '__main__':
+    import argparse
+    parser = argparse.ArgumentParser(description='PZ lotpack reader')
+    parser.add_argument('path', type=str)
+    parser.add_argument('x', type=int)
+    parser.add_argument('y', type=int)
+    args = parser.parse_args()
+
+    cell = load_cell(args.path, args.x, args.y)
+    lotheader.print_header(cell.header)
+    print(len(cell.blocks))

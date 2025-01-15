@@ -3,7 +3,7 @@ if "%ERRORLEVEL%" == "3" (
     python -m pip install -r "%~dp0requirements.txt"
 ) else (
     if "%ERRORLEVEL%" == "2" (
-        python -m pip install -r "%~dp0requirements.txt"
+        python -m pip install -r "%~dp0requirements_python2.txt"
     ) else (
         echo missing python2 or python3
     )

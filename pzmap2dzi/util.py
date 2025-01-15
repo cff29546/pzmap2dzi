@@ -1,18 +1,5 @@
 import struct
 import os
-import re
-
-HEADER_FILE_PATTERN = re.compile('(\\d+)_(\\d+)\\.lotheader$')
-def get_all_cells(path):
-    cells = set()
-    for f in os.listdir(path):
-        m = HEADER_FILE_PATTERN.match(f)
-        if not m:
-            continue
-
-        x, y = map(int, m.groups())
-        cells.add((x, y))
-    return cells
 
 def read_until(data, pos, pattern):
     end = data.index(pattern, pos) + len(pattern)

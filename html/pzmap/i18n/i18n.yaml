@@ -1,0 +1,510 @@
+template:
+    PageTitle:
+        en: 'Project Zomboid Map${g.map_type=="top"?" (Top View)":""}'
+        cn: '僵尸毁灭工程地图${g.map_type=="top"?" (俯视图)":""}'
+    LayerSelector:
+        en: 'Floor Selector'
+        cn: '楼层选择器'
+    Floor:
+        en: '${args<0?"Basement "+(-args):(args>0?"Floor "+args:"Ground Floor")}'
+        cn: '${args<0?"地下"+(-args)+"层":(args>0?"地上"+args+"层":"地面")}'
+    RoofOpacity:
+        en: 'Roof Opacity: ${g.roof_opacity}%'
+        cn: '屋顶透明度: ${g.roof_opacity}%'
+    MapButtonTitle:
+        en: 'Mod Map Selector'
+        cn: '模组地图选择器'
+    MapButton:
+        en: 'Mod Map'
+        cn: '模组地图'
+    MapAllButtonTitle:
+        en: '${g.mod_maps.length>0?"Remove":"Load"} All Mod Maps'
+        cn: '${g.mod_maps.length>0?"移除":"加载"}所有模组地图'
+    MapAllButton:
+        en: '${g.mod_maps.length>0?"Remove":"Load"} All'
+        cn: '全部${g.mod_maps.length>0?"移除":"加载"}'
+    SelectToLoad:
+        en: '(Select Mod Map to Load)'
+        cn: '(选择要加载的模组地图)'
+    LoadedMaps:
+        en: 'Loaded maps:'
+        cn: '已加载模组地图:'
+    MapErrorVersion:
+        en: 'Version conflict maps:'
+        cn: '以下模组地图版本冲突:'
+    GridButton:
+        en: 'Grid'
+        cn: '网格'
+    ZombieButton:
+        en: 'Zombie'
+        cn: '僵尸分布'
+    ForagingButton:
+        en: 'Foraging'
+        cn: '搜寻区域'
+    ForagingLegends:
+        en: 'Foraging Legends:'
+        cn: '搜寻区域图例:'
+    Road:
+        en: 'Road'
+        cn: '道路'
+    TownZone:
+        en: 'Urban Area'
+        cn: '市区'
+    TrailerPark:
+        en: 'Trailer Park'
+        cn: '拖车公园'
+    Vegitation:
+        en: 'Vegitation'
+        cn: '草地'
+    Forest:
+        en: 'Forest'
+        cn: '森林'
+    DeepForest:
+        en: 'Deep Forest'
+        cn: '深林'
+    Farmland:
+        en: 'Farmland'
+        cn: '农田'
+    Farm:
+        en: 'Farm'
+        cn: '农场'
+    RoomButton:
+        en: 'Room'
+        cn: '房间定义'
+    ObjectsButton:
+        en: 'Objects'
+        cn: '随机事件'
+    ObjectsLegends:
+        en: 'Objects Legends:'
+        cn: '随机事件图例:'
+    ZombieType:
+        en: 'Zombie Type'
+        cn: '特殊僵尸'
+    ParkingStall:
+        en: 'Car Spawn'
+        cn: '车辆生成'
+    ZoneStory:
+        en: 'Zone Story'
+        cn: '区域故事'
+    MarkerButton:
+        en: 'Marker'
+        cn: '标记'
+    MarkerSaveButton:
+        en: 'Save'
+        cn: '保存'
+    MarkerXText:
+        en: 'X:'
+        cn: 'X:'
+    MarkerYText:
+        en: 'Y:'
+        cn: 'Y:'
+    MarkerLayerText:
+        en: 'Floor:'
+        cn: '楼层:'
+    MarkerNameText:
+        en: 'Name:'
+        cn: '名称:'
+    MarkerDescriptionText:
+        en: 'Description:'
+        cn: '描述:'
+    MarkerDeleteButton:
+        en: 'Delete'
+        cn: '删除'
+    MarkerWidthText:
+        en: 'Width:'
+        cn: '宽度:'
+    MarkerHeightText:
+        en: 'Height:'
+        cn: '高度:'
+    MarkerHideLabel:
+        en: 'Hide when zoom out'
+        cn: '拉远隐藏'
+    MarkerImportButton:
+        en: 'Import'
+        cn: '导入'
+    MarkerExportButton:
+        en: 'Export'
+        cn: '导出'
+    MarkerDefaultButton:
+        en: 'Load Default'
+        cn: '加载默认'
+    MarkerClearButton:
+        en: 'Remove All Marks'
+        cn: '全部移除'
+    MarkerHelpButton:
+        en: '${g.markerui_help?"Hide":"Show"} Help'
+        cn: '${g.markerui_help?"隐藏":"显示"}帮助'
+    MarkerDeselectButtonTitle:
+        en: 'Deselect mark and discard unsaved changes'
+        cn: '取消选择，放弃未保存更改'
+    MarkerDeselectButton:
+        en: 'Deselect (Esc)'
+        cn: '取消选中 (Esc)'
+    MarkerPointLabel:
+        en: 'Show Point'
+        cn: '显示标记点'
+    MarkerAreaLabel:
+        en: 'Show Area'
+        cn: '显示标记区域'
+    MarkCurrent:
+        en: 'Marks on this floor'
+        cn: '当前楼层标记'
+    MarkAbove:
+        en: 'Marks above'
+        cn: '上层标记'
+    MarkBelow:
+        en: 'Marks below'
+        cn: '下层标记'
+    MarkSelected:
+        en: 'selecting Mark'
+        cn: '标记'
+    MarkSelected:
+        en: 'the selected mark'
+        cn: '选中标记'
+    MarkerHelpText:
+        en: |
+            <div>
+            <b>How to use marker:</b><br/>
+            <b>1. Shift+Click</b>: Create new point
+            <b>2. Shift+Drag</b>: Create new area
+            <b>3. Click existing mark</b>: Select mark
+            <b>4. Ctrl+Click existing mark</b>: Select and zoom to mark
+            <b>5. Drag existing mark</b>: Move mark
+            <b>6. Esc</b>: Deselect mark and discard unsaved changes
+            </div>
+        cn: |
+            <div>
+            <b>标记操作方式:</b><br/>
+            <b>1. Shift+单击鼠标左键:</b> 新建标记点
+            <b>2. Shift+拖拽鼠标左键:</b> 新建标记区域
+            <b>3. 单击标记</b>: 选择标记
+            <b>4. Ctrl+单击标记</b>: 选择并缩放到标记
+            <b>5. 拖拽标记</b>: 移动标记
+            <b>6. Esc</b>: 取消选择，放弃未保存更改
+            </div>
+    MarkerNew:
+        en: 'New'
+        cn: '新建'
+    MarkerSelect:
+        en: 'Select'
+        cn: '选中'
+    MarkerPoint:
+        en: 'Point'
+        cn: '标记点'
+    MarkerArea:
+        en: 'Area'
+        cn: '标记区域'
+    MarkerIdle:
+        en: 'Idle'
+        cn: '就绪'
+    MarkerLoadDefaultFail:
+        en: 'Failed to load default marks for [{lang}].'
+        cn: '读取语言[{lang}]的默认标记失败。'
+    TrimmerButtonTitle:
+        en: 'Savegame Trimming Tool'
+        cn: '存档裁剪工具'
+    TrimmerButton:
+        en: 'Trimmer'
+        cn: '存档裁剪'
+    TrimmerTitle:
+        en: '[Savegame Trimming Tool]'
+        cn: '[存档裁剪工具]'
+    TrimmerLegendsText:
+        en: 'Legends:'
+        cn: '图例:'
+    TrimmerSaved:
+        en: 'Saved Area'
+        cn: '存档区域'
+    TrimmerPartialSaved:
+        en: 'Partially Saved Area'
+        cn: '部分存档区域'
+    TrimmerSelected:
+        en: 'Selected Area'
+        cn: '选中区域'
+    TrimmerPartialSelected:
+        en: 'Partially Selected Area'
+        cn: '部分选中区域'
+    TrimmerHelpButton:
+        en: '${g.trimmerui_help?"Hide":"Show"} Help'
+        cn: '${g.trimmerui_help?"隐藏":"显示"}帮助'
+    TrimmerDummyOption:
+        en: '(Select Savegame Slot)'
+        cn: '(选择存档目录)'
+    TrimmerRefreshButton:
+        en: 'Refresh Savegame List'
+        cn: '刷新存档列表'
+    TrimmerVehiclesLabel:
+        en: 'Remove Vehicles'
+        cn: '删除车辆'
+    TrimmerVehiclesLabelTitle:
+        en: 'Delete the selected areas and remove vehicles on them.'
+        cn: '删除选定的区域并移除其上的车辆'
+    TrimmerAnimalsLabel:
+        en: 'Remove Animals'
+        cn: '删除动物'
+    TrimmerAnimalsLabelTitle:
+        en: 'Delete the selected areas and remove animals on them.'
+        cn: '删除选定的区域并移除其上的动物'
+    TrimmerTrimButton:
+        en: 'Delete Selected Area'
+        cn: '删除选择区域'
+    TrimmerBrowseButton:
+        en: 'Browse Folder'
+        cn: '浏览存档目录'
+    TrimmerHelpText:
+        en: '<b>Instructions:</b></br>
+            <b>Step 1</b> Select save slot.
+            <b>Step 2</b> Select unwanted area.
+            <b>Step 3</b> Delete selected area.
+            <p></p>
+            <b>How to select area</b><br/>
+            <b>1. Click:</b> select/unselect a single grid.
+            <b>2. Shift+Click:</b> select/unselect all area in a yellow grid.
+            <b>3. Shift+Drag:</b> Flip selection of a rectangle area.'
+        cn: '<b>操作流程:</b></br>
+            <b>1</b> 选择存档目录
+            <b>2</b> 选择需要裁剪的区域
+            <b>3</b> 删除选择区域
+            <p></p>
+            <b>选择区域操作方式:</b><br/>
+            <b>1. 单击鼠标左键:</b> 选中/反选单个网格
+            <b>2. Shift+单击鼠标左键:</b> 选中/反选单个黄色网格
+            <b>3. Shift+拖拽鼠标左键:</b> 翻转矩形区域的选择'
+    TrimmerBrowserSuccess:
+        en: '<b>File Browser Launched.</b>'
+        cn: '<b>已打开文件浏览器。</b>'
+    TrimmerBrowserFailed:
+        en: '<b>Failed opening file browser, error: {error}</b>'
+        cn: '<b>打开文件浏览器失败，错误: {error}</b>'
+    TrimmerVersionMismatch:
+        en: 'Version mismatch, save=[{save_version}] map=[{map_version}].'
+        cn: '存档版本=[{save_version}]与主地图版本=[{map_version}]不匹配。'
+    TrimmerLoadSuccess:
+        en: '<b>Savegame [{path}] loaded, version=[{version}].</b>'
+        cn: '<b>加载存档[{path}]成功，存档版本=[{version}]。</b>'
+    TrimmerLoadFailed:
+        en: '<b>Failed to load savegame [{path}], error: {error}</b>'
+        cn: '<b>加载存档[{path}]失败，错误: {error}</b>'
+    TrimmerListSuccess:
+        en: '<b>Savegame list loaded.</b>'
+        cn: '<b>存档列表加载成功。</b>'
+    TrimmerListFailed:
+        en: '<b>Failed to list savegames, error: {error}</b>'
+        cn: '<b>存档列表读取失败，错误: {error}</b>'
+    TrimmerNotInServerMode:
+        en: '<b>Trimmer require server mode to function. Use "run_server.bat" to start the viewer.</b>'
+        cn: '<b>存档裁剪器需要配合服务器模式使用。请使用"run_server.bat"脚本启动地图浏览器。</b>'
+    TrimmerConfirm:
+        en: |
+            Are you sure to delete ${args.blocks.length} block(s)?
+
+            Block (green grid(s)):
+            ${args.blocks.slice(0,20).join(";")}${args.blocks.length>20?";...":""}
+        cn: |
+            您确认要删除 ${args.blocks.length} 个区块吗？
+
+            区块(绿色网格)列表:
+            ${args.blocks.slice(0,20).join(";")}${args.blocks.length>20?";...":""}
+    TrimmerNotSelecting:
+        en: '<b>Nothing selected.</b>'
+        cn: '<b>没有选择区域。</b>'
+    TrimmerCanceled:
+        en: '<b>Trimming canceled.</b>'
+        cn: '<b>裁剪操作已取消。</b>'
+    TrimmerSuccess:
+        en: '<b>Trimming success.</b>'
+        cn: '<b>裁剪成功。</b>'
+    TrimmerError:
+        en: '<b>Trimming failed, error: {error}</b>'
+        cn: '<b>裁剪失败，错误: {error}</b>'
+    ChangeView:
+        en: 'Switch to ${g.map_type=="top"?"Isometric":"Top"} View'
+        cn: '切换到${g.map_type=="top"?"等轴测投影":"俯"}视图'
+    LanguageSelectorTitle:
+        en: 'Change Language'
+        cn: '切换语言'
+    AboutButton:
+        en: 'About'
+        cn: '关于'
+    About:
+        en: '<strong>Created with:</strong> {pzmap2dzi}<br/>
+            <strong>Map engine:</strong> {osd}<br/>
+            <strong>Special Thanks to:</strong> {pzwiki} <strong>Volunteers</strong><br/>
+            {pz} map version: <b style="color:red">{version}</b><br/>'
+        cn: '<strong>使用</strong>{pzmap2dzi}<strong>绘制</strong><br/>
+            <strong>地图浏览引擎:</strong> {osd}<br/>
+            <strong>特别感谢:</strong>{pzwiki}<strong>志愿者</strong><br/>
+            {pz_steam} 主地图版本: <b style="color:red">{version}</b><br/>'
+    PZmap2dzi:
+        en: 'PZmap2dzi'
+        cn: '僵毁地图可视化工具'
+    OpenSeaDragon:
+        en: 'OpenSeaDragon'
+        cn: 'OpenSeaDragon'
+    PZwiki:
+        en: 'PZwiki'
+        cn: '僵毁维基'
+    ProjectZomboid:
+        en: 'Project Zomboid'
+        cn: '僵尸毁灭工程'
+
+mapping:
+    id:
+        page_title:
+            innerHTML:
+                eval: PageTitle
+        layer_selector:
+            title: LayerSelector
+        roof_opacity_slider:
+            title:
+                eval: RoofOpacity
+        map_btn:
+            title: MapButtonTitle
+            innerHTML: MapButton
+        map_all_btn:
+            title:
+                eval: MapAllButtonTitle
+            innerHTML:
+                eval: MapAllButton
+        map_selector_dummy_option:
+            innerHTML: SelectToLoad
+        map_loaded_text:
+            innerHTML: LoadedMaps
+        grid_btn:
+            innerHTML: GridButton
+        zombie_btn:
+            innerHTML: ZombieButton
+        foraging_btn:
+            innerHTML: ForagingButton
+        foraging_legends_text:
+            innerHTML: ForagingLegends
+        nav:
+            innerHTML: Road
+        town_zone:
+            innerHTML: TownZone
+        trailer_park:
+            innerHTML: TrailerPark
+        vegitation:
+            innerHTML: Vegitation
+        forest:
+            innerHTML: Forest
+        deep_forest:
+            innerHTML: DeepForest
+        farmland:
+            innerHTML: Farmland
+        farm:
+            innerHTML: Farm
+        room_btn:
+            innerHTML: RoomButton
+        objects_btn:
+            innerHTML: ObjectsButton
+        objects_legends_text:
+            innerHTML: ObjectsLegends
+        zombie_type:
+            innerHTML: ZombieType
+        parking_stall:
+            innerHTML: ParkingStall
+        zone_story:
+            innerHTML: ZoneStory
+        marker_btn:
+            innerHTML: MarkerButton
+        marker_save_btn:
+            innerHTML: MarkerSaveButton
+        marker_x_text:
+            innerHTML: MarkerXText
+        marker_y_text:
+            innerHTML: MarkerYText
+        marker_layer_text:
+            innerHTML: MarkerLayerText
+        marker_name_text:
+            innerHTML: MarkerNameText
+        marker_description_text:
+            innerHTML: MarkerDescriptionText
+        marker_delete_btn:
+            innerHTML: MarkerDeleteButton
+        marker_width_text:
+            innerHTML: MarkerWidthText
+        marker_height_text:
+            innerHTML: MarkerHeightText
+        marker_hide_label:
+            innerHTML: MarkerHideLabel
+        marker_import_btn:
+            innerHTML: MarkerImportButton
+        marker_export_btn:
+            innerHTML: MarkerExportButton
+        marker_default_btn:
+            innerHTML: MarkerDefaultButton
+        marker_clear_btn:
+            innerHTML: MarkerClearButton
+        marker_help_btn:
+            innerHTML:
+                eval: MarkerHelpButton
+        marker_deselect_btn:
+            title: MarkerDeselectButtonTitle
+            innerHTML: MarkerDeselectButton
+        marker_point_label:
+            innerHTML: MarkerPointLabel
+        marker_area_label:
+            innerHTML: MarkerAreaLabel
+        mark_current:
+            innerHTML: MarkCurrent
+        mark_above:
+            innerHTML: MarkAbove
+        mark_below:
+            innerHTML: MarkBelow
+        mark_selected:
+            innerHTML: MarkSelected
+        marker_help_text:
+            innerHTML: MarkerHelpText
+        trimmer_btn:
+            title: TrimmerButtonTitle
+            innerHTML: TrimmerButton
+        trimmer_title:
+            innerHTML: TrimmerTitle
+        trimmer_legends_text:
+            innerHTML: TrimmerLegendsText
+        trimmer_saved:
+            innerHTML: TrimmerSaved
+        trimmer_partial_saved:
+            innerHTML: TrimmerPartialSaved
+        trimmer_selected:
+            innerHTML: TrimmerSelected
+        trimmer_partial_selected:
+            innerHTML: TrimmerPartialSelected
+        trimmer_help_btn:
+            innerHTML:
+                eval: TrimmerHelpButton
+        trimmer_save_selector_dummy_option:
+            innerHTML: TrimmerDummyOption
+        trimmer_refresh_btn:
+            innerHTML: TrimmerRefreshButton
+        trimmer_vehicles_label:
+            title: TrimmerVehiclesLabelTitle
+            innerHTML: TrimmerVehiclesLabel
+        trimmer_animals_label:
+            title: TrimmerAnimalsLabelTitle
+            innerHTML: TrimmerAnimalsLabel
+        trimmer_trim_btn:
+            innerHTML: TrimmerTrimButton
+        trimmer_browse_btn:
+            innerHTML: TrimmerBrowseButton
+        trimmer_help_text:
+            innerHTML: TrimmerHelpText
+        change_view_btn:
+            innerHTML:
+                eval: ChangeView
+        language_selector:
+            title: LanguageSelectorTitle
+        about_btn:
+            innerHTML: AboutButton
+        pzmap2dzi:
+            innerHTML: PZmap2dzi
+        osd:
+            innerHTML: OpenSeaDragon
+        pzwiki:
+            innerHTML: PZwiki
+        pz:
+            innerHTML: ProjectZomboid
+        pz_steam:
+            innerHTML: ProjectZomboid
+

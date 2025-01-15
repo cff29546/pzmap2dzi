@@ -1,7 +1,7 @@
 from PIL import ImageDraw
 import os
 from .common import draw_square, render_long_text, render_edge, LazyFont
-from .. import pzdzi, pzobjects
+from .. import pzobjects
 
 FORAGING_COLOR = {
     'Nav':         (255, 255, 255, 128),
@@ -14,26 +14,27 @@ FORAGING_COLOR = {
     'Farm':        (255,   0,   0, 128),
 }
 
+
 class ForagingRender(object):
     def __init__(self, **options):
         self.input = options.get('input')
         objects_path = os.path.join(self.input, 'objects.lua')
-        cell_zones = pzobjects.load_cell_zones(objects_path, pzobjects.FORAGING_TYPES, 1)
-        self.cells = set(cell_zones.keys())
-        self.getter = pzobjects.CachedSquareMapGetter(objects_path, pzobjects.FORAGING_TYPES, 1)
+        self.getter = pzobjects.CachedSquareMapGetter(
+            objects_path, pzobjects.FORAGING_TYPES, 1)
+        self.cells = set(self.getter.get_cell_zones().keys())
 
     def update_options(self, options):
-        options['layers'] = 1
+        options['render_layers'] = [0]
         return options
 
     def valid_cell(self, x, y):
         return (x, y) in self.cells
 
-    def square(self, im_getter, ox, oy, sx, sy, layer):
-        cx, subx = divmod(sx, pzdzi.CELL_SIZE)
-        cy, suby = divmod(sy, pzdzi.CELL_SIZE)
-        bx, x = divmod(subx, 10)
-        by, y = divmod(suby, 10)
+    def square(self, im_getter, dzi, ox, oy, sx, sy, layer):
+        cx, subx = divmod(sx, dzi.cell_size)
+        cy, suby = divmod(sy, dzi.cell_size)
+        bx, x = divmod(subx, dzi.block_size)
+        by, y = divmod(suby, dzi.block_size)
         zone = self.getter(cx, cy)
         if not zone:
             return
@@ -45,37 +46,39 @@ class ForagingRender(object):
         color = FORAGING_COLOR[zone_type]
         draw_square(draw, ox, oy, color)
 
+
 class ForagingTopRender(object):
     def __init__(self, **options):
         self.input = options.get('input')
         objects_path = os.path.join(self.input, 'objects.lua')
-        cell_zones = pzobjects.load_cell_zones(objects_path, pzobjects.FORAGING_TYPES, 1)
-        self.cells = set(cell_zones.keys())
-        self.getter = pzobjects.CachedSquareMapGetter(objects_path, pzobjects.FORAGING_TYPES, 1)
+        self.getter = pzobjects.CachedSquareMapGetter(
+            objects_path, pzobjects.FORAGING_TYPES, 1)
 
     def update_options(self, options):
-        options['layers'] = 1
+        options['render_layers'] = [0]
         return options
 
-    def tile(self, im_getter, cx, cy, layer, size):
-        if (cx, cy) not in self.cells:
-            return
+    def tile(self, im_getter, dzi, cx, cy, layer):
         zone = self.getter(cx, cy)
         if not zone:
             return
         im = None
         draw = None
-        for x in range(300):
-            sx = x + cx * 300
-            for y in range(300):
-                sy = y + cy * 300
+        size = dzi.square_size
+        for x in range(dzi.cell_size):
+            sx = x + cx*dzi.cell_size
+            for y in range(dzi.cell_size):
+                sy = y + cy*dzi.cell_size
                 zone_type = zone.get((sx, sy), None)
                 if zone_type:
                     if draw is None:
                         im = im_getter.get()
                         draw = ImageDraw.Draw(im)
-                    shape = [x * size, y * size, (x + 1) * size, (y + 1) * size]
+                    ox = x*size
+                    oy = y*size
+                    shape = [ox, oy, ox + size, oy + size]
                     draw.rectangle(shape, fill=FORAGING_COLOR[zone_type])
+
 
 # objects
 COLOR_MAP = {
@@ -84,7 +87,6 @@ COLOR_MAP = {
     'ZoneStory': 'yellow',
 }
 DEFAULT_COLOR = 'white'
-
 class ObjectsRender(object):
     def __init__(self, **options):
         self.input = options.get('input')
@@ -103,16 +105,15 @@ class ObjectsRender(object):
             types = types.union(pzobjects.ZOMBIE_TYPES)
         if options.get('story', True):
             types = types.union(pzobjects.STORY_TYPES)
-        cell_zones = pzobjects.load_cell_zones(objects_path, types)
-        self.cells = set(cell_zones.keys())
         self.getter = pzobjects.CachedBorderLabelMapGetter(objects_path, types)
+        self.cells = set(self.getter.get_cell_zones().keys())
 
     def valid_cell(self, x, y):
         return (x, y) in self.cells
 
-    def square(self, im_getter, ox, oy, sx, sy, layer):
-        cx, subx = divmod(sx, pzdzi.CELL_SIZE)
-        cy, suby = divmod(sy, pzdzi.CELL_SIZE)
+    def square(self, im_getter, dzi, ox, oy, sx, sy, layer):
+        cx, subx = divmod(sx, dzi.cell_size)
+        cy, suby = divmod(sy, dzi.cell_size)
         border, label = self.getter(cx, cy)
         if not border:
             return

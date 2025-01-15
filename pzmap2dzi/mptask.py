@@ -3,9 +3,10 @@ import multiprocessing
 import traceback
 import cProfile
 try:
-   import queue
+    import queue
 except ImportError:
-   import Queue as queue
+    import Queue as queue
+
 
 class WorkerWarp(object):
     def __init__(self, worker, wid, out_q, profile=False):
@@ -32,7 +33,7 @@ class WorkerWarp(object):
             try:
                 init = self.worker.init()
             except Exception as e:
-                print('worker:[{}] init error, Exception: {}'.format(e))
+                print('worker init error, Exception: {}'.format(e))
                 traceback.print_exc()
                 init = False
                 result = e
@@ -64,7 +65,7 @@ class WorkerWarp(object):
                     print('msg:[{}] error, Exception: {}'.format(arg, e))
                     traceback.print_exc()
                 state = None
-                
+
         if hasattr(self.worker, 'cleanup'):
             try:
                 self.worker.cleanup()
@@ -88,6 +89,7 @@ class WorkerWarp(object):
         if self.p:
             self.p.join()
             self.p = None
+
 
 # worker interface
 # worker.init() -> bool
@@ -192,22 +194,24 @@ def split_list(a, n):
     k, m = divmod(len(a), n)
     return [a[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(n)]
 
+
 def rebalance(splits, slot):
     if len(splits[slot]) != 0:
         return splits
-    
+
     idx = None
     maxlen = 0
     for i, jobs in enumerate(splits):
         if len(jobs) > 0:
-             maxlen = len(jobs)
-             idx = i
+            maxlen = len(jobs)
+            idx = i
     if idx is not None:
         jobs = splits[idx]
         mid = (len(jobs) + 1) // 2
         splits[idx] = jobs[mid:]
         splits[slot] = jobs[:mid]
         splits[slot].reverse()
+
 
 class SplitScheduler(object):
     def __init__(self, verbose=False):
@@ -224,8 +228,8 @@ class SplitScheduler(object):
         if self.verbose:
             self.done += 1
             active = sum([1 if w else 0 for w in workers])
-            print('job: {}/{} worker: {}/{}       '.format(
-                    self.done, self.total, active, self.n), end='\r')
+            print('job: {}/{} worker: {}/{}       '
+                  .format(self.done, self.total, active, self.n), end='\r')
 
     def on_empty(self, workers, wid, state, result):
         if len(self.splits[wid]) == 0:
@@ -236,17 +240,23 @@ class SplitScheduler(object):
 
     def cleanup(self):
         if self.verbose:
-            print('job: {}/{} worker: {}/{}       '.format(
-                  self.done, self.total, 0, self.n))
+            print('job: {}/{} worker: {}/{}       '
+                  .format(self.done, self.total, 0, self.n))
+
 
 class TestWorker(object):
     def on_job(self, job):
-        import time, random
-        time.sleep(random.random()) # print(job)
+        import time
+        import random
+        time.sleep(random.random())
+        # print(job)
+
+
 def test():
     worker = TestWorker()
     task = Task(worker, SplitScheduler(True))
     task.run(list(range(100)), 10)
+
 
 if __name__ == '__main__':
     test()

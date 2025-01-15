@@ -1,11 +1,13 @@
 from multiprocessing import shared_memory
 from PIL import Image
 
+
 def _buffered_image(shm, width, height, extra_size):
     im = Image.frombuffer('RGBA', (width, height), shm.buf[extra_size:],
                           'raw', 'RGBA', 0, 1)
     im.readonly = 0
     return im
+
 
 class ImageSharedMemory(object):
     def __init__(self, prefix, extra_size=0):
@@ -17,11 +19,12 @@ class ImageSharedMemory(object):
     def create(self, index, width, height):
         size = 4 * width * height + self.extra_size
         try:
-            shm = shared_memory.SharedMemory(name=self.prefix+index, create=True, size=size)
+            shm = shared_memory.SharedMemory(name=self.prefix+index,
+                                             create=True, size=size)
         except:
             return None
 
-        self.created[index]=shm
+        self.created[index] = shm
         return _buffered_image(shm, width, height, self.extra_size)
 
     def load(self, index, width=0, height=0, size_func=None):
@@ -35,7 +38,7 @@ class ImageSharedMemory(object):
                 shm = shared_memory.SharedMemory(name=self.prefix+index)
             except:
                 return None
-            self.loaded[index]=shm
+            self.loaded[index] = shm
         if width * height == 0 and size_func:
             width, height = size_func(shm)
         return _buffered_image(shm, width, height, self.extra_size)
@@ -68,23 +71,26 @@ class ImageSharedMemory(object):
     def __del__(self):
         self.clear()
 
+
 def test():
-    import random, os
+    import random
+    import os
     from PIL import ImageDraw
     import sys
     cmd = 'line'
     if len(sys.argv) > 1:
-       cmd = sys.argv[1]
+        cmd = sys.argv[1]
     c = ImageSharedMemory('test')
     im = c.load('a', 128, 128)
     if im:
         if cmd == 'line':
             draw = ImageDraw.Draw(im)
-            draw.line((0, random.randint(0,127), 127, random.randint(0,127)), fill=(255,0,0,255))
+            draw.line((0, random.randint(0, 127),
+                       127, random.randint(0, 127)), fill=(255, 0, 0, 255))
             draw = None
         if cmd == 't':
-            r = im.resize((64,64), Image.LANCZOS)
-            im.paste(r, (0,0))
+            r = im.resize((64, 64), Image.LANCZOS)
+            im.paste(r, (0, 0))
         im.show()
     else:
         print('create shared image')
@@ -93,6 +99,7 @@ def test():
         os.system('pause')
     im = None
     c.release('a')
+
 
 if __name__ == '__main__':
     test()

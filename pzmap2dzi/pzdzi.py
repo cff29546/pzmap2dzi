@@ -3,20 +3,20 @@ import os
 import sys
 import re
 import json
-from . import util, mptask, scheduling, geometry
-
-CELL_SIZE = 300
+from . import util, mptask, scheduling, geometry, lotheader
 
 DZI_TEMPLATE = '''<?xml version="1.0" encoding="UTF-8"?>
 <Image xmlns="http://schemas.microsoft.com/deepzoom/2008" TileSize="{}" Overlap="0" Format="{}">
   <Size Width="{}" Height="{}"/>
 </Image>'''
-
 PENDING_PATTERN = re.compile('(\\d+)_(\\d+)\\.pending$')
+DONE_TEMPLATE = '(\\d+)_(\\d+)\\.(?:empty|{})$'
+
 
 def lower_level_depend(tx, ty):
     return [(i + (tx << 1), j + (ty << 1))
             for i in (0, 1) for j in (0, 1)]
+
 
 def get_merge_task_depend(done, lower_task, lower_done):
     tasks = {}
@@ -33,26 +33,34 @@ def get_merge_task_depend(done, lower_task, lower_done):
         if (x, y) not in done:
             tasks[(x, y)] = tasks.get((x, y), 0) + 1
         else:
-            skip.add((tx,ty))
+            skip.add((tx, ty))
     return tasks, skip
+
 
 class DZI(object):
     def __init__(self, w, h, **options):
         self.w = w
         self.h = h
         self.path = options.get('output', './dzi')
-        self.tile_size = options.get('tile_size', 1024)
+        assert self.tile_size != None
         self.save_empty = options.get('save_empty_tile', False)
-        self.compress_level = options.get('image_compress_level', -1)
-        self.ext = 'png'
-        self.ext0 = options.get('layer0_fmt', self.ext)
-        self.done_pattern = re.compile('(\\d+)_(\\d+)\\.(?:empty|{})$'.format(self.ext0))
-        self.layers = options.get('layers', 1)
+        self.ext = options.get('image_fmt', 'png')
+        self.ext0 = options.get('image_fmt_layer0')
+        if not self.ext0:
+            self.ext0 = self.ext
+        self.save_options = {}
+        self.save_options[self.ext] = {}
+        self.save_options[self.ext0] = {}
+        save_options = options.get('image_save_options', {})
+        if save_options:
+            self.save_options[self.ext] = save_options.get(self.ext, {})
+            self.save_options[self.ext0] = save_options.get(self.ext0, {})
+        self.done_pattern = re.compile(DONE_TEMPLATE.format(self.ext0))
         self.skip_level = options.get('skip_level', 0)
         self.skip_cells = set()
         self.cache_enabled = False
         self.cache_limit = 0
-        if sys.version_info >= (3,8):
+        if sys.version_info >= (3, 8):
             if options.get('enable_cache', True):
                 self.cache_enabled = True
                 self.cache_limit = options.get('cache_limit_mb', 0)
@@ -98,12 +106,9 @@ class DZI(object):
             return 'empty'
 
         if ext == 'jpg':
-           im = im.convert('RGB')
+            im = im.convert('RGB')
 
-        options = {}
-        if self.compress_level >= 0:
-            options['compress_level'] = self.compress_level
-        im.save(path, **options)
+        im.save(path, **self.save_options[ext])
 
         if (write_all and level != self.levels and
             level + 1 >= self.levels - self.skip_level):
@@ -127,10 +132,8 @@ class DZI(object):
     def tile_path(self, level, tx, ty, layer, ext=None):
         if ext is None:
             ext = self.ext0 if layer == 0 else self.ext
-        path = os.path.join(self.path,
-                           'layer{}_files'.format(layer),
-                           str(level),
-                           '{}_{}.{}'.format(tx, ty, ext))
+        path = os.path.join(self.path, 'layer{}_files'.format(layer),
+                            str(level), '{}_{}.{}'.format(tx, ty, ext))
         return ext, path
 
     def load_tile(self, level, tx, ty, layer):
@@ -150,10 +153,10 @@ class DZI(object):
     def clear_wip(self, level, x, y):
         ext, path = self.tile_path(level, x, y, 0, 'pending')
         os.remove(path)
- 
+
     def create_empty_output(self):
         util.ensure_folder(self.path)
-        for layer in range(self.layers):
+        for layer in self.render_layers:
             layer_path = os.path.join(self.path, 'layer{}_files'.format(layer))
             util.ensure_folder(layer_path)
             for level in range(self.levels):
@@ -177,10 +180,11 @@ class DZI(object):
         if hasattr(self, 'update_map_info'):
             info = self.update_map_info(info)
         path = os.path.join(self.path, 'map_info.json')
+
+        data = json.dumps(info, indent=1)
+        data = data.replace('\n  ', '').replace('\n ]', ']').replace('[ ', '[')
         with open(path, 'w') as f:
-            f.write(json.dumps(info))
-
-
+            f.write(data)
 
     def get_bottom_task_depend(self, skip_cells, done):
         tasks = {}
@@ -207,7 +211,7 @@ class DZI(object):
             if m:
                 x, y = map(int, m.groups())
                 pending.add((x, y))
-        return done - pending  
+        return done - pending
 
     def get_tasks(self, skip_cells=set()):
         level_tasks = [None for i in range(self.levels)]
@@ -218,7 +222,8 @@ class DZI(object):
             if level == self.levels - 1:
                 task = self.get_bottom_task_depend(skip_cells, done)
             else:
-                task, skip = get_merge_task_depend(done, level_tasks[level+1], level_done[level+1])
+                task, skip = get_merge_task_depend(
+                    done, level_tasks[level+1], level_done[level+1])
                 level_skip[level + 1] = skip
             level_tasks[level] = task
             level_done[level] = done
@@ -248,7 +253,8 @@ class DZI(object):
                     im = None
                 if im:
                     if not tile:
-                        tile = Image.new('RGBA', (self.tile_size*2, self.tile_size*2))
+                        size = self.tile_size << 1
+                        tile = Image.new('RGBA', (size, size))
                     tile.paste(im, (self.tile_size * i, self.tile_size * j))
                     im = None
         if tile:
@@ -277,32 +283,79 @@ class DZI(object):
             print('Done')
         return True
 
-class IsoDZI(DZI):
+
+PZ_VERSION = {
+    0: 'B41',
+    1: 'B42',
+}
+
+
+class PZDZI(DZI):
+    def pz_init(self, path, **options):
+        version_info = lotheader.get_version_info(path)
+        self.pz_version = PZ_VERSION.get(version_info['version'], 'Unknown')
+        self.cells = version_info['cells']
+        self.cell_size_in_block = version_info['cell_size_in_block']
+        self.block_size = version_info['block_size']
+        self.cell_size = version_info['cell_size']
+        self.minlayer = version_info['minlayer']
+        self.maxlayer = version_info['maxlayer']
+        layer_range = options.get('layer_range', 'all')
+        if layer_range != 'all':
+            self.minlayer = max(self.minlayer, layer_range[0])
+            self.maxlayer = min(self.maxlayer, layer_range[1])
+        if self.minlayer > 0:
+            self.minlayer = 0
+        if self.maxlayer < 1:
+            self.maxlayer = 1
+        self.render_layers = list(range(self.minlayer, 0))
+        self.render_layers += list(reversed(range(self.maxlayer)))
+        render_layers = options.get('render_layers', None)
+        if render_layers is not None:
+            self.render_layers = render_layers
+        self.layers = max(self.render_layers) - min(self.render_layers) + 1
+        if options.get('verbose'):
+            print('PZ version: {} , layer range [{}, {})'.format(
+                  self.pz_version, self.minlayer, self.maxlayer))
+
+    def update_pz_map_info(self, info):
+        info['cell_size'] = self.cell_size
+        info['block_size'] = self.block_size
+        info['pz_version'] = self.pz_version
+        info['maxlayer'] = self.maxlayer
+        info['minlayer'] = self.minlayer
+        return info
+
+
+class IsoDZI(PZDZI):
     SQR_HEIGHT = 64
     HALF_SQR_HEIGHT = SQR_HEIGHT >> 1
     SQR_WIDTH = 128
     HALF_SQR_WIDTH = SQR_WIDTH >> 1
-    @staticmethod
-    def get_sqr_center(gx, gy):
+    # normal texture size      w:128 h:256
+    # jumbo tree texutre size  w:384 h:512
+
+    def get_sqr_center(self, gx, gy):
         ox = gx * IsoDZI.HALF_SQR_WIDTH
         oy = gy * IsoDZI.HALF_SQR_HEIGHT
         return ox, oy
 
     def __init__(self, map_path, **options):
-        tile_size = options.get('tile_size', 1024)
-        self.total_layers = options.get('total_layers', 8)
-        use_jumbo_tree = options.get('jumbo_tree_size', 3) > 3
+        self.pz_init(map_path, **options)
+        self.sqr_height = IsoDZI.SQR_HEIGHT
+        self.sqr_width = IsoDZI.SQR_WIDTH
+        self.tile_size = options.get('tile_size', 1024)
+        self.grid_per_tilex = self.tile_size // IsoDZI.HALF_SQR_WIDTH
+        self.grid_per_tiley = self.tile_size // IsoDZI.HALF_SQR_HEIGHT
 
-        self.use_jumbo_tree = True
-        self.cells = set(util.get_all_cells(map_path))
-
-        assert tile_size % IsoDZI.SQR_WIDTH == 0
-        assert tile_size % IsoDZI.SQR_HEIGHT == 0
+        assert self.tile_size % self.sqr_width == 0
+        assert self.tile_size % self.sqr_height == 0
         assert len(self.cells) > 0
         gxmin = None
         gxmax = None
         gymin = None
         gymax = None
+        self.use_jumbo_tree = True
         for cx, cy in self.cells:
             left, right, top, bottom = self.cell_grid_bound(cx, cy)
             if gxmin is None:
@@ -328,14 +381,14 @@ class IsoDZI(DZI):
         self.gh = gymax - gymin + 1
         w = self.gw * IsoDZI.HALF_SQR_WIDTH
         h = self.gh * IsoDZI.HALF_SQR_HEIGHT
-        self.tile_gw = tile_size // IsoDZI.HALF_SQR_WIDTH
-        self.tile_gh = tile_size // IsoDZI.HALF_SQR_HEIGHT
-        self.use_jumbo_tree = use_jumbo_tree
+        self.tile_gw = self.tile_size // IsoDZI.HALF_SQR_WIDTH
+        self.tile_gh = self.tile_size // IsoDZI.HALF_SQR_HEIGHT
+        self.use_jumbo_tree = options.get('jumbo_tree_size', 3) > 3
         DZI.__init__(self, w, h, **options)
 
     def tile2grid(self, tx, ty, layer):
-        gx = self.gxo + (self.tile_size // IsoDZI.HALF_SQR_WIDTH) * tx
-        gy = self.gyo + (self.tile_size // IsoDZI.HALF_SQR_HEIGHT) * ty + layer * 6
+        gx = self.gxo + self.grid_per_tilex * tx
+        gy = self.gyo + self.grid_per_tiley * ty + layer*6
         return gx, gy
 
     def tile_grid_bound(self, tx, ty, layer):
@@ -354,13 +407,15 @@ class IsoDZI(DZI):
         return top, bottom, left, right
 
     def cell_grid_bound(self, cx, cy):
-        sx = cx * CELL_SIZE
-        sy = cy * CELL_SIZE
-        top, bottom, left, right = self.square_grid_bound(sx, sy, sx + CELL_SIZE - 1, sy + CELL_SIZE - 1)
+        sx = cx * self.cell_size
+        sy = cy * self.cell_size
+        sxmax = sx + self.cell_size - 1
+        symax = sy + self.cell_size - 1
+        top, bottom, left, right = self.square_grid_bound(sx, sy, sxmax, symax)
         if self.use_jumbo_tree:
-            return (left - 2, right + 2, top - max(14, 6*self.total_layers), bottom)
+            return (left - 2, right + 2, top - max(14, 6*self.maxlayer), bottom - 6*self.minlayer)
         else:
-            return (left, right, top - 6*self.total_layers, bottom)
+            return (left, right, top - 6*self.maxlayer, bottom - 6*self.minlayer)
 
     def cell2tiles(self, cx, cy):
         left, right, top, bottom = self.cell_grid_bound(cx, cy)
@@ -368,45 +423,47 @@ class IsoDZI(DZI):
         txmax = (right - self.gxo) // self.tile_gw
         tymin = (top - self.gyo - 1) // self.tile_gh
         tymax = (bottom - self.gyo) // self.tile_gh
-        tiles = [(tx, ty) for ty in range(tymin, tymax + 1) for tx in range(txmin, txmax + 1)]
+        tiles = [(tx, ty) for ty in range(tymin, tymax + 1)
+                 for tx in range(txmin, txmax + 1)]
         return tiles
 
     def render_tile(self, im_getter, render, tx, ty, layer):
         gx0, gy0 = self.tile2grid(tx, ty, layer)
         left, right, top, bottom = self.tile_grid_bound(tx, ty, layer)
         if hasattr(render, 'tile'):
-            return render.tile(im_getter, gx0, gy0, left, right, top, bottom, layer)
+            return render.tile(im_getter, self, gx0, gy0, left, right, top, bottom, layer)
         for gy in range(top, bottom + 1):
             for gx in range(left, right + 1):
                 if (gx + gy) & 1:
                     continue
                 sx = (gx + gy) >> 1
                 sy = (gy - gx) >> 1
-                ox, oy = IsoDZI.get_sqr_center(gx - gx0, gy - gy0)
-                render.square(im_getter, ox, oy, sx, sy, layer)
+                ox, oy = self.get_sqr_center(gx - gx0, gy - gy0)
+                render.square(im_getter, self, ox, oy, sx, sy, layer)
 
     def update_map_info(self, info):
+        info = self.update_pz_map_info(info)
         info['x0'] = -self.gxo * IsoDZI.HALF_SQR_WIDTH
         info['y0'] = -(self.gyo + 1) * IsoDZI.HALF_SQR_HEIGHT
         info['sqr'] = 2 * IsoDZI.HALF_SQR_WIDTH
         return info
 
-class TopDZI(DZI):
-    def __init__(self, map_path, **options):
-        self.square_size = options.get('top_view_square_size', 1)
-        self.cells = set(util.get_all_cells(map_path))
 
-        cxmax, cymax = map(max, zip(*self.cells))            
-        cxmin, cymin = map(min, zip(*self.cells))            
+class TopDZI(PZDZI):
+    def __init__(self, map_path, **options):
+        self.pz_init(map_path, **options)
+        self.square_size = options.get('top_view_square_size', 1)
+
+        cxmax, cymax = map(max, zip(*self.cells))
+        cxmin, cymin = map(min, zip(*self.cells))
 
         self.cxo = cxmin
         self.cyo = cymin
         self.cw = cxmax - cxmin + 1
         self.ch = cymax - cymin + 1
-        tile_size = self.square_size * CELL_SIZE
-        w = tile_size * self.cw
-        h = tile_size * self.ch
-        options['tile_size'] = tile_size
+        self.tile_size = self.square_size * self.cell_size
+        w = self.tile_size * self.cw
+        h = self.tile_size * self.ch
         DZI.__init__(self, w, h, **options)
 
     def tile2cell(self, tx, ty):
@@ -417,10 +474,11 @@ class TopDZI(DZI):
 
     def render_tile(self, im_getter, render, tx, ty, layer):
         cx, cy = self.tile2cell(tx, ty)
-        render.tile(im_getter, cx, cy, layer, self.square_size)
+        render.tile(im_getter, self, cx, cy, layer)
 
     def update_map_info(self, info):
-        info['x0'] = -(self.cxo * self.square_size * CELL_SIZE)
-        info['y0'] = -(self.cyo * self.square_size * CELL_SIZE)
+        info = self.update_pz_map_info(info)
+        info['x0'] = -(self.cxo * self.square_size * self.cell_size)
+        info['y0'] = -(self.cyo * self.square_size * self.cell_size)
         info['sqr'] = self.square_size
         return info

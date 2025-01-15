@@ -1,0 +1,32 @@
+conf:
+    vanilla.txt:
+        default:
+            map_path: '{custom_root}/main'
+        custom:
+            map_path: '{custom_root}/custom'
+
+    conf.yaml:
+        output_path: .
+        use_depend_texture_only: true
+        mod_maps: [custom]
+        render_conf:
+            enable_cache: true
+            break_key: <f9>
+            image_save_options:
+                png: {compress_level: 1}
+maps:
+    B41:
+        main:
+            - [26, 38]
+            - [26, 39]
+        custom:
+            - [27, 38]
+            - [27, 39]
+    B42:
+        main:
+            - [31, 44]
+            - [31, 45]
+        custom:
+            - [32, 44]
+            - [32, 45]
+

@@ -1,14 +1,16 @@
 # pzmap2dzi
 pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid map data into [Deep Zoom format](https://en.wikipedia.org/wiki/Deep_Zoom).
 
+# Now fully suport B42 basement
+
 # Features
 
 - HTML viewer for viewing the generated Deep Zoom image in both isometric and top down
 - Render mod maps as switchable overlay
 - Featured overlay map: zombie-heatmap, foraging zones, story area, etc.
 - Tools for local saved games trimming
-- B42 basement viewer. And more...
-
+- Customized marks edit/export/import
+- i18n support
 - Multi-thread acceleration
 - Tested with game version 41.78.16 and 42.0.2 UNSTABLE on both python 2.7 and python 3.11
 

@@ -1,7 +1,7 @@
 conf:
     vanilla.txt:
         default:
-            map_path: '{custom_root}/rosewood'
+            map_path: '{custom_root}/main'
         custom:
             map_path: '{custom_root}/custom'
 
@@ -16,14 +16,14 @@ conf:
                 png: {compress_level: 1}
 maps:
     B41:
-        rosewood:
+        main:
             - [26, 38]
             - [26, 39]
         custom:
             - [27, 38]
             - [27, 39]
     B42:
-        rosewood:
+        main:
             - [31, 44]
             - [31, 45]
         custom:

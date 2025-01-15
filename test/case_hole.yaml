@@ -1,0 +1,13 @@
+copy: [case_default.yaml]
+maps:
+    B41:
+        main:
+            - [22, 17]
+        custom:
+            - [22, 18]
+    B42:
+        main:
+            - [26, 20]
+        custom:
+            - [26, 21]
+

@@ -1,686 +1,243 @@
-var map_type = 'iso';
-var suffix = '';
-var viewer = 0;
+var g; // globals
+var initGlobals;
+var c; // coordinates
+var util;
+var Marker;
+var Map;
+var Trimmer;
+var i18n;
+var debug = {};
+var pmodules = [
+    import("./pzmap/globals.js").then((m) => {
+        g = m.g;
+        initGlobals = m.initGlobals;
+    }),
+    import("./pzmap/map.js").then((m) => {
+        Map = m.Map;
+    }),
+    import("./pzmap/coordinates.js").then((m) => {
+        c = m;
+    }),
+    import("./pzmap/marker.js").then((m) => {
+        Marker = m.Marker;
+        debug.marker = m;
+    }),
+    import("./pzmap/trimmer.js").then((m) => {
+        Trimmer = m.Trimmer;
+    }),
+    import("./pzmap/i18n.js").then((m) => {
+        i18n = m;
+        return i18n.init();
+    }),
+    import("./pzmap/util.js").then((m) => {
+        util = m;
+    })
+];
 
-const Map = class {
-    layers = 0;
-    tiles = [];
-    overlays = {};
-    overlay_layer = 0;
-    cell_rects = [];
-    clip_list = [];
+window.addEventListener("keydown", (event) => {onKeyDown(event);});
 
-    constructor(name, is_base=false) {
-        this.name = name;
-        this.is_base = is_base;
-        this.init();
-    }
+function initUI_HTML() {
+    g.UI_HTML = {};
+    g.UI_ID = {};
 
-    cell2pixel(cx, cy) {
-        let x = this.x0;
-        let y = this.y0;
-        if (map_type == 'iso') {
-            x += (cx - cy) * this.sqr * this.cell_size / 2;
-            y += (cx + cy) * this.sqr * this.cell_size / 4;
-        } else {
-            x += cx * this.sqr * this.cell_size;
-            y += cy * this.sqr * this.cell_size;
-        }
-        return {x: x, y: y};
-    }
+    g.UI_HTML.map = `
+<button id="map_all_btn" onclick="toggleAllMaps()"></button>
+<select id="map_selector" onchange="onMapSelect()">
+    <option id="map_selector_dummy_option" value=""></option>
+</select>
+<b id="map_loaded_text"></b>
+<div id="map_list" style="display: inline-block"></div>
+<div id="map_output" style="display: inline-block"></div>`;
+    g.UI_ID.map = ['map_all_btn', 'map_selector_dummy_option', 'map_loaded_text'];
 
-    getClipPoints(rects, remove=true) {
-        let points = [];
-        if (remove) {
-            points.push({x: 0, y: 0});
-            points.push({x: 0, y: this.h});
-            points.push({x: this.w, y: this.h});
-            points.push({x: this.w, y: 0});
-        }
-        points.push({x: 0, y: 0});
-        for (let [x, y, w, h] of rects) {
-            points.push(this.cell2pixel(x, y));
-            points.push(this.cell2pixel(x + w, y));
-            points.push(this.cell2pixel(x + w, y + h));
-            points.push(this.cell2pixel(x, y + h));
-            points.push(this.cell2pixel(x, y));
-            points.push({x: 0, y: 0});
-        }
-        return points;
-    }
+    g.UI_HTML.foraging = `
+<b id="foraging_legends_text"></b>
+<div class="legend" style="background-color:#fff"></div><span id="nav"></span>
+<div class="legend" style="background-color:#00f"></div><span id="town_zone"></span>
+<div class="legend" style="background-color:#0ff"></div><span id="trailer_park"></span>
+<div class="legend" style="background-color:#ff0"></div><span id="vegitation"></span>
+<div class="legend" style="background-color:#0f0"></div><span id="forest"></span>
+<div class="legend" style="background-color:#080"></div><span id="deep_forest"></span>
+<div class="legend" style="background-color:#f0f"></div><span id="farmland"></span>
+<div class="legend" style="background-color:#f00"></div><span id="farm"></span>
+<span>&emsp; &emsp;</span>`;
+    g.UI_ID.foraging = [
+        'foraging_legends_text', 'road', 'town_zone', 'trailer_park',
+        'vegitation', 'forest', 'deep_forest', 'farmland', 'farm'];
 
-    setClipFromOverlayMaps(maps) {
-        this.clip_list = [this.getClipPoints(this.cell_rects, false)];
-        for (let i = maps.length - 1; i >= 0; i--) {
-            let rlist = [];
-            for (let r of maps[i].cell_rects) {
-                for (let b of this.cell_rects) {
-                    if (rectIntersect(b, r)) {
-                        rlist.push(r);
-                        break;
-                    }
-                }
-            }
-            if (rlist.length > 0) {
-                this.clip_list.push(this.getClipPoints(rlist));
-            }
-        }
-        
-        for (let type of ['zombie', 'foraging']) {
-            if (this.overlays[type]) {
-                let clip_list = shiftClipList(this.clip_list, this.info[type].scale, 0);
-                this.overlays[type].setCroppingPolygons(clip_list);
-            }
-        }
-        for (let type of ['room', 'objects']) {
-            if (this.overlays[type]) {
-                let clip_list = shiftClipList(this.clip_list, this.info[type].scale, currentLayer);
-                this.overlays[type].setCroppingPolygons(clip_list);
-            }
-        }
-    }
+    g.UI_HTML.objects = `
+<b id="objects_legends_text"></b>
+<div class="legend" style="border-color:#f00; border-width: 3px;"></div><span id="zombie_type"></span>
+<div class="legend" style="border-color:#00f; border-width: 3px;"></div><span id="parking_stall"></span>
+<div class="legend" style="border-color:#ff0; border-width: 3px;"></div><span id="zone_story"></span>`;
+    g.UI_ID.objects = [ 'objects_legends_text', 'zombie_type', 'parking_stall', 'zone_story']
 
-    getMapRoot() {
-        if (this.is_base) {
-            return '';
-        }
-        return 'mod_maps/' + this.name + '/'; 
-    }
+    g.UI_HTML.marker = `
+<div style="display: flex">
+<div style="display: inline-block">
+    <table style="white-space: nowrap; text-align: right">
+    <tr>
+        <td><button id="marker_save_btn" type="button" style="width: 100%" onclick="onMarkerSave()">Save</button></td>
+        <td id="marker_x_text">x:</td>
+        <td><input id="marker_x" type="number" step="1" style="width: 5em" onchange="onMarkerInput(this)"/></td>
+        <td id="marker_y_text">y:</td>
+        <td><input id="marker_y" type="number" step="1" style="width: 5em" onchange="onMarkerInput(this)"/></td>
+        <td style="display: flex;">
+            <span id="marker_layer_text">layer:</span><input id="marker_layer" type="number" step="1" style="width: 3em" onchange="onMarkerInput(this)" />
+            <span id="marker_name_text">name:</span> <input id="marker_name" type="text" style="flex: 1;" onchange="onMarkerInput(this)"/>
+        </td>
+        <td id="marker_description_text">description:</td>
+    </tr>
+    <tr>
+        <td><button id="marker_delete_btn" type="button" onclick="onMarkerDelete()" style="width: 100%">Delete</button></td>
+        <td id="marker_width_text">width:</td>
+        <td><input id="marker_width" type="number" step="1" style="width: 5em" onchange="onMarkerInput(this)"/></td>
+        <td id="marker_height_text">height:</td>
+        <td><input id="marker_height" type="number" step="1" style="width: 5em" onchange="onMarkerInput(this)"/></td>
+        <td class="text-right">
+            <input type="checkbox" id="marker_hide" onchange="onMarkerInput(this)">
+            <label id="marker_hide_label" for="marker_hide">Hide on zoom out</label>
+            <button id="marker_import_btn" type="button" onclick="onMarkerImport()">Import</button>
+            <button id="marker_export_btn" type="button" onclick="onMarkerExport()">Export</button>
+            <button id="marker_default_btn" type="button" onclick="onMarkerDefault()">Load Default</button>
+            <button id="marker_clear_btn" type="button" onclick="onMarkerClear()">Remove All</button>
+        </td>
+        <td><a id="marker_help_btn" href="" onclick="return toggleMarkerHelp();">Show Help</a></td>
+    </tr>
+    </table>
+</div>
+<div style="display: inline-block; width: 100%">
+<table style="width: 100%"><td>
+    <textarea id="marker_desc" rows="2" style="width: 100%; resize: none;" onchange="onMarkerInput(this)"></textarea>
+</td></table>
+</div>
+</div>
+<div style="display: flex;">
+<button id="marker_deselect_btn" type="button" onclick="onMarkerDeselect()">Deselect(Esc)</button>
+<input type="checkbox" id="marker_point" checked onchange="togglePointMark(this)">
+<label id="marker_point_label" for="marker_point">Show Point</label>
+<input type="checkbox" id="marker_area" checked onchange="toggleAreaMark(this)">
+<label id="marker_area_label" for="marker_area">Show Area</label>
+<div class="legend point" style="width: 1em; height: 1em; visibility: visible;"></div><span id="mark_current">marks on this floor</span>
+<div class="legend point above" style="width: 1em; height: 1em; visibility: visible;"></div><span id="mark_above">marks above</span>
+<div class="legend point below" style="width: 1em; height: 1em; visibility: visible;"></div><span id="mark_below">marks below</span>
+<div class="legend point selected" style="width: 1em; height: 1em; visibility: visible;"></div><span id="mark_selected">the selected mark</span>
+<span id="marker_output" class="inline" style="flex: 1; background-color: white; margin-left: 1em;"></span>
+</div>
+<div id="marker_help"></div>
+    `;
+    g.UI_HTML.marker_ID = [
+        "marker_save_btn", "marker_x_text", "marker_y_text", "marker_layer_text", "marker_name_text", "marker_description_text",
+        "marker_delete_btn", "marker_width_text", "marker_height_text", "marker_hide_label", "marker_import_btn", "marker_export_btn",
+        "marker_default_btn", "marker_clear_btn", 'marker_help_btn', "marker_deselect_btn", "marker_point_label",
+        "marker_area_label", "mark_current", "mark_above", "mark_below", "mark_selected"];
 
-    getRelativePositionAndWidth(other_map) {
-        let x = (this.x0 - other_map.x0) / this.scale;
-        let y = (this.y0 - other_map.y0) / this.scale;
-        let p = viewer.world.getItemAt(0).imageToViewportCoordinates(x, y);
-        let width = other_map.w / this.w;
-        return [p, width];
-    }
+    g.UI_HTML.marker_help = '<div id="marker_help_text"></div>';
+    g.UI_HTML.marker_help_ID = ['marker_help_btn', 'marker_help_text'];
 
-    _load_tile(layer, opacity=1) {
-        if (viewer) {
-            let [p, width] = base_map.getRelativePositionAndWidth(this);
-            //console.log(this.name, 'tile', p, width);
-            if (layer < this.maxlayer && layer >= this.minlayer) {
-                if (this.getTile(layer) == 0) {
-                    this.setTile(layer, 'loading');
-                    viewer.addTiledImage({
-                        tileSource: this.getMapRoot() + 'base' + suffix + '/layer' + layer + '.dzi',
-                        opacity: 1,
-                        x: p.x,
-                        y: p.y,
-                        width: width,
-                        success: (function (obj) {
-                            if ([0, 'loading'].includes(this.getTile(layer))) {
-                                this.setTile(layer, obj.item);
-                                positionItem(obj.item, this.name, layer);
-                                obj.item.setOpacity(opacity);
-                            } else {
-                                viewer.world.removeItem(obj.item);
-                                if (this.getTile(layer) == 'delete') {
-                                    this.setTile(layer, 0);
-                                }
-                            }
-                        }).bind(this),
-                        error: (function (e) {
-                            if (['delete', 0, 'loading'].includes(this.getTile(layer))) {
-                                this.setTile(layer, 0);
-                            }
-                        }).bind(this),
-                    });
-                } else {
-                    if (!['delete', 'loading'].includes(this.getTile(layer))) {
-                        this.getTile(layer).setOpacity(opacity);
-                    }
-                }
-            }
-        }
-    }
-    _load_overlay(type, layer) {
-        if (viewer && layer < this.maxlayer && layer >= this.minlayer) {
-            let [p, width] = base_map.getRelativePositionAndWidth(this);
-            //console.log(this.name, type, p, width);
-            let shift = true;
-            if (type == 'zombie' || type == 'foraging') {
-                layer = 0;
-                shift = false;
-            }
-            if (this.overlays[type] == 0) {
-                this.overlays[type] = 'loading';
-                viewer.addTiledImage({
-                    tileSource: this.getMapRoot() + type + suffix + '/layer' + layer + '.dzi',
-                    opacity: 1,
-                    x: p.x,
-                    y: p.y,
-                    width: width,
-                    success: (function (obj) {
-                        if ([0, 'loading'].includes(this.overlays[type])) {
-                            this.overlays[type] = obj.item;
-                            if (shift) {
-                                let clip_list = shiftClipList(this.clip_list, this.info[type].scale, layer);
-                                this.overlays[type].setCroppingPolygons(clip_list);
-                            } else {
-                                let clip_list = shiftClipList(this.clip_list, this.info[type].scale, 0);
-                                this.overlays[type].setCroppingPolygons(clip_list);
-                            }
-                        } else {
-                            viewer.world.removeItem(obj.item);
-                            if (this.overlays[type] == 'delete') {
-                                this.overlays[type] = 0;
-                            }
-                        }
-                    }).bind(this),
-                    error: (function (e) {
-                        if (['delete', 0, 'loading'].includes(this.overlays[type])) {
-                            this.overlays[type] = 0;
-                        }
-                    }).bind(this),
-                });
-            }
-        }
-    }
+    g.UI_HTML.trimmer = `
+<b id="trimmer_title"></b> <span id="trimmer_legends_text"></span>
+<div class="legend" style="background-color:#0f0"></div><span id="trimmer_saved"></span>
+<div class="legend" style="background-color:#00f"></div><span id="trimmer_partial_saved"></span>
+<div class="legend" style="background-color:#f00"></div><span id="trimmer_selected"></span>
+<div class="legend" style="background-color:#ff0"></div><span id="trimmer_partial_selected"></span>
+<a id="trimmer_help_btn" href="" class="text-right" onclick="return toggleTrimmerHelp();"></a>
+<div>
+<select id="trimmer_save_selector" onchange="onTrimmerSaveSelect()">
+    <option id="trimmer_save_selector_dummy_option" value=""></option>
+</select>
+<button id="trimmer_refresh_btn" type="button" onclick="onTrimmerRefresh()"></button>
+<input type="checkbox" id="trimmer_vehicles" checked>
+<label id="trimmer_vehicles_label" for="trimmer_vehicles"></label>
+<input type="checkbox" id="trimmer_animals">
+<label id="trimmer_animals_label" for="trimmer_animals"></label>
+<button id="trimmer_trim_btn" onclick="onTrim()"></button>
+<div id="trimmer_output" style="display: inline-block"></div>
+<button id="trimmer_browse_btn" class="text-right" onclick="onTrimmerBrowse()"></button>
+</div>
+<div id="trimmer_help"></div>`;
+    g.UI_HTML.trimmer_ID = [
+        "trimmer_title", "trimmer_legends_text", "trimmer_saved", "trimmer_partial_saved",
+        "trimmer_selected", "trimmer_partial_selected", "trimmer_help_btn",
+        "trimmer_save_selector_dummy_option", "trimmer_refresh_btn", "trimmer_vehicles_label",
+        "trimmer_animals_label", "trimmer_trim_btn", "trimmer_browse_btn"];
 
-    _unload_tile(layer) {
-        if (layer < this.maxlayer && layer >= this.minlayer && this.getTile(layer) != 0) {
-            if (['loading', 'delete'].includes(this.getTile(layer))) {
-                this.setTile(layer, 'delete');
-            } else {
-                viewer.world.removeItem(this.getTile(layer));
-                this.setTile(layer, 0);
-            }
-        }
-        return
-    }
-
-    _hide_tile(layer) {
-        if (layer < this.maxlayer && layer >= this.minlayer && this.getTile(layer) != 0) {
-            if (['loading', 'delete'].includes(this.getTile(layer))) {
-                this.setTile(layer, 'delete');
-            } else {
-                this.getTile(layer).setOpacity(0);
-            }
-        }
-        return
-    }
-
-    _unload_overlay(type) {
-        if (this.overlays[type] != 0) {
-            if (['loading', 'delete'].includes(this.overlays[type])) {
-                this.overlays[type] = 'delete';
-            } else {
-                viewer.world.removeItem(this.overlays[type]);
-                this.overlays[type] = 0;
-            }
-        }
-    }
-
-    setTile(layer, tile) {
-        this.tiles[layer - this.minlayer] = tile;
-    }
-
-    getTile(layer) {
-        return this.tiles[layer - this.minlayer];
-    }
-
-    setBaseLayer(layer) {
-        let start = this.minlayer;
-        if (layer >= 0) {
-            start = 0;
-        }
-        for (let i = start; i < this.maxlayer ; i++) {
-            if (i > layer) {
-                if (i == layer + 1 && roof_opacity > 0) {
-                    this._load_tile(i, roof_opacity / 100);
-                } else {
-                    this._unload_tile(i);
-                }
-            } else {
-                this._load_tile(i);
-            }
-        }
-        if (layer >= 0) {
-            for (let i = this.minlayer; i < 0 ; i++) {
-                this._unload_tile(i);
-            }
-        }
-    }
-
-    setOverlayLayer(overlay, layer) {
-        for (let type of ['zombie', 'foraging', 'room', 'objects']) {
-            if (overlay[type]) {
-                if (!['zombie', 'foraging'].includes(type)) {
-                    if (layer != this.overlay_layer) {
-                        this._unload_overlay(type);
-                    }
-                }
-                this._load_overlay(type, layer);
-            } else {
-                this._unload_overlay(type);
-            }
-        }
-        this.overlay_layer = layer;
-    }
-
-    destroy() {
-        this.setOverlayLayer({}, 0);
-        for (let i = this.minlayer; i < this.maxlayer ; i++) {
-            this._unload_tile(i);
-        } 
-    }
-
-    getTotalLayers() {
-        let map_root = this.getMapRoot();
-        let maxlayer = 0;
-        let minlayer = -1;
-        while (true) {
-            let xhttp = new XMLHttpRequest();
-            xhttp.open('GET', map_root + 'base' + suffix + '/layer' + maxlayer + '.dzi', false);
-            try {
-                xhttp.send(null);
-            } catch (error) {
-                break;
-            }
-            if (xhttp.status != 200) {
-                break;
-            }
-            maxlayer++;
-        }
-        while (true) {
-            let xhttp = new XMLHttpRequest();
-            xhttp.open('GET', map_root + 'base' + suffix + '/layer' + minlayer + '.dzi', false);
-            try {
-                xhttp.send(null);
-            } catch (error) {
-                break;
-            }
-            if (xhttp.status != 200) {
-                break;
-            }
-            minlayer--;
-        }
-        return [minlayer + 1, maxlayer];
-    }
-
-    loadMapInfo(type) {
-        let xhttp = new XMLHttpRequest();
-        xhttp.open('GET', this.getMapRoot() + type + suffix + '/map_info.json', false);
-        try {
-            xhttp.send(null);
-        } catch (error) {
-        } 
-        if (xhttp.status === 200) {
-            let info = JSON.parse(xhttp.responseText);
-            info.scale = 1 << info.skip;
-            this.info[type] = info;
-        }
-    }
-
-    init() {
-        this.info = {};
-        this.loadMapInfo('base');
-        if (this.info.base) {
-            this.w = this.info.base.w * this.info.base.scale;
-            this.h = this.info.base.h * this.info.base.scale;
-            this.scale = this.info.base.scale;
-            this.x0 = this.info.base.x0;
-            this.y0 = this.info.base.y0;
-            this.sqr = this.info.base.sqr;
-            this.cell_rects = this.info.base.cell_rects;
-            this.cell_size = this.info.base.cell_size;
-            this.block_size = this.info.base.block_size;
-            this.cell_in_block = this.cell_size / this.block_size;
-            this.pz_version = this.info.base.pz_version;
-            this.minlayer = this.info.base.minlayer;
-            this.maxlayer = this.info.base.maxlayer;
-            for (let type of ['zombie', 'foraging', 'room', 'objects']) {
-                this.loadMapInfo(type);
-                this.overlays[type] = 0;
-            }
-        }
-        if (this.minlayer === undefined || this.maxlayer === undefined) {
-            [this.minlayer, this.maxlayer] = this.getTotalLayers();
-        }
-        this.minlayer = this.minlayer > 0 ? 0: this.minlayer;
-        this.maxlayer = this.maxlayer < 1 ? 1: this.maxlayer;
-        this.layers = this.maxlayer - this.minlayer;
-        this.tiles = Array(this.layers).fill(0);
-    }
-}
-
-// order layered maps
-function positionItem(item, name, layer) {
-    let pos = 1;
-    for (let i = minLayer; i < maxLayer; i++) {
-        if (name == '' && layer == i) {
-            viewer.world.setItemIndex(item, pos);
-            return;
-        }
-        if (![undefined, 0, 'loading', 'delete'].includes(base_map.getTile(i))) {
-            pos++;
-        }
-        for (let j = 0; j < mod_maps.length; j++ ) {
-            if (name == mod_maps[j].name && layer == i) {
-                viewer.world.setItemIndex(item, pos);
-                return;
-            }
-            if (![undefined, 0, 'loading', 'delete'].includes(mod_maps[j].getTile(i))) {
-                pos++;
-            }
-        }
-    }
-}
-
-function positionAll() {
-    let pos = 1;
-    for (let i = minLayer; i < maxLayer; i++) {
-        if (![undefined, 0, 'loading', 'delete'].includes(base_map.getTile(i))) {
-            viewer.world.setItemIndex(base_map.getTile(i), pos);
-            pos++;
-        }
-        for (let j = 0; j < mod_maps.length; j++ ) {
-            if (![undefined, 0, 'loading', 'delete'].includes(mod_maps[j].getTile(i))) {
-                viewer.world.setItemIndex(mod_maps[j].getTile(i), pos);
-                pos++;
-            }
-        }
-    }
-}
-
-var base_map = 0;
-var mod_maps = [];
-var overlays = {};
-var currentLayer = 0;
-var minLayer = 0;
-var maxLayer = 0;
-
-var mapui = 0;
-var grid = 0;
-var trimmer = 0;
-var save_path = '';
-var saved_blocks = new Set();
-var saved_cells = {};
-var selected_blocks = new Set();
-var selected_cells = {};
-var cell_font = '12pt bold monospace';
-var block_font = '12pt monospace';
-
-var min_step_cell = 8;
-var min_step_block = 8;
-var rectLevel = 0;
-var rectX1 = 0;
-var rectY1 = 0;
-var rectX2 = 0;
-var rectY2 = 0;
-var grid2key;
-
-var UI_HTML = {
-    foraging: `
-    Foraging Legends:
-    <div class="legend" style="background-color:#fff"></div>Road
-    <div class="legend" style="background-color:#00f"></div>Urban Area
-    <div class="legend" style="background-color:#0ff"></div>Trailer Park
-    <div class="legend" style="background-color:#ff0"></div>Vegitation
-    <div class="legend" style="background-color:#0f0"></div>Forest
-    <div class="legend" style="background-color:#080"></div>Deep Forest
-    <div class="legend" style="background-color:#f0f"></div>Farmland
-    <div class="legend" style="background-color:#f00"></div>Farm`,
-
-    objects: `
-    Objects Legends:
-    <div class="legend" style="border-color:#f00; border-width: 3px;"></div>Zombies Type
-    <div class="legend" style="border-color:#00f; border-width: 3px;"></div>Car Spawn
-    <div class="legend" style="border-color:#ff0; border-width: 3px;"></div>Zone Story`,
-
-    trimmer: `
-    <b>[Savegame Trimming Tool]</b> Legends:
-    <div class="legend" style="background-color:#0f0"></div>Saved Area
-    <div class="legend" style="background-color:#00f"></div>Partial Saved Area
-    <div class="legend" style="background-color:#f00"></div>Selected
-    <div class="legend" style="background-color:#ff0"></div>Partial Selected
-    <a id="trimmer_help_btn" href="" class="text-right" onclick="return toggleTrimmerHelp();">Show Help</a>
-    <div id="trimmer_help"></div>
-    <b>Select Save:</b>
-    <select id="save_selector" onchange="onSaveSelect()">
-        <option value="">(Select Save Slot)</option>
-    </select>
-    <button type="button" onclick="doRefresh()">Refresh Save List</button>
-    <input type="checkbox" id="vehicle" checked>
-    <label for="vehicle"> Remove Vehicles </label>
-    <button type="button" onclick="doDelete()">Delete Selected Area</button>
-    <div id="trimmer_output" style="display: inline-block"></div>
-    <button class="text-right" type="button" onclick="openExplorer()">Browse Folder</button>`,
-    
-    trimmer_help: `
-    <b>Instructions</b><br/>
-    <b>Step 1</b> Select save slot.<br/>
-    <b>Step 2</b> Select unwanted area.<br/>
-    <b>Step 3</b> Delete selected area.<br/>
-    <p>
-    <b>How to select area</b><br/>
-    <b>Click</b>: select/unselect a single grid.<br/>
-    <b>Shift+Click</b>: select/unselect all area in a yellow grid.<br/>
-    <b>Shift+Drag</b> Flip selection of a rectangle area.
-    </p>`,
-
-    map: `
-    <button id="toggle_all_maps" type="button" onclick="toggleAllMaps()">Load All</button>
-    <select id="map_selector" onchange="onMapSelect()">
-        <option value="">(Select Mod Map to Load)</option>
-    </select>
-    <b>Loaded maps:</b>
-    <div id="map_list" style="display: inline-block"></div>
-    <div id="mapui_output" style="display: inline-block"></div>`
-}
-
-function changeView() {
-    if (map_type == 'top') {
-        map_type = 'iso';
-    } else {
-        map_type = 'top';
-    }
-    viewer.destroy();
-    let map_names = [];
-    for (let i = 0; i < mod_maps.length; i++) {
-        map_names.push(mod_maps[i].name);
-    }
-    let setup_maps = function () {
-        for (let i = 0; i < map_names.length; i++) {
-            addMap(map_names[i]);
-        }
-    }
-    init(setup_maps);
-
-    return false;
-}
-
-function init_mapui() {
-    let xhttp = new XMLHttpRequest();
-    xhttp.open('GET', './mod_maps/map_list.json', false);
-    try {
-        xhttp.send(null);
-    } catch (error) {
-    } 
-    if (xhttp.status === 200) {
-        let s = document.getElementById('map_selector')
-        let map_names = JSON.parse(xhttp.responseText);
-        for (let i = 0; i < map_names.length; i++) {
-            let o = document.createElement('option');
-            o.value = map_names[i];
-            o.text = map_names[i];
-            s.appendChild(o);
-        }
-    }
-}
-
-function updateClip() {
-    base_map.setClipFromOverlayMaps(mod_maps);
-    for (let i = 0; i < mod_maps.length; i++) {
-        mod_maps[i].setClipFromOverlayMaps(mod_maps.slice(i + 1));
-    }
-}
-
-function removeMap(name) {
-    let pos = 0;
-    for (pos = 0; pos < mod_maps.length; pos++) {
-        if (name == mod_maps[pos].name) {
-            break;
-        }
-    }
-    if (pos < mod_maps.length) {
-        mod_maps[pos].destroy();
-        mod_maps.splice(pos, 1);
-        if (mod_maps.length == 0) {
-            document.getElementById('map_btn').classList.remove('active');
-        }
-        updateMapUI();
-        updateClip();
-        updateLayerSelector();
-    }
-}
-
-function addMap(name) {
-    if (name != '') {
-        let pos = 0;
-        for (pos = 0; pos < mod_maps.length; pos++) {
-            if (name === mod_maps[pos].name) {
-                break;
-            }
-        }
-        if (pos >= mod_maps.length) {
-            mod_maps.push(new Map(name));
-            if (mod_maps.length == 1) {
-                document.getElementById('map_btn').classList.add('active');
-            }
-            updateMapUI();
-            updateClip();
-            updateMaps(currentLayer);
-            updateLayerSelector();
-        }
-    }
-}
-
-function toggleAllMaps() {
-    if (mapui) {
-        if (mod_maps.length > 0) {
-            for (pos = 0; pos < mod_maps.length; pos++) {
-                mod_maps[pos].destroy();
-            }
-            mod_maps = [];
-            document.getElementById('map_btn').classList.remove('active');
-            updateMapUI();
-            updateClip();
-            updateLayerSelector();
-        } else {
-            let s = document.getElementById('map_selector');
-            for (let i = 0; i < s.options.length; i++) {
-                if (s.options[i].value) {
-                    addMap(s.options[i].value);
-                }
-            }
-        }
-    }
-}
-
-function onMapSelect() {
-    if (mapui) {
-        let s = document.getElementById('map_selector');
-        addMap(s.value);
-        s.value = '';
-    }
-}
-
-function updateLayerSelector() {
-    let s = document.getElementById('layer_selector')
-    for (let i = s.options.length - 1; i >= 0; i--) {
-        s.remove(i);
-    }
-    minLayer = base_map.minlayer;
-    maxLayer = base_map.maxlayer;
-    for (let i = 0; i < mod_maps.length; i++) {
-        if (minLayer > mod_maps[i].minlayer) {
-            minLayer = mod_maps[i].minlayer;
-        }
-        if (maxLayer < mod_maps[i].maxlayer) {
-            maxLayer = mod_maps[i].maxlayer;
-        }
-    }
-    for (let i = minLayer; i < maxLayer; i++) {
-        let o = document.createElement('option');
-        o.value = i;
-        o.text = 'Layer ' + i;
-        s.appendChild(o);
-    }
-    s.selectedIndex = currentLayer - minLayer;
+    g.UI_HTML.trimmer_help = '<div id="trimmer_help_text"></div>';
+    g.UI_HTML.trimmer_help_ID = ['trimmer_help_btn', 'trimmer_help_text'];
 }
 
 function initUI() {
-    if (map_type == 'top') {
-        for (let e of document.getElementsByClassName('iso')) {
-            e.style.display = 'none';
-        }
-        document.getElementById('change_view').innerHTML = 'Isometric View';
-        document.title = 'PZ map (Top View)';
+    util.changeStyle('.iso', 'display', g.map_type == 'top' ? 'none' : '');
+    if (g.map_type == 'top') {
+        document.getElementById('change_view_btn').innerHTML = 'Switch to Isometric View';
+        g.overlays.room = 0;
+        g.overlays.objects = 0;
     } else {
-        for (let e of document.getElementsByClassName('iso')) {
-            e.style.display = '';
-        }
-        document.getElementById('change_view').innerHTML = 'Top View';
-        document.title = 'PZ map';
+        document.getElementById('change_view_btn').innerHTML = 'Switch to Top View';
     }
     updateLayerSelector();
-    for (let type of ['zombie', 'foraging', 'room', 'objects', 'grid', 'map']) {
+    for (let type of ['zombie', 'foraging', 'room', 'objects']) {
         let ui = document.getElementById(type + '_ui');
-        if (ui) {
-            ui.innerHTML = '';
-        }
         let btn = document.getElementById(type + '_btn');
-        if (btn) {
-            btn.classList.remove('active');
+        if (g.overlays[type]) {
+            if (ui) {
+                ui.innerHTML = g.UI_HTML[type];
+            }
+            if (btn) {
+                btn.classList.add('active');
+            }
+        } else {
+            if (ui) {
+                ui.innerHTML = '';
+            }
+            if (btn) {
+                btn.classList.remove('active');
+            }
         }
     }
+    for (let type of ['marker', 'grid', 'map', 'timmer', 'about']) {
+        let ui = document.getElementById(type + '_ui');
+        let btn = document.getElementById(type + '_btn');
+        if (g[type + 'ui']) {
+            if (ui) {
+                ui.innerHTML = g.UI_HTML[type];
+            }
+            if (btn) {
+                if (type == 'map') {
+                    btn.classList.remove('active');
+                } else {
+                    btn.classList.add('active');
+                }
+            }
+        } else {
+            if (ui) {
+                ui.innerHTML = '';
+            }
+            if (btn) {
+                btn.classList.remove('active');
+            }
+        }
+    }
+    if (g.overlays.foraging || g.overlays.objects) {
+        document.getElementById('legends').style.display = '';
+    } else {
+        document.getElementById('legends').style.display = 'none';
+    }
+    updateLangSelector();
+    if (g.aboutui) {
+        updateAbout();
+    }
 
-    setOutput('main_output', 'Green', '');
-    setOutput('version', 'Red', '[PZ version: ' + base_map.pz_version + ']');
+    util.setOutput('main_output', 'Green', '');
     document.body.style.background = 'black';
 }
 
-function init(callback=null) {
-    if (map_type == 'top') {
-        suffix = '_top';
-    } else {
-        suffix = '';
-    }
-
-    base_map = new Map('', true);
-    mod_maps = [];
-    overlays = {};
-    currentLayer = 0;
-    roof_opacity = 0;
-    viewer;
-
-    mapui = 0;
-    grid = 0;
-    trimmer = 0;
-    save_path = '';
-    saved_blocks = new Set();
-    saved_cells = {};
-    selected_blocks = new Set();
-    selected_cells = {};
-    cell_font = '12pt bold monospace';
-    block_font = '12pt monospace';
-    min_step_cell = 8;
-    min_step_block = 8;
-    rectLevel = 0;
-    rectX1 = 0;
-    rectY1 = 0;
-    rectX2 = 0;
-    rectY2 = 0;
-    initUI();
-    updateClip();
-
-    viewer = OpenSeadragon({
+function initOSD() {
+    g.viewer = OpenSeadragon({
         drawer: 'canvas',
         opacity: 1,
         element: document.getElementById('map_div'),
-        tileSources:  'base' + suffix + '/layer0.dzi',
+        tileSources:  'base' + g.base_map.suffix + '/layer0.dzi',
         homeFillsViewer: true,
         showZoomControl: true,
         constrainDuringPan: true,
@@ -688,782 +245,375 @@ function init(callback=null) {
         prefixUrl: 'openseadragon/images/',
         navigatorBackground: 'black',
         minZoomImageRatio: 0.5,
-        maxZoomPixelRatio: (map_type == 'top' ? 12 : 2) * base_map.scale
+        maxZoomPixelRatio: (g.base_map.type == 'top' ? 16 : 2) * g.base_map.scale
     });
 
-    viewer.addHandler('add-item-failed', function(event) {
-        let info = '<b>Map not loaded. Use "run_server.bat" to start the viewer.</b>';
+    g.viewer.addHandler('add-item-failed', function(event) {
+        let info = '<b>Map not loaded. Use "run_server.bat" to start the g.viewer.</b>';
         if (window.location.protocol == 'http:' || window.location.protocol == 'https:') {
-            let type_str = (map_type == 'top') ? 'top' : 'isometric';
+            let type_str = (g.map_type == 'top') ? 'top' : 'isometric';
             info = '<b>Failed to load ' + type_str + ' view map.</b>';
         }
-        setOutput('main_output', 'red', info);
+        util.setOutput('main_output', 'red', info);
         document.body.style.background = 'white';
-    })
+    });
 
-    viewer.addHandler('update-viewport', function() {
-        if (grid == 0 && trimmer == 0) {
-            return;
+    g.viewer.addHandler('update-viewport', function() {
+        g.grid.update(g.viewer);
+
+        if (g.trimmerui) {
+            g.grid.drawEditState(g.trimmer, g.currentLayer);
         }
-        let ctx = viewer.drawer.context;
-        let [c00, step_cell, step_block] = getCanvasOriginAndStep();
 
-        let [cell, block, cell_text_offset, block_text_offset] = getGridLevel(ctx, step_cell, step_block);
-
-        if (trimmer) {
-            drawEditState(ctx, c00, block ? step_block : step_cell, block);
+        if (g.gridui || g.trimmerui) {
+            g.grid.draw(g.currentLayer);
         }
-        if (block) {
-            ctx.strokeStyle = 'lime';
-            drawGrid(ctx, c00, step_block, 1);
-        }
-        if (block_text_offset) {
-            ctx.fillStyle = 'lime';
-            ctx.font = block_font;
-            drawCoord(ctx, c00, step_block, block_text_offset);
-        }
-        if (cell) {
-            ctx.strokeStyle = 'yellow';
-            drawGrid(ctx, c00, step_cell, cell);
-        }
-        if (cell_text_offset) {
-            ctx.fillStyle = 'yellow';
-            ctx.font = cell_font;
-            drawCoord(ctx, c00, step_cell, cell_text_offset);
-        }
-    })
+    });
 
-    viewer.addHandler('canvas-press', function(event) {
-        if (trimmer && event.originalEvent.shiftKey) {
-            let ctx = viewer.drawer.context;
-            let x = event.position.x * window.devicePixelRatio;
-            let y = event.position.y * window.devicePixelRatio;
-            let [c00, step_cell, step_block] = getCanvasOriginAndStep();
-            let [cell, block, cto, bto] = getGridLevel(ctx, step_cell, step_block);
-            if (block) {
-                rectLevel = 'block';
-                [rectX1, rectY1] = getGridXY(c00, step_block, x, y);
-            } else if (cell) {
-                rectLevel = 'cell';
-                [rectX1, rectY1] = getGridXY(c00, step_cell, x, y);
-            }
-            rectX2 = rectX1;
-            rectY2 = rectY1;
-
-            viewer.forceRedraw();
-            viewer.raiseEvent('update-viewport', {});
-            event.preventDefaultAction = true;
+    g.viewer.addHandler('zoom', function(event) {
+        if (g.marker.zoom()) {
+            forceRedraw();
         }
-    })
+    });
 
-    viewer.addHandler('canvas-drag', function(event) {
-        if (trimmer && rectLevel) {
-            let ctx = viewer.drawer.context;
-            let x = event.position.x * window.devicePixelRatio;
-            let y = event.position.y * window.devicePixelRatio;
-            let [c00, step_cell, step_block] = getCanvasOriginAndStep();
-            let [cell, block, cto, bto] = getGridLevel(ctx, step_cell, step_block);
-            if (rectLevel == 'block') {
-                [rectX2, rectY2] = getGridXY(c00, step_block, x, y);
-            } else if (rectLevel == 'cell') {
-                [rectX2, rectY2] = getGridXY(c00, step_cell, x, y);
-            }
-            if (!event.originalEvent.shiftKey) {
-                rectLevel = 0;
-            }
-
-            viewer.forceRedraw();
-            viewer.raiseEvent('update-viewport', {});
-            event.preventDefaultAction = true;
-        }
-    })
-
-    viewer.addHandler('canvas-release', function(event) {
-        if (rectLevel) {
-            if (trimmer && event.originalEvent.shiftKey) {
-                if (rectX1 != rectX2 || rectY1 != rectY2) {
-                    let ctx = viewer.drawer.context;
-                    let x = event.position.x * window.devicePixelRatio;
-                    let y = event.position.y * window.devicePixelRatio;
-                    let [c00, step_cell, step_block] = getCanvasOriginAndStep();
-                    let [cell, block, cto, bto] = getGridLevel(ctx, step_cell, step_block);
-                    for (let i = Math.min(rectX1, rectX2); i <= Math.max(rectX1, rectX2); i++) {
-                        for (let j = Math.min(rectY1, rectY2); j <= Math.max(rectY1, rectY2); j++) {
-                            if (rectLevel == 'block') {
-                                flipBlock(i, j);
-                            } else if (rectLevel == 'cell') {
-                                flipCell(i, j);
-                            }
-                        }
-                    }
-                }
-
-                rectLevel = 0;
-                viewer.forceRedraw();
-                viewer.raiseEvent('update-viewport', {});
+    g.viewer.addHandler('canvas-press', function(event) {
+        if (g.trimmerui) {
+            if (g.trimmer.press(event)) {
+                //forceRedraw();
                 event.preventDefaultAction = true;
             }
-            rectLevel = 0;
         }
-    })
 
-    viewer.addHandler('canvas-click', function(event) {
-        if (event.quick && trimmer != 0) {
-            let ctx = viewer.drawer.context;
-            let x = event.position.x * window.devicePixelRatio;
-            let y = event.position.y * window.devicePixelRatio;
-            let [c00, step_cell, step_block] = getCanvasOriginAndStep();
-            let [cell, block, cto, bto] = getGridLevel(ctx, step_cell, step_block);
-            if (event.originalEvent.shiftKey) {
-                block = 0;
+        if (g.markerui) {
+            if (g.marker.press(event)) {
+                event.preventDefaultAction = true;
             }
-            if (block) {
-                let [bx, by] = getGridXY(c00, step_block, x, y);
-                flipBlock(bx, by);
-            } else if (cell) {
-                let [bx, by] = getGridXY(c00, step_cell, x, y);
-                flipCell(bx, by);
+        }
+    });
+
+    g.viewer.addHandler('canvas-drag', function(event) {
+        if (g.trimmerui) {
+            if (g.trimmer.drag(event)) {
+                forceRedraw();
+                event.preventDefaultAction = true;
             }
-            viewer.forceRedraw();
-            viewer.raiseEvent('update-viewport', {});
+        }
+        if (g.markerui) {
+            if (g.marker.drag(event)) {
+                forceRedraw();
+                event.preventDefaultAction = true;
+            }
+        }
+    });
+
+    g.viewer.addHandler('canvas-release', function(event) {
+        if (g.trimmerui) {
+            if (g.trimmer.release(event)) {
+                forceRedraw();
+                event.preventDefaultAction = true;
+            }
+        }
+        if (g.markerui) {
+            if (g.marker.release(event)) {
+                forceRedraw();
+                event.preventDefaultAction = true;
+            }
+        }
+
+    });
+
+    g.viewer.addHandler('canvas-click', function(event) {
+        if (event.quick) {
+            if (g.trimmerui) {
+                g.trimmer.click(event);
+                forceRedraw();
+                event.preventDefaultAction = true;
+            }
+
+            if (g.markerui) {
+                let l = g.marker.click(event);
+                if (l !== null) {
+                    g.currentLayer = l;
+                    updateLayerSelector();
+                    onLayerSelect();
+                }
+                event.preventDefaultAction = true;
+            }
+        }
+    });
+
+    g.viewer.addHandler('canvas-scroll', function(event) {
+        if (event.originalEvent.shiftKey) {
+            g.currentLayer += event.scroll;
+            updateLayerSelector();
+            onLayerSelect();
             event.preventDefaultAction = true;
         }
-    })
+    });
 
-    if (map_type == 'top') {
-        viewer.drawer.context.mozImageSmoothingEnabled = false;
-        viewer.drawer.context.webkitImageSmoothingEnabled = false;
-        viewer.drawer.context.msImageSmoothingEnabled = false;
-        viewer.drawer.context.imageSmoothingEnabled = false;
-        grid2key = grid2keyTop;
-    } else {
-        grid2key = grid2keyIso;
+    if (g.map_type == 'top') {
+        g.viewer.drawer.context.mozImageSmoothingEnabled = false;
+        g.viewer.drawer.context.webkitImageSmoothingEnabled = false;
+        g.viewer.drawer.context.msImageSmoothingEnabled = false;
+        g.viewer.drawer.context.imageSmoothingEnabled = false;
     }
-    let success_callback = function (retry) {
-        let img = viewer.world.getItemAt(0);
-        if (img && img.getFullyLoaded()) {
-            base_map._load_tile(0);
-            img.setOpacity(0);
+}
+
+function init(callback=null) {
+    initGlobals();
+    if (!g.marker) {
+        g.marker = new Marker();
+    }
+    if (!g.trimmer) {
+        g.trimmer = new Trimmer();
+    }
+    g.base_map = new Map(g.map_type, '');
+    g.base_map.initAsync().then(function(b) {
+        g.grid = new c.Grid(g.base_map);
+        initUI();
+        updateClip();
+        initOSD();
+        i18n.update('id');
+
+        g.viewer.addOnceHandler('tile-loaded', function(e) {
+            let img = e.tiledImage;
+            img.addOnceHandler('fully-loaded-change', function(e) {
+                img.setOpacity(0);
+            });
+            updateMaps(g.currentLayer);
+            g.marker.redrawAll();
             if (callback) {
                 callback();
             }
-        } else {
-            setTimeout(retry, 1, retry);
+        });
+    });
+}
+
+function forceRedraw() {
+    g.viewer.forceRedraw();
+    g.viewer.raiseEvent('update-viewport', {});
+}
+
+// layer selector
+function updateLayerSelector() {
+    let s = document.getElementById('layer_selector')
+    for (let i = s.options.length - 1; i >= 0; i--) {
+        s.remove(i);
+    }
+    g.minLayer = g.base_map.minlayer;
+    g.maxLayer = g.base_map.maxlayer;
+    for (let mod_map of g.mod_maps) {
+        if (g.minLayer > mod_map.minlayer) {
+            g.minLayer = mod_map.minlayer;
+        }
+        if (g.maxLayer < mod_map.maxlayer) {
+            g.maxLayer = mod_map.maxlayer;
         }
     }
-    success_callback(success_callback);
+    for (let i = g.minLayer; i < g.maxLayer; i++) {
+        let o = document.createElement('option');
+        o.value = i;
+        o.text = i18n.E('Floor', i);
+        s.appendChild(o);
+    }
+    if (g.currentLayer >= g.maxLayer) {
+        g.currentLayer = g.maxLayer - 1;
+    }
+    if (g.currentLayer < g.minLayer) {
+        g.currentLayer = g.minLayer;
+    }
+    s.selectedIndex = g.currentLayer - g.minLayer;
 }
 
-function shiftClipList(clip_list, scale, layer) {
-    let clip_list_shift = [];
-    let yshift = (map_type == 'top' ? 0 : 192 * currentLayer);
-    for (let i = 0; i < clip_list.length; i++) {
-        let points = [];
-        for (let j = 0; j < clip_list[i].length; j++) {
-            points.push({x: clip_list[i][j].x / scale, y: (clip_list[i][j].y - yshift) / scale})
-        }
-        clip_list_shift.push(points);
-    }
-    return clip_list_shift;
+function onLayerSelect() {
+    let layer = Number(document.getElementById('layer_selector').value);
+    updateMaps(layer);
+    g.marker.redrawAll();
 }
 
-function rectIntersect(r1, r2) {
-    let [x1, y1, w1, h1] = r1;
-    let [x2, y2, w2, h2] = r2;
-    return (x1 < x2 + w2) && (x2 < x1 + w1) && (y1 < y2 + h2) && (y2 < y1 + h1);
-}
-
-function setOutput(id, color, text, timeout=0) {
-    let output = document.getElementById(id);
-    if (output) {
-        output.style.color = color;
-        output.innerHTML = text;
-    }
-    if (timeout > 0) {
-       setTimeout(setOutput, timeout, id, color, '', 0); 
-    }
-}
-
-function grid2keyTop(gx, gy) {
-    return [gx, gy];
-}
-
-function grid2keyIso(gx, gy) {
-    return [(gx + gy) / 2, (gy - gx) / 2];
-}
-
-function block2cell(bkey) {
-    let [x, y] = bkey.split(',');
-    return Math.floor(x / base_map.cell_in_block) + ',' + Math.floor(y / base_map.cell_in_block);
-}
-
-function openExplorer() {
-    let xhttp = new XMLHttpRequest();
-    xhttp.open("GET", "./browse", false);
-    try {
-        xhttp.send(null);
-    } catch (error) {
-    } 
-    if (xhttp.status === 200) {
-        setOutput('trimmer_output', 'green', '<b>File browser launched</b>', 3000);
-    } else {
-        setOutput('trimmer_output', 'red', '<b>Failed opening file browser, error code:' + xhttp.status + '</b>', 5000);
-    }
-
-}
-
-function doDelete() {
-    if (trimmer) {
-        if (selected_blocks.size > 0) {
-            deleteSave(save_path);
-        } else {
-            setOutput('trimmer_output', 'red', '<b>Nothing selected</b>', 3000);
-        }
-    }
-}
-
-function deleteSave(path) {
-    let xhttp = new XMLHttpRequest();
-    xhttp.open("POST", "./delete/" + path, false);
-    xhttp.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    let cells = [];
-    let cells_set = new Set();
-    let blocks = [];
-    let count = 0;
-    for (const [key, value] of Object.entries(selected_cells)) {
-        if (value == saved_cells[key]) {
-            count += value;
-            cells.push(key);
-            cells_set.add(key);
-        }
-    }
-    for (let it = selected_blocks.values(), key = null; key = it.next().value; ) {
-        if (!cells_set.has(block2cell(key))) {
-            count++;
-            blocks.push(key);
-        }
-    }
-    
-    let version = 'You are using PZ VERSION: [' + base_map.pz_version + ']\n';
-    version += '\nPlease make sure your save is VERSION [' + base_map.pz_version + ']';
-    if (!confirm(version)) {
-        setOutput('trimmer_output', 'red', '<b>Trim canceled</b>', 3000);
-        return;
-    }
-    let info = 'Are you sure to delete ' + count + ' block(s)?\n\n';
-    let cell_info = cells.join(';');
-    if (cells.length > 20) {
-        cell_info = cells.slice(0,20).join(';') + ';...';
-    }
-    let block_info = blocks.join(';');
-    if (blocks.length > 20) {
-        block_info = blocks.slice(0,20).join(';') + ';...';
-    }
-    info += 'Details:\n'
-    if (cell_info) {
-        info += 'Cell (yellow grid(s)): ' + cell_info + '\n';
-    }
-    if (block_info) {
-        info += 'Block (green grid(s)): ' + block_info + '\n';
-    }
-    if (!confirm(info)) {
-        setOutput('trimmer_output', 'red', '<b>Trim canceled</b>', 3000);
-        return;
-    }
-    let req = 'cells=' + cells.join(';') + '&blocks=' + blocks.join(';');
-    if (document.getElementById('vehicle').checked) {
-        req += '&vehicles=1';
-    }
-    try {
-        xhttp.send(req);
-    } catch (error) {
-    } 
-    if (xhttp.status === 200) {
-        setOutput('trimmer_output', 'green', '<b>Trim success</b>', 3000);
-    } else {
-        setOutput('trimmer_output', 'red', '<b>Trim failed, error code:' + xhttp.status + '</b>', 5000);
-    }
-    loadSave(path);
-}
-
-function clearSelection() {
-    saved_cells = {};
-    saved_blocks.clear();
-    selected_cells = {};
-    selected_blocks.clear();
-}
-
-function onSaveSelect() {
-    if (trimmer) {
-        save_path = document.getElementById('save_selector').value;
-        loadSave(save_path);
-    }
-}
-
-function loadSave(path) {
-    if (trimmer) {
-        clearSelection();
-        if (path) {
-            let xhttp = new XMLHttpRequest();
-            xhttp.open('GET', './load/' + path, false);
-            try {
-                xhttp.send(null);
-            } catch (error) {
-            } 
-            if (xhttp.status === 200) {
-                let keys = xhttp.responseText.split(';');
-                for (let i = 0; i < keys.length; i++) {
-                    let ckey = block2cell(keys[i]);
-                    if (saved_cells[ckey] == undefined) {
-                        saved_cells[ckey] = 0;
-                    }
-                    saved_cells[ckey] += 1;
-                    saved_blocks.add(keys[i]);
-                }
-            } else {
-                let info = '<b>Failed to load save [' + path + '], error code:' + xhttp.status + '</b>';
-                setOutput('trimmer_output', 'red', info, 5000);
-            }
-        }
-        viewer.forceRedraw();
-        viewer.raiseEvent('update-viewport', {});
-    }
-}
-
-function doRefresh() {
-    if (trimmer) {
-        listSave();
-    }
-}
-
-function listSave() {
-    if (trimmer) {
-        clearSelection();
-        let s = document.getElementById('save_selector')
-        for (let i = s.options.length - 1; i > 0; i--) {
-            s.remove(i);
-        }
-
-        let xhttp = new XMLHttpRequest();
-        xhttp.open('GET', './list_save', false);
-        try {
-            xhttp.send(null);
-        } catch (error) {
-        } 
-        if (xhttp.status === 200) {
-            let saves = JSON.parse(xhttp.responseText);
-            for (let i = 0; i < saves.length; i++) {
-                let o = document.createElement('option');
-                o.value = saves[i];
-                o.text = saves[i];
-                s.appendChild(o);
-                if (saves[i] == save_path) {
-                    s.value = save_path;
-                }
-            }
-            save_path = s.value;
-            if (save_path) {
-                loadSave(save_path);
-            }
-            setOutput('trimmer_output', 'green', '<b>Save list loaded</b>', 3000);
-        } else {
-            let info = '<b>Failed to list save, error code:' + xhttp.status + '</b>';
-            if (xhttp.status == 0) {
-                info = '<b>[Save File Trimmer] require server mode to function. Use "run_server.bat" to start the viewer.</b>';
-            }
-            setOutput('trimmer_output', 'red', info, 5000);
-        }
-        viewer.forceRedraw();
-        viewer.raiseEvent('update-viewport', {});
-    }
-}
-
-function textSize(ctx, text) {
-    let m = ctx.measureText('-01234,56789');
-    let ascent = m.actualBoundingBoxAscent;
-    let descent = m.actualBoundingBoxDescent;
-    let width = ctx.measureText(text).width;
-    return [width, ascent, descent];
-}
-
-function* inScreenCoords(ctx, c00, step, border) {
-    let w = ctx.canvas.width;
-    let h = ctx.canvas.height;
-    let step_x = step;
-    let step_y = step;
-    let y_start = 0;
-    let y_inc = 1;
-    if (map_type != 'top') {
-        step_x = step / 2;
-        step_y = step / 4;
-        y_inc = 2;
-    }
-    yield [step_x, step_y];
-
-    let gx0 = -Math.floor(c00.x / step_x) - border;
-    let cx0 = c00.x + (gx0 * step_x);
-    let gy0 = -Math.floor(c00.y / step_y) - border;
-    let cy0 = c00.y + (gy0 * step_y);
-    let dx0 = gx0 + gy0;
-    let dy0 = gy0 - gx0;
-
-    for (let x = 0; x <= w / step_x + border * 2 - 1; x++) {
-        if (map_type != 'top') {
-            y_start = (dx0 + x) % 2;
-        }
-        for (let y = y_start; y <= h / step_y + border * 2 - 1; y+=y_inc) {
-            let gx = gx0 + x;
-            let gy = gy0 + y;
-            let [kx, ky] = grid2key(gx, gy);
-            yield [gx, gy, kx, ky];
-        }
-    }
-}
-
-function drawCoord(ctx, c00, step, yoffset) {
-    let coords = inScreenCoords(ctx, c00, step, 1);
-    let [step_x, step_y] = coords.next().value;
-    let xoffset = 4;
-    ctx.setTransform(1, 0, 0, 1, c00.x, c00.y);
-    for (let [gx, gy, kx, ky] of coords) {
-        let cx = gx * step_x;
-        let cy = gy * step_y;
-        let text = makeKey(kx, ky);
-        if (map_type != 'top') {
-            xoffset = - ctx.measureText(text).width / 2;
-        }
-        ctx.fillText(text, cx + xoffset, cy + yoffset);
-
-    }
-    ctx.setTransform();
-}
-
-function drawEditState(ctx, c00, step, is_block) {
-    let coords = inScreenCoords(ctx, c00, step, 2);
-    let [step_x, step_y] = coords.next().value;
-    if (map_type == 'top') {
-        ctx.setTransform(1, 0, 0, 1, c00.x, c00.y);
-    } else {
-        ctx.setTransform(0.5,0.25, -0.5 ,0.25, c00.x, c00.y);
-    }
-    let color = 0;
-    for (let [gx, gy, kx, ky] of coords) {
-        let key = makeKey(kx, ky);
-        if ((is_block && selected_blocks.has(key)) ||
-            (!is_block && selected_cells[key] > 0 && selected_cells[key] == saved_cells[key])) {
-            color = 'rgba(255,0,0,0.5)'; // full selected
-        } else if (!is_block && selected_cells[key] > 0) {
-            color = 'rgba(255,255,0,0.5)'; // partial selected cell
-        } else if ((is_block && saved_blocks.has(key)) ||
-                   (!is_block && saved_cells[key] == 900)) {
-            color = 'rgba(0,255,0,0.5)'; // full saved
-        } else if (!is_block && saved_cells[key] > 0) {
-            color = 'rgba(0,0,255,0.5)'; // partial saved cell
-        } else {
-            color = 0;
-        }
-        if (color) {
-            ctx.fillStyle = color;
-            ctx.fillRect(kx * step, ky * step, step, step);
-        }
-    }
-    // drag selecting area
-    if (rectLevel) {
-        let scale = 1.0;
-        if (rectLevel == 'cell' && is_block) {
-            scale = base_map.cell_in_block;
-        }
-        if (rectLevel == 'block' && !is_block) {
-            scale = 1.0 / base_map.cell_in_block;
-        }
-        let x = Math.min(rectX1, rectX2);
-        let y = Math.min(rectY1, rectY2);
-        let xs = Math.abs(rectX1 - rectX2) + 1;
-        let ys = Math.abs(rectY1 - rectY2) + 1;
-
-        ctx.fillStyle = 'rgba(255,255,255,0.5)'; //white
-        ctx.fillRect(x * step * scale, y * step * scale, xs * step * scale, ys * step * scale);
-    }
-
-    ctx.setTransform();
-}
-
-function drawGrid(ctx, c00, step, line_width) {
-    ctx.lineWidth = line_width;
-    let w = ctx.canvas.width;
-    let h = ctx.canvas.height;
-    let x1 = c00.x
-    let y1 = c00.y
-    let max_w = w;
-    let min_h = 0;
-    let x_shift = 0;
-    let y_shift = 0;
-    let y_step = step;
-    if (map_type != 'top') {
-        x1 += 2 * c00.y;
-        y1 -= c00.x / 2;
-        max_w += 2 * h;
-        min_h -= w / 2;
-        x_shift = -2 * h;
-        y_shift = w / 2;
-        y_step = step / 2;
-    }
-    ctx.beginPath();
-    x1 -= Math.floor(x1 / step) * step;
-    while (x1 <= max_w) {
-        ctx.moveTo(x1, 0);
-        ctx.lineTo(x1 + x_shift, h);
-        x1 += step;
-    }
-    y1 += Math.ceil((h - y1) / step) * step;
-    while (y1 >= min_h) {
-        ctx.moveTo(0, y1);
-        ctx.lineTo(w, y1 + y_shift);
-        y1 -= y_step;
-    }
-    ctx.stroke();
-}
-
-function getGridXY(c00, step, x, y) {
-    let gx = 0;
-    let gy = 0;
-    if (map_type == 'top') {
-        gx = Math.floor((x - c00.x)/step);
-        gy = Math.floor((y - c00.y)/step);
-    } else {
-        let cxx0 = c00.x + 2 * (c00.y - y);
-        let cxy0 = c00.x - 2 * (c00.y - y);
-        gx = Math.floor((x - cxx0)/step);
-        gy = Math.floor((cxy0 - x)/step);
-    }
-    return [gx, gy];
-}
-
-function makeKey(x, y) {
-    return x + ',' + y;
-}
-
-function getCanvasOriginAndStep() {
-    let zm = viewer.viewport.getZoom(true);
-    zm = viewer.world.getItemAt(0).viewportToImageZoom(zm);
-    zm *= window.devicePixelRatio;
-    let yshift = (map_type == 'top' ? 0 : 192 * currentLayer);
-    let x0 = base_map.x0 / base_map.scale;
-    let y0 = (base_map.y0 - yshift) / base_map.scale;
-    let vp00 = viewer.world.getItemAt(0).imageToViewportCoordinates(x0, y0);
-    let c00 = viewer.viewport.pixelFromPoint(vp00, true);
-    c00.x *= window.devicePixelRatio;
-    c00.y *= window.devicePixelRatio;
-
-    let step_cell = base_map.sqr * base_map.cell_size * zm / base_map.scale;
-    let step_block = step_cell / base_map.cell_in_block;
-
-    return [c00, step_cell, step_block];
-}
-
-function getGridLevel(ctx, step_cell, step_block) {
-    ctx.font = cell_font;
-    let [cell_width, cell_ascent, cell_descent] = textSize(ctx, '-00,-00');
-    let cell_height = cell_ascent + cell_descent;
-    let cell_text_offset = 0;
-    let block_text_offset = 0;
-    let cell = 0;
-    let block = 0;
-    if (step_cell >= min_step_cell * window.devicePixelRatio) {
-        cell = 1;
-    }
-    if (step_block >= min_step_block * window.devicePixelRatio) {
-        block = 1;
-    }
-    let min_step_cell_text = 0;
-    if (map_type == 'top') {
-        min_step_cell_text = 8 + Math.max(cell_width, cell_height);
-    } else {
-        min_step_cell_text = 8 + cell_width + 2 * cell_height;
-    }
-    if (step_cell >= min_step_cell_text) {
-        cell = 3;
-        let [block_width, block_ascent, block_descent] = textSize(ctx, '-0000,-0000');
-        let block_height = block_ascent + block_descent;
-        let min_step_block_text = 0;
-        if (map_type == 'top') {
-            cell_text_offset = 4 + cell_ascent;
-            min_step_block_text = 8 + Math.max(block_width, 2 + block_height + cell_height);
-        } else {
-            cell_text_offset = 2 + cell_width / 4 + cell_ascent;
-            if (block_width > cell_width) {
-                min_step_block_text = 8 + block_width + 2 * (block_height + Math.max(0, cell_height - (block_width - cell_width) / 4));
-            } else {
-                min_step_block_text = 8 + cell_width + 2 * (cell_height + Math.max(0, block_height - (cell_width - block_width) / 4));
-            }
-        }
-        if (step_block >= min_step_block_text) {
-            block_text_offset = cell_text_offset + cell_descent + 2 + block_ascent;
-        }
-    } 
-    return [cell, block, cell_text_offset, block_text_offset];
-}
-
-function flipBlock(x, y) {
-    let key = makeKey(x, y);
-    if (saved_blocks.has(key)) {
-        let ckey = makeKey(Math.floor(x/base_map.cell_in_block), Math.floor(y/base_map.cell_in_block));
-        if (selected_blocks.has(key)) {
-            selected_blocks.delete(key);
-            selected_cells[ckey] -= 1;
-            if (selected_cells[ckey] == 0) {
-                delete selected_cells[ckey];
-            }
-        } else {
-            selected_blocks.add(key);
-            if ( selected_cells[ckey] == undefined) {
-                selected_cells[ckey] = 0;
-            }
-            selected_cells[ckey] += 1;
-        }
-    }
-}
-
-function flipCell(x, y) {
-    let key = makeKey(x, y);
-    if (saved_cells[key] != undefined) {
-        if (selected_cells[key] == undefined || selected_cells[key] < saved_cells[key]) {
-            selected_cells[key] = saved_cells[key];
-            for (let i = 0; i < base_map.cell_in_block; i++) {
-                for (let j = 0; j < base_map.cell_in_block; j++) {
-                    let bkey = makeKey(x * base_map.cell_in_block + i, y * base_map.cell_in_block + j);
-                    if (saved_blocks.has(bkey)) {
-                        selected_blocks.add(bkey);
-                    }
-                }
-            }
-        } else {
-            delete selected_cells[key];
-            for (let i = 0; i < base_map.cell_in_block; i++) {
-                for (let j = 0; j < base_map.cell_in_block; j++) {
-                    let bkey = makeKey(x * base_map.cell_in_block + i, y * base_map.cell_in_block + j);
-                    if (selected_blocks.has(bkey)) {
-                        selected_blocks.delete(bkey);
-                    }
-                }
-            }
-        }
-    }
-}
-
-function toggleGrid() {
-    if (grid == 0) {
-        grid = 1;
-        document.getElementById('grid_btn').classList.add('active');
-        if (trimmer == 1) {
-            viewer.forceRedraw();
-        }
-        viewer.raiseEvent('update-viewport', {});
-    } else {
-        grid = 0;
-        document.getElementById('grid_btn').classList.remove('active');
-        viewer.forceRedraw();
-    }
-}
-
-function toggleTrimmer() {
-    if (trimmer == 0) {
-        trimmer = 1;
-        document.getElementById('trimmer_btn').classList.add('active');
-        document.getElementById('trimmer_ui').innerHTML = UI_HTML['trimmer'];
-        listSave();
-        if (grid == 1) {
-            viewer.forceRedraw();
-        }
-        viewer.raiseEvent('update-viewport', {});
-    } else {
-        trimmer = 0;
-        document.getElementById('trimmer_btn').classList.remove('active');
-        document.getElementById('trimmer_ui').innerHTML = '';
-        viewer.forceRedraw();
-    }
-}
-
-function toggleTrimmerHelp() {
-    if (trimmer) {
-        let t = document.getElementById('trimmer_help');
-        let ins = document.getElementById('trimmer_help_btn');
-        if (t.textContent) {
-            t.innerHTML = '';
-            ins.innerHTML = 'Show Help';
-        } else {
-            t.innerHTML = UI_HTML['trimmer_help'];;
-            ins.innerHTML = 'Hide Help';
-        }
-    }
-    return false;
-}
-
+// roof opacity
 function updateRoofOpacity() {
-    let slider = document.getElementById('roof_opacity');
-    slider.title = 'Roof Layer Opacity: ' + slider.value + '%';
-    roof_opacity = slider.value;
-    updateMaps(currentLayer);
+    let slider = document.getElementById('roof_opacity_slider');
+    g.roof_opacity = slider.value;
+    slider.title = i18n.E('RoofOpacity');
+    updateMaps(g.currentLayer);
 }
 
+// mod map ui
 function toggleModMapUI() {
-    if (mapui == 0) {
-        mapui = 1;
-        document.getElementById('map_ui').innerHTML = UI_HTML['map'];
-        init_mapui();
-        updateMapUI();
-    } else {
-        mapui = 0;
+    if (g.mapui) {
+        g.mapui = 0;
         document.getElementById('map_ui').innerHTML = '';
+    } else {
+        g.mapui = 1;
+        document.getElementById('map_ui').innerHTML = g.UI_HTML.map;
+        initModMapUI();
+        updateModMapUI();
     }
 }
 
-function updateMapUI() {
-    if (mapui) {
-        let btn = document.getElementById('toggle_all_maps');
-        if (mod_maps.length > 0) {
+function initModMapUI() {
+    let p = window.fetch('./mod_maps/map_list.json');
+    p = p.then((r) => r.json()).catch((e)=>Promise.resolve([]));
+    p = p.then((map_names) => {
+        let s = document.getElementById('map_selector')
+        for (let name of map_names) {
+            let o = document.createElement('option');
+            o.value = name;
+            o.text = name;
+            s.appendChild(o);
+        }
+    });
+    return p;
+}
+
+function updateModMapUI() {
+    if (g.mapui) {
+        let btn = document.getElementById('map_all_btn');
+        if (g.mod_maps.length > 0) {
             btn.classList.add('active');
-            btn.innerText = 'Remove All';
         } else {
             btn.classList.remove('active');
-            btn.innerText = 'Load All';
         }
+        i18n.update('id', g.UI_ID.map)
         let d = document.getElementById('map_list');
         d.innerHTML = '';
         let warning = [];
-        for (let pos = 0; pos < mod_maps.length; pos++) {
+        for (let mod_map of g.mod_maps) {
             let state = 'active';
-            if (mod_maps[pos].pz_version != base_map.pz_version) {
+            if (mod_map.pz_version != g.base_map.pz_version) {
                 state = 'warning';
-                warning.push(mod_maps[pos].name)
+                warning.push(mod_map.name)
             }
-            d.innerHTML += `<button class="${state}" style="cursor: not-allowed"
-                onclick="removeMap('${mod_maps[pos].name.replace("'","\\'")}')">${mod_maps[pos].name}</button>`;
+            d.innerHTML += `<button class="${state}" style="cursor: not-allowed" ` +
+                `onclick="removeMap('${mod_map.name.replace("'","\\'")}')">${mod_map.name}</button>`;
         }
 
         if (warning.length > 0) {
-            setOutput('mapui_output', 'red', '<b>version conflict maps:</b> ' + warning.join(','), 5000);
+            util.setOutput('map_output', 'red', '<b>' + i18n.T('MapErrorVersion') + '</b> ' + warning.join(','), 5000);
         }
+    }
+}
+
+function updateClip() {
+    g.base_map.setClipByOtherMaps(g.mod_maps, g.currentLayer);
+    for (let i = 0; i < g.mod_maps.length; i++) {
+        g.mod_maps[i].setClipByOtherMaps(g.mod_maps.slice(i + 1), g.currentLayer);
     }
 }
 
 function updateMaps(layer) {
-    base_map.setBaseLayer(layer);
-    base_map.setOverlayLayer(overlays, layer);
-    for (let i = 0; i < mod_maps.length; i++) {
-        mod_maps[i].setBaseLayer(layer);
-        mod_maps[i].setOverlayLayer(overlays, layer);
+    g.base_map.setBaseLayer(layer);
+    g.base_map.setOverlayLayer(g.overlays, layer);
+    for (let i = 0; i < g.mod_maps.length; i++) {
+        g.mod_maps[i].setBaseLayer(layer);
+        g.mod_maps[i].setOverlayLayer(g.overlays, layer);
     }
-    currentLayer = layer;
+    g.currentLayer = layer;
 }
 
+function removeMap(name) {
+    let pos = 0;
+    for (pos = 0; pos < g.mod_maps.length; pos++) {
+        if (name == g.mod_maps[pos].name) {
+            break;
+        }
+    }
+    if (pos < g.mod_maps.length) {
+        g.mod_maps[pos].destroy();
+        g.mod_maps.splice(pos, 1);
+        if (g.mod_maps.length == 0) {
+            document.getElementById('map_btn').classList.remove('active');
+        }
+        updateModMapUI();
+        updateClip();
+        updateLayerSelector();
+    }
+}
+
+function addMap(names) {
+    let p = [];
+    for (let name of names) {
+        if (name != '') {
+            let pos = 0;
+            for (pos = 0; pos < g.mod_maps.length; pos++) {
+                if (name === g.mod_maps[pos].name) {
+                    break;
+                }
+            }
+            if (pos >= g.mod_maps.length) {
+                let m = new Map(g.map_type, name, g.base_map);
+                g.mod_maps.push(m);
+                p.push(m.initAsync());
+                if (g.mod_maps.length == 1) {
+                    document.getElementById('map_btn').classList.add('active');
+                }
+            }
+        }
+    }
+
+    return Promise.all(p).then(function (maps) {
+        updateModMapUI();
+        updateClip();
+        updateMaps(g.currentLayer);
+        updateLayerSelector();
+    });
+}
+
+function toggleAllMaps() {
+    if (g.mapui) {
+        if (g.mod_maps.length > 0) {
+            for (pos = 0; pos < g.mod_maps.length; pos++) {
+                g.mod_maps[pos].destroy();
+            }
+            g.mod_maps = [];
+            document.getElementById('map_btn').classList.remove('active');
+            updateModMapUI();
+            updateClip();
+            updateLayerSelector();
+        } else {
+            let s = document.getElementById('map_selector');
+            let names = [];
+            for (let o of s.options) {
+                if (o.value) {
+                    names.push(o.value);
+                }
+            }
+            addMap(names);
+        }
+    }
+}
+
+function onMapSelect() {
+    if (g.mapui) {
+        let s = document.getElementById('map_selector');
+        addMap([s.value]);
+        s.value = '';
+    }
+}
+
+// grid
+function toggleGrid() {
+    if (g.gridui) {
+        g.gridui = 0;
+        document.getElementById('grid_btn').classList.remove('active');
+    } else {
+        g.gridui = 1;
+        document.getElementById('grid_btn').classList.add('active');
+        g.viewer.raiseEvent('update-viewport', {});
+    }
+    forceRedraw();
+}
+
+// overlay maps
 function toggleOverlay(type) {
-    overlays[type] = !overlays[type];
-    if (overlays[type]) {
+    g.overlays[type] = !g.overlays[type];
+    if (g.overlays[type]) {
         document.getElementById(type + '_btn').classList.add('active');
         let ui = document.getElementById(type + '_ui');
         if (ui) {
-            ui.innerHTML = UI_HTML[type];
+            ui.innerHTML = g.UI_HTML[type];
+            i18n.update('id', g.UI_ID[type]);
         }
     } else {
         document.getElementById(type + '_btn').classList.remove('active');
@@ -1472,12 +622,257 @@ function toggleOverlay(type) {
             ui.innerHTML = '';
         }
     }
-    updateMaps(currentLayer);
+    if (g.overlays.foraging || g.overlays.objects) {
+        document.getElementById('legends').style.display = '';
+    } else {
+        document.getElementById('legends').style.display = 'none';
+    }
+
+    updateMaps(g.currentLayer);
 }
 
-function onLayerSelect() {
-    let layer = Number(document.getElementById('layer_selector').value);
-    updateMaps(layer);
+// marker
+function toggleMarkerUI() {
+    if (g.markerui) {
+        g.markerui = 0;
+        document.getElementById('marker_btn').classList.remove('active');
+        document.getElementById('marker_ui').innerHTML = '';
+        g.marker.unSelect();
+    } else {
+        g.markerui = 1;
+        g.markerui_help = 0;
+        document.getElementById('marker_btn').classList.add('active');
+        document.getElementById('marker_ui').innerHTML = g.UI_HTML.marker;
+        i18n.update('id', g.UI_HTML.marker_ID);
+        if (g.trimmerui) {
+            toggleTrimmer();
+        }
+        g.marker.update();
+    }
 }
 
-init();
+function toggleMarkerHelp() {
+    if (g.markerui) {
+        let t = document.getElementById('marker_help');
+        if (g.markerui_help) {
+            t.innerHTML = '';
+            g.markerui_help = 0;
+        } else {
+            t.innerHTML = g.UI_HTML.marker_help;
+            g.markerui_help = 1;
+        }
+        i18n.update('id', g.UI_HTML.marker_help_ID);
+    }
+    return false;
+}
+
+function onMarkerSave() {
+    g.marker.save();
+}
+
+function onMarkerDelete() {
+    g.marker.removeSelected();
+}
+
+function onMarkerImport() {
+    g.marker.Import();
+}
+
+function onMarkerExport() {
+    g.marker.Export();
+}
+
+function onMarkerDefault() {
+    g.marker.loadDefault();
+}
+
+function onMarkerClear() {
+    g.marker.removeAll();
+}
+
+function onMarkerDeselect() {
+    g.marker.unSelect();
+    g.marker.update();
+}
+
+function onMarkerInput(e) {
+    g.marker.Input(e);
+}
+
+function togglePointMark(e) {
+    if (e.checked) {
+        util.changeStyle('.point', 'visibility', 'visible');
+    } else {
+        util.changeStyle('.point', 'visibility', 'hidden');
+    }
+}
+
+function toggleAreaMark(e) {
+    if (e.checked) {
+        util.changeStyle('.area', 'visibility', 'visible');
+    } else {
+        util.changeStyle('.area', 'visibility', 'hidden');
+    }
+}
+
+// trimmer ui
+function toggleTrimmer() {
+    if (g.trimmerui) {
+        g.trimmerui = 0;
+        document.getElementById('trimmer_btn').classList.remove('active');
+        document.getElementById('trimmer_ui').innerHTML = '';
+    } else {
+        g.trimmerui = 1;
+        g.trimmerui_help = 0;
+        document.getElementById('trimmer_btn').classList.add('active');
+        document.getElementById('trimmer_ui').innerHTML = g.UI_HTML.trimmer;
+        i18n.update('id', g.UI_HTML.trimmer_ID);
+        if (g.markerui) {
+            toggleMarkerUI();
+        }
+        g.trimmer.listSave();
+    }
+    forceRedraw();
+}
+
+function toggleTrimmerHelp() {
+    if (g.trimmerui) {
+        let t = document.getElementById('trimmer_help');
+        if (g.trimmerui_help) {
+            t.innerHTML = '';
+            g.trimmerui_help = 0;
+        } else {
+            t.innerHTML = g.UI_HTML.trimmer_help;
+            g.trimmerui_help = 1;
+        }
+        i18n.update('id', g.UI_HTML.trimmer_help_ID);
+    }
+    return false;
+}
+
+function onTrimmerRefresh() {
+    if (g.trimmerui) {
+        g.trimmer.listSave().then(() => {
+            forceRedraw();
+        });
+    }
+}
+
+function onTrimmerSaveSelect() {
+    if (g.trimmerui) {
+        g.trimmer.save_path = document.getElementById('trimmer_save_selector').value;
+        g.trimmer.loadSave().then(() => {
+            forceRedraw();
+        });
+    }
+}
+
+function onTrimmerBrowse() {
+    g.trimmer.browse();
+}
+
+function onTrim() {
+    if (g.trimmerui) {
+        g.trimmer.trim().then((update) => {
+            if (update) {
+                forceRedraw();
+            }
+        });
+    }
+}
+
+// change view
+function changeView() {
+    if (g.map_type == 'top') {
+        g.map_type = 'iso';
+    } else {
+        g.map_type = 'top';
+    }
+    g.viewer.destroy();
+    let map_names = [];
+    for (let mod_map of g.mod_maps) {
+        map_names.push(mod_map.name);
+    }
+    let setup_maps = function () {
+        addMap(map_names);
+    }
+    init(setup_maps);
+
+    return false;
+}
+
+// language selector
+function updateLangSelector() {
+    let s = document.getElementById('language_selector')
+    for (let i = s.options.length - 1; i >= 0; i--) {
+        s.remove(i);
+    }
+
+    for (let l of i18n.ALL) {
+        let o = document.createElement('option');
+        o.value = l;
+        o.text = l;
+        if (l === i18n.getLang()) {
+            o.selected = true;
+        }
+        s.appendChild(o);
+    }
+}
+
+function onChangeLanguage() {
+    let lang = document.getElementById('language_selector').value;
+    i18n.setLang(lang);
+    i18n.update('id');
+    updateLayerSelector();
+    if (g.aboutui) {
+        updateAbout();
+    }
+    if (g.trimmerui) {
+        util.setOutput('trimmer_output', 'Green', '');
+    }
+    if (g.markerui) {
+        g.marker.update();
+    }
+}
+
+// about
+function toggleAbout() {
+    if (g.aboutui) {
+        g.aboutui = 0;
+        document.getElementById('about_btn').classList.remove('active');
+        document.getElementById('about_ui').innerHTML = '';
+    } else {
+        g.aboutui = 1;
+        document.getElementById('about_btn').classList.add('active');
+        updateAbout();
+    }
+}
+
+function updateAbout() {
+    let div_begin = '<div style="display: inline-block; float: right; background-color: Yellow; text-align: left;">';
+    let div_end = '</div>';
+    let args = {};
+    args.pzmap2dzi = '<a id="pzmap2dzi" href="https://github.com/cff29546/pzmap2dzi" target="_blank">pzmap2dzi</a>';
+    args.osd = '<a id="osd" href="https://github.com/openseadragon/openseadragon" target="_blank">OpenSeaDragon</a>';
+    args.pzwiki = '<a id="pzwiki" href="https://pzwiki.net/wiki/Project_Zomboid_Wiki" target="_blank">PZwiki</a>';
+    args.version = g.base_map.pz_version;
+    args.pz = '<a id="pz" href="https://projectzomboid.com" target="_black">Project Zomboid</a>';
+    args.pz_steam = '<a id="pz_steam" href="https://store.steampowered.com/app/108600/Project_Zomboid" target="_black">Project Zomboid</a>';
+    let aboutUI = div_begin + i18n.T('About', args) + div_end;
+    document.getElementById('about_ui').innerHTML = aboutUI;
+    let aboutUI_ID = ['pzmap2dzi', 'osd', 'pzwiki', 'pz', 'pz_steam'];
+    i18n.update('id', aboutUI_ID);
+}
+
+// key listener
+function onKeyDown(event) {
+    if (event.key == 'Escape' && g.markerui) {
+        g.marker.unSelect();
+        g.marker.update();
+    }
+}
+
+Promise.all(pmodules).then(() => {
+    initUI_HTML();
+    init();
+});

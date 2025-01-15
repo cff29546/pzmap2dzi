@@ -1,6 +1,7 @@
 import flask
 import waitress
 import sqlite3
+import struct
 import json
 import os
 import re
@@ -42,86 +43,137 @@ def list_save():
 
     return json.dumps(saves)
 
+
+SIGNATURE_MAP = {
+    (300, 300, 8): 'B41',
+    (256, 256, 32): 'B42',
+}
+PATH_MAP = {
+    'map': {
+        'B42': 'map',
+        'B41': '.',
+    },
+    'chunkdata': {
+        'B42': 'chunkdata',
+        'B41': '.',
+    },
+    'zpop': {
+        'B42': 'zpop',
+        'B41': '.',
+    },
+    'apop': {
+        'B42': 'apop',
+        'B41': '.',
+    },
+}
+
+CELL_IN_BLOCK = {
+    'B41': 30,
+    'B42': 32,
+}
+
+def get_version(path):
+    map_bin = os.path.join(path, 'map.bin')
+    if os.path.exists(map_bin):
+        with open(map_bin, 'rb') as f:
+            data = f.read()
+        if len(data) < 12:
+            return 'unknown'
+        cx, cy, layer = struct.unpack('>iii', data[:12])
+        return SIGNATURE_MAP.get((cx, cy, layer), 'unknown')
+    return 'unknown'
+
 MAP = re.compile('^map_(\\d+)_(\\d+)\\.bin$')
 @app.route('/load/<path:save>')
 def load(save):
     path = app.config.get('save_path', None)
-    if not os.path.isdir(os.path.join(path, save)):
+    save_path = os.path.join(path, save)
+    if not os.path.isdir(save_path):
         return ''
     blocks = []
     if path:
-        files = os.listdir(os.path.join(path, save))
+        version = get_version(save_path)
+        files = os.listdir(os.path.join(path, save, PATH_MAP['map'].get(version, '.')))
         for f in files:
             m = MAP.match(f)
             if m:
                 x, y = map(int, m.groups())
                 blocks.append('{},{}'.format(x, y))
+    return {'version': version, 'blocks': ';'.join(blocks)}
 
-    return ';'.join(blocks)
+def remove_bin(save_path, mode, version, x, y):
+    folder = PATH_MAP[mode].get(version, '.')
+    name = os.path.join(save_path, folder, '{}_{}_{}.bin'.format(mode, x, y))
+    if os.path.isfile(name):
+        print('delete {} {},{}'.format(mode, x, y))
+        os.remove(name)
 
 @app.route('/delete/<path:save>', methods=['POST'])
 def delete_save(save):
-    if flask.request.method == 'POST':
-        path = app.config.get('save_path', None)
-        if not os.path.isdir(os.path.join(path, save)):
-            return ''
-        cell_str = flask.request.form.get('cells', None)
-        cell = []
-        if cell_str:
-            for c in cell_str.split(';'):
-                x, y = map(int, c.split(','))
-                cell.append((x, y))
+    if flask.request.method != 'POST':
+        return ''
 
-        block_str = flask.request.form.get('blocks', None)
-        block = []
-        if block_str:
-            for c in block_str.split(';'):
-                x, y = map(int, c.split(','))
-                block.append((x, y))
-        
-        backup = flask.request.form.get('backup', None)
+    path = app.config.get('save_path', None)
+    save_path = os.path.join(path, save)
+    if not os.path.isdir(save_path):
+        return ''
 
-        if path:
-            print('trimming [{}]'.format(save))
-            vehicles = None
-            cursor = None
-            if flask.request.form.get('vehicles', False):
-                db_path = os.path.join(path, save, 'vehicles.db')
-                if os.path.isfile(db_path):
-                    vehicles = sqlite3.connect(db_path)
-                    cursor = vehicles.cursor()
-            for x, y in block:
-                name = os.path.join(path, save, 'map_{}_{}.bin'.format(x, y))
-                if os.path.isfile(name):
-                    print('delete block {},{}'.format(x, y))
-                    if cursor:
-                        cursor.execute('DELETE FROM vehicles ' +
-                                       'WHERE wx = {} AND wy = {};'.format(x, y))
-                    os.remove(name)
-            for x, y in cell:
-                name = os.path.join(path, save, 'chunkdata_{}_{}.bin'.format(x, y))
-                if os.path.isfile(name):
-                    print('delete cell chunkdata {},{}'.format(x, y))
-                    os.remove(name)
-                name = os.path.join(path, save, 'zpop_{}_{}.bin'.format(x, y))
-                if os.path.isfile(name):
-                    print('delete cell zpop {},{}'.format(x, y))
-                    os.remove(name)
-                if cursor:
-                    cursor.execute('DELETE FROM vehicles ' +
-                                   'WHERE wx >= {} AND wx < {} '.format(x * 30, (x + 1) * 30) +
-                                   'AND wy >= {} AND wy < {};'.format(y * 30, (y + 1) * 30))
-                for i in range(30):
-                    for j in range(30):
-                        bx = x * 30 + i
-                        by = y * 30 + j
-                        name = os.path.join(path, save, 'map_{}_{}.bin'.format(bx, by))
-                        if os.path.isfile(name):
-                            print('delete block {},{}'.format(bx, by))
-                            os.remove(name)
-            if vehicles:
-                vehicles.commit()
-                vehicles.close()
+    cell_str = flask.request.form.get('cells', None)
+    cell = []
+    if cell_str:
+        for c in cell_str.split(';'):
+            x, y = map(int, c.split(','))
+            cell.append((x, y))
+
+    block_str = flask.request.form.get('blocks', None)
+    block = []
+    if block_str:
+        for c in block_str.split(';'):
+            x, y = map(int, c.split(','))
+            block.append((x, y))
+    
+    #backup = flask.request.form.get('backup', None)
+    print('trimming [{}]'.format(save))
+    if app.debug:
+        print('req: ', flask.request.form)
+    version = get_version(save_path)
+    vehicles = None
+    cursor = None
+    cb = CELL_IN_BLOCK.get(version, 0)
+    if flask.request.form.get('vehicles', False):
+        db_path = os.path.join(save_path, 'vehicles.db')
+        if os.path.isfile(db_path):
+            vehicles = sqlite3.connect(db_path)
+            cursor = vehicles.cursor()
+
+    for x, y in block:
+        remove_bin(save_path, 'map', version, x, y)
+        if cursor:
+            sql = 'DELETE FROM vehicles WHERE wx = {} AND wy = {};'.format(x, y)
+            cursor.execute(sql)
+
+    for x, y in cell:
+        types = ['chunkdata', 'zpop']
+        if flask.request.form.get('animals', False):
+            types.append('apop')
+
+        for t in types:
+            remove_bin(save_path, t, version, x, y)
+
+        if cursor:
+            sql = 'DELETE FROM vehicles WHERE wx >= {} AND wx < {} AND wy >= {} AND wy < {};'
+            sql = sql.format(x * cb, (x + 1) * cb, y * cb, (y + 1) * cb)
+            cursor.execute(sql)
+
+        for i in range(cb):
+            for j in range(cb):
+                bx = x * cb + i
+                by = y * cb + j
+                remove_bin(save_path, 'map', version, bx, by)
+
+    if vehicles:
+        vehicles.commit()
+        vehicles.close()
 
     return 'done'
 
@@ -142,6 +194,7 @@ if __name__ == '__main__':
         for key, value in load_conf(args.conf).items():
             app.config[key] = value
     if args.debug:
+        app.debug = True
         app.run(host='localhost', port=8880)
     else:
         waitress.serve(app, host='localhost', port=8880)

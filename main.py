@@ -178,6 +178,12 @@ def unzip(path):
         z.extractall(os.path.dirname(path))
 
 
+def process_i18n(path):
+    from pzmap2dzi import i18n_util
+    i18n_util.expand_i18n(os.path.join(path, 'i18n.yaml'))
+    i18n_util.yaml_aio_to_json_all(os.path.join(path, 'marks.yaml'))
+
+
 def copy(args):
     conf = load_yaml(args.conf)
     script_path = os.path.dirname(os.path.realpath(__file__))
@@ -185,6 +191,7 @@ def copy(args):
     dst = os.path.join(conf['output_path'], 'html')
     copy_tree(src, dst)
     unzip(os.path.join(dst, 'openseadragon', 'openseadragon.zip'))
+    process_i18n(os.path.join(dst, 'pzmap', 'i18n'))
 
 
 CMD = {

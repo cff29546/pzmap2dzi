@@ -330,7 +330,7 @@ export class Map {
                 }
             }
 
-            if (this.info.base) {
+            if (this.info.base.pz_version) {
                 this.w = this.info.base.w * this.info.base.scale;
                 this.h = this.info.base.h * this.info.base.scale;
                 this.scale = this.info.base.scale;

@@ -186,15 +186,11 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='pzmap2dzi viewer server')
     parser.add_argument('-c', '--conf', type=str, default=None)
     parser.add_argument('-d', '--debug', action='store_true')
-    parser.add_argument('save_path', nargs='?', default=None)
     args = parser.parse_args()
-    if args.save_path:
-        app.config['save_path'] = args.save_path
-    else:
-        for key, value in load_conf(args.conf).items():
-            app.config[key] = value
+    for key, value in load_conf(args.conf).items():
+        app.config[key] = value
     if args.debug:
         app.debug = True
-        app.run(host='localhost', port=8880)
+        app.run(host=app.config['host'], port=8880)
     else:
-        waitress.serve(app, host='localhost', port=8880)
+        waitress.serve(app, host=app.config['host'], port=8880)

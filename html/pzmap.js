@@ -232,7 +232,16 @@ function initUI() {
     document.body.style.background = 'black';
 }
 
+function updateMainOutput() {
+    if (g.load_error) {
+        util.setOutput('main_output', 'red', '<b>' + i18n.E('MapMissingType') + '</b>');
+    } else {
+        util.setOutput('main_output', 'green', '');
+    }
+}
+
 function initOSD() {
+    g.load_error = 0;
     g.viewer = OpenSeadragon({
         drawer: 'canvas',
         opacity: 1,
@@ -248,14 +257,9 @@ function initOSD() {
         maxZoomPixelRatio: (g.base_map.type == 'top' ? 16 : 2) * g.base_map.scale
     });
 
-    g.viewer.addHandler('add-item-failed', function(event) {
-        let info = '<b>Map not loaded. Use "run_server.bat" to start the g.viewer.</b>';
-        if (window.location.protocol == 'http:' || window.location.protocol == 'https:') {
-            let type_str = (g.map_type == 'top') ? 'top' : 'isometric';
-            info = '<b>Failed to load ' + type_str + ' view map.</b>';
-        }
-        util.setOutput('main_output', 'red', info);
-        document.body.style.background = 'white';
+    g.viewer.addHandler('add-item-failed', (event) => {
+        g.load_error = 1;
+        updateMainOutput();
     });
 
     g.viewer.addHandler('update-viewport', function() {
@@ -833,6 +837,7 @@ function onChangeLanguage() {
     if (g.markerui) {
         g.marker.update();
     }
+    updateMainOutput();
 }
 
 // about
@@ -875,4 +880,11 @@ function onKeyDown(event) {
 Promise.all(pmodules).then(() => {
     initUI_HTML();
     init();
+}).catch((e) => {
+    let output = document.getElementById('main_output');
+    if (output) {
+        output.style.color = 'red';
+        output.innerHTML = 'Failed to load, try to use "run_server.bat" to start.<br/>Error: ' + e;
+    }
+    document.body.style.background = 'white';
 });

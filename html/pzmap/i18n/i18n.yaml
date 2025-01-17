@@ -32,6 +32,9 @@ template:
     MapErrorVersion:
         en: 'Version conflict maps:'
         cn: '以下模组地图版本冲突:'
+    MapMissingType:
+        en: 'Failed to load ${g.map_type=="top"?"top":"isometric"} view map. Please try switch view.'
+        cn: '加载${g.map_type=="top"?"俯":"等轴测投影"}视图失败，请尝试切换视图。'
     GridButton:
         en: 'Grid'
         cn: '网格'

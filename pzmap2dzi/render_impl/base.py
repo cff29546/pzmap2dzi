@@ -76,7 +76,8 @@ def rc_base_water(tl, tiles, layer):
             tx = tl.get_by_name(tile)
             if tx:
                 color_sum = tx.get_color_sum()
-                color_sums.append(color_sum)
+                if color_sum:
+                    color_sums.append(color_sum)
             if i > 0:
                 break
     return color_from_sums(color_sums)

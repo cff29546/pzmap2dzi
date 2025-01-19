@@ -103,12 +103,9 @@ class Texture(object):
         self.color_sum = None
 
     def render(self, target, x, y):
-        w, h = self.im.size
         x = x + self.ox
         y = y + self.oy
-        base = target.crop((x, y, x + w, y + h))
-        result = Image.alpha_composite(base, self.im)
-        target.paste(result, (x, y))
+        target.alpha_composite(self.im, (x, y))
 
     def get_color_sum(self):
         if self.color_sum is None:

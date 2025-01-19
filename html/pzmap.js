@@ -218,6 +218,9 @@ function initUI() {
             }
         }
     }
+    if (g.mapui) {
+        initModMapUI();
+    }
     if (g.overlays.foraging || g.overlays.objects) {
         document.getElementById('legends').style.display = '';
     } else {
@@ -452,7 +455,6 @@ function toggleModMapUI() {
         g.mapui = 1;
         document.getElementById('map_ui').innerHTML = g.UI_HTML.map;
         initModMapUI();
-        updateModMapUI();
     }
 }
 
@@ -467,6 +469,7 @@ function initModMapUI() {
             o.text = name;
             s.appendChild(o);
         }
+        updateModMapUI();
     });
     return p;
 }

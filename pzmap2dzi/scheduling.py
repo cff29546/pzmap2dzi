@@ -260,13 +260,12 @@ class CacheLoader(object):
 
 
 class TopologicalDziWorker(object):
-    def __init__(self, dzi, prefix, render):
+    def __init__(self, dzi, prefix):
         if dzi.cache_enabled and shared_memory_image:
             self.mem = shared_memory_image.ImageSharedMemory(prefix)
         else:
             self.mem = None
         self.cache_map = {}
-        self.render = render
         self.dzi = dzi
         self.gets = 0
         self.hits = 0
@@ -300,38 +299,41 @@ class TopologicalDziWorker(object):
         is_base = (level == self.dzi.levels - 1)
         cl = CacheLoader(self.mem, size)
         layer_map = [0] * self.dzi.layers
+        layer_cache = [None] * self.dzi.layers
         self.dzi.set_wip(level, x, y)
-        for layer in self.dzi.render_layers:
+        for layer in range(self.dzi.render_minlayer, self.dzi.render_maxlayer):
             index = get_index(level, x, y, layer)
             ic = ImageCreater(self.mem, index, size)
             if is_base:
-                self.dzi.render_tile(ic, self.render, x, y, layer)
+                self.dzi.render_tile(ic, x, y, layer, layer_cache)
             else:
                 cached = []
                 for pos, (sub_level, sub_x, sub_y) in enumerate(depend_task(level, x, y)):
                     if sub_layer_maps[pos][layer] == 0:
                         cached.append('empty')
                     else:
-                        im = cl.get(sub_level, sub_x, sub_y, layer)
-                        cached.append(im)
+                        cached.append(cl.get(sub_level, sub_x, sub_y, layer))
                 self.dzi.merge_tile(ic, level, x, y, layer, cached)
                 cached = []
-            im = None
-            if ic.is_created():
-                im = ic.get()
+
             force = self.mem is None
-            state = self.dzi.save_tile(im, level, x, y, layer, force)
-            ic = None
-            im = None
+            state = self.dzi.save_tile(ic.im, level, x, y, layer, force)
+
             if state == 'empty':
                 if self.mem is not None:
+                    ic.im = None
                     self.mem.release(index)
-                if layer == 0 and sum(layer_map) > 0:
-                    self.dzi.mark_empty(level, x, y, 0)
             else:
                 if self.mem is not None:
                     self.cache_map[(level, x, y, layer)] = state
                 layer_map[layer] = 1
+            layer_cache[layer] = ic.im
+            ic.im = None
+
+        if not layer_map[0]:
+            self.dzi.mark_empty(level, x, y, 0)
+        layer_cache = None
+
         self.gets += cl.gets
         self.hits += cl.hits
         cl.cleanup()

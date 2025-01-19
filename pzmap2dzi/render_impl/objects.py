@@ -24,7 +24,8 @@ class ForagingRender(object):
         self.cells = set(self.getter.get_cell_zones().keys())
 
     def update_options(self, options):
-        options['render_layers'] = [0]
+        options['render_minlayer'] = 0
+        options['render_maxlayer'] = 1
         return options
 
     def valid_cell(self, x, y):
@@ -55,7 +56,8 @@ class ForagingTopRender(object):
             objects_path, pzobjects.FORAGING_TYPES, 1)
 
     def update_options(self, options):
-        options['render_layers'] = [0]
+        options['render_minlayer'] = 0
+        options['render_maxlayer'] = 1
         return options
 
     def tile(self, im_getter, dzi, cx, cy, layer):

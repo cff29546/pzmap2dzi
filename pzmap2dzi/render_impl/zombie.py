@@ -46,7 +46,8 @@ class ZombieRender(object):
         self.font = LazyFont(font_name, int(font_size))
 
     def update_options(self, options):
-        options['render_layers'] = [0]
+        options['render_minlayer'] = 0
+        options['render_maxlayer'] = 1
         return options
 
     def valid_cell(self, x, y):
@@ -111,7 +112,8 @@ class ZombieTopRender(object):
         self.input = options.get('input')
 
     def update_options(self, options):
-        options['render_layers'] = [0]
+        options['render_minlayer'] = 0
+        options['render_maxlayer'] = 1
         return options
 
     def tile(self, im_getter, dzi, cx, cy, layer):

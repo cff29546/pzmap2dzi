@@ -13,6 +13,13 @@ PENDING_PATTERN = re.compile('(\\d+)_(\\d+)\\.pending$')
 DONE_TEMPLATE = '(\\d+)_(\\d+)\\.(?:empty|{})$'
 
 
+RGB_FMT = set(['jpg', 'jpeg'])
+def SupportRGBA(ext):
+    if ext in RGB_FMT:
+        return False
+    return True
+
+
 def lower_level_depend(tx, ty):
     return [(i + (tx << 1), j + (ty << 1))
             for i in (0, 1) for j in (0, 1)]
@@ -44,10 +51,8 @@ class DZI(object):
         self.path = options.get('output', './dzi')
         assert self.tile_size != None
         self.save_empty = options.get('save_empty_tile', False)
-        self.ext = options.get('image_fmt', 'png')
-        self.ext0 = options.get('image_fmt_layer0')
-        if not self.ext0:
-            self.ext0 = self.ext
+        self.ext = options.get('image_fmt', 'png').lower()
+        self.ext0 = options.get('image_fmt_layer0', self.ext).lower()
         self.save_options = {}
         self.save_options[self.ext] = {}
         self.save_options[self.ext0] = {}
@@ -105,7 +110,7 @@ class DZI(object):
             self.mark_empty(level, tx, ty, layer)
             return 'empty'
 
-        if ext == 'jpg':
+        if not SupportRGBA(ext):
             im = im.convert('RGB')
 
         im.save(path, **self.save_options[ext])
@@ -129,9 +134,12 @@ class DZI(object):
             except:
                 pass
 
+    def get_ext(self, layer):
+        return self.ext0 if layer == 0 else self.ext
+
     def tile_path(self, level, tx, ty, layer, ext=None):
         if ext is None:
-            ext = self.ext0 if layer == 0 else self.ext
+            ext = self.get_ext(layer)
         path = os.path.join(self.path, 'layer{}_files'.format(layer),
                             str(level), '{}_{}.{}'.format(tx, ty, ext))
         return ext, path
@@ -141,7 +149,7 @@ class DZI(object):
         im = None
         if os.path.isfile(path):
             im = Image.open(path)
-            if ext == 'jpg':
+            if not SupportRGBA(ext):
                 im = im.convert('RGBA')
         return im
 
@@ -156,7 +164,7 @@ class DZI(object):
 
     def create_empty_output(self):
         util.ensure_folder(self.path)
-        for layer in self.render_layers:
+        for layer in range(self.render_minlayer, self.render_maxlayer):
             layer_path = os.path.join(self.path, 'layer{}_files'.format(layer))
             util.ensure_folder(layer_path)
             for level in range(self.levels):
@@ -261,6 +269,16 @@ class DZI(object):
             tile.thumbnail((self.tile_size, self.tile_size), Image.LANCZOS)
             im_getter.get().paste(tile, (0, 0))
 
+    def render_below(self, im_getter, layer, layer_cache):
+        ext = self.get_ext(layer)
+        if SupportRGBA(ext):
+            return None
+        for l in range(self.render_minlayer, layer):
+            im_below = layer_cache[l]
+            if im_below:
+                im = im_getter.get()
+                im.alpha_composite(im_below)
+
     def render_all(self, render, n, break_key=None, verbose=False, profile=False):
         if verbose:
             print('Preparing data')
@@ -269,10 +287,11 @@ class DZI(object):
             for x, y in self.cells:
                 if not render.valid_cell(x, y):
                     self.skip_cells.add((x, y))
+        self.render = render
         tasks, done = self.get_tasks(self.skip_cells)
         schd = scheduling.TopologicalDziScheduler(self, break_key, verbose)
         cache_prefix = 'pzdzi.{}.'.format(os.getpid())
-        worker = scheduling.TopologicalDziWorker(self, cache_prefix, render)
+        worker = scheduling.TopologicalDziWorker(self, cache_prefix)
         task = mptask.Task(worker, schd, profile)
         task.run((tasks, done), n)
         if schd.stop:
@@ -284,16 +303,15 @@ class DZI(object):
         return True
 
 
-PZ_VERSION = {
-    0: 'B41',
-    1: 'B42',
-}
-
-
 class PZDZI(DZI):
+    PZ_VERSION = {
+        0: 'B41',
+        1: 'B42',
+    }
+
     def pz_init(self, path, **options):
         version_info = lotheader.get_version_info(path)
-        self.pz_version = PZ_VERSION.get(version_info['version'], 'Unknown')
+        self.pz_version = PZDZI.PZ_VERSION.get(version_info['version'], 'Unknown')
         self.cells = version_info['cells']
         self.cell_size_in_block = version_info['cell_size_in_block']
         self.block_size = version_info['block_size']
@@ -308,12 +326,10 @@ class PZDZI(DZI):
             self.minlayer = 0
         if self.maxlayer < 1:
             self.maxlayer = 1
-        self.render_layers = list(range(self.minlayer, 0))
-        self.render_layers += list(reversed(range(self.maxlayer)))
-        render_layers = options.get('render_layers', None)
-        if render_layers is not None:
-            self.render_layers = render_layers
-        self.layers = max(self.render_layers) - min(self.render_layers) + 1
+
+        self.render_minlayer = max(options.get('render_minlayer', self.minlayer), self.minlayer)
+        self.render_maxlayer = min(options.get('render_maxlayer', self.maxlayer), self.maxlayer)
+        self.layers = self.render_maxlayer - self.render_minlayer
         if options.get('verbose'):
             print('PZ version: {} , layer range [{}, {})'.format(
                   self.pz_version, self.minlayer, self.maxlayer))
@@ -427,11 +443,12 @@ class IsoDZI(PZDZI):
                  for tx in range(txmin, txmax + 1)]
         return tiles
 
-    def render_tile(self, im_getter, render, tx, ty, layer):
+    def render_tile(self, im_getter, tx, ty, layer, layer_cache):
+        self.render_below(im_getter, layer, layer_cache)
         gx0, gy0 = self.tile2grid(tx, ty, layer)
         left, right, top, bottom = self.tile_grid_bound(tx, ty, layer)
-        if hasattr(render, 'tile'):
-            return render.tile(im_getter, self, gx0, gy0, left, right, top, bottom, layer)
+        if hasattr(self.render, 'tile'):
+            return self.render.tile(im_getter, self, gx0, gy0, left, right, top, bottom, layer)
         for gy in range(top, bottom + 1):
             for gx in range(left, right + 1):
                 if (gx + gy) & 1:
@@ -439,7 +456,7 @@ class IsoDZI(PZDZI):
                 sx = (gx + gy) >> 1
                 sy = (gy - gx) >> 1
                 ox, oy = self.get_sqr_center(gx - gx0, gy - gy0)
-                render.square(im_getter, self, ox, oy, sx, sy, layer)
+                self.render.square(im_getter, self, ox, oy, sx, sy, layer)
 
     def update_map_info(self, info):
         info = self.update_pz_map_info(info)
@@ -472,9 +489,10 @@ class TopDZI(PZDZI):
     def cell2tiles(self, cx, cy):
         return [(cx - self.cxo, cy - self.cyo)]
 
-    def render_tile(self, im_getter, render, tx, ty, layer):
+    def render_tile(self, im_getter, tx, ty, layer, layer_cache):
+        self.render_below(im_getter, layer, layer_cache)
         cx, cy = self.tile2cell(tx, ty)
-        render.tile(im_getter, self, cx, cy, layer)
+        self.render.tile(im_getter, self, cx, cy, layer)
 
     def update_map_info(self, info):
         info = self.update_pz_map_info(info)

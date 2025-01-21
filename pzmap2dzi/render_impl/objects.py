@@ -20,7 +20,7 @@ class ForagingRender(object):
         self.input = options.get('input')
         objects_path = os.path.join(self.input, 'objects.lua')
         self.getter = pzobjects.CachedSquareMapGetter(
-            objects_path, pzobjects.FORAGING_TYPES, 1)
+            objects_path, pzobjects.FORAGING_TYPES, [0, 1])
         self.cells = set(self.getter.get_cell_zones().keys())
 
     def update_options(self, options):
@@ -53,7 +53,7 @@ class ForagingTopRender(object):
         self.input = options.get('input')
         objects_path = os.path.join(self.input, 'objects.lua')
         self.getter = pzobjects.CachedSquareMapGetter(
-            objects_path, pzobjects.FORAGING_TYPES, 1)
+            objects_path, pzobjects.FORAGING_TYPES, [0, 1])
 
     def update_options(self, options):
         options['render_minlayer'] = 0

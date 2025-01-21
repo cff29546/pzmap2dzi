@@ -8,13 +8,12 @@ except ImportError:
     from backports.functools_lru_cache import lru_cache
 
 
-def load_objects_raw(objects_path):
-    if not os.path.isfile(objects_path):
+def load_lua_raw(path):
+    if not os.path.isfile(path):
         return []
-    with open(objects_path, 'r') as f:
+    with open(path, 'r') as f:
         text = f.read()
-    olist = slpp.slpp.decode(text.replace('objects = ', '', 1))
-    return olist
+    return slpp.slpp.decode('{' + text + '}')
 
 
 FORAGING_TYPES = set([
@@ -30,13 +29,17 @@ FORAGING_TYPES = set([
 PARKING_TYPES = set(['ParkingStall'])
 ZOMBIE_TYPES = set(['ZombiesType'])
 STORY_TYPES = set(['ZoneStory'])
+BASEMENT_TYPES = set(['Basement'])
 
 
-def filter_objects_raw(objects, types, zlimit=None):
+def filter_objects_raw(objects, types, zrange=None):
+    if zrange:
+        zmin, zmax = zrange
     output = []
     for o in objects:
-        if zlimit is not None and o['z'] >= zlimit:
-            continue
+        if zrange:
+            if o['z'] >= zmax or o['z'] < zmin:
+                continue
         if o['type'] in types:
             output.append(o)
     return output
@@ -135,9 +138,9 @@ def cell_map(objects_raw, cell_size):
     return m
 
 
-def load_cell_zones(path, cell_size, types, zlimit=None):
-    objects_raw = load_objects_raw(path)
-    objects_raw = filter_objects_raw(objects_raw, types, zlimit)
+def load_cell_zones(path, cell_size, types, zrange=None):
+    objects_raw = load_lua_raw(path)['objects']
+    objects_raw = filter_objects_raw(objects_raw, types, zrange)
     return cell_map(objects_raw, cell_size)
 
 
@@ -178,18 +181,18 @@ def square_map(cell_zones, cell_size, cx, cy):
 
 
 class CachedGetter(object):
-    def __init__(self, path, types, zlimit=None, cache_size=16):
+    def __init__(self, path, types, zrange=None, cache_size=16):
         self.path = path
         map_path = os.path.dirname(path)
         version_info = lotheader.get_version_info(map_path, fast_mode=True)
         self.cell_size = version_info['cell_size']
         self.types = types
-        self.zlimit = zlimit
+        self.zrange = zrange
         self.cache_size = cache_size
         self.getter = None
 
     def get_cell_zones(self):
-        return load_cell_zones(self.path, self.cell_size, self.types, self.zlimit)
+        return load_cell_zones(self.path, self.cell_size, self.types, self.zrange)
 
     def __call__(self, cx, cy):
         if self.getter is None:

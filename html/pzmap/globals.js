@@ -1,4 +1,9 @@
 export var g = {
+    defaults: {
+			get: {
+				'map_name': '' // no default map_name for offline viewing
+			}
+		},
     map_type: 'iso',
     overlays: {},
     mapui: 0,
@@ -27,6 +32,6 @@ export function initGlobals() {
     g.grid = 0;
 		g.get = populateGet();
     if (undefined == g.get['map_name']){
-			g.get['map_name'] = 'SurvivalB4202';
+			g.get['map_name'] = g.defaults['map_name'];
 		}
 };

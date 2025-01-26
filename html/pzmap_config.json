@@ -1,5 +1,5 @@
 {
     "route": {
-        "": "map_data/"
+        "default": "map_data/"
     }
 }

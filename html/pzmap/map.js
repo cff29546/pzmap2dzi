@@ -276,7 +276,7 @@ export class Map {
         } 
     }
 
-    getLayerRangeAsync() {
+    getLayerRange() {
         let i = -1, j = 0;
         let root = this.root;
         let suffix = this.suffix;
@@ -305,7 +305,7 @@ export class Map {
         return Promise.all([getmin({ok: 1}), getmax({ok: 1})]).then(setrange);
     }
 
-    initAsync() {
+    init() {
         let root = this.root;
         let suffix = this.suffix;
         let empty = function(e) { return Promise.resolve({})};
@@ -323,6 +323,9 @@ export class Map {
         }).bind(this);
 
         let infos = ['base', 'zombie', 'foraging', 'room', 'objects'];
+        if (this.type == 'top') {
+            infos = ['base', 'zombie', 'foraging'];
+        }
         let setinfo = (function (r) {
             for (let i in infos) {
                 let type = infos[i];
@@ -353,7 +356,7 @@ export class Map {
             }
 
             if (this.minlayer === undefined || this.maxlayer === undefined) {
-                return this.getLayerRangeAsync();
+                return this.getLayerRange();
             } else {
                 return Promise.resolve([this.minlayer, this.maxlayer]);
             }

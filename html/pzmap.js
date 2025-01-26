@@ -235,6 +235,7 @@ function initUI() {
         document.getElementById('legends').style.display = 'none';
     }
     updateLangSelector();
+    updateRouteSelector();
     if (g.aboutui) {
         updateAbout();
     }
@@ -383,7 +384,7 @@ function init(callback=null) {
         g.trimmer = new Trimmer();
     }
     g.base_map = new Map(globals.getRoot(), g.map_type, '');
-    g.base_map.initAsync().then(function(b) {
+    return g.base_map.init().then(function(b) {
         g.grid = new c.Grid(g.base_map);
         initUI_HTML();
         initUI();
@@ -391,16 +392,22 @@ function init(callback=null) {
         initOSD();
         i18n.update('id');
 
-        g.viewer.addOnceHandler('tile-loaded', function(e) {
-            let img = e.tiledImage;
-            img.addOnceHandler('fully-loaded-change', function(e) {
-                img.setOpacity(0);
+        return new Promise(function(resolve, reject) {
+            g.viewer.addOnceHandler('tile-loaded', function(e) {
+                let p = new Promise(function(res, rej) {
+                    let img = e.tiledImage;
+                    img.addOnceHandler('fully-loaded-change', function(e) {
+                        img.setOpacity(0);
+                        res();
+                    });
+                });
+                updateMaps(g.currentLayer);
+                g.marker.redrawAll();
+                if (callback) {
+                    p = Promise.all([p, callback()]);
+                }
+                p.then(() => { resolve(e); });
             });
-            updateMaps(g.currentLayer);
-            g.marker.redrawAll();
-            if (callback) {
-                callback();
-            }
         });
     });
 }
@@ -560,7 +567,7 @@ function addMap(names) {
             if (pos >= g.mod_maps.length) {
                 let m = new Map(globals.getRoot() + 'mod_maps/' + name + '/', g.map_type, name, g.base_map);
                 g.mod_maps.push(m);
-                p.push(m.initAsync());
+                p.push(m.init());
                 if (g.mod_maps.length == 1) {
                     document.getElementById('map_btn').classList.add('active');
                 }
@@ -797,24 +804,82 @@ function onTrim() {
     }
 }
 
+// change route
+function updateRouteSelector() {
+    let s = document.getElementById('route_selector');
+    for (let i = s.options.length - 1; i >= 0; i--) {
+        s.remove(i);
+    }
+
+    s.style.display = 'none';
+    if (g.query_string.map_name !== undefined) {
+        return false;
+    }
+    let route = g.conf.route;
+    if (!route) {
+        return false;
+    }
+
+    let keys = Object.keys(route);
+    if (keys.length <= 0) {
+        return false;
+    }
+    if (keys.length === 1 && keys[0] === g.route) {
+        return false;
+    }
+
+    if (!keys.includes(g.route)) {
+        let o = document.createElement('option');
+        o.id = "route_selector_dummy_option";
+        o.value = 'default';
+        o.text = i18n.T('SelectRoute');
+        o.selected = true;
+        s.appendChild(o);
+    }
+    for (let key of keys) {
+        let o = document.createElement('option');
+        o.value = key;
+        o.text = key;
+        if (g.route === key) {
+            o.selected = true;
+        }
+        s.appendChild(o);
+    }
+    s.style.display = '';
+}
+
+function onChangeRoute() {
+    let route = document.getElementById('route_selector').value;
+    if (route !== g.route) {
+        g.route = route;
+        return reloadView(false);
+    }
+}
+
 // change view
-function changeView() {
+function onChangeView() {
     if (g.map_type == 'top') {
         g.map_type = 'iso';
     } else {
         g.map_type = 'top';
     }
-    g.viewer.destroy();
-    let map_names = [];
-    for (let mod_map of g.mod_maps) {
-        map_names.push(mod_map.name);
-    }
-    let setup_maps = function () {
-        addMap(map_names);
-    }
-    init(setup_maps);
+    return reloadView(true);
+}
 
-    return false;
+function reloadView(keep_mod_map=false) {
+    g.viewer.destroy();
+    let setup_maps = null;
+    if (keep_mod_map) {
+        let map_names = [];
+        for (let mod_map of g.mod_maps) {
+            map_names.push(mod_map.name);
+        }
+        setup_maps = function () {
+            addMap(map_names);
+            return Promise.resolve();
+        }
+    }
+    return init(setup_maps);
 }
 
 // language selector

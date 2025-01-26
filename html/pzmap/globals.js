@@ -7,6 +7,7 @@ export var g = {
     markerui: 0,
     aboutui: 0,
     currentLayer: 0,
+    route: 'default',
     query_string: {},
     conf: {}
 };
@@ -43,8 +44,15 @@ export function reset() {
 };
 
 export function getRoot(name=null) {
+    // Name is obtained in the following order of precedence:
+    // 1. query string (online environment)
+    // 2. g.route (offline environment, using selector)
+    // 3. '' empty for default
     if (name === null) {
         name = g.query_string.map_name;
+        if (!name) {
+            name = g.route;
+        }
         if (!name) {
             name = '';
         }

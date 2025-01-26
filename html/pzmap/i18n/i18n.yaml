@@ -307,7 +307,7 @@ template:
         en: |
             Are you sure to delete ${args.blocks.length} block(s)?
 
-            Block (green grid(s)):
+            Block(s) (green grid(s)) list:
             ${args.blocks.slice(0,20).join(";")}${args.blocks.length>20?";...":""}
         cn: |
             您确认要删除 ${args.blocks.length} 个区块吗？
@@ -326,6 +326,12 @@ template:
     TrimmerError:
         en: '<b>Trimming failed, error: {error}</b>'
         cn: '<b>裁剪失败，错误: {error}</b>'
+    RouteSelectorTitle:
+        en: 'Change Route'
+        cn: '切换路径'
+    SelectRoute:
+        en: '(Select Route)'
+        cn: '(选择路径)'
     ChangeView:
         en: 'Switch to ${g.map_type=="top"?"Isometric":"Top"} View'
         cn: '切换到${g.map_type=="top"?"等轴测投影":"俯"}视图'
@@ -503,6 +509,10 @@ mapping:
             innerHTML: TrimmerBrowseButton
         trimmer_help_text:
             innerHTML: TrimmerHelpText
+        route_selector:
+            title: RouteSelectorTitle
+        route_selector_dummy_option:
+            innerHTML: SelectRoute
         change_view_btn:
             innerHTML:
                 eval: ChangeView

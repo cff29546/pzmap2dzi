@@ -97,10 +97,14 @@ export class Map {
 }
 
     getMapRoot() {
+        let prefix = 'maps/'+g.get['map_name']+'_';
+			if (undefined == g.prefix){
+				g.prefix = prefix;
+			}
         if (this.base_map === this) {
-            return '';
+            return prefix;
         }
-        return 'mod_maps/' + this.name + '/'; 
+        return prefix+'/mod_maps/' + this.name + '/'; 
     }
 
     getRelativePositionAndWidth(other_map) {

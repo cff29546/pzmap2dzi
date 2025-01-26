@@ -256,7 +256,7 @@ function initOSD() {
         drawer: 'canvas',
         opacity: 1,
         element: document.getElementById('map_div'),
-        tileSources:  'base' + g.base_map.suffix + '/layer0.dzi',
+        tileSources: g.prefix + 'base' + g.base_map.suffix + '/layer0.dzi',
         homeFillsViewer: true,
         showZoomControl: true,
         constrainDuringPan: true,

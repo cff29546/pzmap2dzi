@@ -1,6 +1,7 @@
 from __future__ import print_function
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
+import PIL
 import io
 import os
 import struct
@@ -102,10 +103,19 @@ class Texture(object):
             self.oy = oy
         self.color_sum = None
 
-    def render(self, target, x, y):
-        x = x + self.ox
-        y = y + self.oy
-        target.alpha_composite(self.im, (x, y))
+    if tuple(map(int, PIL.__version__.split('.'))) >= (10, 4, 0):
+        def render(self, target, x, y):
+            x = x + self.ox
+            y = y + self.oy
+            target.alpha_composite(self.im, (x, y))
+    else:
+        def render(self, target, x, y):
+            w, h = self.im.size
+            x = x + self.ox
+            y = y + self.oy
+            base = target.crop((x, y, x + w, y + h))
+            result = Image.alpha_composite(base, self.im)
+            target.paste(result, (x, y))
 
     def get_color_sum(self):
         if self.color_sum is None:

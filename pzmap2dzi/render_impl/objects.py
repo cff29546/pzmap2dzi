@@ -1,5 +1,6 @@
 from PIL import Image, ImageDraw
 import os
+import struct
 from .common import draw_square, render_long_text, render_edge, LazyFont
 from .. import pzobjects
 
@@ -25,12 +26,13 @@ FORAGING_COLOR = {
 class Lmap(object):
     def __init__(self, biome):
         im = Image.open(biome).convert('L')
-        self.bytes = im.tobytes()
+        b = im.tobytes()
+        self.bytes = struct.unpack('B'*len(b), b)
         self.w, self.h = im.size
 
     def __getitem__(self, key):
         x, y = key
-        return int(self.bytes[x + y * self.w])
+        return self.bytes[x + y * self.w]
 
 
 @lru_cache(maxsize=1024)

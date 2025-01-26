@@ -110,6 +110,7 @@ def render_map(cmd, conf, maps, map_name, is_base):
     options = conf['render_conf'].copy()
     map_conf = maps[map_name]
     map_path = map_conf['map_path'].format(**dict(conf, **map_conf))
+    options['pz_root'] = conf['pz_root']
     options['input'] = map_path
 
     options['skip_level'] = get_conf(options, map_name, cmd, 'omit_levels', 0)

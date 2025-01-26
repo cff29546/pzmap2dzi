@@ -14,7 +14,7 @@ DONE_TEMPLATE = '(\\d+)_(\\d+)\\.(?:empty|{})$'
 
 
 RGB_FMT = set(['jpg', 'jpeg'])
-def SupportRGBA(ext):
+def supports_RGBA(ext):
     if ext in RGB_FMT:
         return False
     return True
@@ -110,7 +110,7 @@ class DZI(object):
             self.mark_empty(level, tx, ty, layer)
             return 'empty'
 
-        if not SupportRGBA(ext):
+        if not supports_RGBA(ext):
             im = im.convert('RGB')
 
         im.save(path, **self.save_options[ext])
@@ -149,7 +149,7 @@ class DZI(object):
         im = None
         if os.path.isfile(path):
             im = Image.open(path)
-            if not SupportRGBA(ext):
+            if not supports_RGBA(ext):
                 im = im.convert('RGBA')
         return im
 
@@ -271,7 +271,7 @@ class DZI(object):
 
     def render_below(self, im_getter, layer, layer_cache):
         ext = self.get_ext(layer)
-        if SupportRGBA(ext):
+        if supports_RGBA(ext):
             return None
         for l in range(self.render_minlayer, layer):
             im_below = layer_cache[l]

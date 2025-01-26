@@ -123,7 +123,7 @@ class Obj(object):
             return geometry.rects_border([[self.x, self.y, self.w, self.h]])
         m = {}
         for x, y in self.square_list():
-            m[x, y] = [geometry._MAYBE_OUTSIDE] * 4
+            m[x, y] = [geometry._MAYBE] * 4
         return geometry.get_border_from_square_map(m)
 
 

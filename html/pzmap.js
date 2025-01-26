@@ -59,11 +59,18 @@ function initUI_HTML() {
 <div class="legend" style="background-color:#0f0"></div><span id="forest"></span>
 <div class="legend" style="background-color:#080"></div><span id="deep_forest"></span>
 <div class="legend" style="background-color:#f0f"></div><span id="farmland"></span>
-<div class="legend" style="background-color:#f00"></div><span id="farm"></span>
-<span>&emsp; &emsp;</span>`;
+<div class="legend" style="background-color:#f00"></div><span id="farm"></span>`;
+    if (g.base_map.pz_version === 'B42') {
+        g.UI_HTML.foraging += `
+<div class="legend" style="background-color:#00bfff"></div><span id="water"></span>
+<div class="legend" style="background-color:#708090"></div><span id="water_no_fish"></span>`;
+    }
+    g.UI_HTML.foraging += `<span>&emsp; &emsp;</span>`;
+
     g.UI_ID.foraging = [
-        'foraging_legends_text', 'road', 'town_zone', 'trailer_park',
-        'vegitation', 'forest', 'deep_forest', 'farmland', 'farm'];
+        'foraging_legends_text', 'nav', 'town_zone', 'trailer_park',
+        'vegitation', 'forest', 'deep_forest', 'farmland', 'farm',
+        'water', 'water_no_fish'];
 
     g.UI_HTML.objects = `
 <b id="objects_legends_text"></b>
@@ -377,6 +384,7 @@ function init(callback=null) {
     g.base_map = new Map(g.map_type, '');
     g.base_map.initAsync().then(function(b) {
         g.grid = new c.Grid(g.base_map);
+        initUI_HTML();
         initUI();
         updateClip();
         initOSD();
@@ -881,7 +889,6 @@ function onKeyDown(event) {
 }
 
 Promise.all(pmodules).then(() => {
-    initUI_HTML();
     init();
 }).catch((e) => {
     let output = document.getElementById('main_output');

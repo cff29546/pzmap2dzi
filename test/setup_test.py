@@ -12,6 +12,10 @@ def copy_map(dst, src, cells):
     for x, y in cells:
         copy(dst, src, 'world_{}_{}.lotpack'.format(x, y))
         copy(dst, src, '{}_{}.lotheader'.format(x, y))
+        src_maps = os.path.join(src, 'maps')
+        if os.path.isdir(src_maps):
+            dst_maps = os.path.join(dst, 'maps')
+            copy(dst_maps, src_maps, 'biomemap_{}_{}.png'.format(x, y))
 
 
 def copy_conf(dst, src):

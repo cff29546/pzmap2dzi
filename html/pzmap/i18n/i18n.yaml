@@ -71,6 +71,12 @@ template:
     Farm:
         en: 'Farm'
         cn: '农场'
+    Water:
+        en: 'Water'
+        cn: '水域'
+    WaterNoFish:
+        en: 'Water (No Fish)'
+        cn: '水域(不可钓鱼)'
     RoomButton:
         en: 'Room'
         cn: '房间定义'
@@ -397,6 +403,10 @@ mapping:
             innerHTML: Farmland
         farm:
             innerHTML: Farm
+        water:
+            innerHTML: Water
+        water_no_fish:
+            innerHTML: WaterNoFish
         room_btn:
             innerHTML: RoomButton
         objects_btn:

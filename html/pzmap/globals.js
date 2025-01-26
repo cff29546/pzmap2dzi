@@ -1,9 +1,4 @@
 export var g = {
-    defaults: {
-			get: {
-				'map_name': '' // no default map_name for offline viewing
-			}
-		},
     map_type: 'iso',
     overlays: {},
     mapui: 0,
@@ -12,17 +7,31 @@ export var g = {
     markerui: 0,
     aboutui: 0,
     currentLayer: 0,
-		get: {}
+    query_string: {},
+    conf: {}
 };
-function populateGet() {
-  var obj = {}, params = location.search.slice(1).split('&');
-  for(var i=0,len=params.length;i<len;i++) {
-    var keyVal = params[i].split('=');
-    obj[decodeURIComponent(keyVal[0])] = decodeURIComponent(keyVal[1]);
-  }
-  return obj;
+
+function updateQueryString() {
+    g.query_string = {};
+    let params = location.search.slice(1).split('&');
+    for (let kv of params) {
+        if (kv.indexOf('=') >= 0) {
+            let [k, ...v] = kv.split('=');
+            g.query_string[k] = v.join('=');
+        }
+    }
 }
-export function initGlobals() {
+
+function loadConfig() {
+    let p = window.fetch('./pzmap_config.json').then((r) => r.json());
+    p = p.catch((e) => Promise.resolve({}));
+    return p.then((data) => {
+        g.conf = data;
+        return Promise.resolve(data);
+    });
+}
+
+export function reset() {
     g.viewer = 0;
     g.base_map = 0;
     g.mod_maps = [];
@@ -30,8 +39,27 @@ export function initGlobals() {
     g.minLayer = 0;
     g.maxLayer = 0;
     g.grid = 0;
-		g.get = populateGet();
-    if (undefined == g.get['map_name']){
-			g.get['map_name'] = g.defaults['map_name'];
-		}
+    updateQueryString();
 };
+
+export function getRoot(name=null) {
+    if (name === null) {
+        name = g.query_string.map_name;
+        if (!name) {
+            name = '';
+        }
+    }
+    let path = name;
+    let route = g.conf.route;
+    if (route) {
+        path = route[name];
+    }
+    if (!path) {
+        path = name;
+    }
+    return path;
+}
+
+export function init() {
+    return loadConfig();
+}

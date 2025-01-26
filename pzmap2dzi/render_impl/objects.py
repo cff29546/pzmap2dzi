@@ -41,7 +41,7 @@ def load_cell_biome(path, cx, cy):
     return None
 
 
-def get_b42_mapping(pz_root):
+def get_biome_mapping(pz_root):
     # return None # force B41
     path = os.path.join(pz_root, 'media', 'lua', 'server', 'metazones')
     config_file = os.path.join(path, 'BiomeMapConfig.lua')
@@ -57,7 +57,7 @@ def get_b42_mapping(pz_root):
 class ForagingBase(object):
     def __init__(self, **options):
         self.input = options.get('input')
-        self.mapping = get_b42_mapping(options.get('pz_root', '.'))
+        self.mapping = get_biome_mapping(options.get('pz_root', '.'))
         if self.mapping:
             self.version = 'B42'
             self.biome_path = os.path.join(self.input, 'maps')
@@ -70,7 +70,7 @@ class ForagingBase(object):
             self.tile = getattr(self, 'tile_' + self.version)
         else:
             self.square = getattr(self, 'square_' + self.version)
-        print('F:', self.version)
+        print('Foraging veriosn: {}'.format(self.version))
 
     def update_options(self, options):
         options['render_minlayer'] = 0
@@ -81,7 +81,7 @@ class ForagingBase(object):
 class ForagingRender(ForagingBase):
     def __init__(self, **options):
         ForagingBase.__init__(self, **options)
-        if not self.mapping:
+        if self.version == 'B41':
             self.cells = set(self.getter.get_cell_zones().keys())
             self.valid_cell = self.valid_cell_B41
 

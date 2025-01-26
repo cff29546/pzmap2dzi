@@ -1,5 +1,5 @@
-var g; // globals
-var initGlobals;
+var g; // globals vars
+var globals;
 var c; // coordinates
 var util;
 var Marker;
@@ -10,7 +10,8 @@ var debug = {};
 var pmodules = [
     import("./pzmap/globals.js").then((m) => {
         g = m.g;
-        initGlobals = m.initGlobals;
+        globals = m;
+        return m.init();
     }),
     import("./pzmap/map.js").then((m) => {
         Map = m.Map;
@@ -27,7 +28,7 @@ var pmodules = [
     }),
     import("./pzmap/i18n.js").then((m) => {
         i18n = m;
-        return i18n.init();
+        return m.init();
     }),
     import("./pzmap/util.js").then((m) => {
         util = m;
@@ -256,7 +257,7 @@ function initOSD() {
         drawer: 'canvas',
         opacity: 1,
         element: document.getElementById('map_div'),
-        tileSources: g.prefix + 'base' + g.base_map.suffix + '/layer0.dzi',
+        tileSources: globals.getRoot() + 'base' + g.base_map.suffix + '/layer0.dzi',
         homeFillsViewer: true,
         showZoomControl: true,
         constrainDuringPan: true,
@@ -374,14 +375,14 @@ function initOSD() {
 }
 
 function init(callback=null) {
-    initGlobals();
+    globals.reset();
     if (!g.marker) {
         g.marker = new Marker();
     }
     if (!g.trimmer) {
         g.trimmer = new Trimmer();
     }
-    g.base_map = new Map(g.map_type, '');
+    g.base_map = new Map(globals.getRoot(), g.map_type, '');
     g.base_map.initAsync().then(function(b) {
         g.grid = new c.Grid(g.base_map);
         initUI_HTML();
@@ -467,7 +468,7 @@ function toggleModMapUI() {
 }
 
 function initModMapUI() {
-    let p = window.fetch('./mod_maps/map_list.json');
+    let p = window.fetch(globals.getRoot() + 'mod_maps/map_list.json');
     p = p.then((r) => r.json()).catch((e)=>Promise.resolve([]));
     p = p.then((map_names) => {
         let s = document.getElementById('map_selector')
@@ -557,7 +558,7 @@ function addMap(names) {
                 }
             }
             if (pos >= g.mod_maps.length) {
-                let m = new Map(g.map_type, name, g.base_map);
+                let m = new Map(globals.getRoot() + 'mod_maps/' + name + '/', g.map_type, name, g.base_map);
                 g.mod_maps.push(m);
                 p.push(m.initAsync());
                 if (g.mod_maps.length == 1) {
@@ -894,7 +895,8 @@ Promise.all(pmodules).then(() => {
     let output = document.getElementById('main_output');
     if (output) {
         output.style.color = 'red';
-        output.innerHTML = 'Failed to load, try to use "run_server.bat" to start.<br/>Error: ' + e;
+        output.innerHTML = 'Failed to initialize modules.<br/>Error: ' + e;
     }
     document.body.style.background = 'white';
+    throw e;
 });

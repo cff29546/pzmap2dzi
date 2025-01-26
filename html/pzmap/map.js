@@ -9,7 +9,8 @@ export class Map {
     clip_list = [];
     info = {};
 
-    constructor(map_type, name, base_map=null) {
+    constructor(root, map_type, name, base_map=null) {
+        this.root = root;
         this.name = name;
         this.type = map_type;
         this.suffix = (map_type == 'top') ? '_top' : '';
@@ -97,6 +98,7 @@ export class Map {
 }
 
     getMapRoot() {
+        return this.root;
         let prefix = 'maps/'+g.get['map_name']+'_';
 			if (undefined == g.prefix){
 				g.prefix = prefix;
@@ -122,7 +124,7 @@ export class Map {
                 if (this.getTile(layer) == 0) {
                     this.setTile(layer, 'loading');
                     g.viewer.addTiledImage({
-                        tileSource: this.getMapRoot() + 'base' + this.suffix + '/layer' + layer + '.dzi',
+                        tileSource: this.root + 'base' + this.suffix + '/layer' + layer + '.dzi',
                         opacity: 1,
                         x: p.x,
                         y: p.y,
@@ -165,7 +167,7 @@ export class Map {
             if (this.overlays[type] == 0) {
                 this.overlays[type] = 'loading';
                 g.viewer.addTiledImage({
-                    tileSource: this.getMapRoot() + type + this.suffix + '/layer' + layer + '.dzi',
+                    tileSource: this.root + type + this.suffix + '/layer' + layer + '.dzi',
                     opacity: 1,
                     x: p.x,
                     y: p.y,
@@ -276,12 +278,12 @@ export class Map {
 
     getLayerRangeAsync() {
         let i = -1, j = 0;
-        let map_root = this.getMapRoot();
+        let root = this.root;
         let suffix = this.suffix;
         function getmax(r) {
             if (r.ok) {
                 i += 1;
-                return window.fetch(map_root + 'base' + suffix + '/layer' + i + '.dzi').then(getmax, getmax);
+                return window.fetch(root + 'base' + suffix + '/layer' + i + '.dzi').then(getmax, getmax);
             } else {
                 return Promise.resolve(i);
             }
@@ -289,7 +291,7 @@ export class Map {
         function getmin(r) {
             if (r.ok) {
                 j -= 1;
-                return window.fetch(map_root + 'base' + suffix + '/layer' + j + '.dzi').then(getmin, getmin);
+                return window.fetch(root + 'base' + suffix + '/layer' + j + '.dzi').then(getmin, getmin);
             } else {
                 return Promise.resolve(j+1);
             }
@@ -304,11 +306,11 @@ export class Map {
     }
 
     initAsync() {
-        let map_root = this.getMapRoot();
+        let root = this.root;
         let suffix = this.suffix;
         let empty = function(e) { return Promise.resolve({})};
         function getinfo(type) {
-            return window.fetch(map_root + type + suffix + '/map_info.json')
+            return window.fetch(root + type + suffix + '/map_info.json')
                 .then((r) => r.json()).catch((e) => Promise.resolve({}));
         }
 

@@ -101,7 +101,7 @@ def get_conf(options, name, cmd, key, default):
     return default
 
 
-def render_map(cmd, conf, maps, map_name, is_base):
+def render_map(cmd, conf, maps, map_name, is_mod_map=False):
     from pzmap2dzi import render
     if cmd not in render.RENDER_CMD:
         print('unspported render cmd: {}'.format(cmd))
@@ -122,13 +122,13 @@ def render_map(cmd, conf, maps, map_name, is_base):
         texture_path = os.path.join(conf['output_path'], 'texture', d)
         if os.path.isdir(texture_path):
             options['texture'].append(texture_path)
-    if is_base:
-        options['output'] = os.path.join(conf['output_path'], 'html', cmd)
-    else:
-        options['output'] = os.path.join(conf['output_path'], 'html',
-                                         'mod_maps', map_name, cmd)
-    if is_base and cmd == 'base':
+    output_path_parts = [conf['output_path'], 'html', 'map_data']
+    if is_mod_map:
+        output_path_parts += ['mod_maps', map_name]
+    elif cmd == 'base':
         options['image_fmt_layer0'] = options.get('image_fmt_base_layer0')
+    output_path_parts += [cmd]
+    options['output'] = os.path.join(*output_path_parts)
 
     # room / objects
     options['encoding'] = map_conf['encoding']
@@ -144,7 +144,7 @@ def render_map(cmd, conf, maps, map_name, is_base):
 
 
 def save_mod_map_list(conf):
-    mod_maps = os.path.join(conf['output_path'], 'html', 'mod_maps')
+    mod_maps = os.path.join(conf['output_path'], 'html', 'map_data', 'mod_maps')
     if not os.path.isdir(mod_maps):
         return
     maps = []
@@ -160,13 +160,13 @@ def render(args):
     for cmd in args.args:
         # base map
         if conf.get('base_map'):
-            if not render_map(cmd, conf, maps, conf['base_map'], True):
+            if not render_map(cmd, conf, maps, conf['base_map'], False):
                 break
         # mod maps
         if not conf.get('mod_maps'):
             continue
         for map_name in conf['mod_maps']:
-            if not render_map(cmd, conf, maps, map_name, False):
+            if not render_map(cmd, conf, maps, map_name, True):
                 print('render [{}] for map [{}] error'.format(cmd, map_name))
                 save_mod_map_list(conf)
                 return

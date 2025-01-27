@@ -171,9 +171,10 @@ def square_map(cell_zones, cell_size, cx, cy):
         return None
     m = {}
     for z in cell_zones[cx, cy]:
-        for x, y in z.square_list():
-            if (x < cx * cell_size or x >= (cx + 1) * cell_size or
-                y < cy * cell_size or y >= (cy + 1) * cell_size):
+        for sx, sy in z.square_list():
+            x = sx - cx * cell_size
+            y = sy - cy * cell_size
+            if x < 0 or x >= cell_size or y < 0 or y >= cell_size:
                 continue
             if (x, y) not in m:
                 m[x, y] = z.type

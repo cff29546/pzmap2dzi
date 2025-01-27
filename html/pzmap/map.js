@@ -71,13 +71,13 @@ export class Map {
         }
         
         for (let type of ['zombie', 'foraging']) {
-            if (this.overlays[type]) {
+            if (![undefined, 0, 'loading', 'delete'].includes(this.overlays[type])) {
                 let clip_list = this.getClipList(this.info[type].scale, 0);
                 this.overlays[type].setCroppingPolygons(clip_list);
             }
         }
         for (let type of ['room', 'objects']) {
-            if (this.overlays[type]) {
+            if (![undefined, 0, 'loading', 'delete'].includes(this.overlays[type])) {
                 let clip_list = this.getClipList(this.info[type].scale, layer);
                 this.overlays[type].setCroppingPolygons(clip_list);
             }

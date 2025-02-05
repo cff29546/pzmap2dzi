@@ -158,6 +158,7 @@ export class Trimmer {
         this.clearSelection();
         if (this.save_path) {
             let p = window.fetch('./load/' + this.save_path).then((r) => r.json());
+            util.setOutput('trimmer_output', 'green', i18n.T('TrimmerLoading', {path: this.save_path}), 0);
 
             let load = (function (data) {
                 this.save_version = data.version;

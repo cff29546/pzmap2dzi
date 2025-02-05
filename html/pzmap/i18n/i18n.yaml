@@ -288,6 +288,9 @@ template:
     TrimmerVersionMismatch:
         en: 'Version mismatch, save=[{save_version}] map=[{map_version}].'
         cn: '存档版本=[{save_version}]与主地图版本=[{map_version}]不匹配。'
+    TrimmerLoading:
+        en: '<b>Loading savegame [{path}]</b>'
+        cn: '<b>正在加载存档[{path}]</b>'
     TrimmerLoadSuccess:
         en: '<b>Savegame [{path}] loaded, version=[{version}].</b>'
         cn: '<b>加载存档[{path}]成功，存档版本=[{version}]。</b>'

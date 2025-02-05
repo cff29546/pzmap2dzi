@@ -274,6 +274,7 @@ export class Trimmer {
             return Promise.resolve(e);
         };
        
+        util.setOutput('trimmer_output', 'green', i18n.T('TrimmerTrimming'), 0);
         let headers = {'Content-Type': 'application/x-www-form-urlencoded'};
         let p = window.fetch('./delete/' + this.save_path, {method: 'POST', body: body, headers: headers});
         return p.then(() => this.loadSave()).then(ok).catch(error);

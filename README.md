@@ -4,10 +4,20 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 # Now fully suport B42 basement
 
 <p float="left">
-  <img src="/docs/img/markedit.jpg" width="192" alt="marking" />
-  <img src="/docs/img/basement.jpg" width="192" alt="basement" /> 
-  <img src="/docs/img/trimmer.jpg" width="192" alt="trimmer" />
-  <img src="/docs/img/i18n.jpg" width="192" alt="i18n" />
+  <table>
+  <tr>
+    <td><img src="/docs/img/markedit.jpg" width="192" alt="marking" /></td>
+    <td><img src="/docs/img/basement.jpg" width="192" alt="basement" /></td>
+    <td><img src="/docs/img/trimmer.jpg" width="192" alt="trimmer" /></td>
+    <td><img src="/docs/img/i18n.jpg" width="192" alt="i18n" /></td>
+  </tr>
+  <tr>
+    <td>Marking</td>
+    <td>Basement</td>
+    <td>Local savegame trimmer</td>
+    <td>I18n support</td>
+  </tr>
+  </table>
 </p>
 
 # Features
@@ -17,7 +27,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 - Featured overlay map: zombie-heatmap, foraging zones, story area, etc.
 - Tools for local saved games trimming
 - Customized marks edit/export/import
-- i18n support
+- I18n support
 - Multi-thread acceleration
 - Tested with game version 41.78.16 and 42.0.2 UNSTABLE on both python 2.7 and python 3.11
 
@@ -78,21 +88,15 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 After the rendering, you get an `html` folder in your output path.
 ```
 html
-├── base/
-├── base_top/
-├── foraging/
-├── foraging_top/
-├── objects/
-├── mod_maps/
+├── map_data/
 ├── openseadragon/
-├── room/
-├── zombie/
-├── zombie_top/
+├── pzmap/
 ├─ chrome.bat
 ├─ chrome_allow_file(need close chrome first).bat
 ├─ chrome_no_sicurity.bat
 ├─ pzmap.html
 ├─ pzmap.js
+├─ pzmap_config.json
 ├─ run_server.bat
 ├─ server.py
 └─ server_config.txt

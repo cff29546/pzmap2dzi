@@ -76,6 +76,10 @@ class RoomRender(object):
             font_size = options.get('default_font_size', 20)
         self.font = LazyFont(font_name, int(font_size))
 
+    def update_options(self, options):
+        options['render_margin'] = [-2, -2, 2, 2]  # add margin for text
+        return options
+
     def square(self, im_getter, dzi, ox, oy, sx, sy, layer):
         cx, subx = divmod(sx, dzi.cell_size)
         cy, suby = divmod(sy, dzi.cell_size)

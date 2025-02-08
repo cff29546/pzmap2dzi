@@ -344,101 +344,127 @@ class PZDZI(DZI):
 
 
 class IsoDZI(PZDZI):
-    SQR_HEIGHT = 64
-    HALF_SQR_HEIGHT = SQR_HEIGHT >> 1
-    SQR_WIDTH = 128
-    HALF_SQR_WIDTH = SQR_WIDTH >> 1
+    SQUARE_HEIGHT = 64
+    GRID_HEIGHT = SQUARE_HEIGHT // 2  # 32
+    SQUARE_WIDTH = 128
+    GRID_WIDTH = SQUARE_WIDTH // 2  # 64
+    LAYER_HEIGHT = 192
+    GRID_HEIGHT_PER_LAYER = LAYER_HEIGHT // GRID_HEIGHT  # 6
     # normal texture size      w:128 h:256
+    TEXTURE_WIDTH = 128
+    TEXTURE_HEIGHT = 256
     # jumbo tree texutre size  w:384 h:512
+    LARGE_TEXTURE_WIDTH = 384
+    LARGE_TEXTURE_HEIGHT = 512
 
     def get_sqr_center(self, gx, gy):
-        ox = gx * IsoDZI.HALF_SQR_WIDTH
-        oy = gy * IsoDZI.HALF_SQR_HEIGHT
+        ox = gx * IsoDZI.GRID_WIDTH
+        oy = gy * IsoDZI.GRID_HEIGHT
         return ox, oy
 
     def __init__(self, map_path, **options):
         self.pz_init(map_path, **options)
-        self.sqr_height = IsoDZI.SQR_HEIGHT
-        self.sqr_width = IsoDZI.SQR_WIDTH
+        self.sqr_height = IsoDZI.SQUARE_HEIGHT
+        self.sqr_width = IsoDZI.SQUARE_WIDTH
         self.tile_size = options.get('tile_size', 1024)
-        self.grid_per_tilex = self.tile_size // IsoDZI.HALF_SQR_WIDTH
-        self.grid_per_tiley = self.tile_size // IsoDZI.HALF_SQR_HEIGHT
+        self.grid_per_tilex = self.tile_size // IsoDZI.GRID_WIDTH
+        self.grid_per_tiley = self.tile_size // IsoDZI.GRID_HEIGHT
+        self.use_jumbo_tree = options.get('jumbo_tree_size', 3) > 3
+        self.output_margin = self.get_output_margin(True)
+        self.cell_margin = self.get_output_margin()
+        self.render_margin = options.get('render_margin', 'default')
+        if self.render_margin == 'default':
+            self.render_margin = self.get_default_render_margin()
 
         assert self.tile_size % self.sqr_width == 0
         assert self.tile_size % self.sqr_height == 0
         assert len(self.cells) > 0
-        gxmin = None
-        gxmax = None
-        gymin = None
-        gymax = None
-        self.use_jumbo_tree = True
+        gxmin, gymin, gxmax, gymax = [None] * 4
         for cx, cy in self.cells:
-            left, right, top, bottom = self.cell_grid_bound(cx, cy)
+            left, top, right, bottom = self.cell_grid_bound(cx, cy)
             if gxmin is None:
                 gxmin = left
-                gxmax = right
                 gymin = top
+                gxmax = right
                 gymax = bottom
             else:
                 gxmin = min(left, gxmin)
-                gxmax = max(right, gxmax)
                 gymin = min(top, gymin)
+                gxmax = max(right, gxmax)
                 gymax = max(bottom, gymax)
 
-        gxmin -= 2
-        gxmax += 2
-        gymin -= 2
-        gymax += 2
+        gbox = gxmin, gymin, gxmax, gymax
+        gxmin, gymin, gxmax, gymax = map(sum, zip(gbox, self.output_margin))
 
         # grid offset
         self.gxo = gxmin
         self.gyo = gymin
         self.gw = gxmax - gxmin + 1
         self.gh = gymax - gymin + 1
-        w = self.gw * IsoDZI.HALF_SQR_WIDTH
-        h = self.gh * IsoDZI.HALF_SQR_HEIGHT
-        self.tile_gw = self.tile_size // IsoDZI.HALF_SQR_WIDTH
-        self.tile_gh = self.tile_size // IsoDZI.HALF_SQR_HEIGHT
-        self.use_jumbo_tree = options.get('jumbo_tree_size', 3) > 3
+        w = self.gw * IsoDZI.GRID_WIDTH
+        h = self.gh * IsoDZI.GRID_HEIGHT
+        self.grid_width_per_tile = self.tile_size // IsoDZI.GRID_WIDTH
+        self.grid_height_per_tile = self.tile_size // IsoDZI.GRID_HEIGHT
         DZI.__init__(self, w, h, **options)
+
+    def get_output_margin(self, use_large_texture=False):
+        texture_width = IsoDZI.TEXTURE_WIDTH
+        texture_height = IsoDZI.TEXTURE_HEIGHT
+        if use_large_texture or self.use_jumbo_tree:
+            texture_width = IsoDZI.LARGE_TEXTURE_WIDTH
+            texture_height = IsoDZI.LARGE_TEXTURE_HEIGHT
+        width = (texture_width // 2) // IsoDZI.GRID_WIDTH
+        left = -width
+        right = width
+
+        # +1 for grid center to grid bottom
+        top = 1 - IsoDZI.GRID_HEIGHT_PER_LAYER * self.maxlayer
+        top -= (texture_height // IsoDZI.GRID_HEIGHT)
+        # +1 for grid center to grid bottom
+        bottom = IsoDZI.GRID_HEIGHT_PER_LAYER * (-self.minlayer) + 1
+        return left, top, right, bottom
+
+    def get_default_render_margin(self):
+        # render grid neighbours for tile
+        texture_width = IsoDZI.TEXTURE_WIDTH
+        texture_height = IsoDZI.TEXTURE_HEIGHT
+        if self.use_jumbo_tree:
+            texture_width = IsoDZI.LARGE_TEXTURE_WIDTH
+            texture_height = IsoDZI.LARGE_TEXTURE_HEIGHT
+        width = (texture_width // 2) // IsoDZI.GRID_WIDTH - 1
+        left = -width
+        right = width
+        top = 0
+        bottom = (texture_height // IsoDZI.GRID_HEIGHT) - 2
+        return left, top, right, bottom
 
     def tile2grid(self, tx, ty, layer):
         gx = self.gxo + self.grid_per_tilex * tx
-        gy = self.gyo + self.grid_per_tiley * ty + layer*6
+        gy = self.gyo + self.grid_per_tiley * ty
+        gy += IsoDZI.GRID_HEIGHT_PER_LAYER * layer
         return gx, gy
 
-    def tile_grid_bound(self, tx, ty, layer):
-        left, top = self.tile2grid(tx, ty, layer)
-        right, bottom = self.tile2grid(tx + 1, ty + 1, layer)
-        if self.use_jumbo_tree:
-            return (left - 2, right + 2, top, bottom + 14)
-        else:
-            return (left, right, top, bottom + 6)
-
     def square_grid_bound(self, sx1, sy1, sx2, sy2):
-        top = sx1 + sy1
-        bottom = sx2 + sy2
         left = sx1 - sy2
+        top = sx1 + sy1
         right = sx2 - sy1
-        return top, bottom, left, right
+        bottom = sx2 + sy2
+        return left, top, right, bottom
 
     def cell_grid_bound(self, cx, cy):
-        sx = cx * self.cell_size
-        sy = cy * self.cell_size
-        sxmax = sx + self.cell_size - 1
-        symax = sy + self.cell_size - 1
-        top, bottom, left, right = self.square_grid_bound(sx, sy, sxmax, symax)
-        if self.use_jumbo_tree:
-            return (left - 2, right + 2, top - max(14, 6*self.maxlayer), bottom - 6*self.minlayer)
-        else:
-            return (left, right, top - 6*self.maxlayer, bottom - 6*self.minlayer)
+        sxmin = cx * self.cell_size
+        symin = cy * self.cell_size
+        sxmax = sxmin + self.cell_size - 1
+        symax = symin + self.cell_size - 1
+        return self.square_grid_bound(sxmin, symin, sxmax, symax)
 
     def cell2tiles(self, cx, cy):
-        left, right, top, bottom = self.cell_grid_bound(cx, cy)
-        txmin = (left - self.gxo - 1) // self.tile_gw
-        txmax = (right - self.gxo) // self.tile_gw
-        tymin = (top - self.gyo - 1) // self.tile_gh
-        tymax = (bottom - self.gyo) // self.tile_gh
+        gbox = map(sum, zip(self.cell_grid_bound(cx, cy), self.cell_margin))
+        left, top, right, bottom = gbox
+        txmin = (left - self.gxo - 1) // self.grid_width_per_tile
+        txmax = (right - self.gxo) // self.grid_width_per_tile
+        tymin = (top - self.gyo - 1) // self.grid_height_per_tile
+        tymax = (bottom - self.gyo) // self.grid_height_per_tile
         tiles = [(tx, ty) for ty in range(tymin, tymax + 1)
                  for tx in range(txmin, txmax + 1)]
         return tiles
@@ -446,9 +472,16 @@ class IsoDZI(PZDZI):
     def render_tile(self, im_getter, tx, ty, layer, layer_cache):
         self.render_below(im_getter, layer, layer_cache)
         gx0, gy0 = self.tile2grid(tx, ty, layer)
-        left, right, top, bottom = self.tile_grid_bound(tx, ty, layer)
+
         if hasattr(self.render, 'tile'):
-            return self.render.tile(im_getter, self, gx0, gy0, left, right, top, bottom, layer)
+            return self.render.tile(im_getter, self, gx0, gy0, layer)
+
+        gx1 = gx0 + self.grid_per_tilex
+        gy1 = gy0 + self.grid_per_tiley
+        gbox = gx0, gy0, gx1, gy1
+        if self.render_margin:
+            gbox = map(sum, zip(gbox, self.render_margin))
+        left, top, right, bottom = gbox
         for gy in range(top, bottom + 1):
             for gx in range(left, right + 1):
                 if (gx + gy) & 1:
@@ -460,9 +493,9 @@ class IsoDZI(PZDZI):
 
     def update_map_info(self, info):
         info = self.update_pz_map_info(info)
-        info['x0'] = -self.gxo * IsoDZI.HALF_SQR_WIDTH
-        info['y0'] = -(self.gyo + 1) * IsoDZI.HALF_SQR_HEIGHT
-        info['sqr'] = 2 * IsoDZI.HALF_SQR_WIDTH
+        info['x0'] = -self.gxo * IsoDZI.GRID_WIDTH
+        info['y0'] = -(self.gyo + 1) * IsoDZI.GRID_HEIGHT
+        info['sqr'] = 2 * IsoDZI.GRID_WIDTH
         return info
 
 

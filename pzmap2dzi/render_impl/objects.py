@@ -81,6 +81,7 @@ class ForagingBase(object):
     def update_options(self, options):
         options['render_minlayer'] = 0
         options['render_maxlayer'] = 1
+        options['render_margin'] = None
         return options
 
     def valid_cell_B41(self, x, y):
@@ -155,6 +156,10 @@ class ObjectsRender(object):
             types = types.union(pzobjects.STORY_TYPES)
         self.getter = pzobjects.CachedBorderLabelMapGetter(objects_path, types)
         self.cells = set(self.getter.get_cell_zones().keys())
+
+    def update_options(self, options):
+        options['render_margin'] = [-2, -2, 2, 2]  # add margin for text
+        return options
 
     def valid_cell(self, x, y):
         return (x, y) in self.cells

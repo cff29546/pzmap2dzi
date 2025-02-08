@@ -48,21 +48,28 @@ class ZombieRender(object):
     def update_options(self, options):
         options['render_minlayer'] = 0
         options['render_maxlayer'] = 1
+        options['render_margin'] = None
         return options
 
     def valid_cell(self, x, y):
         return load_cell(self.input, x, y) is not None
 
-    def tile(self, im_getter, dzi, gx0, gy0, gl, gr, gt, gb, layer):
+    def tile(self, im_getter, dzi, gx0, gy0, layer):
         draw = None
-        sxmax = (gb + gr) >> 1
-        symax = (gb - gl) >> 1
-        sxmin = (gt + gl) >> 1
-        symin = (gt - gr) >> 1
-        for blockx in range(sxmin // dzi.block_size, (sxmax // dzi.block_size) + 1):
+        gx1 = gx0 + dzi.grid_per_tilex
+        gy1 = gy0 + dzi.grid_per_tiley
+        sxmax = (gy1 + gx1) >> 1
+        symax = (gy1 - gx0) >> 1
+        sxmin = (gy0 + gx0) >> 1
+        symin = (gy0 - gx1) >> 1
+        blockxmax = sxmax // dzi.block_size + 1
+        blockymax = symax // dzi.block_size + 1
+        blockxmin = sxmin // dzi.block_size
+        blockymin = symin // dzi.block_size
+        for blockx in range(blockxmin, blockxmax):
             sx = blockx * dzi.block_size
             cx, bx = divmod(blockx, dzi.cell_size_in_block)
-            for blocky in range(symin // dzi.block_size, (symax // dzi.block_size) + 1):
+            for blocky in range(blockymin, blockymax):
                 cy, by = divmod(blocky, dzi.cell_size_in_block)
                 zpop = load_cell(self.input, cx, cy)
                 if not zpop:
@@ -78,7 +85,7 @@ class ZombieRender(object):
                 if draw == None:
                     im = im_getter.get()
                     draw = ImageDraw.Draw(im)
-                draw_square(draw, ox, oy, color, dzi.block_size)
+                draw_square(draw, ox, oy, color, dzi.block_size, dzi.block_size)
                 gxz = gx + dzi.block_size - 1
                 gyz = gy + dzi.block_size - 1
                 oxz, oyz = dzi.get_sqr_center(gxz - gx0, gyz - gy0)

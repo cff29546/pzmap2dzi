@@ -1,0 +1,18 @@
+#!/bin/bash
+
+echo pre-commit hook
+echo -n "" > NEW_VERSION
+
+cat VERSION | while read pv; do
+    path=`echo $pv | awk '{ OFS=" "; NF-=1; print $0 }'`
+    version=`echo $pv | awk '{ print $NF }'`
+    if git diff --cached --name-only $path | grep -E '.' > /dev/null ; then
+        old_version=$version
+        version=`echo $version | awk -F. '{ OFS="."; $NF+=1; print $0}'`
+        echo [$path] [$old_version]=\>[$version]
+    fi
+    echo $path $version>>NEW_VERSION
+done
+mv NEW_VERSION VERSION
+git add VERSION
+

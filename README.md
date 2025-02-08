@@ -13,7 +13,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
   </tr>
   <tr>
     <td>Marking</td>
-    <td>Basement</td>
+    <td>Basement with transparent roof layer</td>
     <td>Local savegame trimmer</td>
     <td>I18n support</td>
   </tr>

@@ -31,14 +31,14 @@ def render_text(draw, x, y, text, color, font):
               text, color, font)
 
 
-def draw_square(draw, x, y, color, size=1):
-    h = pzdzi.IsoDZI.HALF_SQR_HEIGHT
-    w = pzdzi.IsoDZI.HALF_SQR_WIDTH
+def draw_square(draw, x, y, color, sizew=1, sizeh=1):
+    h = pzdzi.IsoDZI.GRID_HEIGHT
+    w = pzdzi.IsoDZI.GRID_WIDTH
     path = [
-        x         , y - h           ,  # top
-        x + size*w, y - h + size*h  ,  # right
-        x         , y - h + 2*size*h,  # bottom
-        x - size*w, y - h + size*h  ,  # left
+        x                      , y - h                      ,  # top
+        x + sizew * w          , y + (sizew - 1) * h        ,  # right
+        x + (sizew - sizeh) * w, y + (sizew + sizeh - 1) * h,  # bottom
+        x - sizeh * w          , y + (sizeh - 1) * h        ,  # left
     ]
     draw.polygon(path, fill=color)
 
@@ -75,7 +75,7 @@ def break_long_text(text):
 
 def render_long_text(draw, x, y, text, color, font):
     dx, dy, w, h = text_size(draw, text, font)
-    if w >= pzdzi.IsoDZI.SQR_WIDTH:
+    if w >= pzdzi.IsoDZI.SQUARE_WIDTH:
         text = break_long_text(text)
         dx, dy, w, h = text_size(draw, text, font)
     draw.text((x - dx - w // 2, y - dy - h // 2),
@@ -86,8 +86,8 @@ _PAD_Y = 5
 _PAD_X = 10
 def render_edge(draw, x, y, color, width, border_flags):
     edges = geometry.get_edge_segments(border_flags, x, y,
-                                       pzdzi.IsoDZI.HALF_SQR_WIDTH,
-                                       pzdzi.IsoDZI.HALF_SQR_HEIGHT,
+                                       pzdzi.IsoDZI.GRID_WIDTH,
+                                       pzdzi.IsoDZI.GRID_HEIGHT,
                                        _PAD_X, _PAD_Y)
     for edge in edges:
         draw.line(edge, fill=color, width=width)

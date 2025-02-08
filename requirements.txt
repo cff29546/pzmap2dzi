@@ -8,3 +8,4 @@ flask
 waitress
 requests
 ruamel.yaml
+backports.functools_lru_cache==1.6.6 ; python_version < '3.0'

@@ -83,6 +83,7 @@ def color_sum(pixels):
 
 class Texture(object):
     def __init__(self, im, offset=None):
+        # offset is from the bottom center of the square
         if offset:
             ox, oy = offset
         else:
@@ -293,7 +294,7 @@ class TextureLibrary(object):
         w, h = 384, 512
         im = Image.new('RGBA', (w, h))
         x = w >> 1
-        y = h  # - (pzdzi.SQR_HEIGHT // 2)
+        y = h
         for name in names:
             t = self.get_by_name(name)
             if t:

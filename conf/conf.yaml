@@ -10,6 +10,12 @@ mod_root: |- # steam workshop folder for project zomboid
 custom_root: |- # custom file folder
     .
 
+# for multi map set
+# output_entry: map set name
+# output_route: map set data path
+output_entry: default
+output_route: map_data/
+
 # defult map or texture description fields
 # (relative from this config file location)
 map_conf_default: default.txt

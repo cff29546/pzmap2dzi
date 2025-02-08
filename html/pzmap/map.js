@@ -351,6 +351,7 @@ export class Map {
                 this.block_size = this.info.base.block_size;
                 this.cell_in_block = this.cell_size / this.block_size;
                 this.pz_version = this.info.base.pz_version;
+                this.render_version = this.info.base.pzmap2dzi_version;
                 this.minlayer = this.info.base.minlayer;
                 this.maxlayer = this.info.base.maxlayer;
             }

@@ -318,6 +318,7 @@ class PZDZI(DZI):
         self.cell_size = version_info['cell_size']
         self.minlayer = version_info['minlayer']
         self.maxlayer = version_info['maxlayer']
+        self.pzmap2dzi_version = options.get('pzmap2dzi_version', 'unknown')
         layer_range = options.get('layer_range', 'all')
         if layer_range != 'all':
             self.minlayer = max(self.minlayer, layer_range[0])
@@ -340,6 +341,7 @@ class PZDZI(DZI):
         info['pz_version'] = self.pz_version
         info['maxlayer'] = self.maxlayer
         info['minlayer'] = self.minlayer
+        info['pzmap2dzi_version'] = self.pzmap2dzi_version
         return info
 
 

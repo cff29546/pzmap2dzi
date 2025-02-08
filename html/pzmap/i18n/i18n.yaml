@@ -351,11 +351,13 @@ template:
         en: '<strong>Created with:</strong> {pzmap2dzi}<br/>
             <strong>Map engine:</strong> {osd}<br/>
             <strong>Special Thanks to:</strong> {pzwiki} <strong>Volunteers</strong><br/>
-            {pz} map version: <b style="color:red">{version}</b><br/>'
+            <strong>{pz}</strong> map version: <b style="color:red">{pz_version}</b><br/>
+            Render version: {render_version} UI version: {ui_version} <br/>'
         cn: '<strong>使用</strong>{pzmap2dzi}<strong>绘制</strong><br/>
             <strong>地图浏览引擎:</strong> {osd}<br/>
             <strong>特别感谢:</strong>{pzwiki}<strong>志愿者</strong><br/>
-            {pz_steam} 主地图版本: <b style="color:red">{version}</b><br/>'
+            <strong>{pz_steam}</strong> 主地图版本: <b style="color:red">{pz_version}</b><br/>
+            渲染器版本: {render_version} 界面版本: {ui_version} <br/>'
     PZmap2dzi:
         en: 'PZmap2dzi'
         cn: '僵毁地图可视化工具'

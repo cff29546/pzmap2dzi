@@ -5,13 +5,25 @@ from distutils.dir_util import copy_tree
 import re
 import json
 import zipfile
+from pzmap2dzi import i18n_util
+from pzmap2dzi.i18n_util import load_yaml, update_json
 
 
-def load_yaml(path):
-    with io.open(path, 'r', encoding='utf8') as f:
-        data = yaml.safe_load(f.read())
-    return data
+def get_version():
+    v = {}
+    script_path = os.path.dirname(os.path.realpath(__file__))
+    version_file = os.path.join(script_path, 'VERSION')
+    if os.path.isfile(version_file):
+        with io.open(version_file, 'r', encoding='utf8') as f:
+            for line in f:
+                keys = line.strip().split()
+                if keys:
+                    version = keys[-1]
+                    for key in keys[:-1]:
+                        v[key] = version
+    return v
 
+VERSION = get_version()
 
 def load_path(path):
     if os.path.isfile(path):
@@ -137,6 +149,7 @@ def render_map(cmd, conf, maps, map_name, is_mod_map=False):
     r = Render(**options)
     if hasattr(r, 'update_options'):
         options = r.update_options(options)
+    options['pzmap2dzi_version'] = VERSION.get('pzmap2dzi', 'unknown')
     dzi = DZI(options['input'], **options)
     suc = dzi.render_all(r, options['worker_count'], options['break_key'],
                          options['verbose'], options['profile'])
@@ -180,7 +193,6 @@ def unzip(path):
 
 
 def process_i18n(path):
-    from pzmap2dzi import i18n_util
     i18n_util.expand_i18n(os.path.join(path, 'i18n.yaml'))
     i18n_util.yaml_aio_to_json_all(os.path.join(path, 'marks.yaml'))
 
@@ -193,6 +205,15 @@ def copy(args):
     copy_tree(src, dst)
     unzip(os.path.join(dst, 'openseadragon', 'openseadragon.zip'))
     process_i18n(os.path.join(dst, 'pzmap', 'i18n'))
+
+    entry = conf.get('output_entry', 'default')
+    route = conf.get('output_route', 'map_data/')
+    update_json(os.path.join(dst, 'pzmap_config.json'), {
+        'route': {
+            entry: route,
+        },
+        'version': VERSION.get('html', 'unknown'),
+    })
 
 
 CMD = {

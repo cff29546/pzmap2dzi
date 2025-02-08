@@ -23,6 +23,24 @@ def save_yaml(path, data):
     with io.open(path, 'w', encoding='utf8') as f:
         f.write(yaml.safe_dump(data, encoding=None, allow_unicode=True))
 
+
+def update_data(data, update):
+    for key, value in update.items():
+        if isinstance(value, dict):
+            data[key] = update_data(data.get(key, {}), value)
+        else:
+            data[key] = value
+    return data
+
+
+def update_json(path, update):
+    data = {}
+    if os.path.isfile(path):
+        data = load_json(path)
+    data = update_data(data, update)
+    save_json(path, data)
+
+
 # marks
 def concat_dict(data, splitor):
     kvs = []

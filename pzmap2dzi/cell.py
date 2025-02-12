@@ -1,12 +1,5 @@
 import os
-from . import lotheader, util
-
-
-def get_version(data):
-    if data[:4] == b'LOTP':
-        return util.read_uint32(data, 4)
-    else:
-        return 0, 0
+from . import binfile, lotheader, util
 
 
 class Cell(object):
@@ -18,12 +11,16 @@ class Cell(object):
         data = b''
         with open(path, 'rb') as f:
             data = f.read()
-        self.version, pos = get_version(data)
+        self.version, pos = binfile.get_version(data, 0, b'LOTP', (0, 0))
         self.init_for_version()
         block_num, pos = util.read_uint32(data, pos)
         self.blocks = []
+        block_table = pos
         for i in range(block_num):
-            self.read_block(data, pos + i*8)
+            pos, _ = util.read_uint32(data, block_table + i * 8)
+            block, pos = binfile.read_block(data, pos, self.block_size,
+                [self.minlayer, self.maxlayer], binfile.lotpack_data_parser)
+            self.blocks.append(block)
 
     def init_for_version(self):
         if self.version != self.header['version']:
@@ -34,48 +31,6 @@ class Cell(object):
         self.cell_size = self.block_per_cell * self.block_size
         self.minlayer = self.header['minlayer']
         self.maxlayer = self.header['maxlayer']
-
-    def read_block(self, data, pos):
-        pos, _ = util.read_uint32(data, pos)
-        size = self.block_size
-        sqr_size = size*size
-        skip = 0
-        block = [None] * (self.maxlayer - self.minlayer)
-        valid_tiles = 0
-        for z in range(self.minlayer, self.maxlayer):
-            if skip >= sqr_size:
-                skip -= sqr_size
-                continue
-            layer = [None] * size
-            for x in range(size):
-                if skip >= size:
-                    skip -= size
-                    continue
-                row = [None] * size
-                for y in range(size):
-                    if skip > 0:
-                        skip -= 1
-                        continue
-                    count, pos = util.read_int32(data, pos)
-                    if count == -1:
-                        skip, pos = util.read_int32(data, pos)
-                        if skip > 0:
-                            skip -= 1
-                            continue
-                    if count <= 1:
-                        continue
-                    room, pos = util.read_int32(data, pos)
-                    tiles = []
-                    for i in range(count - 1):
-                        tile, pos = util.read_int32(data, pos)
-                        tiles.append(tile)
-                    row[y] = tiles  # drop room here as it is not used
-                    valid_tiles += 1
-                if row != [None] * size:
-                    layer[x] = row
-            if layer != [None] * size:
-                block[z] = layer
-        self.blocks.append(block)
 
     def get_square(self, subx, suby, layer):
         if layer < self.minlayer or layer >= self.maxlayer:

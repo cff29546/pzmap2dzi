@@ -1,6 +1,6 @@
 import os
 import re
-from . import util
+from . import binfile, util
 
 VERSION_LIMITATIONS = {
     0: {  # B41
@@ -73,72 +73,15 @@ def get_version_info(path, fast_mode=False):
     return version_info
 
 
-def calc_room_bound(room):
-    for rect in room['rects']:
-        x, y, w, h = rect
-        room['xmin'] = min(room.get('xmin', x), x)
-        room['xmax'] = max(room.get('xmax', x + w), x + w)
-        room['ymin'] = min(room.get('ymin', y), y)
-        room['ymax'] = max(room.get('ymax', y + h), y + h)
-
-
-def read_room(data, pos):
-    room = {}
-    name, pos = util.read_line(data, pos)
-    room['name'] = name
-    room['layer'], pos = util.read_int32(data, pos)
-    rect_num, pos = util.read_uint32(data, pos)
-    rects = []
-    room['area'] = 0
-    for i in range(rect_num):
-        x, pos = util.read_int32(data, pos)
-        y, pos = util.read_int32(data, pos)
-        w, pos = util.read_int32(data, pos)
-        h, pos = util.read_int32(data, pos)
-        room['area'] += w * h
-        rects.append((x, y, w, h))
-    room['rects'] = rects
-
-    calc_room_bound(room)
-
-    meta_num, pos = util.read_uint32(data, pos)
-    metas = []
-    for i in range(meta_num):
-        meta_type, pos = util.read_int32(data, pos)
-        x, pos = util.read_int32(data, pos)  # relative to cell base
-        y, pos = util.read_int32(data, pos)
-        metas.append((meta_type, x, y))
-    room['objects'] = metas
-
-    return room, pos
-
-
-def read_building(data, pos):
-    building = {}
-    room_num, pos = util.read_uint32(data, pos)
-    building['rooms'] = []
-    for i in range(room_num):
-        room_id, pos = util.read_uint32(data, pos)
-        building['rooms'].append(room_id)
-    return building, pos
-
-
-def read_zpop(data, pos, blocks):
+def read_zpop(data, pos, size):
     zpop = []
-    for i in range(blocks):
+    for x in range(size):
         line = []
-        for j in range(blocks):
+        for y in range(size):
             pop, pos = util.read_uint8(data, pos)
             line.append(pop)
         zpop.append(line)
     return zpop, pos
-
-
-def get_version(data):
-    if data[:4] == b'LOTH':
-        return util.read_uint32(data, 4)
-    else:
-        return util.read_uint32(data, 0)
 
 
 def load_lotheader(path, x, y):
@@ -155,17 +98,13 @@ def load_lotheader(path, x, y):
     header['x'] = x
     header['y'] = y
 
-    header['version'], pos = get_version(data)
-    header.update(VERSION_LIMITATIONS[header['version']])
+    version, pos = binfile.get_version(data, 0, b'LOTH', util.read_uint32)
+    header.update(VERSION_LIMITATIONS[version])
+    header['version'] = version
 
-    tile_name_num, pos = util.read_uint32(data, pos)
-    tile_names = []
-    for i in range(tile_name_num):
-        name, pos = util.read_line(data, pos)
-        tile_names.append(name.decode('utf8'))
-    header['tiles'] = tile_names
+    header['tiles'], pos = binfile.read_tile_defs(data, pos)
 
-    if header['version'] == 0:  # B41
+    if version == 0:  # B41
         pos += 1  # skip 0x00
     header['width'], pos = util.read_uint32(data, pos)
     header['height'], pos = util.read_uint32(data, pos)
@@ -183,26 +122,9 @@ def load_lotheader(path, x, y):
     header['minlayer'] = minlayer
     header['maxlayer'] = maxlayer
 
-    room_num, pos = util.read_uint32(data, pos)
-    rooms = []
-    for i in range(room_num):
-        room, pos = read_room(data, pos)
-        room['id'] = i
-        rooms.append(room)
-    header['rooms'] = rooms
-
-    building_num, pos = util.read_uint32(data, pos)
-    buildings = []
-    for i in range(building_num):
-        building, pos = read_building(data, pos)
-        building['id'] = i
-        buildings.append(building)
-    header['buildings'] = buildings
-    if header['version'] == 0:  # B41
-        header['zpop'], pos = read_zpop(data, pos, 30)
-    else:  # B42
-        header['zpop'], pos = read_zpop(data, pos, 32)
-
+    header['rooms'], pos = binfile.read_rooms(data, pos)
+    header['buildings'], pos = binfile.read_buildings(data, pos)
+    header['zpop'], pos = read_zpop(data, pos, header['CELL_SIZE_IN_BLOCKS'])
     return header
 
 

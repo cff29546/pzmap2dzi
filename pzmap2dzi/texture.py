@@ -8,19 +8,12 @@ import struct
 import time
 import yaml
 if __package__ is not None:
-    from . import util, mptask, plants
+    from . import binfile, util, mptask, plants
 
 try:
     from . import shared_memory_image
 except:
     shared_memory_image = None
-
-
-def get_version(data):
-    if data[:4] == b'PZPK':
-        return util.read_uint32(data, 4)
-    else:
-        return 0, 0
 
 
 def read_texture(data, pos):
@@ -63,7 +56,7 @@ def load_pack(path):
     data = b''
     with open(path, 'rb') as f:
         data = f.read()
-    version, pos = get_version(data)
+    version, pos = binfile.get_version(data, 0, b'PZPK', (0, 0))
     page_num, pos = util.read_uint32(data, pos)
     print('{}: version {}, {} pages'.format(path, version, page_num))
     pages = []

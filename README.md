@@ -30,6 +30,7 @@ pzmap2dzi is a command-line tool running on Windows to convert Project Zomboid m
 - I18n support
 - Multi-thread acceleration
 - Tested with game version 41.78.16 and 42.0.2 UNSTABLE on both python 2.7 and python 3.11
+- see [change log](./docs/change_log.md) for more updates
 
 # Requirement
 - **Storage**: The full output size of isometric map for game version 41.78 is around 450GB (or 2.5TB with lossless png format) and consists of 4M files. SSD is recommended as high I/O bandwidth can reduce render time.

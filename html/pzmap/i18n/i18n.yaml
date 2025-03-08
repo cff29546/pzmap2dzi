@@ -47,36 +47,63 @@ template:
     ForagingLegends:
         en: 'Foraging Legends:'
         cn: '搜寻区域图例:'
-    Road:
+    LegendNav:
         en: 'Road'
         cn: '道路'
-    TownZone:
+    LegendTownZone:
         en: 'Urban Area'
         cn: '市区'
-    TrailerPark:
+    LegendTrailerPark:
         en: 'Trailer Park'
         cn: '拖车公园'
-    Vegitation:
+    LegendVegitation:
         en: 'Vegitation'
         cn: '草地'
-    Forest:
+    LegendForest:
         en: 'Forest'
         cn: '森林'
-    DeepForest:
+    LegendDeepForest:
         en: 'Deep Forest'
         cn: '深林'
-    Farmland:
+    LegendFarmLand:
         en: 'Farmland'
         cn: '农田'
-    Farm:
+    LegendFarm:
         en: 'Farm'
         cn: '农场'
-    Water:
+    LegendForagingNav:
+        en: 'Road'
+        cn: '道路'
+    LegendWater:
         en: 'Water'
         cn: '水域'
-    WaterNoFish:
+    LegendWaterNoFish:
         en: 'Water (No Fish)'
         cn: '水域(不可钓鱼)'
+    LegendPHForest:
+        en: 'Acidic Forest'
+        cn: '酸性林'
+    LegendPHMixForest:
+        en: 'Acidic Mixed Forest'
+        cn: '酸性混交林'
+    LegendPRForest:
+        en: 'Primary Forest'
+        cn: '原始林'
+    LegendFarmMixForest:
+        en: 'Farmland Forest'
+        cn: '农田林'
+    LegendFarmForest:
+        en: 'Managed Forestry'
+        cn: '人工林'
+    LegendBirchForest:
+        en: 'Birch Forest'
+        cn: '桦木林'
+    LegendBirchMixForest:
+        en: 'Birch Mixed Forest'
+        cn: '桦木混交林'
+    LegendOrganicForest:
+        en: 'Organic Forest'
+        cn: '有机林'
     RoomButton:
         en: 'Room'
         cn: '房间定义'
@@ -86,13 +113,13 @@ template:
     ObjectsLegends:
         en: 'Objects Legends:'
         cn: '随机事件图例:'
-    ZombieType:
+    LegendZombiesType:
         en: 'Zombie Type'
         cn: '特殊僵尸'
-    ParkingStall:
+    LegendParkingStall:
         en: 'Car Spawn'
         cn: '车辆生成'
-    ZoneStory:
+    LegendZoneStory:
         en: 'Zone Story'
         cn: '区域故事'
     MarkerButton:
@@ -401,38 +428,56 @@ mapping:
             innerHTML: ForagingButton
         foraging_legends_text:
             innerHTML: ForagingLegends
-        nav:
-            innerHTML: Road
-        town_zone:
-            innerHTML: TownZone
-        trailer_park:
-            innerHTML: TrailerPark
-        vegitation:
-            innerHTML: Vegitation
-        forest:
-            innerHTML: Forest
-        deep_forest:
-            innerHTML: DeepForest
-        farmland:
-            innerHTML: Farmland
-        farm:
-            innerHTML: Farm
-        water:
-            innerHTML: Water
-        water_no_fish:
-            innerHTML: WaterNoFish
+        foraging_legend_Nav:
+            innerHTML: LegendNav
+        foraging_legend_TownZone:
+            innerHTML: LegendTownZone
+        foraging_legend_TrailerPark:
+            innerHTML: LegendTrailerPark
+        foraging_legend_Vegitation:
+            innerHTML: LegendVegitation
+        foraging_legend_Forest:
+            innerHTML: LegendForest
+        foraging_legend_DeepForest:
+            innerHTML: LegendDeepForest
+        foraging_legend_FarmLand:
+            innerHTML: LegendFarmLand
+        foraging_legend_Farm:
+            innerHTML: LegendFarm
+        foraging_legend_ForagingNav:
+            innerHTML: LegendForagingNav
+        foraging_legend_Water:
+            innerHTML: LegendWater
+        foraging_legend_WaterNoFish:
+            innerHTML: LegendWaterNoFish
+        foraging_legend_PHForest:
+            innerHTML: LegendPHForest
+        foraging_legend_PHMixForest:
+            innerHTML: LegendPHMixForest
+        foraging_legend_PRForest:
+            innerHTML: LegendPRForest
+        foraging_legend_FarmMixForest:
+            innerHTML: LegendFarmMixForest
+        foraging_legend_FarmForest:
+            innerHTML: LegendFarmForest
+        foraging_legend_BirchForest:
+            innerHTML: LegendBirchForest
+        foraging_legend_BirchMixForest:
+            innerHTML: LegendBirchMixForest
+        foraging_legend_OrganicForest:
+            innerHTML: LegendOrganicForest
         room_btn:
             innerHTML: RoomButton
         objects_btn:
             innerHTML: ObjectsButton
         objects_legends_text:
             innerHTML: ObjectsLegends
-        zombie_type:
-            innerHTML: ZombieType
-        parking_stall:
-            innerHTML: ParkingStall
-        zone_story:
-            innerHTML: ZoneStory
+        objects_legend_ZombiesType:
+            innerHTML: LegendZombiesType
+        objects_legend_ParkingStall:
+            innerHTML: LegendParkingStall
+        objects_legend_ZoneStory:
+            innerHTML: LegendZoneStory
         marker_btn:
             innerHTML: MarkerButton
         marker_save_btn:

@@ -15,23 +15,6 @@ def load_lua_raw(path):
         text = f.read()
     return slpp.slpp.decode('{' + text + '}')
 
-
-FORAGING_TYPES = set([
-    'Nav',
-    'TownZone',
-    'TrailerPark',
-    'Vegitation',
-    'Forest',
-    'DeepForest',
-    'FarmLand',
-    'Farm'
-])
-PARKING_TYPES = set(['ParkingStall'])
-ZOMBIE_TYPES = set(['ZombiesType'])
-STORY_TYPES = set(['ZoneStory'])
-BASEMENT_TYPES = set(['Basement'])
-
-
 def filter_objects_raw(objects, types, zrange=None):
     if zrange:
         zmin, zmax = zrange
@@ -127,21 +110,30 @@ class Obj(object):
         return geometry.get_border_from_square_map(m)
 
 
-def cell_map(objects_raw, cell_size):
-    m = {}
-    for obj in objects_raw:
-        o = Obj(obj)
-        for c in o.cells(cell_size):
-            if c not in m:
-                m[c] = []
-            m[c].append(o)
-    return m
+class CellMap(object):
+    def __init__(self, objects_raw, cell_size):
+        self.cell_map = {}
+        self.used_types = set()
+        for obj in objects_raw:
+            o = Obj(obj)
+            self.used_types.add(o.type)
+            for c in o.cells(cell_size):
+                if c not in self.cell_map:
+                    self.cell_map[c] = []
+                self.cell_map[c].append(o)
+        self.cells = set(self.cell_map.keys())
+
+    def __getitem__(self, key):
+        return self.cell_map[key]
+
+    def __contains__(self, item):
+        return item in self.cell_map
 
 
 def load_cell_zones(path, cell_size, types, zrange=None):
     objects_raw = load_lua_raw(path)['objects']
     objects_raw = filter_objects_raw(objects_raw, types, zrange)
-    return cell_map(objects_raw, cell_size)
+    return CellMap(objects_raw, cell_size)
 
 
 def border_label_map(cell_zones, cx, cy):
@@ -191,9 +183,12 @@ class CachedGetter(object):
         self.zrange = zrange
         self.cache_size = cache_size
         self.getter = None
+        self.cell_zones = None
 
     def get_cell_zones(self):
-        return load_cell_zones(self.path, self.cell_size, self.types, self.zrange)
+        if self.cell_zones is None:
+            self.cell_zones = load_cell_zones(self.path, self.cell_size, self.types, self.zrange)
+        return self.cell_zones
 
     def __call__(self, cx, cy):
         if self.getter is None:
@@ -203,13 +198,13 @@ class CachedGetter(object):
 
 class CachedSquareMapGetter(CachedGetter):
     def build_getter(self):
-        self.cell_zones = self.get_cell_zones()
+        self.get_cell_zones()
         getter = partial(square_map, self.cell_zones, self.cell_size)
         self.getter = lru_cache(maxsize=self.cache_size)(getter)
 
 
 class CachedBorderLabelMapGetter(CachedGetter):
     def build_getter(self):
-        self.cell_zones = self.get_cell_zones()
+        self.get_cell_zones()
         getter = partial(border_label_map, self.cell_zones)
         self.getter = lru_cache(maxsize=self.cache_size)(getter)

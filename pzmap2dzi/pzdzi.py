@@ -189,8 +189,24 @@ class DZI(object):
             info = self.update_map_info(info)
         path = os.path.join(self.path, 'map_info.json')
 
+        # dump and compact list values
         data = json.dumps(info, indent=1)
-        data = data.replace('\n  ', '').replace('\n ]', ']').replace('[ ', '[')
+        level = 0
+        output = []
+        for c in data:
+            if c == '[':
+                level += 1
+            elif c == ']':
+                level -= 1
+            elif c in ' \n':
+                if level:
+                    continue
+            elif c == ',':
+                output.append(', ')
+                continue
+            output.append(c)
+        data = ''.join(output)
+
         with open(path, 'w') as f:
             f.write(data)
 
@@ -319,6 +335,7 @@ class PZDZI(DZI):
         self.minlayer = version_info['minlayer']
         self.maxlayer = version_info['maxlayer']
         self.pzmap2dzi_version = options.get('pzmap2dzi_version', 'unknown')
+        self.legends = options.get('legends', {})
         layer_range = options.get('layer_range', 'all')
         if layer_range != 'all':
             self.minlayer = max(self.minlayer, layer_range[0])
@@ -342,6 +359,7 @@ class PZDZI(DZI):
         info['maxlayer'] = self.maxlayer
         info['minlayer'] = self.minlayer
         info['pzmap2dzi_version'] = self.pzmap2dzi_version
+        info['legends'] = self.legends
         return info
 
 

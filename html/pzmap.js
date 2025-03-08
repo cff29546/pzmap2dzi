@@ -37,6 +37,30 @@ var pmodules = [
 
 window.addEventListener("keydown", (event) => {onKeyDown(event);});
 
+var LEGEND_TEMPLATE = {
+    foraging: '<div class="legend" style="background-color:{color}"></div><span id="{id}"></span>',
+    objects: '<div class="legend" style="border-color:{color}; border-width: 3px;"></div><span id="{id}"></span>'
+};
+function genLegendsUI(type, mapping) {
+    let label_id = type + '_legends_text';
+    let id = [label_id];
+    let ui = '<b id="' + label_id + '"></b>';
+
+    template = LEGEND_TEMPLATE[type];
+    if (template) {
+        for (let key in mapping) {
+            let color = mapping[key];
+            if (color == 'skip') {
+                continue;
+            }
+            let legend_id = type + '_legend_' + key;
+            ui += util.format(template, {color: color, id: legend_id});
+            id.push(legend_id);
+        }
+    }
+    return [id, ui];
+}
+
 function initUI_HTML() {
     g.UI_HTML = {};
     g.UI_ID = {};
@@ -51,34 +75,19 @@ function initUI_HTML() {
 <div id="map_output" style="display: inline-block"></div>`;
     g.UI_ID.map = ['map_all_btn', 'map_selector_dummy_option', 'map_loaded_text'];
 
-    g.UI_HTML.foraging = `
-<b id="foraging_legends_text"></b>
-<div class="legend" style="background-color:#fff"></div><span id="nav"></span>
-<div class="legend" style="background-color:#00f"></div><span id="town_zone"></span>
-<div class="legend" style="background-color:#0ff"></div><span id="trailer_park"></span>
-<div class="legend" style="background-color:#ff0"></div><span id="vegitation"></span>
-<div class="legend" style="background-color:#0f0"></div><span id="forest"></span>
-<div class="legend" style="background-color:#080"></div><span id="deep_forest"></span>
-<div class="legend" style="background-color:#f0f"></div><span id="farmland"></span>
-<div class="legend" style="background-color:#f00"></div><span id="farm"></span>`;
-    if (g.base_map.pz_version === 'B42') {
-        g.UI_HTML.foraging += `
-<div class="legend" style="background-color:#00bfff"></div><span id="water"></span>
-<div class="legend" style="background-color:#708090"></div><span id="water_no_fish"></span>`;
+    let legends;
+    legends = util.getByPath(g, 'base_map', 'info', 'foraging', 'legends');
+    if (!legends) {
+        legends = {Nav: 'White', TownZone: 'Blue', TrailerPark: 'Cyan', Vegitation: 'Yellow', Forest: 'Lime', DeepForest: 'Green', FarmLand: 'Magenta', Farm: 'Red'}
     }
+    [g.UI_ID.foraging, g.UI_HTML.foraging] = genLegendsUI('foraging', legends);
     g.UI_HTML.foraging += `<span>&emsp; &emsp;</span>`;
 
-    g.UI_ID.foraging = [
-        'foraging_legends_text', 'nav', 'town_zone', 'trailer_park',
-        'vegitation', 'forest', 'deep_forest', 'farmland', 'farm',
-        'water', 'water_no_fish'];
-
-    g.UI_HTML.objects = `
-<b id="objects_legends_text"></b>
-<div class="legend" style="border-color:#f00; border-width: 3px;"></div><span id="zombie_type"></span>
-<div class="legend" style="border-color:#00f; border-width: 3px;"></div><span id="parking_stall"></span>
-<div class="legend" style="border-color:#ff0; border-width: 3px;"></div><span id="zone_story"></span>`;
-    g.UI_ID.objects = [ 'objects_legends_text', 'zombie_type', 'parking_stall', 'zone_story']
+    legends = util.getByPath(g, 'base_map', 'info', 'objects', 'legends');
+    if (!legends) {
+        legends = {ZombiesType: 'Red', ParkingStall: 'Blue', ZoneStory: 'Yellow'}
+    }
+    [g.UI_ID.objects, g.UI_HTML.objects] = genLegendsUI('objects', legends);
 
     g.UI_HTML.marker = `
 <div style="display: flex">

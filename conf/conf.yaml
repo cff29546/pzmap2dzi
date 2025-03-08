@@ -170,9 +170,56 @@ render_conf:
     zombie_count_font_size: 40
 
     # objects areas
-    vehicle: true
-    special_zombie: true
-    story: true
     # objects font settings, using default font if omitted
     # objects_font: arial.ttf
     # objects_font_size: 20
+
+    # foraging & objects color config
+    # Possible color value are CSS3-style color specifiers.
+    # For more details, see:
+    #     https://pillow.readthedocs.io/en/stable/reference/ImageColor.html
+    #
+    # If the value doesn't provide alpha, default alpha is set:
+    #     For foraging default alpha = 128 (50%)
+    #     For objects default alpha = 255 (100%)
+    #
+    # To skip render of a type, set color to 'skip'
+    #
+    # Example values:
+    #       red
+    #       '#FF0000'
+    #       ‘#FF000080’
+    #       'rgba(255, 0, 0, 128)'
+    #       'rgb(255, 0, 0)'
+    #       'hsl(0, 100%, 50%)'
+    #
+    foraging_color_default: Gray
+    foraging_color:
+        Nav:            White
+        TownZone:       Blue
+        TrailerPark:    Cyan
+        Vegitation:     Yellow
+        Forest:         Lime
+        DeepForest:     Green
+        FarmLand:       Magenta
+        Farm:           Red
+        ForagingNav:    White          # B42 Road
+        Water:          DeepSkyBlue    # B42
+        WaterNoFish:    SlateGrey      # B42
+        PHForest:       OrangeRed      # B42.4 Acidic Forest
+        PHMixForest:    Orange         # B42.4 Acidic Mixed Forest
+        PRForest:       ForestGreen    # B42.4 Primary Forest
+        FarmMixForest:  Olive          # B42.4 Farmland Forest
+        FarmForest:     Orange         # B42.4 Managed Forestry
+        BirchForest:    OliveDrab      # B42.4 Birch Forest
+        BirchMixForest: DarkOliveGreen # B42.4 Birch Mixed Forest
+        OrganicForest:  LawnGreen      # B42.4 Organic Forest
+
+    objects_color_default: White
+    objects_color:
+        # Special Zombie Spawn Area
+        ZombiesType:  Red
+        # Car Spawn Area
+        ParkingStall: Blue
+        # Zone Story
+        ZoneStory:    Yellow

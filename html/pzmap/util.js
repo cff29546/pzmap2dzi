@@ -106,7 +106,7 @@ export function parseJson(data) {
 
 export function format(template, args) {
     let formatted = template;
-    for( var arg in args ) {
+    for(let arg in args) {
         formatted = formatted.replace("{" + arg + "}", args[arg]);
     }
     return formatted;
@@ -114,4 +114,14 @@ export function format(template, args) {
 
 export function isObject(o) {
     return (typeof o === 'object' && !Array.isArray(o) && o !== null);
+}
+
+export function getByPath(o, ...args) {
+    for (let key of args) {
+        if (o === undefined || o === null) {
+            return o;
+        }
+        o = o[key];
+    }
+    return o;
 }

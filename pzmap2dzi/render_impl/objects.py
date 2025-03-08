@@ -1,4 +1,4 @@
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageColor
 import os
 import struct
 from .common import draw_square, render_long_text, render_edge, LazyFont
@@ -9,19 +9,38 @@ try:
 except ImportError:
     from backports.functools_lru_cache import lru_cache
 
-FORAGING_COLOR = {
-    'Nav':         (0xFF, 0xFF, 0xFF, 0x80),
-    'TownZone':    (   0,    0, 0xFF, 0x80),
-    'TrailerPark': (   0, 0xFF, 0xFF, 0x80),
-    'Vegitation':  (0xFF, 0xFF,    0, 0x80),
-    'Forest':      (   0, 0xFF,    0, 0x80),
-    'DeepForest':  (   0, 0x88,    0, 0x80),
-    'FarmLand':    (0xFF,    0, 0xFF, 0x80),
-    'Farm':        (0xFF,    0,    0, 0x80),
-    'ForagingNav': (0xFF, 0xFF, 0xFF, 0x80), # B42
-    'Water':       (   0, 0xBF, 0xFF, 0x80), # B42
-    'WaterNoFish': (0x70, 0x80, 0x90, 0x80), # B42
-}
+
+def non_skip_key_set(d):
+    kvs = filter(lambda kv: kv[1] != 'skip', d.items())
+    return set(map(lambda kv: kv[0], kvs))
+
+
+class ColorMapper(object):
+    def __init__(self, color_map, default_color, default_alpha=255):
+        self.color_map = color_map
+        self.alpha = default_alpha
+        self.default = default_color
+        self.cache = {}
+
+    def apply_alpha(self, color):
+        if color == 'skip':
+            return None
+        color_tuple = ImageColor.getrgb(color)
+        if len(color_tuple) == 4:
+            return color_tuple
+        elif len(color_tuple) == 3:
+            return color_tuple + (self.alpha,)
+        else:
+            return None
+
+    def get(self, key):
+        if not key:
+            return None
+        if key not in self.cache:
+            name = self.color_map.get(key, self.default)
+            self.cache[key] = self.apply_alpha(name)
+        return self.cache[key]
+
 
 class Lmap(object):
     def __init__(self, biome):
@@ -42,12 +61,14 @@ def load_cell_biome(path, cx, cy):
         return Lmap(biome)
     return None
 
+
 class CellGetterB42(object):
     def __init__(self, path):
         self.path = path
 
     def __call__(self, cx, cy):
         return load_cell_biome(self.path, cx, cy)
+
 
 def get_biome_mapping(pz_root):
     path = os.path.join(pz_root, 'media', 'lua', 'server', 'metazones')
@@ -64,17 +85,27 @@ def get_biome_mapping(pz_root):
 class ForagingBase(object):
     def __init__(self, **options):
         self.input = options.get('input')
+        legends = options.get('foraging_color', {})
+        color_default = options.get('foraging_color_default', 'Gray')
+        self.color_map = ColorMapper(legends, color_default, 128)
         self.mapping = get_biome_mapping(options.get('pz_root', '.'))
         if self.mapping:
             self.version = 'B42'
             self.getter = CellGetterB42(os.path.join(self.input, 'maps'))
+            self.used_types = set(filter(lambda x: x is not None, self.mapping))
         else:
             self.version = 'B41'
             objects_path = os.path.join(self.input, 'objects.lua')
             self.getter = pzobjects.CachedSquareMapGetter(
-                objects_path, pzobjects.FORAGING_TYPES, [0, 1])
-            self.cells = set(self.getter.get_cell_zones().keys())
+                objects_path, non_skip_key_set(legends), [0, 1])
+            self.cells = self.getter.get_cell_zones().cells
+            self.used_types = self.getter.get_cell_zones().used_types
             self.valid_cell = self.valid_cell_B41
+
+        self.legends = {}
+        for k, v in legends.items():
+            if k in self.used_types and v != 'skip':
+                self.legends[k] = v
 
         print('Foraging veriosn: {}'.format(self.version))
 
@@ -82,6 +113,7 @@ class ForagingBase(object):
         options['render_minlayer'] = 0
         options['render_maxlayer'] = 1
         options['render_margin'] = None
+        options['legends'] = self.legends
         return options
 
     def valid_cell_B41(self, x, y):
@@ -98,12 +130,11 @@ class ForagingRender(ForagingBase):
         zone_type = zone.get((subx, suby))
         if self.mapping:
             zone_type = self.mapping[zone_type]
-        if zone_type is None:
-            return
-        im = im_getter.get()
-        draw = ImageDraw.Draw(im)
-        color = FORAGING_COLOR[zone_type]
-        draw_square(draw, ox, oy, color)
+        color = self.color_map.get(zone_type)
+        if color:
+            im = im_getter.get()
+            draw = ImageDraw.Draw(im)
+            draw_square(draw, ox, oy, color)
 
 
 class ForagingTopRender(ForagingBase):
@@ -119,26 +150,23 @@ class ForagingTopRender(ForagingBase):
                 zone_type = zone.get((x, y))
                 if self.mapping:
                     zone_type = self.mapping[zone_type]
-                if zone_type:
+                color = self.color_map.get(zone_type)
+                if color:
                     if draw is None:
                         im = im_getter.get()
                         draw = ImageDraw.Draw(im)
                     ox = x*size
                     oy = y*size
                     shape = [ox, oy, ox + size, oy + size]
-                    draw.rectangle(shape, fill=FORAGING_COLOR[zone_type])
+                    draw.rectangle(shape, fill=color)
 
 
-# objects
-COLOR_MAP = {
-    'ZombiesType': 'red',
-    'ParkingStall': 'blue',
-    'ZoneStory': 'yellow',
-}
-DEFAULT_COLOR = 'white'
 class ObjectsRender(object):
     def __init__(self, **options):
         self.input = options.get('input')
+        legends = options.get('objects_color', {})
+        color_default = options.get('objects_color_default', 'White')
+        self.color_map = ColorMapper(legends, color_default, 255)
         font_name = options.get('objects_font')
         if not font_name:
             font_name = options.get('default_font', 'arial.tff')
@@ -147,18 +175,20 @@ class ObjectsRender(object):
             font_size = options.get('default_font_size', 20)
         self.font = LazyFont(font_name, int(font_size))
         objects_path = os.path.join(self.input, 'objects.lua')
-        types = set()
-        if options.get('vehicle', True):
-            types = types.union(pzobjects.PARKING_TYPES)
-        if options.get('special_zombie', True):
-            types = types.union(pzobjects.ZOMBIE_TYPES)
-        if options.get('story', True):
-            types = types.union(pzobjects.STORY_TYPES)
+
+        types = non_skip_key_set(legends)
         self.getter = pzobjects.CachedBorderLabelMapGetter(objects_path, types)
-        self.cells = set(self.getter.get_cell_zones().keys())
+        self.cells = self.getter.get_cell_zones().cells
+        self.used_types = self.getter.get_cell_zones().used_types
+
+        self.legends = {}
+        for k, v in legends.items():
+            if k in self.used_types and v != 'skip':
+                self.legends[k] = v
 
     def update_options(self, options):
         options['render_margin'] = [-2, -2, 2, 2]  # add margin for text
+        options['legends'] = self.legends
         return options
 
     def valid_cell(self, x, y):
@@ -174,13 +204,15 @@ class ObjectsRender(object):
         if layer in border:
             if (sx, sy) in border[layer]:
                 for t, flag in border[layer][sx, sy]:
-                    color = COLOR_MAP.get(t, DEFAULT_COLOR)
-                    drawing.append((render_edge, (color, 3, flag)))
+                    color = self.color_map.get(t)
+                    if color:
+                        drawing.append((render_edge, (color, 3, flag)))
         if layer in label:
             if (sx, sy) in label[layer]:
                 for t, name in label[layer][sx, sy]:
-                    color = COLOR_MAP.get(t, DEFAULT_COLOR)
-                    drawing.append((render_long_text, (name, color, self.font.get())))
+                    color = self.color_map.get(t)
+                    if color:
+                        drawing.append((render_long_text, (name, color, self.font.get())))
         if drawing:
             im = im_getter.get()
             draw = ImageDraw.Draw(im)

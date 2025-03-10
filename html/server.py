@@ -177,6 +177,11 @@ def delete_save(save):
 
     return 'done'
 
+@app.route('/<path:filename>.js')
+def serve_js(filename):
+    file_path = f'{filename}.js'
+    return flask.send_from_directory('.', file_path, mimetype='application/javascript')
+
 @app.route('/<path:filename>')
 def static_files(filename):
     return flask.send_from_directory('.', filename)

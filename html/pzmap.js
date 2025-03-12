@@ -382,6 +382,13 @@ function initOSD() {
         g.viewer.drawer.context.msImageSmoothingEnabled = false;
         g.viewer.drawer.context.imageSmoothingEnabled = false;
     }
+
+    const cellCoordsElement = document.getElementById('cell_coords');
+
+    document.getElementById('map_div').addEventListener('pointermove', (event) => {
+        const [sx, sy] = c.getSquare(event);
+        cellCoordsElement.textContent = `Cell: (${sx}, ${sy})`;
+    });
 }
 
 function init(callback=null) {

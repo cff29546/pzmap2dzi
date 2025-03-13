@@ -359,6 +359,9 @@ template:
     TrimmerError:
         en: '<b>Trimming failed, error: {error}</b>'
         cn: '<b>裁剪失败，错误: {error}</b>'
+    Coords:
+        en: 'Coordinates'
+        cn: '坐标'        
     RouteSelectorTitle:
         en: 'Change Route'
         cn: '切换路径'

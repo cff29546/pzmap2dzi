@@ -383,11 +383,9 @@ function initOSD() {
         g.viewer.drawer.context.imageSmoothingEnabled = false;
     }
 
-    const cellCoordsElement = document.getElementById('cell_coords');
-
     document.getElementById('map_div').addEventListener('pointermove', (event) => {
         const [sx, sy] = c.getSquare(event);
-        cellCoordsElement.textContent = `Cell: (${sx}, ${sy})`;
+        util.setOutput('coords', 'black', i18n.T('Coords') + `: (${sx}, ${sy})`);
     });
 }
 

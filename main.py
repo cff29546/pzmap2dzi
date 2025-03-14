@@ -9,10 +9,31 @@ from pzmap2dzi import i18n_util
 from pzmap2dzi.i18n_util import load_yaml, update_json
 
 
+SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
+def git_info():
+    head_path = os.path.join(SCRIPT_PATH, '.git', 'HEAD')
+    if os.path.isfile(head_path):
+        with io.open(head_path, 'r', encoding='utf8') as f:
+            head_data = f.read().strip()
+    else:
+        head_data = ''
+    ref = ''
+    commit = ''
+    if head_data.startswith('ref:'):
+        ref = head_data.split(':', 1)[1].strip()
+        if ref:
+            ref_path = os.path.join(SCRIPT_PATH, '.git', ref)
+            if os.path.isfile(ref_path):
+                with io.open(ref_path, 'r', encoding='utf8') as f:
+                    commit = f.read().strip()
+    else:
+        commit = head_data
+    return ref, commit
+
+
 def get_version():
     v = {}
-    script_path = os.path.dirname(os.path.realpath(__file__))
-    version_file = os.path.join(script_path, 'VERSION')
+    version_file = os.path.join(SCRIPT_PATH, 'VERSION')
     if os.path.isfile(version_file):
         with io.open(version_file, 'r', encoding='utf8') as f:
             for line in f:
@@ -21,9 +42,12 @@ def get_version():
                     version = keys[-1]
                     for key in keys[:-1]:
                         v[key] = version
+    v['git_branch'], v['git_commit'] = git_info()
     return v
 
+
 VERSION = get_version()
+
 
 def load_path(path):
     if os.path.isfile(path):
@@ -150,6 +174,8 @@ def render_map(cmd, conf, maps, map_name, is_mod_map=False):
     if hasattr(r, 'update_options'):
         options = r.update_options(options)
     options['pzmap2dzi_version'] = VERSION.get('pzmap2dzi', 'unknown')
+    options['git_branch'] = VERSION.get('git_branch', '')
+    options['git_commit'] = VERSION.get('git_commit', '')
     dzi = DZI(options['input'], **options)
     suc = dzi.render_all(r, options['worker_count'], options['break_key'],
                          options['verbose'], options['profile'])
@@ -197,7 +223,7 @@ def process_i18n(path):
     i18n_util.yaml_aio_to_json_all(os.path.join(path, 'marks.yaml'))
 
 
-def copy(args):
+def deploy(args):
     conf = load_yaml(args.conf)
     script_path = os.path.dirname(os.path.realpath(__file__))
     src = os.path.join(script_path, 'html')
@@ -213,14 +239,17 @@ def copy(args):
             entry: route,
         },
         'version': VERSION.get('html', 'unknown'),
+        'git_branch': VERSION.get('git_branch', ''),
+        'git_commit': VERSION.get('git_commit', ''),
     })
 
 
 CMD = {
+    'deploy': deploy,
     'unpack': unpack,
     'render': render,
-    'copy': copy,
 }
+
 
 if __name__ == '__main__':
     import argparse

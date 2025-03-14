@@ -335,6 +335,8 @@ class PZDZI(DZI):
         self.minlayer = version_info['minlayer']
         self.maxlayer = version_info['maxlayer']
         self.pzmap2dzi_version = options.get('pzmap2dzi_version', 'unknown')
+        self.git_branch = options.get('git_branch', '')
+        self.git_commit = options.get('git_commit', '')
         self.legends = options.get('legends', {})
         layer_range = options.get('layer_range', 'all')
         if layer_range != 'all':
@@ -359,6 +361,8 @@ class PZDZI(DZI):
         info['maxlayer'] = self.maxlayer
         info['minlayer'] = self.minlayer
         info['pzmap2dzi_version'] = self.pzmap2dzi_version
+        info['git_branch'] = self.git_branch
+        info['git_commit'] = self.git_commit
         info['legends'] = self.legends
         return info
 

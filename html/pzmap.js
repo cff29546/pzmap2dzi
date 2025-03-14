@@ -948,9 +948,27 @@ function updateAbout() {
     args.pzwiki = '<a id="pzwiki" href="https://pzwiki.net/wiki/Project_Zomboid_Wiki" target="_blank">PZwiki</a>';
     args.pz = '<a id="pz" href="https://projectzomboid.com" target="_black">Project Zomboid</a>';
     args.pz_steam = '<a id="pz_steam" href="https://store.steampowered.com/app/108600/Project_Zomboid" target="_black">Project Zomboid</a>';
-    args.pz_version = g.base_map.pz_version;
-    args.render_version = g.base_map.render_version;
-    args.ui_version = g.conf.version;
+    args.pz_version = util.getByPath(g, 'base_map', 'pz_version');
+
+    let link_template = '<a href="https://github.com/cff29546/pzmap2dzi/tree/{commit}" title="{branch}" target="_blank">{version}</a>';
+    if (g.base_map.commit) {
+        args.render_version = util.format(link_template, {
+            commit: g.base_map.commit,
+            branch: g.base_map.branch,
+            version: g.base_map.render_version
+        });
+    } else {
+        args.render_version = g.base_map.render_version;
+    }
+    if (g.conf.git_commit) {
+        args.ui_version = util.format(link_template, {
+            commit: g.conf.git_commit,
+            branch: g.conf.git_branch,
+            version: g.conf.version
+        });
+    } else {
+        args.ui_version = g.conf.version;
+    }
     let aboutUI = div_begin + i18n.T('About', args) + div_end;
     document.getElementById('about_ui').innerHTML = aboutUI;
     let aboutUI_ID = ['pzmap2dzi', 'osd', 'pzwiki', 'pz', 'pz_steam'];

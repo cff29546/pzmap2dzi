@@ -352,6 +352,8 @@ export class Map {
                 this.cell_in_block = this.cell_size / this.block_size;
                 this.pz_version = this.info.base.pz_version;
                 this.render_version = this.info.base.pzmap2dzi_version;
+                this.branch = this.info.base.git_branch;
+                this.commit = this.info.base.git_commit;
                 this.minlayer = this.info.base.minlayer;
                 this.maxlayer = this.info.base.maxlayer;
             }

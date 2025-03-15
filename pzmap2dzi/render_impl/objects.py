@@ -157,7 +157,7 @@ class ForagingTopRender(ForagingBase):
                         draw = ImageDraw.Draw(im)
                     ox = x*size
                     oy = y*size
-                    shape = [ox, oy, ox + size, oy + size]
+                    shape = [ox, oy, ox + size - 1, oy + size - 1]
                     draw.rectangle(shape, fill=color)
 
 

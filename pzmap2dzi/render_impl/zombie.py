@@ -135,6 +135,7 @@ class ZombieTopRender(object):
                 if zombie == 0:
                     continue
                 color = get_color(zombie, 128)
-                shape = [bx*size, by*size, (bx + 1)*size, (by + 1)*size]
+                x, y = bx * size, by * size
+                shape = [x, y, x + size - 1, y + size - 1]
                 draw.rectangle(shape, fill=color)
 

@@ -382,6 +382,11 @@ function initOSD() {
         g.viewer.drawer.context.msImageSmoothingEnabled = false;
         g.viewer.drawer.context.imageSmoothingEnabled = false;
     }
+
+    document.getElementById('map_div').addEventListener('pointermove', (event) => {
+        const [sx, sy] = c.getSquare(event);
+        util.setOutput('coords', 'black', i18n.T('Coords') + `: (${sx}, ${sy})`);
+    });
 }
 
 function init(callback=null) {

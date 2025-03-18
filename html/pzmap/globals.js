@@ -40,6 +40,8 @@ export function reset() {
     g.minLayer = 0;
     g.maxLayer = 0;
     g.grid = 0;
+    g.sx = 0;
+    g.sy = 0;
     updateQueryString();
 };
 

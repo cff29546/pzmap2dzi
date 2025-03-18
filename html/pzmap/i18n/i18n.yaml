@@ -360,8 +360,8 @@ template:
         en: '<b>Trimming failed, error: {error}</b>'
         cn: '<b>裁剪失败，错误: {error}</b>'
     Coords:
-        en: 'Coordinates'
-        cn: '坐标'        
+        en: 'Coordinates: (X: ${g.sx}, Y: ${g.sy})'
+        cn: '坐标: (X: ${g.sx}, Y: ${g.sy})'
     RouteSelectorTitle:
         en: 'Change Route'
         cn: '切换路径'
@@ -565,6 +565,9 @@ mapping:
             innerHTML: TrimmerBrowseButton
         trimmer_help_text:
             innerHTML: TrimmerHelpText
+        coords:
+            innerHTML:
+                eval: Coords
         route_selector:
             title: RouteSelectorTitle
         route_selector_dummy_option:

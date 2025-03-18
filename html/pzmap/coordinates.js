@@ -135,8 +135,8 @@ export function stepToZoom(step) {
 }
 
 export function getSquare(event) {
-    let x = event.x * window.devicePixelRatio;
-    let y = event.y * window.devicePixelRatio;
+    let x = event.position.x * window.devicePixelRatio;
+    let y = event.position.y * window.devicePixelRatio;
     return getSquareByCanvas(g.viewer, g.base_map, x, y, g.currentLayer);
 }
 

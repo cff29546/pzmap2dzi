@@ -402,10 +402,7 @@ function initOSD() {
         g.viewer.drawer.context.imageSmoothingEnabled = false;
     }
 
-    document.getElementById('map_div').addEventListener('pointermove', (event) => {
-        const [sx, sy] = c.getSquare(event);
-        util.setOutput('coords', 'black', i18n.T('Coords') + `: (${sx}, ${sy})`);
-    });
+    g.viewer.container.addEventListener('mousemove', onMouseMove);
 }
 
 function init(callback=null) {
@@ -838,6 +835,17 @@ function onTrim() {
     }
 }
 
+// coordinates
+function updateCoords() {
+    i18n.update('id', ['coords']);
+}
+
+function onMouseMove(event) {
+    let e = {position: event};
+    [g.sx, g.sy] = c.getSquare(e);
+    updateCoords();
+}
+
 // change route
 function updateRouteSelector() {
     let s = document.getElementById('route_selector');
@@ -939,6 +947,7 @@ function onChangeLanguage() {
     i18n.setLang(lang);
     i18n.update('id');
     updateLayerSelector();
+    updateCoords();
     if (g.aboutui) {
         updateAbout();
     }

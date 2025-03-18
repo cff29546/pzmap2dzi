@@ -1,9 +1,15 @@
 # Change log
 
+# 2025-03-19: 1.0.6 + UI 1.0.8
+
+* Fix recent change to 'getSquare' function break Marker and Trimmer drag events
+* Optimize performance of 'i18n.update' function
+* Use named function for 'onMouseMove' to prevent duplication of anonymous listeners
+
 # 2025-03-18: 1.0.6 + UI 1.0.7
 
-* When only top view data exists, open as top view.
-* Fix top view blurry by turn off OSD image smoothing.
+* When only top view data exists, open as top view
+* Fix top view blurry by turn off OSD image smoothing
 
 # 2025-03-16: 1.0.6 + UI 1.0.6
 

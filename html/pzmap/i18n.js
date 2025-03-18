@@ -102,17 +102,19 @@ function L(label, value, args) {
 
 // update all label
 export function update(label, values=null, args=null) {
-    let vset = null;
+    let labels = [];
     if (values) {
-        vset = new Set(values);
+        for (let value of values) {
+            let hit = document.querySelectorAll('[' + label + '="' + value + '"]');
+            labels.push(...hit);
+        }
+    } else {
+        labels = document.querySelectorAll('[' + label + ']');
     }
-    let labels = document.querySelectorAll('[' + label + ']');
     for (let l of labels) {
-        if (vset === null || vset.has(l[label])) {
-            let data = L(label, l[label], args);
-            for (let [k, text] of Object.entries(data)) {
-                l[k] = text;
-            }
+        let data = L(label, l[label], args);
+        for (let [k, text] of Object.entries(data)) {
+            l[k] = text;
         }
     }
 }

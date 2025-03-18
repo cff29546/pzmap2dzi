@@ -1,5 +1,5 @@
 export var g = {
-    map_type: 'iso',
+    map_type: '',
     overlays: {},
     mapui: 0,
     gridui: 0,

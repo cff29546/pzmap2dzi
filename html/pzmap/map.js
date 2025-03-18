@@ -8,12 +8,12 @@ export class Map {
     cell_rects = [];
     clip_list = [];
     info = {};
+    available_types = [];
 
     constructor(root, map_type, name, base_map=null) {
         this.root = root;
         this.name = name;
         this.type = map_type;
-        this.suffix = (map_type == 'top') ? '_top' : '';
         this.base_map = base_map;
         if (!this.base_map) {
             this.base_map = this;
@@ -305,8 +305,51 @@ export class Map {
         return Promise.all([getmin({ok: 1}), getmax({ok: 1})]).then(setrange);
     }
 
+    typeToSuffix(type) {
+        return (type == 'top') ? '_top' : '';
+    }
+
+    isTypeAvailable(type) {
+        let suffix = this.typeToSuffix(type);
+        return window.fetch(this.root + 'base' + suffix + '/map_info.json')
+            .then((r) => r.json())
+            .then((j) => Promise.resolve(type))
+            .catch((e) => Promise.resolve(null));
+    }
+
+    availableTypes() {
+        let t = [];
+        for (let type of ['iso', 'top']) {
+            t.push(this.isTypeAvailable(type));
+        }
+        return Promise.all(t).then((r) => {
+            let types = [];
+            for (let type of r) {
+                if (type) {
+                    types.push(type);
+                }
+            }
+            this.available_types = types;
+            return Promise.resolve(types);
+        });
+    }
+
     init() {
+        return this.availableTypes().then((types) => {
+            if (!this.type) {
+                if (types.length) {
+                    this.type = types[0];
+                } else {
+                    this.type = 'iso';
+                }
+            }
+            return this.initMap();
+        });
+    }
+
+    initMap() {
         let root = this.root;
+        this.suffix = this.typeToSuffix(this.type);
         let suffix = this.suffix;
         let empty = function(e) { return Promise.resolve({})};
         function getinfo(type) {

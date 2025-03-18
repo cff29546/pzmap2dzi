@@ -1,11 +1,11 @@
 var g; // globals vars
-var globals;
-var c; // coordinates
-var util;
+var globals; // module
+var map; // module
+var c; // module coordinates
+var util; // module
+var i18n; // module
 var Marker;
-var Map;
 var Trimmer;
-var i18n;
 var debug = {};
 var pmodules = [
     import("./pzmap/globals.js").then((m) => {
@@ -14,7 +14,7 @@ var pmodules = [
         return m.init();
     }),
     import("./pzmap/map.js").then((m) => {
-        Map = m.Map;
+        map = m;
     }),
     import("./pzmap/coordinates.js").then((m) => {
         c = m;
@@ -243,6 +243,20 @@ function initUI() {
     } else {
         document.getElementById('legends').style.display = 'none';
     }
+
+    let change_view = false;
+    for (let type of g.base_map.available_types) {
+        if (type != g.base_map.type) {
+            change_view = true;
+        }
+    }
+    if (change_view) {
+        document.getElementById('change_view_btn').style.display = '';
+    } else {
+        document.getElementById('change_view_btn').style.display = 'none';
+    }
+
+
     updateLangSelector();
     updateRouteSelector();
     if (g.aboutui) {
@@ -263,7 +277,7 @@ function updateMainOutput() {
 
 function initOSD() {
     g.load_error = 0;
-    g.viewer = OpenSeadragon({
+    let options = {
         drawer: 'canvas',
         opacity: 1,
         element: document.getElementById('map_div'),
@@ -275,8 +289,13 @@ function initOSD() {
         prefixUrl: 'openseadragon/images/',
         navigatorBackground: 'black',
         minZoomImageRatio: 0.5,
-        maxZoomPixelRatio: (g.base_map.type == 'top' ? 16 : 2) * g.base_map.scale
-    });
+        maxZoomPixelRatio: 2 * g.base_map.scale
+    };
+    if (g.base_map.type == 'top') {
+        options.imageSmoothingEnabled = false;
+        options.maxZoomPixelRatio = 16 * g.base_map.scale;
+    }
+    g.viewer = OpenSeadragon(options);
 
     g.viewer.addHandler('add-item-failed', (event) => {
         g.load_error = 1;
@@ -397,9 +416,10 @@ function init(callback=null) {
     if (!g.trimmer) {
         g.trimmer = new Trimmer();
     }
-    g.base_map = new Map(globals.getRoot(), g.map_type, '');
+    g.base_map = new map.Map(globals.getRoot(), g.map_type, '');
     return g.base_map.init().then(function(b) {
-        g.grid = new c.Grid(g.base_map);
+        g.map_type = b.type;
+        g.grid = new c.Grid(b);
         initUI_HTML();
         initUI();
         updateClip();
@@ -579,7 +599,7 @@ function addMap(names) {
                 }
             }
             if (pos >= g.mod_maps.length) {
-                let m = new Map(globals.getRoot() + 'mod_maps/' + name + '/', g.map_type, name, g.base_map);
+                let m = new map.Map(globals.getRoot() + 'mod_maps/' + name + '/', g.map_type, name, g.base_map);
                 g.mod_maps.push(m);
                 p.push(m.init());
                 if (g.mod_maps.length == 1) {

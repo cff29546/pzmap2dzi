@@ -402,7 +402,7 @@ function initOSD() {
         g.viewer.drawer.context.imageSmoothingEnabled = false;
     }
 
-    g.viewer.container.addEventListener('mousemove', onMouseMove);
+    g.viewer.canvas.addEventListener('pointermove', onPointerMove);
 }
 
 function init(callback=null) {
@@ -836,13 +836,30 @@ function onTrim() {
 }
 
 // coordinates
-function updateCoords() {
-    i18n.update('id', ['coords']);
+function copyCoords() {
+    let coords = '(' + g.sx + ',' + g.sy + ')';
+    util.setClipboard(coords).then((err) => {
+        if (err) {
+            util.setOutput('main_output', 'Red', i18n.T('CopyCoordsError', {error: err}));
+        } else {
+            let e = document.getElementById('coords');
+            e.style['border-color'] = 'Green';
+            util.setOutput('coords', 'Green', i18n.T('CopyCoordsSuccess'));
+        }
+    });
 }
 
-function onMouseMove(event) {
-    let e = {position: event};
-    [g.sx, g.sy] = c.getSquare(e);
+function updateCoords() {
+    let e = document.getElementById('coords');
+    e.style['border-color'] = '';
+    e.style['color'] = '';
+    e.innerHTML = i18n.E('Coords');
+}
+
+function onPointerMove(event) {
+    let mouse = OpenSeadragon.getMousePosition(event);
+    let offset = OpenSeadragon.getElementOffset(g.viewer.canvas);
+    [g.sx, g.sy] = c.getSquare({position: mouse.minus(offset)});
     updateCoords();
 }
 
@@ -1014,6 +1031,9 @@ function onKeyDown(event) {
     if (event.key == 'Escape' && g.markerui) {
         g.marker.unSelect();
         g.marker.update();
+    }
+    if (event.key == 'c') {
+        copyCoords();
     }
 }
 

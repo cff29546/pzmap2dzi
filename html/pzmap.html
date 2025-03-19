@@ -18,6 +18,7 @@
     .warning { background-color: LightCoral; border-color: DarkRed; }
     div { box-sizing: content-box; }
     .inline { display: inline-block; }
+    .coords { border: dashed 1px; }
     .iso {}
     .rank1 {}
     .mark { border-style: solid; }
@@ -51,8 +52,8 @@
         <button id="objects_btn" class="iso" onclick="toggleOverlay('objects')"></button>
         <button id="marker_btn" onclick="toggleMarkerUI()"></button>
         <button id="trimmer_btn" onclick="toggleTrimmer()"></button>
+        <div id="coords" class="inline coords" onclick="copyCoords()"></div>
         <div id="main_output" class="inline">Initialization Failed</div>
-        <div id="coords" class="inline" style="margin-left: 1em;"></div>
         <div class="text-right">
             <select id="route_selector" onchange="onChangeRoute()"></select>
             <button id="change_view_btn" onclick="onChangeView()"></button>

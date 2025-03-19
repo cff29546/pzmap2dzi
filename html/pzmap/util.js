@@ -10,7 +10,9 @@ export function changeStyle(selector, cssProp, cssVal) {
 export function setOutput(id, color, text, timeout=0) {
     let output = document.getElementById(id);
     if (output) {
-        output.style.color = color;
+        if (color !== null) {
+            output.style.color = color;
+        }
         output.innerHTML = text;
         if (timeout > 0) {
            setTimeout(setOutput, timeout, id, color, '', 0); 
@@ -124,4 +126,10 @@ export function getByPath(o, ...args) {
         o = o[key];
     }
     return o;
+}
+
+export function setClipboard(text) {
+    return navigator.clipboard.writeText(text)
+        .then(() => Promise.resolve(null))
+        .catch((err) => Promise.resolve(err));
 }

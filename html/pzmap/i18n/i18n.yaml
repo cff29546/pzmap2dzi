@@ -362,6 +362,15 @@ template:
     Coords:
         en: 'Coordinates: (X: ${g.sx}, Y: ${g.sy})'
         cn: '坐标: (X: ${g.sx}, Y: ${g.sy})'
+    CoordsTitle:
+        en: 'Press "c" key copy coordinates to clipboard'
+        cn: '按"c"键复制坐标到剪切板'
+    CopyCoordsSuccess:
+        en: 'Coordinates copied'
+        cn: '坐标已复制到剪切板'
+    CopyCoordsError:
+        en: 'Failed to copy coordinates, error: {error}'
+        cn: '复制坐标失败，错误: {error}'
     RouteSelectorTitle:
         en: 'Change Route'
         cn: '切换路径'
@@ -568,6 +577,7 @@ mapping:
         coords:
             innerHTML:
                 eval: Coords
+            title: CoordsTitle
         route_selector:
             title: RouteSelectorTitle
         route_selector_dummy_option:

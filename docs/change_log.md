@@ -1,5 +1,10 @@
 # Change log
 
+# 2025-03-19: 1.0.6 + UI 1.0.9
+
+* Fix coordinates offset
+* Copy coordinates to clipboard by pressing 'c'
+
 # 2025-03-19: 1.0.6 + UI 1.0.8
 
 * Fix recent change to 'getSquare' function break Marker and Trimmer drag events

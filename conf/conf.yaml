@@ -33,9 +33,11 @@ map_conf:
 use_depend_texture_only: false
 
 # Specify maps to be rendered.
-# See map_data.yaml for map names. default = Muldraugh, KY
+# See vanilla.txt for map names.
+# default = Muldraugh, KY
 base_map: default
 # Additional overlay maps
+# See mod/ folder for map names.
 mod_maps:
 #    - Ashenwood
 #    - BedfordFalls

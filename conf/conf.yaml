@@ -26,16 +26,16 @@ map_conf:
     - mod/
 
 # When use_depend_texture_only is set to true, only textures that are declared as
-# dependencies in the map's description will be used. This may cause the rendering
-# to fail for maps with incomplete dependency descriptions.
+# dependencies in the map's description will be used. This may cause the render
+# failure for maps with incomplete dependency descriptions.
 # The default setting is false, which means it will try to use all the textures
 # available in the description files.
 use_depend_texture_only: false
 
-# Specify maps to be rendered. See map_data.yaml for map names
-# The base layer map to be rendered. default = Muldraugh, KY
+# Specify maps to be rendered.
+# See map_data.yaml for map names. default = Muldraugh, KY
 base_map: default
-# Additional overlay maps to be rendered (mod_id)
+# Additional overlay maps
 mod_maps:
 #    - Ashenwood
 #    - BedfordFalls

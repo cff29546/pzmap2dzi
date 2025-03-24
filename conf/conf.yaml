@@ -190,7 +190,7 @@ render_conf:
     # Example values:
     #       red
     #       '#FF0000'
-    #       ‘#FF000080’
+    #       '#FF000080'
     #       'rgba(255, 0, 0, 128)'
     #       'rgb(255, 0, 0)'
     #       'hsl(0, 100%, 50%)'

@@ -259,6 +259,11 @@ def toplogical_svg(rsize, levels=3, use_image=False):
         image = SVG(0, 0)
 
     svg = SVG(0, 0)
+    background = Shape('rect', [], [], 0, {})
+    background['width'] = '100%'
+    background['height'] = '100%'
+    background['fill'] = 'white'
+    svg.append(background)
 
     # legends
     fsize = 24
@@ -322,8 +327,8 @@ def toplogical_svg(rsize, levels=3, use_image=False):
     w += xshift
     svg.resize(w, h)
 
-    box = Rect(0, 0, w, h, width=4, style={'stroke': 'gray', 'fill': 'none'})
-    svg.append(box)
+    #box = Rect(0, 0, w, h, width=4, style={'stroke': 'gray', 'fill': 'none'})
+    #svg.append(box)
 
     return svg
 

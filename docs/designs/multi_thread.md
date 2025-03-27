@@ -25,6 +25,6 @@ Initially, the renderer built the DZI pyramid level-by-level: it rendered the bo
 
 To resolve this, we adopted **topological order rendering**, which ensures only a small subset of tiles need to be cached for pending thumbnails. This completely eliminates disk readbacks. Below is an animated demonstration of the algorithm:
 
-[topological order render](./toplogical.svg)
+![topological order render](./toplogical.svg)
 
 For code details, refer to the `TopologicalDziScheduler` class in [scheduling.py](/pzmap2dzi/scheduling.py).

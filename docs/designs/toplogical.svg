@@ -1,4 +1,5 @@
 <svg width="567" height="337" xmlns="http://www.w3.org/2000/svg">
+<rect width="100%" height="100%" fill="white" />
 <polygon points="412.5,18.75 437.5,18.75 400,37.5" style="fill:red;stroke:black;stroke-width:0" />
 <polygon points="437.5,18.75 462.5,18.75 443.75,28.125 418.75,28.125" style="fill:gold;stroke:black;stroke-width:0" />
 <polygon points="425,37.5 443.75,28.125 418.75,28.125" style="fill:indigo;stroke:black;stroke-width:0" />
@@ -224,5 +225,4 @@ Presisted
 <animate id="a_o_2_15_1" attributeName="fill-opacity" begin="a_o_2_15_0.end" dur="2" from="0" to="0" />
 <animate id="a_o_2_15_2" attributeName="fill-opacity" begin="a_o_2_15_1.end" dur="6" from="0.75" to="0.75" />
 </polygon>
-<rect x="0" y="0" width="567" height="337" rx="0" ry="0" style="stroke:gray;fill:none;stroke-width:4" />
 </svg>

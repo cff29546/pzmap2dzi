@@ -1,0 +1,228 @@
+<svg width="567" height="337" xmlns="http://www.w3.org/2000/svg">
+<polygon points="412.5,18.75 437.5,18.75 400,37.5" style="fill:red;stroke:black;stroke-width:0" />
+<polygon points="437.5,18.75 462.5,18.75 443.75,28.125 418.75,28.125" style="fill:gold;stroke:black;stroke-width:0" />
+<polygon points="425,37.5 443.75,28.125 418.75,28.125" style="fill:indigo;stroke:black;stroke-width:0" />
+<polygon points="425,37.5 418.75,28.125 400,37.5 406.25,46.875" style="fill:skyblue;stroke:black;stroke-width:0" />
+<polygon points="400,37.5 406.25,46.875 387.5,56.25" style="fill:plum;stroke:black;stroke-width:0" />
+<polygon points="425,37.5 437.5,56.25 387.5,56.25" style="fill:orange;stroke:black;stroke-width:0" />
+<polygon points="425,37.5 437.5,56.25 462.5,18.75" style="fill:green;stroke:black;stroke-width:0" />
+<polygon points="412.5,18.75 462.5,18.75 437.5,56.25 387.5,56.25" style="stroke:gray;fill:white;stroke-width:4" />
+<text x="382" y="83.25" fill="black" font-size="24">
+Unprocessed
+</text>
+<polygon points="412.5,110.25 437.5,110.25 400,129" style="fill:red;stroke:black;stroke-width:0" />
+<polygon points="437.5,110.25 462.5,110.25 443.75,119.625 418.75,119.625" style="fill:gold;stroke:black;stroke-width:0" />
+<polygon points="425,129 443.75,119.625 418.75,119.625" style="fill:indigo;stroke:black;stroke-width:0" />
+<polygon points="425,129 418.75,119.625 400,129 406.25,138.375" style="fill:skyblue;stroke:black;stroke-width:0" />
+<polygon points="400,129 406.25,138.375 387.5,147.75" style="fill:plum;stroke:black;stroke-width:0" />
+<polygon points="425,129 437.5,147.75 387.5,147.75" style="fill:orange;stroke:black;stroke-width:0" />
+<polygon points="425,129 437.5,147.75 462.5,110.25" style="fill:green;stroke:black;stroke-width:0" />
+<polygon points="412.5,110.25 462.5,110.25 437.5,147.75 387.5,147.75" style="stroke:gray;fill:white;fill-opacity:0;stroke-width:4" />
+<text x="382" y="174.75" fill="black" font-size="24">
+Done, Cached
+</text>
+<polygon points="412.5,201.75 437.5,201.75 400,220.5" style="fill:red;stroke:black;stroke-width:0" />
+<polygon points="437.5,201.75 462.5,201.75 443.75,211.125 418.75,211.125" style="fill:gold;stroke:black;stroke-width:0" />
+<polygon points="425,220.5 443.75,211.125 418.75,211.125" style="fill:indigo;stroke:black;stroke-width:0" />
+<polygon points="425,220.5 418.75,211.125 400,220.5 406.25,229.875" style="fill:skyblue;stroke:black;stroke-width:0" />
+<polygon points="400,220.5 406.25,229.875 387.5,239.25" style="fill:plum;stroke:black;stroke-width:0" />
+<polygon points="425,220.5 437.5,239.25 387.5,239.25" style="fill:orange;stroke:black;stroke-width:0" />
+<polygon points="425,220.5 437.5,239.25 462.5,201.75" style="fill:green;stroke:black;stroke-width:0" />
+<polygon points="412.5,201.75 462.5,201.75 437.5,239.25 387.5,239.25" style="stroke:gray;fill:black;fill-opacity:0.75;stroke-width:4" />
+<text x="382" y="266.25" fill="black" font-size="24">
+Presisted
+</text>
+<text x="382" y="284.25" fill="black" font-size="24">
+(Cache Released)
+</text>
+<polygon points="162.5,18.75 187.5,18.75 150,37.5" style="fill:red;stroke:black;stroke-width:0" />
+<polygon points="187.5,18.75 212.5,18.75 193.75,28.125 168.75,28.125" style="fill:gold;stroke:black;stroke-width:0" />
+<polygon points="175,37.5 193.75,28.125 168.75,28.125" style="fill:indigo;stroke:black;stroke-width:0" />
+<polygon points="175,37.5 168.75,28.125 150,37.5 156.25,46.875" style="fill:skyblue;stroke:black;stroke-width:0" />
+<polygon points="150,37.5 156.25,46.875 137.5,56.25" style="fill:plum;stroke:black;stroke-width:0" />
+<polygon points="175,37.5 187.5,56.25 137.5,56.25" style="fill:orange;stroke:black;stroke-width:0" />
+<polygon points="175,37.5 187.5,56.25 212.5,18.75" style="fill:green;stroke:black;stroke-width:0" />
+<polygon points="162.5,18.75 212.5,18.75 187.5,56.25 137.5,56.25" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_0_0_0" attributeName="fill" begin="0s;a_0_0_2.end" dur="25" from="white" to="white" />
+<animate id="a_0_0_1" attributeName="fill" begin="a_0_0_0.end" dur="2" from="white" to="white" />
+<animate id="a_0_0_2" attributeName="fill" begin="a_0_0_1.end" dur="3" from="black" to="black" />
+<animate id="a_o_0_0_0" attributeName="fill-opacity" begin="0s;a_o_0_0_2.end" dur="25" from="1" to="1" />
+<animate id="a_o_0_0_1" attributeName="fill-opacity" begin="a_o_0_0_0.end" dur="2" from="0" to="0" />
+<animate id="a_o_0_0_2" attributeName="fill-opacity" begin="a_o_0_0_1.end" dur="3" from="0.75" to="0.75" />
+</polygon>
+<polygon points="150,75 200,75 125,112.5" style="fill:red;stroke:black;stroke-width:0" />
+<polygon points="200,75 250,75 212.5,93.75 162.5,93.75" style="fill:gold;stroke:black;stroke-width:0" />
+<polygon points="175,112.5 212.5,93.75 162.5,93.75" style="fill:indigo;stroke:black;stroke-width:0" />
+<polygon points="175,112.5 162.5,93.75 125,112.5 137.5,131.25" style="fill:skyblue;stroke:black;stroke-width:0" />
+<polygon points="125,112.5 137.5,131.25 100,150" style="fill:plum;stroke:black;stroke-width:0" />
+<polygon points="175,112.5 200,150 100,150" style="fill:orange;stroke:black;stroke-width:0" />
+<polygon points="175,112.5 200,150 250,75" style="fill:green;stroke:black;stroke-width:0" />
+<polygon points="150,75 200,75 175,112.5 125,112.5" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_1_0_0" attributeName="fill" begin="0s;a_1_0_2.end" dur="5" from="white" to="white" />
+<animate id="a_1_0_1" attributeName="fill" begin="a_1_0_0.end" dur="21" from="white" to="white" />
+<animate id="a_1_0_2" attributeName="fill" begin="a_1_0_1.end" dur="4" from="black" to="black" />
+<animate id="a_o_1_0_0" attributeName="fill-opacity" begin="0s;a_o_1_0_2.end" dur="5" from="1" to="1" />
+<animate id="a_o_1_0_1" attributeName="fill-opacity" begin="a_o_1_0_0.end" dur="21" from="0" to="0" />
+<animate id="a_o_1_0_2" attributeName="fill-opacity" begin="a_o_1_0_1.end" dur="4" from="0.75" to="0.75" />
+</polygon>
+<polygon points="125,112.5 175,112.5 150,150 100,150" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_1_2_0" attributeName="fill" begin="0s;a_1_2_2.end" dur="17" from="white" to="white" />
+<animate id="a_1_2_1" attributeName="fill" begin="a_1_2_0.end" dur="9" from="white" to="white" />
+<animate id="a_1_2_2" attributeName="fill" begin="a_1_2_1.end" dur="4" from="black" to="black" />
+<animate id="a_o_1_2_0" attributeName="fill-opacity" begin="0s;a_o_1_2_2.end" dur="17" from="1" to="1" />
+<animate id="a_o_1_2_1" attributeName="fill-opacity" begin="a_o_1_2_0.end" dur="9" from="0" to="0" />
+<animate id="a_o_1_2_2" attributeName="fill-opacity" begin="a_o_1_2_1.end" dur="4" from="0.75" to="0.75" />
+</polygon>
+<polygon points="200,75 250,75 225,112.5 175,112.5" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_1_1_0" attributeName="fill" begin="0s;a_1_1_2.end" dur="11" from="white" to="white" />
+<animate id="a_1_1_1" attributeName="fill" begin="a_1_1_0.end" dur="15" from="white" to="white" />
+<animate id="a_1_1_2" attributeName="fill" begin="a_1_1_1.end" dur="4" from="black" to="black" />
+<animate id="a_o_1_1_0" attributeName="fill-opacity" begin="0s;a_o_1_1_2.end" dur="11" from="1" to="1" />
+<animate id="a_o_1_1_1" attributeName="fill-opacity" begin="a_o_1_1_0.end" dur="15" from="0" to="0" />
+<animate id="a_o_1_1_2" attributeName="fill-opacity" begin="a_o_1_1_1.end" dur="4" from="0.75" to="0.75" />
+</polygon>
+<polygon points="175,112.5 225,112.5 200,150 150,150" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_1_3_0" attributeName="fill" begin="0s;a_1_3_2.end" dur="23" from="white" to="white" />
+<animate id="a_1_3_1" attributeName="fill" begin="a_1_3_0.end" dur="3" from="white" to="white" />
+<animate id="a_1_3_2" attributeName="fill" begin="a_1_3_1.end" dur="4" from="black" to="black" />
+<animate id="a_o_1_3_0" attributeName="fill-opacity" begin="0s;a_o_1_3_2.end" dur="23" from="1" to="1" />
+<animate id="a_o_1_3_1" attributeName="fill-opacity" begin="a_o_1_3_0.end" dur="3" from="0" to="0" />
+<animate id="a_o_1_3_2" attributeName="fill-opacity" begin="a_o_1_3_1.end" dur="4" from="0.75" to="0.75" />
+</polygon>
+<polygon points="125,168.75 225,168.75 75,243.75" style="fill:red;stroke:black;stroke-width:0" />
+<polygon points="225,168.75 325,168.75 250,206.25 150,206.25" style="fill:gold;stroke:black;stroke-width:0" />
+<polygon points="175,243.75 250,206.25 150,206.25" style="fill:indigo;stroke:black;stroke-width:0" />
+<polygon points="175,243.75 150,206.25 75,243.75 100,281.25" style="fill:skyblue;stroke:black;stroke-width:0" />
+<polygon points="75,243.75 100,281.25 25,318.75" style="fill:plum;stroke:black;stroke-width:0" />
+<polygon points="175,243.75 225,318.75 25,318.75" style="fill:orange;stroke:black;stroke-width:0" />
+<polygon points="175,243.75 225,318.75 325,168.75" style="fill:green;stroke:black;stroke-width:0" />
+<polygon points="125,168.75 175,168.75 150,206.25 100,206.25" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_2_0_0" attributeName="fill" begin="0s;a_2_0_2.end" dur="1" from="white" to="white" />
+<animate id="a_2_0_1" attributeName="fill" begin="a_2_0_0.end" dur="5" from="white" to="white" />
+<animate id="a_2_0_2" attributeName="fill" begin="a_2_0_1.end" dur="24" from="black" to="black" />
+<animate id="a_o_2_0_0" attributeName="fill-opacity" begin="0s;a_o_2_0_2.end" dur="1" from="1" to="1" />
+<animate id="a_o_2_0_1" attributeName="fill-opacity" begin="a_o_2_0_0.end" dur="5" from="0" to="0" />
+<animate id="a_o_2_0_2" attributeName="fill-opacity" begin="a_o_2_0_1.end" dur="24" from="0.75" to="0.75" />
+</polygon>
+<polygon points="100,206.25 150,206.25 125,243.75 75,243.75" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_2_2_0" attributeName="fill" begin="0s;a_2_2_2.end" dur="3" from="white" to="white" />
+<animate id="a_2_2_1" attributeName="fill" begin="a_2_2_0.end" dur="3" from="white" to="white" />
+<animate id="a_2_2_2" attributeName="fill" begin="a_2_2_1.end" dur="24" from="black" to="black" />
+<animate id="a_o_2_2_0" attributeName="fill-opacity" begin="0s;a_o_2_2_2.end" dur="3" from="1" to="1" />
+<animate id="a_o_2_2_1" attributeName="fill-opacity" begin="a_o_2_2_0.end" dur="3" from="0" to="0" />
+<animate id="a_o_2_2_2" attributeName="fill-opacity" begin="a_o_2_2_1.end" dur="24" from="0.75" to="0.75" />
+</polygon>
+<polygon points="75,243.75 125,243.75 100,281.25 50,281.25" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_2_8_0" attributeName="fill" begin="0s;a_2_8_2.end" dur="13" from="white" to="white" />
+<animate id="a_2_8_1" attributeName="fill" begin="a_2_8_0.end" dur="5" from="white" to="white" />
+<animate id="a_2_8_2" attributeName="fill" begin="a_2_8_1.end" dur="12" from="black" to="black" />
+<animate id="a_o_2_8_0" attributeName="fill-opacity" begin="0s;a_o_2_8_2.end" dur="13" from="1" to="1" />
+<animate id="a_o_2_8_1" attributeName="fill-opacity" begin="a_o_2_8_0.end" dur="5" from="0" to="0" />
+<animate id="a_o_2_8_2" attributeName="fill-opacity" begin="a_o_2_8_1.end" dur="12" from="0.75" to="0.75" />
+</polygon>
+<polygon points="50,281.25 100,281.25 75,318.75 25,318.75" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_2_10_0" attributeName="fill" begin="0s;a_2_10_2.end" dur="15" from="white" to="white" />
+<animate id="a_2_10_1" attributeName="fill" begin="a_2_10_0.end" dur="3" from="white" to="white" />
+<animate id="a_2_10_2" attributeName="fill" begin="a_2_10_1.end" dur="12" from="black" to="black" />
+<animate id="a_o_2_10_0" attributeName="fill-opacity" begin="0s;a_o_2_10_2.end" dur="15" from="1" to="1" />
+<animate id="a_o_2_10_1" attributeName="fill-opacity" begin="a_o_2_10_0.end" dur="3" from="0" to="0" />
+<animate id="a_o_2_10_2" attributeName="fill-opacity" begin="a_o_2_10_1.end" dur="12" from="0.75" to="0.75" />
+</polygon>
+<polygon points="175,168.75 225,168.75 200,206.25 150,206.25" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_2_1_0" attributeName="fill" begin="0s;a_2_1_2.end" dur="2" from="white" to="white" />
+<animate id="a_2_1_1" attributeName="fill" begin="a_2_1_0.end" dur="4" from="white" to="white" />
+<animate id="a_2_1_2" attributeName="fill" begin="a_2_1_1.end" dur="24" from="black" to="black" />
+<animate id="a_o_2_1_0" attributeName="fill-opacity" begin="0s;a_o_2_1_2.end" dur="2" from="1" to="1" />
+<animate id="a_o_2_1_1" attributeName="fill-opacity" begin="a_o_2_1_0.end" dur="4" from="0" to="0" />
+<animate id="a_o_2_1_2" attributeName="fill-opacity" begin="a_o_2_1_1.end" dur="24" from="0.75" to="0.75" />
+</polygon>
+<polygon points="150,206.25 200,206.25 175,243.75 125,243.75" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_2_3_0" attributeName="fill" begin="0s;a_2_3_2.end" dur="4" from="white" to="white" />
+<animate id="a_2_3_1" attributeName="fill" begin="a_2_3_0.end" dur="2" from="white" to="white" />
+<animate id="a_2_3_2" attributeName="fill" begin="a_2_3_1.end" dur="24" from="black" to="black" />
+<animate id="a_o_2_3_0" attributeName="fill-opacity" begin="0s;a_o_2_3_2.end" dur="4" from="1" to="1" />
+<animate id="a_o_2_3_1" attributeName="fill-opacity" begin="a_o_2_3_0.end" dur="2" from="0" to="0" />
+<animate id="a_o_2_3_2" attributeName="fill-opacity" begin="a_o_2_3_1.end" dur="24" from="0.75" to="0.75" />
+</polygon>
+<polygon points="125,243.75 175,243.75 150,281.25 100,281.25" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_2_9_0" attributeName="fill" begin="0s;a_2_9_2.end" dur="14" from="white" to="white" />
+<animate id="a_2_9_1" attributeName="fill" begin="a_2_9_0.end" dur="4" from="white" to="white" />
+<animate id="a_2_9_2" attributeName="fill" begin="a_2_9_1.end" dur="12" from="black" to="black" />
+<animate id="a_o_2_9_0" attributeName="fill-opacity" begin="0s;a_o_2_9_2.end" dur="14" from="1" to="1" />
+<animate id="a_o_2_9_1" attributeName="fill-opacity" begin="a_o_2_9_0.end" dur="4" from="0" to="0" />
+<animate id="a_o_2_9_2" attributeName="fill-opacity" begin="a_o_2_9_1.end" dur="12" from="0.75" to="0.75" />
+</polygon>
+<polygon points="100,281.25 150,281.25 125,318.75 75,318.75" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_2_11_0" attributeName="fill" begin="0s;a_2_11_2.end" dur="16" from="white" to="white" />
+<animate id="a_2_11_1" attributeName="fill" begin="a_2_11_0.end" dur="2" from="white" to="white" />
+<animate id="a_2_11_2" attributeName="fill" begin="a_2_11_1.end" dur="12" from="black" to="black" />
+<animate id="a_o_2_11_0" attributeName="fill-opacity" begin="0s;a_o_2_11_2.end" dur="16" from="1" to="1" />
+<animate id="a_o_2_11_1" attributeName="fill-opacity" begin="a_o_2_11_0.end" dur="2" from="0" to="0" />
+<animate id="a_o_2_11_2" attributeName="fill-opacity" begin="a_o_2_11_1.end" dur="12" from="0.75" to="0.75" />
+</polygon>
+<polygon points="225,168.75 275,168.75 250,206.25 200,206.25" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_2_4_0" attributeName="fill" begin="0s;a_2_4_2.end" dur="7" from="white" to="white" />
+<animate id="a_2_4_1" attributeName="fill" begin="a_2_4_0.end" dur="5" from="white" to="white" />
+<animate id="a_2_4_2" attributeName="fill" begin="a_2_4_1.end" dur="18" from="black" to="black" />
+<animate id="a_o_2_4_0" attributeName="fill-opacity" begin="0s;a_o_2_4_2.end" dur="7" from="1" to="1" />
+<animate id="a_o_2_4_1" attributeName="fill-opacity" begin="a_o_2_4_0.end" dur="5" from="0" to="0" />
+<animate id="a_o_2_4_2" attributeName="fill-opacity" begin="a_o_2_4_1.end" dur="18" from="0.75" to="0.75" />
+</polygon>
+<polygon points="200,206.25 250,206.25 225,243.75 175,243.75" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_2_6_0" attributeName="fill" begin="0s;a_2_6_2.end" dur="9" from="white" to="white" />
+<animate id="a_2_6_1" attributeName="fill" begin="a_2_6_0.end" dur="3" from="white" to="white" />
+<animate id="a_2_6_2" attributeName="fill" begin="a_2_6_1.end" dur="18" from="black" to="black" />
+<animate id="a_o_2_6_0" attributeName="fill-opacity" begin="0s;a_o_2_6_2.end" dur="9" from="1" to="1" />
+<animate id="a_o_2_6_1" attributeName="fill-opacity" begin="a_o_2_6_0.end" dur="3" from="0" to="0" />
+<animate id="a_o_2_6_2" attributeName="fill-opacity" begin="a_o_2_6_1.end" dur="18" from="0.75" to="0.75" />
+</polygon>
+<polygon points="175,243.75 225,243.75 200,281.25 150,281.25" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_2_12_0" attributeName="fill" begin="0s;a_2_12_2.end" dur="19" from="white" to="white" />
+<animate id="a_2_12_1" attributeName="fill" begin="a_2_12_0.end" dur="5" from="white" to="white" />
+<animate id="a_2_12_2" attributeName="fill" begin="a_2_12_1.end" dur="6" from="black" to="black" />
+<animate id="a_o_2_12_0" attributeName="fill-opacity" begin="0s;a_o_2_12_2.end" dur="19" from="1" to="1" />
+<animate id="a_o_2_12_1" attributeName="fill-opacity" begin="a_o_2_12_0.end" dur="5" from="0" to="0" />
+<animate id="a_o_2_12_2" attributeName="fill-opacity" begin="a_o_2_12_1.end" dur="6" from="0.75" to="0.75" />
+</polygon>
+<polygon points="150,281.25 200,281.25 175,318.75 125,318.75" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_2_14_0" attributeName="fill" begin="0s;a_2_14_2.end" dur="21" from="white" to="white" />
+<animate id="a_2_14_1" attributeName="fill" begin="a_2_14_0.end" dur="3" from="white" to="white" />
+<animate id="a_2_14_2" attributeName="fill" begin="a_2_14_1.end" dur="6" from="black" to="black" />
+<animate id="a_o_2_14_0" attributeName="fill-opacity" begin="0s;a_o_2_14_2.end" dur="21" from="1" to="1" />
+<animate id="a_o_2_14_1" attributeName="fill-opacity" begin="a_o_2_14_0.end" dur="3" from="0" to="0" />
+<animate id="a_o_2_14_2" attributeName="fill-opacity" begin="a_o_2_14_1.end" dur="6" from="0.75" to="0.75" />
+</polygon>
+<polygon points="275,168.75 325,168.75 300,206.25 250,206.25" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_2_5_0" attributeName="fill" begin="0s;a_2_5_2.end" dur="8" from="white" to="white" />
+<animate id="a_2_5_1" attributeName="fill" begin="a_2_5_0.end" dur="4" from="white" to="white" />
+<animate id="a_2_5_2" attributeName="fill" begin="a_2_5_1.end" dur="18" from="black" to="black" />
+<animate id="a_o_2_5_0" attributeName="fill-opacity" begin="0s;a_o_2_5_2.end" dur="8" from="1" to="1" />
+<animate id="a_o_2_5_1" attributeName="fill-opacity" begin="a_o_2_5_0.end" dur="4" from="0" to="0" />
+<animate id="a_o_2_5_2" attributeName="fill-opacity" begin="a_o_2_5_1.end" dur="18" from="0.75" to="0.75" />
+</polygon>
+<polygon points="250,206.25 300,206.25 275,243.75 225,243.75" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_2_7_0" attributeName="fill" begin="0s;a_2_7_2.end" dur="10" from="white" to="white" />
+<animate id="a_2_7_1" attributeName="fill" begin="a_2_7_0.end" dur="2" from="white" to="white" />
+<animate id="a_2_7_2" attributeName="fill" begin="a_2_7_1.end" dur="18" from="black" to="black" />
+<animate id="a_o_2_7_0" attributeName="fill-opacity" begin="0s;a_o_2_7_2.end" dur="10" from="1" to="1" />
+<animate id="a_o_2_7_1" attributeName="fill-opacity" begin="a_o_2_7_0.end" dur="2" from="0" to="0" />
+<animate id="a_o_2_7_2" attributeName="fill-opacity" begin="a_o_2_7_1.end" dur="18" from="0.75" to="0.75" />
+</polygon>
+<polygon points="225,243.75 275,243.75 250,281.25 200,281.25" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_2_13_0" attributeName="fill" begin="0s;a_2_13_2.end" dur="20" from="white" to="white" />
+<animate id="a_2_13_1" attributeName="fill" begin="a_2_13_0.end" dur="4" from="white" to="white" />
+<animate id="a_2_13_2" attributeName="fill" begin="a_2_13_1.end" dur="6" from="black" to="black" />
+<animate id="a_o_2_13_0" attributeName="fill-opacity" begin="0s;a_o_2_13_2.end" dur="20" from="1" to="1" />
+<animate id="a_o_2_13_1" attributeName="fill-opacity" begin="a_o_2_13_0.end" dur="4" from="0" to="0" />
+<animate id="a_o_2_13_2" attributeName="fill-opacity" begin="a_o_2_13_1.end" dur="6" from="0.75" to="0.75" />
+</polygon>
+<polygon points="200,281.25 250,281.25 225,318.75 175,318.75" style="stroke:gray;fill:none;stroke-width:4">
+<animate id="a_2_15_0" attributeName="fill" begin="0s;a_2_15_2.end" dur="22" from="white" to="white" />
+<animate id="a_2_15_1" attributeName="fill" begin="a_2_15_0.end" dur="2" from="white" to="white" />
+<animate id="a_2_15_2" attributeName="fill" begin="a_2_15_1.end" dur="6" from="black" to="black" />
+<animate id="a_o_2_15_0" attributeName="fill-opacity" begin="0s;a_o_2_15_2.end" dur="22" from="1" to="1" />
+<animate id="a_o_2_15_1" attributeName="fill-opacity" begin="a_o_2_15_0.end" dur="2" from="0" to="0" />
+<animate id="a_o_2_15_2" attributeName="fill-opacity" begin="a_o_2_15_1.end" dur="6" from="0.75" to="0.75" />
+</polygon>
+<rect x="0" y="0" width="567" height="337" rx="0" ry="0" style="stroke:gray;fill:none;stroke-width:4" />
+</svg>

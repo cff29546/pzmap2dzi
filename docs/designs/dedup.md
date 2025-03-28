@@ -53,6 +53,8 @@ Implementation:
 
 ### Schema
 
+Tables
+
 ```sql
 -- mapping_table
 hash BLOB,         -- Hash value (configurable size, stored as BLOB)
@@ -67,6 +69,14 @@ state INTEGER      -- Additional flags (e.g., incomplete, deleted)
 hash_algorithm TEXT,     -- e.g., "xxhash.xxh64"
 collision_count INTEGER, -- Statistics
 last_updated TIMESTAMP   -- Timestamps for auditing
+```
+
+Indexes
+
+```sql
+   UNIQUE INDEX ON mapping_table (hash, id); -- unique constraint
+   INDEX ON mapping_table (path);            -- for search by path
+   INDEX ON mapping_table (inode);           -- for search by inode
 ```
 
 ### Concurrency Control

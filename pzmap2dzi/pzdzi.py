@@ -430,7 +430,6 @@ class IsoDZI(PZDZI):
         # grid offset
         self.gxo = align_origin(gxmin, self.grid_per_tilex * self.align_tiles)
         self.gyo = align_origin(gymin, self.grid_per_tiley * self.align_tiles)
-        print(self.gxo, self.gyo)
         self.gw = gxmax - self.gxo + 1
         self.gh = gymax - self.gyo + 1
         w = self.gw * IsoDZI.GRID_WIDTH

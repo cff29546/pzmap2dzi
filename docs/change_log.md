@@ -1,6 +1,6 @@
 # Change log
 
-# 2025-03-19: 1.0.7 + UI 1.0.9
+# 2025-03-19: 1.0.8 + UI 1.0.9
 
 * Align tiles to map origin
 

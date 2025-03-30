@@ -43,6 +43,11 @@ def get_merge_task_depend(done, lower_task, lower_done):
             skip.add((tx, ty))
     return tasks, skip
 
+def align_origin(origin, align):
+    align = int(align)
+    if align == 0:
+        return origin
+    return align * (origin // align)
 
 class DZI(object):
     def __init__(self, w, h, **options):
@@ -346,6 +351,8 @@ class PZDZI(DZI):
             self.minlayer = 0
         if self.maxlayer < 1:
             self.maxlayer = 1
+        tile_align_levels = options.get('tile_align_levels', 3)
+        self.align_tiles = int(2 ** (tile_align_levels - 1))
 
         self.render_minlayer = max(options.get('render_minlayer', self.minlayer), self.minlayer)
         self.render_maxlayer = min(options.get('render_maxlayer', self.maxlayer), self.maxlayer)
@@ -421,14 +428,13 @@ class IsoDZI(PZDZI):
         gxmin, gymin, gxmax, gymax = map(sum, zip(gbox, self.output_margin))
 
         # grid offset
-        self.gxo = gxmin
-        self.gyo = gymin
-        self.gw = gxmax - gxmin + 1
-        self.gh = gymax - gymin + 1
+        self.gxo = align_origin(gxmin, self.grid_per_tilex * self.align_tiles)
+        self.gyo = align_origin(gymin, self.grid_per_tiley * self.align_tiles)
+        print(self.gxo, self.gyo)
+        self.gw = gxmax - self.gxo + 1
+        self.gh = gymax - self.gyo + 1
         w = self.gw * IsoDZI.GRID_WIDTH
         h = self.gh * IsoDZI.GRID_HEIGHT
-        self.grid_width_per_tile = self.tile_size // IsoDZI.GRID_WIDTH
-        self.grid_height_per_tile = self.tile_size // IsoDZI.GRID_HEIGHT
         DZI.__init__(self, w, h, **options)
 
     def get_output_margin(self, use_large_texture=False):
@@ -485,10 +491,10 @@ class IsoDZI(PZDZI):
     def cell2tiles(self, cx, cy):
         gbox = map(sum, zip(self.cell_grid_bound(cx, cy), self.cell_margin))
         left, top, right, bottom = gbox
-        txmin = (left - self.gxo - 1) // self.grid_width_per_tile
-        txmax = (right - self.gxo) // self.grid_width_per_tile
-        tymin = (top - self.gyo - 1) // self.grid_height_per_tile
-        tymax = (bottom - self.gyo) // self.grid_height_per_tile
+        txmin = (left - self.gxo - 1) // self.grid_per_tilex
+        txmax = (right - self.gxo) // self.grid_per_tilex
+        tymin = (top - self.gyo - 1) // self.grid_per_tiley
+        tymax = (bottom - self.gyo) // self.grid_per_tiley
         tiles = [(tx, ty) for ty in range(tymin, tymax + 1)
                  for tx in range(txmin, txmax + 1)]
         return tiles
@@ -518,7 +524,7 @@ class IsoDZI(PZDZI):
     def update_map_info(self, info):
         info = self.update_pz_map_info(info)
         info['x0'] = -self.gxo * IsoDZI.GRID_WIDTH
-        info['y0'] = -(self.gyo + 1) * IsoDZI.GRID_HEIGHT
+        info['y0'] = -(self.gyo + 1) * IsoDZI.GRID_HEIGHT  # center to top
         info['sqr'] = 2 * IsoDZI.GRID_WIDTH
         return info
 
@@ -531,10 +537,10 @@ class TopDZI(PZDZI):
         cxmax, cymax = map(max, zip(*self.cells))
         cxmin, cymin = map(min, zip(*self.cells))
 
-        self.cxo = cxmin
-        self.cyo = cymin
-        self.cw = cxmax - cxmin + 1
-        self.ch = cymax - cymin + 1
+        self.cxo = align_origin(cxmin, self.align_tiles)
+        self.cyo = align_origin(cymin, self.align_tiles)
+        self.cw = cxmax - self.cxo + 1
+        self.ch = cymax - self.cyo + 1
         self.tile_size = self.square_size * self.cell_size
         w = self.tile_size * self.cw
         h = self.tile_size * self.ch

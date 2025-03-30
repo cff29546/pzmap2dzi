@@ -1,5 +1,9 @@
 # Change log
 
+# 2025-03-19: 1.0.7 + UI 1.0.9
+
+* Align tiles to map origin
+
 # 2025-03-19: 1.0.6 + UI 1.0.9
 
 * Fix coordinates offset

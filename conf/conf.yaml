@@ -70,6 +70,11 @@ render_conf:
     # dzi conf
     # dzi tile size
     tile_size: 1024
+    # make sure map origin (cell 0,0) lies on (0, 0) of a tile
+    # for how many bottem levels
+    # 0 for not align
+    # default is 3 bottom levels
+    tile_align_levels: 3
     # how may layer of map to render
     # examples:
     # render layer 0 to layer 7

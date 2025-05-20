@@ -1,175 +1,7 @@
 import os
 import sys
-import copy
 
-def _g(f):
-    # format float
-    return '{:g}'.format(f)
-
-def _coords(c):
-    return ' '.join(map(lambda x: ','.join(map(_g, x)), c))
-
-def _style(s):
-    return ';'.join(map(lambda x: ':'.join(map(str, x)), s.items()))
-
-class Elem(object):
-    def __init__(self, tag):
-        self.tag = tag
-        self.prop = {}
-
-    def _prop(self):
-        if hasattr(self, 'update_prop'):
-            self.update_prop()
-        prop = []
-        for k, v in self.prop.items():
-            prop.append('{}="{}"'.format(k, v))
-        return ' '.join(prop)
-
-    def __getitem__(self, key):
-        return self.prop.get(key)
-
-    def __setitem__(self, key, value):
-        self.prop[key] = value
-
-    def __delitem__(self, key):
-        del self.prop[key]
-
-    def __str__(self):
-        content = self.get_content()
-        if content:
-            return '<{} {}>{}</{}>'.format(
-                    self.tag,
-                    self._prop(),
-                    content,
-                    self.tag)
-        else:
-            return '<{} {} />'.format(
-                    self.tag,
-                    self._prop())
-
-class Animate(Elem):
-    def __init__(self, tag_id, attr, begin, dur, v0, v1=None, discrete=False):
-        super().__init__('animate')
-        self['id'] = tag_id
-        self['attributeName'] = attr
-        self['begin'] = begin
-        self['dur'] = dur
-        self['from'] = v0
-        
-        if discrete:
-            self['calcMode'] = 'discrete'
-        if v1 is not None:
-            self['to'] = v1
-        else:
-            self['to'] = v0
-
-    def get_content(self):
-        return ''
-
-class Shape(Elem):
-    def __init__(self, tag, coords, sizes, width, style):
-        super().__init__(tag)
-        self.coords = coords
-        self.sizes = sizes
-        self.width = width
-        self.children = []
-        self.style = dict(style)
-
-    def move(self, x, y):
-        return self.matrix(1, 0, 0, 1, x, y)
-
-    def matrix(self, a, b, c, d, tx=0, ty=0):
-        coords = []
-        for ox, oy in self.coords:
-            x = a * ox + b * oy + tx
-            y = c * ox + d * oy + ty
-            coords.append([x, y])
-        self.coords = coords
-        for child in self.children:
-            if hasattr(child, 'matrix'):
-                child.matrix(a, b, c, d, tx, ty)
-        return self
-
-    def copyby(self, x, y):
-        s = copy.deepcopy(self)
-        s.move(x, y)
-        return s
-
-    def get_content(self):
-        content = []
-        for child in self.children:
-            content.append(str(child))
-        if content:
-            return '\n' + '\n'.join(content) + '\n'
-        return ''
-
-    def update_style_prop(self):
-        self.style['stroke-width'] = self.width
-        self['style'] = _style(self.style)
-
-    def append(self, shape):
-        self.children.append(shape)
-        return self
-
-class SVG(Shape):
-    def __init__(self, w, h):
-        super().__init__('svg', [], [w, h], 0, {})
-
-    def paste(self, svg, x=0, y=0):
-        self.children.extend(svg.copyby(x, y).children)
-        return self
-
-    def resize(self, w, h):
-        self.sizes = [w, h]
-        return self
-
-    def update_prop(self):
-        self['width'] = _g(self.sizes[0])
-        self['height'] = _g(self.sizes[1])
-        self['xmlns'] = 'http://www.w3.org/2000/svg'
-
-    def save(self, file):
-        with open(file, 'w') as f:
-            f.write(str(self))
-
-class Polyline(Shape):
-    def __init__(self, coords, width=1, style={}):
-        super().__init__('polyline', coords, [], width, style)
-        if 'stroke' not in self.style:
-            self.style['stroke'] = 'black'
-
-    def update_prop(self):
-        self['points'] = _coords(self.coords)
-        self.update_style_prop()
-
-class Polygon(Polyline):
-    def __init__(self, coords, width=1, style={}):
-        super().__init__(coords, width, style)
-        self.tag = 'polygon'
-
-class Rect(Shape):
-    def __init__(self, x, y, w, h, rx=0, ry=0, width=1, style={}):
-        super().__init__('rect', [[x, y]], [w, h, rx, ry], width, style)
-
-    def update_prop(self):
-        self['x'], self['y'] = map(_g, self.coords[0])
-        self['width'] = _g(self.sizes[0])
-        self['height'] = _g(self.sizes[1])
-        self['rx'] = _g(self.sizes[2])
-        self['ry'] = _g(self.sizes[3])
-        self.update_style_prop()
-
-class Text(Shape):
-    def __init__(self, x, y, text, fill, size):
-        super().__init__('text', [[x, y]], [], size, {})
-        self.children.append(text)
-        self.fill = fill
-
-    def update_prop(self):
-        self['x'], self['y'] = map(_g, self.coords[0])
-        self['fill'] = self.fill
-        self['font-size'] = self.width
-
+from svg import SVG, Polygon, Shape, Text, Animate
 
 def zorder(x, y):
     block = 1
@@ -276,7 +108,7 @@ def toplogical_svg(rsize, levels=3, use_image=False):
             r.style['fill-opacity'] = opacity
         svg.append(r)
         for i, text in enumerate(text_list):
-            t = Text(x - rsize/4, y + rsize/2 + 1.5*fsize, text, 'black', str(fsize))
+            t = Text(x - rsize/4, y + rsize/2 + 1.5*fsize, text, str(fsize), {'fill': color})
             svg.append(t)
             x += fsize/2
             y += fsize
@@ -326,6 +158,7 @@ def toplogical_svg(rsize, levels=3, use_image=False):
     svg.move(xshift, 0)
     w += xshift
     svg.resize(w, h)
+    svg['style'] = 'background-color: white;'
 
     #box = Rect(0, 0, w, h, width=4, style={'stroke': 'gray', 'fill': 'none'})
     #svg.append(box)
@@ -338,7 +171,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--tile-size', type=int, default=50, help='tile size')
     parser.add_argument('-l', '--levels', type=int, default=3, help='levels')
     parser.add_argument('-i', '--use-image', action='store_true', help='use image background')
-    parser.add_argument('-o', '--output', type=str, default='./toplogical.svg', help='use image background')
+    parser.add_argument('-o', '--output', type=str, default='./toplogical.svg', help='output file')
     args = parser.parse_args()
     toplogical_svg(args.tile_size, args.levels, args.use_image).save(args.output)
 

@@ -59,7 +59,7 @@ def rc_base(tl, tiles, layer):
     if base:
         tx = tl.get_by_name(base)
         if tx:
-            return color_from_sums([tex.get_color_sum()])
+            return color_from_sums([tx.get_color_sum()])
     return None
 
 

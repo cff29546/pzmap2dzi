@@ -1,4 +1,4 @@
-<svg width="567" height="337" xmlns="http://www.w3.org/2000/svg">
+<svg style="background-color: white;" width="567" height="337" xmlns="http://www.w3.org/2000/svg">
 <rect width="100%" height="100%" fill="white" />
 <polygon points="412.5,18.75 437.5,18.75 400,37.5" style="fill:red;stroke:black;stroke-width:0" />
 <polygon points="437.5,18.75 462.5,18.75 443.75,28.125 418.75,28.125" style="fill:gold;stroke:black;stroke-width:0" />
@@ -8,7 +8,7 @@
 <polygon points="425,37.5 437.5,56.25 387.5,56.25" style="fill:orange;stroke:black;stroke-width:0" />
 <polygon points="425,37.5 437.5,56.25 462.5,18.75" style="fill:green;stroke:black;stroke-width:0" />
 <polygon points="412.5,18.75 462.5,18.75 437.5,56.25 387.5,56.25" style="stroke:gray;fill:white;stroke-width:4" />
-<text x="382" y="83.25" fill="black" font-size="24">
+<text style="fill:white;stroke-width:24" x="382" y="83.25" font-size="24">
 Unprocessed
 </text>
 <polygon points="412.5,110.25 437.5,110.25 400,129" style="fill:red;stroke:black;stroke-width:0" />
@@ -19,7 +19,7 @@ Unprocessed
 <polygon points="425,129 437.5,147.75 387.5,147.75" style="fill:orange;stroke:black;stroke-width:0" />
 <polygon points="425,129 437.5,147.75 462.5,110.25" style="fill:green;stroke:black;stroke-width:0" />
 <polygon points="412.5,110.25 462.5,110.25 437.5,147.75 387.5,147.75" style="stroke:gray;fill:white;fill-opacity:0;stroke-width:4" />
-<text x="382" y="174.75" fill="black" font-size="24">
+<text style="fill:white;stroke-width:24" x="382" y="174.75" font-size="24">
 Done, Cached
 </text>
 <polygon points="412.5,201.75 437.5,201.75 400,220.5" style="fill:red;stroke:black;stroke-width:0" />
@@ -30,10 +30,10 @@ Done, Cached
 <polygon points="425,220.5 437.5,239.25 387.5,239.25" style="fill:orange;stroke:black;stroke-width:0" />
 <polygon points="425,220.5 437.5,239.25 462.5,201.75" style="fill:green;stroke:black;stroke-width:0" />
 <polygon points="412.5,201.75 462.5,201.75 437.5,239.25 387.5,239.25" style="stroke:gray;fill:black;fill-opacity:0.75;stroke-width:4" />
-<text x="382" y="266.25" fill="black" font-size="24">
+<text style="fill:black;stroke-width:24" x="382" y="266.25" font-size="24">
 Presisted
 </text>
-<text x="382" y="284.25" fill="black" font-size="24">
+<text style="fill:black;stroke-width:24" x="382" y="284.25" font-size="24">
 (Cache Released)
 </text>
 <polygon points="162.5,18.75 187.5,18.75 150,37.5" style="fill:red;stroke:black;stroke-width:0" />

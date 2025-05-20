@@ -21,6 +21,18 @@ function updateQueryString() {
             g.query_string[k] = v.join('=');
         }
     }
+    if (g.map_type === '') {
+        // first time page load
+        if (g.query_string.overlays) {
+            let overlays = g.query_string.overlays.split(',');
+            for (let type of overlays) {
+                if (type === '') {
+                    continue;
+                }
+                g.overlays[type] = 1;
+            }
+        }
+    }
 }
 
 function loadConfig() {

@@ -152,9 +152,18 @@ template:
     MarkerHeightText:
         en: 'Height:'
         cn: '高度:'
-    MarkerHideLabel:
-        en: 'Hide when zoom out'
-        cn: '拉远隐藏'
+    MarkerVisibilityText:
+        en: 'Visibility:'
+        cn: '可见性:'
+    MarkerVisibilityLevel0:
+        en: 'Always'
+        cn: '始终可见'
+    MarkerVisibilityLevel1:
+        en: 'Normal-Zoom'
+        cn: '中等缩放'
+    MarkerVisibilityLevel2:
+        en: 'Close-Zoom'
+        cn: '近距缩放'
     MarkerImportButton:
         en: 'Import'
         cn: '导入'
@@ -170,6 +179,9 @@ template:
     MarkerHelpButton:
         en: '${g.markerui_help?"Hide":"Show"} Help'
         cn: '${g.markerui_help?"隐藏":"显示"}帮助'
+    MarkerFocusButtonTitle:
+        en: 'Focus on selected mark'
+        cn: '聚焦选中标记'
     MarkerDeselectButtonTitle:
         en: 'Deselect mark and discard unsaved changes'
         cn: '取消选择，放弃未保存更改'
@@ -204,9 +216,8 @@ template:
             <b>1. Shift+Click</b>: Create new point
             <b>2. Shift+Drag</b>: Create new area
             <b>3. Click existing mark</b>: Select mark
-            <b>4. Ctrl+Click existing mark</b>: Select and zoom to mark
-            <b>5. Drag existing mark</b>: Move mark
-            <b>6. Esc</b>: Deselect mark and discard unsaved changes
+            <b>4. Drag existing mark</b>: Move mark
+            <b>5. Esc</b>: Deselect mark and discard unsaved changes
             </div>
         cn: |
             <div>
@@ -214,9 +225,8 @@ template:
             <b>1. Shift+单击鼠标左键:</b> 新建标记点
             <b>2. Shift+拖拽鼠标左键:</b> 新建标记区域
             <b>3. 单击标记</b>: 选择标记
-            <b>4. Ctrl+单击标记</b>: 选择并缩放到标记
-            <b>5. 拖拽标记</b>: 移动标记
-            <b>6. Esc</b>: 取消选择，放弃未保存更改
+            <b>4. 拖拽标记</b>: 移动标记
+            <b>5. Esc</b>: 取消选择，放弃未保存更改
             </div>
     MarkerNew:
         en: 'New'
@@ -510,8 +520,14 @@ mapping:
             innerHTML: MarkerWidthText
         marker_height_text:
             innerHTML: MarkerHeightText
-        marker_hide_label:
-            innerHTML: MarkerHideLabel
+        marker_visibility_text:
+            innerHTML: MarkerVisibilityText
+        marker_visiable_zoom_level_0:
+            innerHTML: MarkerVisibilityLevel0
+        marker_visiable_zoom_level_1:
+            innerHTML: MarkerVisibilityLevel1
+        marker_visiable_zoom_level_2:
+            innerHTML: MarkerVisibilityLevel2
         marker_import_btn:
             innerHTML: MarkerImportButton
         marker_export_btn:
@@ -523,6 +539,8 @@ mapping:
         marker_help_btn:
             innerHTML:
                 eval: MarkerHelpButton
+        marker_focus_btn:
+            title: MarkerFocusButtonTitle
         marker_deselect_btn:
             title: MarkerDeselectButtonTitle
             innerHTML: MarkerDeselectButton

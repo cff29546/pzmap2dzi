@@ -4,7 +4,7 @@
   layer: 0
   name_cn: 服装店
   name_en: Clothing Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11599
   y: 8252
@@ -14,7 +14,7 @@
   layer: 0
   name_cn: 小餐馆
   name_en: Diner
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11464
   y: 8809
@@ -24,7 +24,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11603
   y: 8308
@@ -34,7 +34,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11508
   y: 8832
@@ -44,7 +44,7 @@
   layer: 0
   name_cn: 自助洗衣店
   name_en: Laundromat
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11683
   y: 8821
@@ -54,7 +54,7 @@
   layer: 0
   name_cn: 莫兰的二手车
   name_en: Molan's Used Cars
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11687
   y: 8367
@@ -64,7 +64,7 @@
   layer: 0
   name_cn: 野餐用餐区
   name_en: Picnic Dining Area
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11556
   y: 8858
@@ -74,7 +74,7 @@
   layer: 0
   name_cn: 斯皮福餐厅
   name_en: Spiffo's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11668
   y: 8302
@@ -84,7 +84,7 @@
   layer: 0
   name_cn: 超市
   name_en: Supermarket
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11670
   y: 8794
@@ -94,7 +94,7 @@
   layer: 0
   name_cn: 迪克西拖车公园
   name_en: Dixie Trailer Park
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 11493
   y: 8914
@@ -104,7 +104,7 @@
   layer: 0
   name_cn: <3 Brian
   name_en: <3 Brian
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8927
   y: 10320
@@ -114,7 +114,7 @@
   layer: 0
   name_cn: 废弃工厂
   name_en: Abandoned Factory
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3847
   y: 6212
@@ -124,7 +124,7 @@
   layer: 0
   name_cn: 陆军宿舍
   name_en: Army Quarters
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7445
   y: 7959
@@ -134,7 +134,7 @@
   layer: 0
   name_cn: 汽车修理店
   name_en: Auto Repair Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5470
   y: 9661
@@ -144,7 +144,7 @@
   layer: 0
   name_cn: 林中小屋
   name_en: Cabin in the Woods
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8059
   y: 7620
@@ -155,7 +155,7 @@
   layer: 0
   name_cn: 露营地
   name_en: Camp Camus
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 4817
   y: 7939
@@ -165,7 +165,7 @@
   layer: 0
   name_cn: 露营店
   name_en: Camping Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3800
   y: 8549
@@ -175,7 +175,7 @@
   layer: 0
   name_cn: 服装店
   name_en: Clothing Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5501
   y: 9566
@@ -185,7 +185,7 @@
   layer: 0
   name_cn: 建筑工地
   name_en: Construction Site
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10223
   y: 7586
@@ -196,7 +196,7 @@
   layer: 0
   name_cn: 鹿头湖公园护林站
   name_en: Deerhead Lake Park Ranger Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 4674
   y: 8597
@@ -207,7 +207,7 @@
   layer: 0
   name_cn: 鹿头湖公园护林站
   name_en: Deerhead Lake Park Ranger Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 4674
   y: 8597
@@ -217,7 +217,7 @@
   layer: 0
   name_cn: 小餐馆
   name_en: Diner
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3703
   y: 8462
@@ -227,7 +227,7 @@
   layer: 0
   name_cn: 医生办公室
   name_en: Doctor's Office
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5499
   y: 9582
@@ -237,7 +237,7 @@
   layer: 0
   name_cn: 双层小型仓库
   name_en: Double Small Warehouses
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6560
   y: 8946
@@ -247,7 +247,7 @@
   layer: 0
   name_cn: 双层小型仓库
   name_en: Double Small Warehouses
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5892
   y: 9861
@@ -257,7 +257,7 @@
   layer: 0
   name_cn: 双仓库
   name_en: Double Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7657
   y: 9343
@@ -267,7 +267,7 @@
   layer: 0
   name_cn: 双仓库
   name_en: Double Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8279
   y: 10039
@@ -277,7 +277,7 @@
   layer: 0
   name_cn: 农产品商店
   name_en: Farm Produce Shop
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5465
   y: 9584
@@ -287,7 +287,7 @@
   layer: 0
   name_cn: 农场摊位
   name_en: Farm stall
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 9449
   y: 9777
@@ -297,7 +297,7 @@
   layer: 0
   name_cn: 僵尸毁灭工程预告片中展示的第一栋房子
   name_en: First house shown in Project Zomboid's trailer
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7087
   y: 8370
@@ -307,7 +307,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5467
   y: 9709
@@ -317,7 +317,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3690
   y: 8495
@@ -327,7 +327,7 @@
   layer: 0
   name_cn: 枪支店
   name_en: Gun Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3807
   y: 8513
@@ -337,7 +337,7 @@
   layer: 0
   name_cn: 赛马场
   name_en: Horse Course
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5577
   y: 6499
@@ -347,7 +347,7 @@
   layer: 0
   name_cn: 猎人小屋
   name_en: Hunter's Cabin
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 9040
   y: 8732
@@ -357,7 +357,7 @@
   layer: 0
   name_cn: 冰淇淋店
   name_en: Ice Cream Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7140
   y: 8981
@@ -367,7 +367,7 @@
   layer: 0
   name_cn: 孤立的房子
   name_en: Isolated House
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3859
   y: 8428
@@ -378,7 +378,7 @@
   layer: 0
   name_cn: 湖边别墅
   name_en: Lake House
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 4243
   y: 7226
@@ -388,7 +388,7 @@
   layer: 0
   name_cn: 自助洗衣店
   name_en: Laundromat
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7259
   y: 8498
@@ -398,7 +398,7 @@
   layer: 0
   name_cn: 自助洗衣店
   name_en: Laundromat
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5474
   y: 9680
@@ -408,7 +408,7 @@
   layer: 0
   name_cn: 军事研究设施
   name_en: Military Research Facility
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5564
   y: 12476
@@ -418,7 +418,7 @@
   layer: 0
   name_cn: 军事剩余物资商店
   name_en: Military Surplus Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5464
   y: 9511
@@ -428,7 +428,7 @@
   layer: 0
   name_cn: 餐厅
   name_en: Restaurant
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5547
   y: 9663
@@ -438,7 +438,7 @@
   layer: 0
   name_cn: 小农舍
   name_en: Small Farm House
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3659
   y: 8535
@@ -448,7 +448,7 @@
   layer: 0
   name_cn: 小仓库
   name_en: Small Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7485
   y: 11081
@@ -458,7 +458,7 @@
   layer: 0
   name_cn: 小作坊
   name_en: Small Workshop
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8532
   y: 9033
@@ -468,7 +468,7 @@
   layer: 0
   name_cn: 捕兽者之家
   name_en: Trapper House
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3924
   y: 6214
@@ -478,7 +478,7 @@
   layer: 0
   name_cn: 三个仓库
   name_en: Triple Warehouses
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6734
   y: 10020
@@ -488,7 +488,7 @@
   layer: 0
   name_cn: 酒吧
   name_en: Bar
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7246
   y: 8522
@@ -498,7 +498,7 @@
   layer: 0
   name_cn: 书店
   name_en: Book Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7258
   y: 8431
@@ -508,7 +508,7 @@
   layer: 0
   name_cn: 汉堡店
   name_en: Burger Joint
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7234
   y: 8203
@@ -518,7 +518,7 @@
   layer: 0
   name_cn: 教堂
   name_en: Church
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7387
   y: 8353
@@ -528,7 +528,7 @@
   layer: 0
   name_cn: 医生办公室
   name_en: Doctor's Office
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7296
   y: 8388
@@ -538,7 +538,7 @@
   layer: 0
   name_cn: 农用用品店
   name_en: Farming Supply Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7252
   y: 8321
@@ -548,7 +548,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7317
   y: 8186
@@ -558,7 +558,7 @@
   layer: 0
   name_cn: 杂货店
   name_en: General Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7296
   y: 8253
@@ -568,7 +568,7 @@
   layer: 0
   name_cn: 五金店
   name_en: Hardware Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7256
   y: 8231
@@ -578,7 +578,7 @@
   layer: 0
   name_cn: 警察局
   name_en: Police Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7252
   y: 8378
@@ -588,7 +588,7 @@
   layer: 0
   name_cn: 3车库豪宅
   name_en: 3 Garage Mansion
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12037
   y: 2593
@@ -598,7 +598,7 @@
   layer: 0
   name_cn: 3联别墅
   name_en: 3 Mansion Complex
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 14150
   y: 2628
@@ -608,7 +608,7 @@
   layer: 0
   name_cn: 5美元或更少
   name_en: 5 Bux or Less
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13318
   y: 1293
@@ -618,7 +618,7 @@
   layer: 0
   name_cn: LMBW 93.2广播电台
   name_en: 93.2 LMBW Radio
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12474
   y: 1774
@@ -628,7 +628,7 @@
   layer: 0
   name_cn: 罗恩狩猎用品
   name_en: A.A. Ron Hunting Supply
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13961
   y: 3231
@@ -638,7 +638,7 @@
   layer: 0
   name_cn: ABC驾校
   name_en: ABCDriving School
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13312
   y: 1314
@@ -648,7 +648,7 @@
   layer: 0
   name_cn: 艾托线材公司
   name_en: Aitor Wire Company
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12183
   y: 1457
@@ -658,7 +658,7 @@
   layer: 0
   name_cn: 美国环球通讯
   name_en: AmeriGlobe Communications
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12305
   y: 3533
@@ -668,7 +668,7 @@
   layer: 0
   name_cn: 美国美食
   name_en: American Eats
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12781
   y: 1214
@@ -678,7 +678,7 @@
   layer: 0
   name_cn: 陆军检查站
   name_en: Army Checkpoint
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12515
   y: 4267
@@ -688,7 +688,7 @@
   layer: 0
   name_cn: 军队剩余物资商店
   name_en: Army Surplus Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12225
   y: 1319
@@ -698,7 +698,7 @@
   layer: 0
   name_cn: 路易斯维尔艺术馆
   name_en: Art Gallery of Louisville
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12547
   y: 1393
@@ -708,7 +708,7 @@
   layer: 0
   name_cn: 汽车修理店（中央）
   name_en: Auto Repair Shop (Central)
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12655
   y: 2118
@@ -718,7 +718,7 @@
   layer: 0
   name_cn: 汽车修理店（中心区）
   name_en: Auto Repair Shop (Central)
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12266
   y: 1567
@@ -728,7 +728,7 @@
   layer: 0
   name_cn: 汽车修理店（东）
   name_en: Auto Repair Shop (East)
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13111
   y: 1757
@@ -738,7 +738,7 @@
   layer: 0
   name_cn: 汽车修理店（北）
   name_en: Auto Repair Shop (North)
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12232
   y: 1375
@@ -748,7 +748,7 @@
   layer: 0
   name_cn: 汽车修理店（南）
   name_en: Auto Repair Shop (South)
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13280
   y: 2965
@@ -758,7 +758,7 @@
   layer: 0
   name_cn: 汽车修理店（南）
   name_en: Auto Repair Shop (South)
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12616
   y: 3518
@@ -768,7 +768,7 @@
   layer: 0
   name_cn: 裁缝店
   name_en: Awl Work and Sew Play
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12489
   y: 1697
@@ -778,7 +778,7 @@
   layer: 0
   name_cn: 裁缝店
   name_en: Awl Work and Sew Play
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13169
   y: 1560
@@ -788,7 +788,7 @@
   layer: 0
   name_cn: 烧烤设备店
   name_en: BBBQ
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12912
   y: 1398
@@ -798,7 +798,7 @@
   layer: 0
   name_cn: 回归自然脊椎按摩
   name_en: Back To The Nurture
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12411
   y: 2835
@@ -808,7 +808,7 @@
   layer: 0
   name_cn: 面包店
   name_en: Bakery
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13581
   y: 2134
@@ -818,7 +818,7 @@
   layer: 0
   name_cn: 酒吧
   name_en: Bar
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13181
   y: 1283
@@ -828,7 +828,7 @@
   layer: 0
   name_cn: 酒吧
   name_en: Bar
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13951
   y: 3129
@@ -838,7 +838,7 @@
   layer: 0
   name_cn: 酒吧
   name_en: Bar
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12858
   y: 1206
@@ -848,7 +848,7 @@
   layer: 0
   name_cn: 电池厂
   name_en: Battery Factory
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12190
   y: 1270
@@ -858,7 +858,7 @@
   layer: 0
   name_cn: 啤酒和烈酒
   name_en: Beer & Liquor
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13585
   y: 2147
@@ -868,7 +868,7 @@
   layer: 0
   name_cn: 圣经精神浸信会教堂
   name_en: Bible Spirit Baptist Church
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12433
   y: 3020
@@ -878,7 +878,7 @@
   layer: 0
   name_cn: 大空仓库
   name_en: Big Empty Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12704
   y: 2123
@@ -888,7 +888,7 @@
   layer: 0
   name_cn: 大仓库
   name_en: Big Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12179
   y: 1592
@@ -898,7 +898,7 @@
   layer: 0
   name_cn: 黑甘草
   name_en: Black Liquorice
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13613
   y: 1622
@@ -908,7 +908,7 @@
   layer: 0
   name_cn: 书店
   name_en: Book Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13347
   y: 1295
@@ -918,7 +918,7 @@
   layer: 0
   name_cn: 书店
   name_en: Book Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12560
   y: 1931
@@ -928,7 +928,7 @@
   layer: 0
   name_cn: 书店
   name_en: Book Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12375
   y: 1510
@@ -938,7 +938,7 @@
   layer: 0
   name_cn: 书店
   name_en: Book Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13240
   y: 1658
@@ -948,7 +948,7 @@
   layer: 0
   name_cn: 书店
   name_en: Book Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12813
   y: 1310
@@ -958,7 +958,7 @@
   layer: 0
   name_cn: 书店
   name_en: Book Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13382
   y: 3052
@@ -968,7 +968,7 @@
   layer: 0
   name_cn: 书店
   name_en: Book Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12534
   y: 1254
@@ -978,7 +978,7 @@
   layer: 0
   name_cn: 书店
   name_en: Book Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13524
   y: 1396
@@ -988,7 +988,7 @@
   layer: 0
   name_cn: 书店
   name_en: Book Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13182
   y: 1250
@@ -998,7 +998,7 @@
   layer: 0
   name_cn: 汪汪狗营养中心
   name_en: Bow-Wow Dog Nutrition
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12561
   y: 3523
@@ -1008,7 +1008,7 @@
   layer: 0
   name_cn: 保龄球馆
   name_en: Bowling Alley
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12444
   y: 2062
@@ -1018,7 +1018,7 @@
   layer: 0
   name_cn: 拳击馆
   name_en: Boxing Gym
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13139
   y: 1578
@@ -1028,7 +1028,7 @@
   layer: 0
   name_cn: 拳击馆
   name_en: Boxing Gym
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12313
   y: 1428
@@ -1038,7 +1038,7 @@
   layer: 0
   name_cn: 流行音乐啤酒厂
   name_en: Boxpop Berwery
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13170
   y: 1592
@@ -1048,7 +1048,7 @@
   layer: 0
   name_cn: 布拉克砖厂
   name_en: Brac Brick Factory
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12121
   y: 1259
@@ -1058,7 +1058,7 @@
   layer: 0
   name_cn: 克拉克纪念大桥
   name_en: Clark Memorial Bridge
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12596
   y: 962
@@ -1068,7 +1068,7 @@
   layer: 0
   name_cn: 布鲁克斯公共图书馆
   name_en: Brooks Public Library
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12562
   y: 1467
@@ -1078,7 +1078,7 @@
   layer: 0
   name_cn: 汉堡店
   name_en: Burger Joint
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13240
   y: 3486
@@ -1088,7 +1088,7 @@
   layer: 0
   name_cn: 汉堡餐厅
   name_en: Burgers
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13206
   y: 1283
@@ -1099,7 +1099,7 @@
   layer: 0
   name_cn: 公交车站
   name_en: Bus Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12558
   y: 2313
@@ -1109,7 +1109,7 @@
   layer: 0
   name_cn: 肉店
   name_en: Butcher Shop
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12491
   y: 1446
@@ -1119,7 +1119,7 @@
   layer: 0
   name_cn: 咖啡馆
   name_en: Cafe
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12713
   y: 1333
@@ -1129,7 +1129,7 @@
   layer: 0
   name_cn: 咖啡馆
   name_en: Cafe
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13530
   y: 2143
@@ -1139,7 +1139,7 @@
   layer: 0
   name_cn: 坎托录音棚
   name_en: Canto Records
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13388
   y: 2925
@@ -1149,7 +1149,7 @@
   layer: 0
   name_cn: 汽车经销店
   name_en: Car Dealership
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13246
   y: 1327
@@ -1159,7 +1159,7 @@
   layer: 0
   name_cn: 汽车经销店
   name_en: Car Dealership
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13159
   y: 1388
@@ -1169,7 +1169,7 @@
   layer: 0
   name_cn: 汽车经销店
   name_en: Car Dealership
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12372
   y: 2533
@@ -1179,7 +1179,7 @@
   layer: 0
   name_cn: 红衣主教广场
   name_en: Cardinal Plaza
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12850
   y: 1316
@@ -1189,7 +1189,7 @@
   layer: 0
   name_cn: 大教堂
   name_en: Cathedral
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12768
   y: 1398
@@ -1199,7 +1199,7 @@
   layer: 0
   name_cn: 公墓
   name_en: Cemetary
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12583
   y: 3274
@@ -1209,7 +1209,7 @@
   layer: 0
   name_cn: 中央路易斯维尔社区中心
   name_en: Central Loisville Community Center
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12846
   y: 1697
@@ -1219,7 +1219,7 @@
   layer: 0
   name_cn: 易洛魁公园
   name_en: Iroquois Park
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13238
   y: 2681
@@ -1229,7 +1229,7 @@
   layer: 0
   name_cn: 中央公园马厩
   name_en: Central Park Stables
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13043
   y: 2827
@@ -1239,7 +1239,7 @@
   layer: 0
   name_cn: 查格斯
   name_en: Chugg's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13330
   y: 1242
@@ -1249,7 +1249,7 @@
   layer: 0
   name_cn: 教堂
   name_en: Church
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12607
   y: 3364
@@ -1259,7 +1259,7 @@
   layer: 0
   name_cn: 教堂
   name_en: Church
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12410
   y: 1926
@@ -1269,7 +1269,7 @@
   layer: 0
   name_cn: 教堂
   name_en: Church
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12874
   y: 2854
@@ -1279,7 +1279,7 @@
   layer: 0
   name_cn: 教堂
   name_en: Church
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13667
   y: 2547
@@ -1289,7 +1289,7 @@
   layer: 0
   name_cn: 服装店
   name_en: Clothing Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13182
   y: 1293
@@ -1299,7 +1299,7 @@
   layer: 0
   name_cn: 服装店
   name_en: Clothing Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13239
   y: 1675
@@ -1309,7 +1309,7 @@
   layer: 0
   name_cn: 服装店
   name_en: Clothing Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13334
   y: 1293
@@ -1319,7 +1319,7 @@
   layer: 0
   name_cn: 服装店
   name_en: Clothing Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12693
   y: 1209
@@ -1329,7 +1329,7 @@
   layer: 0
   name_cn: 服装店
   name_en: Clothing Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12666
   y: 1211
@@ -1339,7 +1339,7 @@
   layer: 0
   name_cn: 服装店
   name_en: Clothing store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13251
   y: 2137
@@ -1349,7 +1349,7 @@
   layer: 0
   name_cn: 服装店
   name_en: Clothing store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13466
   y: 1317
@@ -1359,7 +1359,7 @@
   layer: 0
   name_cn: 咖啡天堂
   name_en: Coffee Nirvana
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12629
   y: 2327
@@ -1369,7 +1369,7 @@
   layer: 0
   name_cn: 建筑工地
   name_en: Construction Site
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13820
   y: 1675
@@ -1379,7 +1379,7 @@
   layer: 0
   name_cn: 便利店
   name_en: Conven-U-Mart
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12280
   y: 2529
@@ -1389,7 +1389,7 @@
   layer: 0
   name_cn: 便利店/自助洗衣店
   name_en: Convenience Store / Laundromat
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13947
   y: 2240
@@ -1399,7 +1399,7 @@
   layer: 0
   name_cn: 玉米迷宫
   name_en: Corn Maze
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13721
   y: 3691
@@ -1410,7 +1410,7 @@
   layer: 0
   name_cn: 角落围栏房屋
   name_en: Corner-fenced house
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12325
   y: 3415
@@ -1420,7 +1420,7 @@
   layer: 0
   name_cn: 乡村书记员和记录
   name_en: Country Clerk and Records
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12637
   y: 1469
@@ -1430,7 +1430,7 @@
   layer: 0
   name_cn: 法院
   name_en: Court House
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12468
   y: 1540
@@ -1440,7 +1440,7 @@
   layer: 0
   name_cn: 小餐馆
   name_en: Diner
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13344
   y: 1735
@@ -1451,7 +1451,7 @@
   layer: 0
   name_cn: 小餐馆
   name_en: Diner
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13240
   y: 1697
@@ -1461,7 +1461,7 @@
   layer: 0
   name_cn: 小餐馆
   name_en: Diner
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12907
   y: 1408
@@ -1471,7 +1471,7 @@
   layer: 0
   name_cn: 小餐馆
   name_en: Diner
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12718
   y: 1212
@@ -1481,7 +1481,7 @@
   layer: 0
   name_cn: 折扣帐户公司
   name_en: Discount Account
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12627
   y: 3667
@@ -1491,7 +1491,7 @@
   layer: 0
   name_cn: 狗火狂欢
   name_en: Dogs-A-Flaming
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13078
   y: 1589
@@ -1501,7 +1501,7 @@
   layer: 0
   name_cn: 甜甜圈店
   name_en: Donut Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13470
   y: 1349
@@ -1511,7 +1511,7 @@
   layer: 0
   name_cn: 宿舍
   name_en: Dormitory
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12328
   y: 2268
@@ -1521,7 +1521,7 @@
   layer: 0
   name_cn: 雷布伦大楼
   name_en: E. Wrayburn Building
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12662
   y: 1400
@@ -1531,7 +1531,7 @@
   layer: 0
   name_cn: 变电站
   name_en: Electrical Substation
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 14765
   y: 4085
@@ -1541,7 +1541,7 @@
   layer: 0
   name_cn: 小学
   name_en: Elementary School
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12335
   y: 3251
@@ -1551,7 +1551,7 @@
   layer: 0
   name_cn: Evergreen Hill 社区中心
   name_en: Evergreen Hill Community Center
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13683
   y: 2785
@@ -1561,7 +1561,7 @@
   layer: 0
   name_cn: Evergreen Hill 社区中心
   name_en: Evergreen Hill Community Center
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13683
   y: 2785
@@ -1571,7 +1571,7 @@
   layer: 0
   name_cn: 常青公立学校
   name_en: Evergreen Public School
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13600
   y: 2762
@@ -1581,7 +1581,7 @@
   layer: 0
   name_cn: 家庭牙科诊所
   name_en: Family Dentistry
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13605
   y: 1569
@@ -1591,7 +1591,7 @@
   layer: 0
   name_cn: 豪华豪宅
   name_en: Fancy Mansion
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13533
   y: 2856
@@ -1601,7 +1601,7 @@
   layer: 0
   name_cn: 高档餐厅
   name_en: Fancy Restaurant
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12664
   y: 1151
@@ -1611,7 +1611,7 @@
   layer: 0
   name_cn: 农产品仓库
   name_en: Farm Produce Warehouses
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13555
   y: 3635
@@ -1621,7 +1621,7 @@
   layer: 0
   name_cn: 农贸集市
   name_en: Farmer's Fair
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13697
   y: 3604
@@ -1631,7 +1631,7 @@
   layer: 0
   name_cn: 带花园的农业商店
   name_en: Farming Store With Garden
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13219
   y: 3021
@@ -1641,7 +1641,7 @@
   layer: 0
   name_cn: 带围栏的房屋
   name_en: Fenced Housing
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13423
   y: 1732
@@ -1651,7 +1651,7 @@
   layer: 0
   name_cn: 芬尼根研究小组
   name_en: Finnegan Research Group
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13580
   y: 1701
@@ -1661,7 +1661,7 @@
   layer: 0
   name_cn: 消防局
   name_en: Fire Department
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13689
   y: 1779
@@ -1671,7 +1671,7 @@
   layer: 0
   name_cn: 消防局
   name_en: Fire Department
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12363
   y: 1760
@@ -1681,7 +1681,7 @@
   layer: 0
   name_cn: 消防局
   name_en: Fire Department
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13943
   y: 3047
@@ -1691,7 +1691,7 @@
   layer: 0
   name_cn: 第一火车旅馆
   name_en: First Train Inn
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12617
   y: 2354
@@ -1701,7 +1701,7 @@
   layer: 0
   name_cn: 食品市场
   name_en: Food Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13346
   y: 1753
@@ -1711,7 +1711,7 @@
   layer: 0
   name_cn: 食品市场
   name_en: Food Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12481
   y: 1929
@@ -1721,7 +1721,7 @@
   layer: 0
   name_cn: 食品市场
   name_en: Food Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13567
   y: 3024
@@ -1731,7 +1731,7 @@
   layer: 0
   name_cn: 食品市场
   name_en: Food Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13782
   y: 2542
@@ -1741,7 +1741,7 @@
   layer: 0
   name_cn: 食品市场
   name_en: Food Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13177
   y: 1603
@@ -1751,7 +1751,7 @@
   layer: 0
   name_cn: 足球场
   name_en: Football Field
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12368
   y: 2463
@@ -1761,7 +1761,7 @@
   layer: 0
   name_cn: 棒球场
   name_en: Fossoil Field - Baseball Stadium
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13026
   y: 1581
@@ -1771,7 +1771,7 @@
   layer: 0
   name_cn: 福斯石油总部
   name_en: Fossoil Headquarters
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12082
   y: 1612
@@ -1781,7 +1781,7 @@
   layer: 0
   name_cn: 来自掩体
   name_en: From The Dugouts
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13039
   y: 1634
@@ -1791,7 +1791,7 @@
   layer: 0
   name_cn: 极点娱乐城
   name_en: Fun XTreme
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12369
   y: 1319
@@ -1801,7 +1801,7 @@
   layer: 0
   name_cn: 殡仪馆
   name_en: Funeral Home
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13153
   y: 1516
@@ -1811,7 +1811,7 @@
   layer: 0
   name_cn: 家具店
   name_en: Furniture Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13115
   y: 1444
@@ -1821,7 +1821,7 @@
   layer: 0
   name_cn: 家具店
   name_en: Furniture Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12668
   y: 2163
@@ -1831,7 +1831,7 @@
   layer: 0
   name_cn: 家具店
   name_en: Furniture Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13420
   y: 1462
@@ -1841,7 +1841,7 @@
   layer: 0
   name_cn: 家具店
   name_en: Furniture Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13380
   y: 3073
@@ -1851,7 +1851,7 @@
   layer: 0
   name_cn: 车库出租
   name_en: Garage For Lease
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13143
   y: 3013
@@ -1861,7 +1861,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12098
   y: 2100
@@ -1871,7 +1871,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12713
   y: 2239
@@ -1881,7 +1881,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12273
   y: 1621
@@ -1891,7 +1891,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12444
   y: 3536
@@ -1901,7 +1901,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13960
   y: 3275
@@ -1911,7 +1911,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13386
   y: 1412
@@ -1921,7 +1921,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12912
   y: 3029
@@ -1931,7 +1931,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13556
   y: 2138
@@ -1941,7 +1941,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13619
   y: 1527
@@ -1951,7 +1951,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13383
   y: 2966
@@ -1961,7 +1961,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12998
   y: 2162
@@ -1971,7 +1971,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13133
   y: 1324
@@ -1981,7 +1981,7 @@
   layer: 0
   name_cn: 加油站和吉佳玛特连锁超市
   name_en: Gas Station/GigaMart
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12579
   y: 2550
@@ -1991,7 +1991,7 @@
   layer: 0
   name_cn: 封闭式社区
   name_en: Gated Community
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12207
   y: 1799
@@ -2001,7 +2001,7 @@
   layer: 0
   name_cn: 吉佳玛特连锁超市
   name_en: GigaMart
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13452
   y: 3057
@@ -2011,7 +2011,7 @@
   layer: 0
   name_cn: 吉佳玛特连锁超市
   name_en: GigaMart
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12633
   y: 1672
@@ -2021,7 +2021,7 @@
   layer: 0
   name_cn: 格洛夜总会
   name_en: Glo Night Club
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12425
   y: 1323
@@ -2031,7 +2031,7 @@
   layer: 0
   name_cn: 摄影器材店
   name_en: Go Flash
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12413
   y: 2827
@@ -2041,7 +2041,7 @@
   layer: 0
   name_cn: 金龙自助餐
   name_en: Golden Dragon Buffet
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12576
   y: 1882
@@ -2051,7 +2051,7 @@
   layer: 0
   name_cn: 古德曼法律服务
   name_en: Goodman Legal Services
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12662
   y: 2190
@@ -2061,7 +2061,7 @@
   layer: 0
   name_cn: 格林氏杂货店
   name_en: Greene's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13362
   y: 1292
@@ -2071,7 +2071,7 @@
   layer: 0
   name_cn: 格林氏杂货店
   name_en: Greene's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13334
   y: 2959
@@ -2081,7 +2081,7 @@
   layer: 0
   name_cn: 格林氏杂货店
   name_en: Greene's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13510
   y: 2142
@@ -2091,7 +2091,7 @@
   layer: 0
   name_cn: 格林氏杂货店
   name_en: Greene's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13137
   y: 2123
@@ -2101,7 +2101,7 @@
   layer: 0
   name_cn: 烧烤店
   name_en: Grill store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13328
   y: 3072
@@ -2111,7 +2111,7 @@
   layer: 0
   name_cn: 杂货店
   name_en: Grocery Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13246
   y: 1633
@@ -2121,7 +2121,7 @@
   layer: 0
   name_cn: 枪支店
   name_en: Gun Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13594
   y: 1536
@@ -2131,7 +2131,7 @@
   layer: 0
   name_cn: 枪支店
   name_en: Gun Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12361
   y: 1720
@@ -2141,7 +2141,7 @@
   layer: 0
   name_cn: 枪支店
   name_en: Gun Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13555
   y: 1273
@@ -2151,7 +2151,7 @@
   layer: 0
   name_cn: 健身房
   name_en: Gym
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12630
   y: 1144
@@ -2161,7 +2161,7 @@
   layer: 0
   name_cn: 健身房
   name_en: Gym
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12854
   y: 1373
@@ -2171,7 +2171,7 @@
   layer: 0
   name_cn: 理发店
   name_en: Hair Genesis
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13330
   y: 2971
@@ -2181,7 +2181,7 @@
   layer: 0
   name_cn: 五金店
   name_en: Hardware Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13959
   y: 3106
@@ -2191,7 +2191,7 @@
   layer: 0
   name_cn: 五金店
   name_en: Hardware Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13172
   y: 1551
@@ -2201,7 +2201,7 @@
   layer: 0
   name_cn: 五金店
   name_en: Hardware Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13312
   y: 1307
@@ -2211,7 +2211,7 @@
   layer: 0
   name_cn: 五金店
   name_en: Hardware Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12377
   y: 1382
@@ -2221,7 +2221,7 @@
   layer: 0
   name_cn: 五金店
   name_en: Hardware Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13959
   y: 3099
@@ -2231,7 +2231,7 @@
   layer: 0
   name_cn: 五金店
   name_en: Hardware Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13528
   y: 3089
@@ -2241,7 +2241,7 @@
   layer: 0
   name_cn: 五金店
   name_en: Hardware Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13521
   y: 1318
@@ -2251,7 +2251,7 @@
   layer: 0
   name_cn: 五金店
   name_en: Hardware store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13369
   y: 3074
@@ -2261,7 +2261,7 @@
   layer: 0
   name_cn: 希科里面包房
   name_en: Hickory Bakery Box
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12927
   y: 1484
@@ -2271,7 +2271,7 @@
   layer: 0
   name_cn: 高中
   name_en: HighSchool
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13049
   y: 1710
@@ -2281,7 +2281,7 @@
   layer: 0
   name_cn: 篱笆上的洞
   name_en: Hole in the Fence
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12606
   y: 4161
@@ -2291,7 +2291,7 @@
   layer: 0
   name_cn: 赛马场
   name_en: Horsetrack
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12224
   y: 2757
@@ -2301,7 +2301,7 @@
   layer: 0
   name_cn: 医院
   name_en: Hospital
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12940
   y: 2076
@@ -2311,7 +2311,7 @@
   layer: 0
   name_cn: 毛绒雨果
   name_en: Hugo Plush
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12578
   y: 1816
@@ -2321,7 +2321,7 @@
   layer: 0
   name_cn: 杰伊炸鸡
   name_en: Jay's Chicken
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13466
   y: 2979
@@ -2331,7 +2331,7 @@
   layer: 0
   name_cn: 杰伊炸鸡
   name_en: Jay's Chicken
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13630
   y: 1271
@@ -2341,7 +2341,7 @@
   layer: 0
   name_cn: 杰伊炸鸡
   name_en: Jay's Chicken
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12745
   y: 2233
@@ -2351,7 +2351,7 @@
   layer: 0
   name_cn: 杰伊炸鸡
   name_en: Jay's Chicken
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13365
   y: 1350
@@ -2361,7 +2361,7 @@
   layer: 0
   name_cn: 杰伊炸鸡
   name_en: Jay's Chicken
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12271
   y: 1381
@@ -2371,7 +2371,7 @@
   layer: 0
   name_cn: 杰伊炸鸡总部
   name_en: Jay's Chicken HQ
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12790
   y: 2227
@@ -2381,7 +2381,7 @@
   layer: 0
   name_cn: 垃圾场
   name_en: Junkyard
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13695
   y: 1681
@@ -2391,7 +2391,7 @@
   layer: 0
   name_cn: 肯塔基州交通局
   name_en: KY Transit
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12558
   y: 2408
@@ -2401,7 +2401,7 @@
   layer: 0
   name_cn: 肯塔基先驱报
   name_en: Kentucky Herald Newspaper
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12615
   y: 3557
@@ -2411,7 +2411,7 @@
   layer: 0
   name_cn: 厨房用品店
   name_en: Kitchen Supply Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12427
   y: 1371
@@ -2421,7 +2421,7 @@
   layer: 0
   name_cn: Kitten Knives
   name_en: Kitten Knives
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12171
   y: 1394
@@ -2431,7 +2431,7 @@
   layer: 0
   name_cn: 诺克斯银行
   name_en: Knox Bank
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12566
   y: 1696
@@ -2441,7 +2441,7 @@
   layer: 0
   name_cn: 诺克斯银行
   name_en: Knox Bank
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13410
   y: 1353
@@ -2451,7 +2451,7 @@
   layer: 0
   name_cn: 诺克斯银行（经典建筑）
   name_en: Knox Bank (Classic Building)
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12617
   y: 1586
@@ -2461,7 +2461,7 @@
   layer: 0
   name_cn: 诺克斯银行（现代建筑）
   name_en: Knox Bank (Modern Building)
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13603
   y: 3027
@@ -2471,7 +2471,7 @@
   layer: 0
   name_cn: 诺克斯酿酒厂
   name_en: Knox Distillery
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12912
   y: 1380
@@ -2481,7 +2481,7 @@
   layer: 0
   name_cn: 诺克斯派克厨房
   name_en: Knox Pack Kitchens
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12917
   y: 1446
@@ -2491,7 +2491,7 @@
   layer: 0
   name_cn: 诺克斯脱口秀电台
   name_en: Knox Talk Radio Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13561
   y: 1581
@@ -2501,7 +2501,7 @@
   layer: 0
   name_cn: 诺克斯派克厨房
   name_en: KnoxPack Kitchens
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12632
   y: 3769
@@ -2511,7 +2511,7 @@
   layer: 0
   name_cn: LBMW电视台
   name_en: LBMW Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12340
   y: 2057
@@ -2521,7 +2521,7 @@
   layer: 0
   name_cn: 路易斯安那州立大学校园
   name_en: LSU Campus
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12407
   y: 2254
@@ -2531,7 +2531,7 @@
   layer: 0
   name_cn: 路易斯安那州立大学图书馆
   name_en: LSU Library
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12350
   y: 2142
@@ -2541,7 +2541,7 @@
   layer: 0
   name_cn: 大型公寓大楼
   name_en: Large Apartment Complex
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12787
   y: 1848
@@ -2551,7 +2551,7 @@
   layer: 0
   name_cn: 大型封闭式社区
   name_en: Large Gated Community
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 14121
   y: 2798
@@ -2561,7 +2561,7 @@
   layer: 0
   name_cn: 大型杂货店
   name_en: Large Grocery Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12759
   y: 2944
@@ -2571,7 +2571,7 @@
   layer: 0
   name_cn: 大型仓库
   name_en: Large Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12720
   y: 2180
@@ -2581,7 +2581,7 @@
   layer: 0
   name_cn: 叶山高地办公室
   name_en: Leafhill Heights Offices
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12254
   y: 3545
@@ -2591,7 +2591,7 @@
   layer: 0
   name_cn: 逐行设计公司
   name_en: Line by Line Design
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12565
   y: 3761
@@ -2601,7 +2601,7 @@
   layer: 0
   name_cn: 酒类商店
   name_en: Liquor Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12408
   y: 2845
@@ -2611,7 +2611,7 @@
   layer: 0
   name_cn: 酒类商店
   name_en: Liquor Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13440
   y: 1292
@@ -2621,7 +2621,7 @@
   layer: 0
   name_cn: 酒类商店
   name_en: Liquor Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12232
   y: 1347
@@ -2631,7 +2631,7 @@
   layer: 0
   name_cn: 酒类商店
   name_en: Liquor Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12618
   y: 2292
@@ -2641,7 +2641,7 @@
   layer: 0
   name_cn: 酒类商店
   name_en: Liquor store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12717
   y: 5059
@@ -2651,7 +2651,7 @@
   layer: 0
   name_cn: 酒类商店
   name_en: Liquor store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13960
   y: 3205
@@ -2661,7 +2661,7 @@
   layer: 0
   name_cn: 萝拉·利蒙
   name_en: Lola Limon
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12830
   y: 1332
@@ -2671,7 +2671,7 @@
   layer: 0
   name_cn: 萝拉·利蒙
   name_en: Lola Limon
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13522
   y: 1271
@@ -2681,7 +2681,7 @@
   layer: 0
   name_cn: 路易斯维尔动物收容所
   name_en: Louisville Animal Shelter
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12263
   y: 1444
@@ -2691,7 +2691,7 @@
   layer: 0
   name_cn: 路易斯维尔划船俱乐部
   name_en: Louisville Boat Club
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12776
   y: 1144
@@ -2701,7 +2701,7 @@
   layer: 0
   name_cn: 路易斯维尔布鲁泽
   name_en: Louisville Bruiser
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13249
   y: 1234
@@ -2711,7 +2711,7 @@
   layer: 0
   name_cn: 路易斯维尔市政厅
   name_en: Louisville City Hall
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12563
   y: 1534
@@ -2721,7 +2721,7 @@
   layer: 0
   name_cn: 路易斯维尔博览中心
   name_en: Louisville Expo Center
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12965
   y: 1309
@@ -2731,7 +2731,7 @@
   layer: 0
   name_cn: 路易斯维尔音乐会
   name_en: Louisville Music Concert
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13759
   y: 1937
@@ -2741,7 +2741,7 @@
   layer: 0
   name_cn: 麦克福金顿餐厅
   name_en: Mama McFudgington's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13182
   y: 1276
@@ -2751,7 +2751,7 @@
   layer: 0
   name_cn: 无限地图
   name_en: Maps Unlimited
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12233
   y: 1627
@@ -2761,7 +2761,7 @@
   layer: 0
   name_cn: 默欣标志和绘画设计
   name_en: Mashie Signs & Paintings
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12606
   y: 3701
@@ -2771,7 +2771,7 @@
   layer: 0
   name_cn: 陵墓
   name_en: Mausoleum
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12571
   y: 3172
@@ -2781,7 +2781,7 @@
   layer: 0
   name_cn: 医疗中心
   name_en: Medical Center
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12423
   y: 1761
@@ -2791,7 +2791,7 @@
   layer: 0
   name_cn: 军人之家
   name_en: Military Homes
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12733
   y: 3969
@@ -2801,7 +2801,7 @@
   layer: 0
   name_cn: 不止牛奶便利店
   name_en: Milk 'n' More
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12668
   y: 2125
@@ -2811,7 +2811,7 @@
   layer: 0
   name_cn: 乳制品商店
   name_en: Milk 'n' More
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13958
   y: 3242
@@ -2821,7 +2821,7 @@
   layer: 0
   name_cn: 汽车旅馆
   name_en: Motel
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12428
   y: 2774
@@ -2831,7 +2831,7 @@
   layer: 0
   name_cn: 汽车旅馆
   name_en: Motel
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13225
   y: 3523
@@ -2841,7 +2841,7 @@
   layer: 0
   name_cn: 电影院
   name_en: Movie theater
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12333
   y: 1369
@@ -2851,7 +2851,7 @@
   layer: 0
   name_cn: 音乐商店
   name_en: Music store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12403
   y: 1389
@@ -2861,7 +2861,7 @@
   layer: 0
   name_cn: 我的周日市场
   name_en: My Sunday Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12438
   y: 3108
@@ -2871,7 +2871,7 @@
   layer: 0
   name_cn: 即刻新闻网络
   name_en: News Now Network
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12645
   y: 1918
@@ -2881,7 +2881,7 @@
   layer: 0
   name_cn: 橡树园公寓
   name_en: Oak Park Apartments
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12155
   y: 2914
@@ -2891,7 +2891,7 @@
   layer: 0
   name_cn: 办公家具店
   name_en: Office Furniture Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13682
   y: 1572
@@ -2901,7 +2901,7 @@
   layer: 0
   name_cn: 调色板艺术用品
   name_en: Palette Art Supplies
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13179
   y: 1748
@@ -2911,7 +2911,7 @@
   layer: 0
   name_cn: 公园中心
   name_en: Park Center
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13391
   y: 2368
@@ -2921,7 +2921,7 @@
   layer: 0
   name_cn: 当铺
   name_en: Pawn Shop
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12320
   y: 1331
@@ -2931,7 +2931,7 @@
   layer: 0
   name_cn: 当铺
   name_en: Pawn Shop
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13123
   y: 2975
@@ -2941,7 +2941,7 @@
   layer: 0
   name_cn: 当铺
   name_en: Pawn Shop
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12376
   y: 1470
@@ -2951,7 +2951,7 @@
   layer: 0
   name_cn: 当铺
   name_en: Pawn Shop
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12488
   y: 1383
@@ -2961,7 +2961,7 @@
   layer: 0
   name_cn: Perfick 土豆公司
   name_en: Perfick Potato Co.
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12268
   y: 1341
@@ -2971,7 +2971,7 @@
   layer: 0
   name_cn: 宠物健康 Pawmise
   name_en: Pet Health Pawmise
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13217
   y: 3044
@@ -2981,7 +2981,7 @@
   layer: 0
   name_cn: 药店
   name_en: Pharmacy
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13237
   y: 1286
@@ -2991,7 +2991,7 @@
   layer: 0
   name_cn: 药店
   name_en: Pharmacy
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13123
   y: 2126
@@ -3001,7 +3001,7 @@
   layer: 0
   name_cn: 药店
   name_en: Pharmacy
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13232
   y: 2972
@@ -3011,7 +3011,7 @@
   layer: 0
   name_cn: 药店
   name_en: Pharmacy
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12950
   y: 1482
@@ -3021,7 +3021,7 @@
   layer: 0
   name_cn: 披萨旋转
   name_en: Pizza Whirled
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12440
   y: 3832
@@ -3031,7 +3031,7 @@
   layer: 0
   name_cn: 披萨旋转
   name_en: Pizza Whirled
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13170
   y: 3028
@@ -3041,7 +3041,7 @@
   layer: 0
   name_cn: 披萨旋转
   name_en: Pizza Whirled
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13225
   y: 2104
@@ -3051,7 +3051,7 @@
   layer: 0
   name_cn: 披萨旋转
   name_en: Pizza Whirled
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13652
   y: 1278
@@ -3061,7 +3061,7 @@
   layer: 0
   name_cn: 披萨旋转
   name_en: Pizza Whirled
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13474
   y: 1411
@@ -3071,7 +3071,7 @@
   layer: 0
   name_cn: 披萨旋转
   name_en: Pizza Whirled
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13517
   y: 2112
@@ -3081,7 +3081,7 @@
   layer: 0
   name_cn: 警察局
   name_en: Police Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13782
   y: 2558
@@ -3091,7 +3091,7 @@
   layer: 0
   name_cn: 警察局
   name_en: Police Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13220
   y: 3087
@@ -3101,7 +3101,7 @@
   layer: 0
   name_cn: 警察局和监狱
   name_en: Police Station & Prison
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12444
   y: 1609
@@ -3111,7 +3111,7 @@
   layer: 0
   name_cn: 警察局
   name_en: Police station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12961
   y: 1379
@@ -3121,7 +3121,7 @@
   layer: 0
   name_cn: 邮局
   name_en: Post Office
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12624
   y: 2076
@@ -3131,7 +3131,7 @@
   layer: 0
   name_cn: 难民区
   name_en: Refugee Area
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12514
   y: 4063
@@ -3141,7 +3141,7 @@
   layer: 0
   name_cn: 难民营
   name_en: Refugee Camp
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13423
   y: 3738
@@ -3151,7 +3151,7 @@
   layer: 0
   name_cn: 带田地的偏远房屋
   name_en: Remote House with a field
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 14824
   y: 3716
@@ -3163,7 +3163,7 @@
   layer: 0
   name_cn: 改建建筑
   name_en: Repurposed Building
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12421
   y: 1423
@@ -3173,7 +3173,7 @@
   layer: 0
   name_cn: 研究实验室
   name_en: Research Labs
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13597
   y: 1699
@@ -3183,7 +3183,7 @@
   layer: 0
   name_cn: 餐厅
   name_en: Resturant
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13959
   y: 3211
@@ -3193,7 +3193,7 @@
   layer: 0
   name_cn: 餐厅
   name_en: Resturant
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12731
   y: 1143
@@ -3203,7 +3203,7 @@
   layer: 0
   name_cn: 溜冰场
   name_en: Roller Skating Rink
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12975
   y: 1430
@@ -3213,7 +3213,7 @@
   layer: 0
   name_cn: 罗梅罗表演艺术中心
   name_en: Romero Center for the Performing Arts
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12527
   y: 1751
@@ -3223,7 +3223,7 @@
   layer: 0
   name_cn: 废弃的加油站
   name_en: Ruined Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13639
   y: 4072
@@ -3233,7 +3233,7 @@
   layer: 0
   name_cn: 绯红橡木酿酒厂
   name_en: Scarlet Oak Distillery
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12034
   y: 1945
@@ -3243,7 +3243,7 @@
   layer: 0
   name_cn: 海马咖啡
   name_en: Seahorse Coffee
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12576
   y: 1635
@@ -3253,7 +3253,7 @@
   layer: 0
   name_cn: 海马咖啡
   name_en: Seahorse Coffee
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13523
   y: 1714
@@ -3263,7 +3263,7 @@
   layer: 0
   name_cn: 海马咖啡
   name_en: Seahorse Coffee
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13078
   y: 1598
@@ -3273,7 +3273,7 @@
   layer: 0
   name_cn: 橡树荫养老院
   name_en: Shady Oaks Nursing Home
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13084
   y: 2023
@@ -3283,7 +3283,7 @@
   layer: 0
   name_cn: 示巴珠宝商
   name_en: Sheba Jewellers
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13570
   y: 1274
@@ -3293,7 +3293,7 @@
   layer: 0
   name_cn: 小型艺术画廊
   name_en: Small Art Gallery
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12517
   y: 1445
@@ -3303,7 +3303,7 @@
   layer: 0
   name_cn: 小型艺术画廊
   name_en: Small Art Gallery
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13610
   y: 1366
@@ -3313,7 +3313,7 @@
   layer: 0
   name_cn: 小型购物中心
   name_en: Small Mall
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13344
   y: 3045
@@ -3323,7 +3323,7 @@
   layer: 0
   name_cn: 小型军事检查站
   name_en: Small Military Checkpoint
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13446
   y: 4077
@@ -3333,7 +3333,7 @@
   layer: 0
   name_cn: 南陆军检查站
   name_en: South Army Checkpoint
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 14534
   y: 4025
@@ -3343,7 +3343,7 @@
   layer: 0
   name_cn: 南路易斯维尔小学
   name_en: South Louisville Elementary
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12971
   y: 3223
@@ -3353,7 +3353,7 @@
   layer: 0
   name_cn: 斯皮福餐厅
   name_en: Spiffo's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12448
   y: 3786
@@ -3363,7 +3363,7 @@
   layer: 0
   name_cn: 斯皮福餐厅
   name_en: Spiffo's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13457
   y: 2927
@@ -3373,7 +3373,7 @@
   layer: 0
   name_cn: 斯皮福餐厅
   name_en: Spiffo's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13661
   y: 1321
@@ -3383,7 +3383,7 @@
   layer: 0
   name_cn: 斯皮福餐厅
   name_en: Spiffo's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12314
   y: 1930
@@ -3393,7 +3393,7 @@
   layer: 0
   name_cn: 斯皮福餐厅
   name_en: Spiffo's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13303
   y: 1351
@@ -3403,7 +3403,7 @@
   layer: 0
   name_cn: 斯皮福餐厅
   name_en: Spiffo's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13080
   y: 1633
@@ -3413,7 +3413,7 @@
   layer: 0
   name_cn: 斯皮福总部
   name_en: Spiffo's HQ
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12714
   y: 1621
@@ -3423,7 +3423,7 @@
   layer: 0
   name_cn: 体育用品店
   name_en: Sporting Goods Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13316
   y: 3052
@@ -3433,7 +3433,7 @@
   layer: 0
   name_cn: 圣佩雷格林医院
   name_en: St. Peregrin Hospital
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12458
   y: 3702
@@ -3443,7 +3443,7 @@
   layer: 0
   name_cn: 圣佩雷格林医院
   name_en: St. Peregrin Hospital
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12458
   y: 3702
@@ -3453,7 +3453,7 @@
   layer: 0
   name_cn: 星空影城
   name_en: StarEplex - Movie Theater
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12471
   y: 1272
@@ -3463,7 +3463,7 @@
   layer: 0
   name_cn: 钢铁旋转公司
   name_en: Steely Revolve
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12583
   y: 3637
@@ -3473,7 +3473,7 @@
   layer: 0
   name_cn: 存储单元
   name_en: Storage Units
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12196
   y: 1684
@@ -3483,7 +3483,7 @@
   layer: 0
   name_cn: 存储单元
   name_en: Storage Units
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12181
   y: 1328
@@ -3493,7 +3493,7 @@
   layer: 0
   name_cn: 存储单元
   name_en: Storage Units
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12713
   y: 1999
@@ -3503,7 +3503,7 @@
   layer: 0
   name_cn: 存储单元
   name_en: Storage Units
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13122
   y: 1708
@@ -3513,7 +3513,7 @@
   layer: 0
   name_cn: 甜豌豆餐厅
   name_en: SweetPea
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12419
   y: 2818
@@ -3523,7 +3523,7 @@
   layer: 0
   name_cn: TIS建筑公司
   name_en: T.I.S Construction
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12669
   y: 2140
@@ -3533,7 +3533,7 @@
   layer: 0
   name_cn: 潘乔塔克卷饼
   name_en: Taco del Pancho
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12579
   y: 2071
@@ -3543,7 +3543,7 @@
   layer: 0
   name_cn: 潘乔塔克卷饼
   name_en: Taco del Pancho
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13527
   y: 3019
@@ -3553,7 +3553,7 @@
   layer: 0
   name_cn: 俄亥俄购物中心
   name_en: The Grand Ohio Mall
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13562
   y: 1386
@@ -3563,7 +3563,7 @@
   layer: 0
   name_cn: 哈维沙姆酒店及套房
   name_en: The Havisham Hotel&Suites
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12636
   y: 1317
@@ -3573,7 +3573,7 @@
   layer: 0
   name_cn: 丰盛的丰饶之角
   name_en: The Plump Cornucopia
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12733
   y: 1211
@@ -3583,7 +3583,7 @@
   layer: 0
   name_cn: 海滨公寓
   name_en: The Waterfront
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13037
   y: 1210
@@ -3593,7 +3593,7 @@
   layer: 0
   name_cn: 绿色拇指
   name_en: Thumbs of Green
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13135
   y: 1780
@@ -3603,7 +3603,7 @@
   layer: 0
   name_cn: 健身时刻
   name_en: Time 4 Sport
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13522
   y: 1314
@@ -3613,7 +3613,7 @@
   layer: 0
   name_cn: 蒂塔玛利亚餐厅
   name_en: Tita Maria's Catina
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13311
   y: 2970
@@ -3623,7 +3623,7 @@
   layer: 0
   name_cn: 中央车站
   name_en: Central Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12714
   y: 2326
@@ -3633,7 +3633,7 @@
   layer: 0
   name_cn: 火车站
   name_en: Train Yard
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12675
   y: 4403
@@ -3643,7 +3643,7 @@
   layer: 0
   name_cn: 火车站
   name_en: Trainyard
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12650
   y: 4339
@@ -3653,7 +3653,7 @@
   layer: 0
   name_cn: 存储单元
   name_en: U-Store It
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13689
   y: 1615
@@ -3663,7 +3663,7 @@
   layer: 0
   name_cn: 美国邮政服务
   name_en: U.S Mail Service
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12583
   y: 3581
@@ -3673,7 +3673,7 @@
   layer: 0
   name_cn: 联合航运物流
   name_en: United Shipping Logistics
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12627
   y: 3704
@@ -3683,7 +3683,7 @@
   layer: 0
   name_cn: 录像带商店
   name_en: VHS Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12431
   y: 2818
@@ -3693,7 +3693,7 @@
   layer: 0
   name_cn: 录像带商店
   name_en: VHS Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12797
   y: 1212
@@ -3703,7 +3703,7 @@
   layer: 0
   name_cn: 录像带商店
   name_en: VHS Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13429
   y: 1292
@@ -3713,7 +3713,7 @@
   layer: 0
   name_cn: 录像带商店
   name_en: VHS Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13114
   y: 1454
@@ -3723,7 +3723,7 @@
   layer: 0
   name_cn: 廉科保险公司
   name_en: Valu Insurance
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12561
   y: 3617
@@ -3733,7 +3733,7 @@
   layer: 0
   name_cn: 廉科总部
   name_en: ValuTech HQ
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12560
   y: 3696
@@ -3743,7 +3743,7 @@
   layer: 0
   name_cn: 天鹅绒流苏俱乐部
   name_en: Velvet Tassel Club
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12316
   y: 1271
@@ -3753,7 +3753,7 @@
   layer: 0
   name_cn: 仓库
   name_en: Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12611
   y: 3617
@@ -3763,7 +3763,7 @@
   layer: 0
   name_cn: 仓库
   name_en: Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12796
   y: 2184
@@ -3773,7 +3773,7 @@
   layer: 0
   name_cn: 惠灵顿高地高尔夫俱乐部
   name_en: Wellington Heights Golf Club
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12973
   y: 2233
@@ -3783,7 +3783,7 @@
   layer: 0
   name_cn: 橱窗店
   name_en: Window shop
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13416
   y: 1292
@@ -3793,7 +3793,7 @@
   layer: 0
   name_cn: Zippee便利店
   name_en: Zippee Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12225
   y: 3026
@@ -3803,7 +3803,7 @@
   layer: 0
   name_cn: Zippee便利店
   name_en: Zippee Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12999
   y: 3113
@@ -3813,7 +3813,7 @@
   layer: 0
   name_cn: Zippee便利店
   name_en: Zippee Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13066
   y: 1922
@@ -3823,7 +3823,7 @@
   layer: 0
   name_cn: Zippee便利店
   name_en: Zippee Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12664
   y: 1366
@@ -3833,7 +3833,7 @@
   layer: 0
   name_cn: Zippee便利店
   name_en: Zippee Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13519
   y: 1668
@@ -3843,7 +3843,7 @@
   layer: 0
   name_cn: Zippee便利店
   name_en: Zippee Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12521
   y: 1482
@@ -3853,7 +3853,7 @@
   layer: 0
   name_cn: Zippee便利店
   name_en: Zippee Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12646
   y: 2291
@@ -3863,7 +3863,7 @@
   layer: 0
   name_cn: 面包店
   name_en: Bakery
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10081
   y: 12806
@@ -3873,7 +3873,7 @@
   layer: 0
   name_cn: 酒吧
   name_en: Bar
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10170
   y: 12673
@@ -3883,7 +3883,7 @@
   layer: 0
   name_cn: 教堂
   name_en: Church
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10328
   y: 12794
@@ -3893,7 +3893,7 @@
   layer: 0
   name_cn: 电影院
   name_en: Cinema
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10172
   y: 12645
@@ -3903,7 +3903,7 @@
   layer: 0
   name_cn: 社区中心
   name_en: Community Center
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10030
   y: 12732
@@ -3913,7 +3913,7 @@
   layer: 0
   name_cn: 小餐馆
   name_en: Diner
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10110
   y: 11151
@@ -3923,7 +3923,7 @@
   layer: 0
   name_cn: 医生办公室
   name_en: Doctor's Office
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10160
   y: 12761
@@ -3933,7 +3933,7 @@
   layer: 0
   name_cn: 服装店
   name_en: Family Fashion
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10079
   y: 12818
@@ -3943,7 +3943,7 @@
   layer: 0
   name_cn: 农民仓库
   name_en: Farmer's Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 9395
   y: 9300
@@ -3953,7 +3953,7 @@
   layer: 0
   name_cn: 食品市场
   name_en: Food Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10113
   y: 12786
@@ -3963,7 +3963,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10144
   y: 12791
@@ -3973,7 +3973,7 @@
   layer: 0
   name_cn: 美发沙龙
   name_en: Hair-Saloon
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10183
   y: 12819
@@ -3983,7 +3983,7 @@
   layer: 0
   name_cn: 保险办公室
   name_en: Insurance Office
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10074
   y: 12776
@@ -3994,7 +3994,7 @@
   layer: 0
   name_cn: 诺克斯军事公寓
   name_en: Knox Military Apartments
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10077
   y: 12637
@@ -4004,7 +4004,7 @@
   layer: 0
   name_cn: 自助洗衣店
   name_en: Laundromat
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10183
   y: 12782
@@ -4014,7 +4014,7 @@
   layer: 0
   name_cn: 自助洗衣店
   name_en: Laundromat
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10181
   y: 12731
@@ -4024,7 +4024,7 @@
   layer: 0
   name_cn: 麦克福金顿餐厅
   name_en: Mama McFudgington's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10176
   y: 12805
@@ -4034,7 +4034,7 @@
   layer: 0
   name_cn: 门迪餐厅
   name_en: Mendy's Eatery
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10131
   y: 12761
@@ -4044,7 +4044,7 @@
   layer: 0
   name_cn: 办公室
   name_en: Office
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10184
   y: 12793
@@ -4054,7 +4054,7 @@
   layer: 0
   name_cn: 药店
   name_en: Pharmahug
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10144
   y: 12761
@@ -4064,7 +4064,7 @@
   layer: 0
   name_cn: 邮局
   name_en: Post Office
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10107
   y: 12713
@@ -4074,7 +4074,7 @@
   layer: 0
   name_cn: 中继站
   name_en: Relay station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10278
   y: 8749
@@ -4084,7 +4084,7 @@
   layer: 0
   name_cn: 餐厅
   name_en: Restaurant
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10095
   y: 12750
@@ -4094,7 +4094,7 @@
   layer: 0
   name_cn: 学校
   name_en: School
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 9999
   y: 12655
@@ -4104,7 +4104,7 @@
   layer: 0
   name_cn: 录像带商店
   name_en: VHS Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10164
   y: 12733
@@ -4114,7 +4114,7 @@
   layer: 0
   name_cn: 水井
   name_en: Well
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8847
   y: 9206
@@ -4124,7 +4124,7 @@
   layer: 0
   name_cn: CDDA初始房间
   name_en: A CDDA Starter House
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10820
   y: 9412
@@ -4134,7 +4134,7 @@
   layer: 0
   name_cn: 废弃的小屋
   name_en: Abandoned Cabins
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10969
   y: 9173
@@ -4144,7 +4144,7 @@
   layer: 0
   name_cn: 废弃餐厅
   name_en: Abandoned Restaurant
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10625
   y: 10047
@@ -4154,7 +4154,7 @@
   layer: 0
   name_cn: 成人教育中心
   name_en: Adult Education Center
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10638
   y: 9904
@@ -4164,7 +4164,7 @@
   layer: 0
   name_cn: 自助餐
   name_en: All You Can Eat Buffet
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10619
   y: 9437
@@ -4174,7 +4174,7 @@
   layer: 0
   name_cn: 汽车修理店
   name_en: Auto Repair Shop
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10605
   y: 9406
@@ -4184,7 +4184,7 @@
   layer: 0
   name_cn: 汽车修理店
   name_en: Auto Repair Shop
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10173
   y: 10940
@@ -4194,7 +4194,7 @@
   layer: 0
   name_cn: 后院花园
   name_en: Backyard Garden
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10771
   y: 9539
@@ -4204,7 +4204,7 @@
   layer: 0
   name_cn: 面包店
   name_en: Bakery
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10617
   y: 9606
@@ -4214,7 +4214,7 @@
   layer: 0
   name_cn: 酒吧
   name_en: Bar
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10617
   y: 9219
@@ -4224,7 +4224,7 @@
   layer: 0
   name_cn: 棒球场
   name_en: Baseball Field
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10955
   y: 9944
@@ -4234,7 +4234,7 @@
   layer: 0
   name_cn: 大型城市仓库
   name_en: Big Urban Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10694
   y: 10103
@@ -4244,7 +4244,7 @@
   layer: 0
   name_cn: 鲍勃和凯特的安全屋
   name_en: Bob and Kate's Safehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10746
   y: 9415
@@ -4254,7 +4254,7 @@
   layer: 0
   name_cn: 书店
   name_en: Book Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10610
   y: 10365
@@ -4264,7 +4264,7 @@
   layer: 0
   name_cn: 汉堡和自助洗衣店
   name_en: Burger and Laundromat
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10606
   y: 9467
@@ -4274,7 +4274,7 @@
   layer: 0
   name_cn: 小木屋
   name_en: Cabin
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11243
   y: 8953
@@ -4284,7 +4284,7 @@
   layer: 0
   name_cn: 林中小屋
   name_en: Cabin in the Woods
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 9664
   y: 8773
@@ -4294,7 +4294,7 @@
   layer: 0
   name_cn: 自助餐厅
   name_en: Cafeteria
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10648
   y: 9924
@@ -4304,7 +4304,7 @@
   layer: 0
   name_cn: 露营地
   name_en: Camp Grounds
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12422
   y: 8927
@@ -4314,7 +4314,7 @@
   layer: 0
   name_cn: 教堂
   name_en: Chapel
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10723
   y: 9711
@@ -4324,7 +4324,7 @@
   layer: 0
   name_cn: 教堂
   name_en: Church
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10773
   y: 10169
@@ -4334,7 +4334,7 @@
   layer: 0
   name_cn: 服装店
   name_en: Clothing Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10628
   y: 9903
@@ -4344,7 +4344,7 @@
   layer: 0
   name_cn: 服装店
   name_en: Clothing Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10610
   y: 10376
@@ -4354,7 +4354,7 @@
   layer: 0
   name_cn: 建筑工地
   name_en: Construction Site
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10061
   y: 9576
@@ -4364,7 +4364,7 @@
   layer: 0
   name_cn: 便利店
   name_en: Convenience Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10838
   y: 10029
@@ -4374,7 +4374,7 @@
   layer: 0
   name_cn: 科特曼医疗公司
   name_en: Cortman Medical
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10876
   y: 10028
@@ -4384,7 +4384,7 @@
   layer: 0
   name_cn: 十字路口
   name_en: Cross roads
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10591
   y: 11204
@@ -4394,7 +4394,7 @@
   layer: 0
   name_cn: 小餐馆
   name_en: Diner
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10614
   y: 10559
@@ -4404,7 +4404,7 @@
   layer: 0
   name_cn: 药品实验室
   name_en: Drug Lab
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11600
   y: 9295
@@ -4414,7 +4414,7 @@
   layer: 0
   name_cn: 变电站
   name_en: Electrical Substation
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10383
   y: 10090
@@ -4424,7 +4424,7 @@
   layer: 0
   name_cn: 电子产品商店
   name_en: Electronics Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10614
   y: 9881
@@ -4434,7 +4434,7 @@
   layer: 0
   name_cn: 小学
   name_en: Elementary school
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10619
   y: 9967
@@ -4444,7 +4444,7 @@
   layer: 0
   name_cn: 空仓库
   name_en: Empty Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11825
   y: 9780
@@ -4454,7 +4454,7 @@
   layer: 0
   name_cn: 农场地块
   name_en: Farm Plot
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10706
   y: 9400
@@ -4464,7 +4464,7 @@
   layer: 0
   name_cn: 西部农场
   name_en: Farm to the West
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8599
   y: 8824
@@ -4474,7 +4474,7 @@
   layer: 0
   name_cn: 森林之家
   name_en: Forest House
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11063
   y: 10638
@@ -4484,7 +4484,7 @@
   layer: 0
   name_cn: 车库
   name_en: Garages
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10602
   y: 9360
@@ -4494,7 +4494,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10624
   y: 9761
@@ -4504,7 +4504,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10668
   y: 10625
@@ -4514,7 +4514,7 @@
   layer: 0
   name_cn: 封闭式社区
   name_en: Gated Community
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10668
   y: 9572
@@ -4524,7 +4524,7 @@
   layer: 0
   name_cn: 封闭式社区
   name_en: Gated Community
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10856
   y: 10138
@@ -4534,7 +4534,7 @@
   layer: 0
   name_cn: 格林氏杂货店
   name_en: Greene's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10609
   y: 10259
@@ -4544,7 +4544,7 @@
   layer: 0
   name_cn: 史密斯律师事务所
   name_en: H. Smith Attorney
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10648
   y: 9648
@@ -4554,7 +4554,7 @@
   layer: 0
   name_cn: 带古典火炉的房子
   name_en: House with Antique Stove
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10739
   y: 9839
@@ -4566,7 +4566,7 @@
   layer: 0
   name_cn: 孤立的房子
   name_en: Isolated House
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10945
   y: 9370
@@ -4576,7 +4576,7 @@
   layer: 0
   name_cn: 杰伊炸鸡
   name_en: Jay's Chicken
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10617
   y: 9563
@@ -4586,7 +4586,7 @@
   layer: 0
   name_cn: 诺克斯银行
   name_en: Knox Bank
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10622
   y: 9691
@@ -4596,7 +4596,7 @@
   layer: 0
   name_cn: 大型仓库
   name_en: Large Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10611
   y: 9308
@@ -4606,7 +4606,7 @@
   layer: 0
   name_cn: 自助洗衣店
   name_en: Laundromat
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10914
   y: 9842
@@ -4616,7 +4616,7 @@
   layer: 0
   name_cn: 酒类商店
   name_en: Liquor Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10610
   y: 9905
@@ -4626,7 +4626,7 @@
   layer: 0
   name_cn: 孤独的森林小屋
   name_en: Lone forest shack
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 9341
   y: 10293
@@ -4636,7 +4636,7 @@
   layer: 0
   name_cn: 木材厂
   name_en: Lumber Mill
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10319
   y: 9595
@@ -4646,7 +4646,7 @@
   layer: 0
   name_cn: 迷你商场
   name_en: Mini Mall
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10606
   y: 10358
@@ -4656,7 +4656,7 @@
   layer: 0
   name_cn: 汽车旅馆
   name_en: Motel
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10900
   y: 9749
@@ -4666,7 +4666,7 @@
   layer: 0
   name_cn: 北农场
   name_en: North Farm
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10815
   y: 9105
@@ -4676,7 +4676,7 @@
   layer: 0
   name_cn: 办公室
   name_en: Offices
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10673
   y: 10327
@@ -4686,7 +4686,7 @@
   layer: 0
   name_cn: 野餐区
   name_en: Picnic Area
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10992
   y: 9645
@@ -4696,7 +4696,7 @@
   layer: 0
   name_cn: 煎饼屋
   name_en: Pile-o-Crepe
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10613
   y: 9505
@@ -4706,7 +4706,7 @@
   layer: 0
   name_cn: 披萨旋转
   name_en: Pizza Whirled
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10604
   y: 10111
@@ -4716,7 +4716,7 @@
   layer: 0
   name_cn: 警察局
   name_en: Police Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10631
   y: 10405
@@ -4726,7 +4726,7 @@
   layer: 0
   name_cn: 小马漫游跑马场
   name_en: Pony Roam-O
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8559
   y: 8529
@@ -4736,7 +4736,7 @@
   layer: 0
   name_cn: 火车站
   name_en: Trainyard
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11655
   y: 9985
@@ -4746,7 +4746,7 @@
   layer: 0
   name_cn: 远程伐木办公室
   name_en: Remote Logging Offices
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 9641
   y: 10152
@@ -4756,7 +4756,7 @@
   layer: 0
   name_cn: 餐厅
   name_en: Restaurant
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10619
   y: 10528
@@ -4766,7 +4766,7 @@
   layer: 0
   name_cn: 小型便利店
   name_en: Small convenience store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10836
   y: 9530
@@ -4776,7 +4776,7 @@
   layer: 0
   name_cn: 小仓库
   name_en: Small warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10712
   y: 10144
@@ -4786,7 +4786,7 @@
   layer: 0
   name_cn: 足球场
   name_en: Soccer Field
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10656
   y: 9970
@@ -4796,7 +4796,7 @@
   layer: 0
   name_cn: 斯皮福餐厅
   name_en: Spiffo's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10621
   y: 9650
@@ -4806,7 +4806,7 @@
   layer: 0
   name_cn: 存储单元
   name_en: Storage Units
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10684
   y: 9829
@@ -4816,7 +4816,7 @@
   layer: 0
   name_cn: 存储单元
   name_en: Storage Units
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10752
   y: 10347
@@ -4826,7 +4826,7 @@
   layer: 0
   name_cn: 日星酒店
   name_en: Sunstar Hotel
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10628
   y: 9815
@@ -4836,7 +4836,7 @@
   layer: 0
   name_cn: 纹身店
   name_en: Tattoo 42
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10614
   y: 10155
@@ -4846,7 +4846,7 @@
   layer: 0
   name_cn: 酒馆
   name_en: Tavern
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10758
   y: 10547
@@ -4856,7 +4856,7 @@
   layer: 0
   name_cn: 麦考伊伐木公司
   name_en: The McCoy Logging Corp.
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10317
   y: 9290
@@ -4866,7 +4866,7 @@
   layer: 0
   name_cn: 火车站
   name_en: Train Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11096
   y: 9237
@@ -4876,7 +4876,7 @@
   layer: 0
   name_cn: 录像带商店
   name_en: VHS Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10610
   y: 10452
@@ -4886,7 +4886,7 @@
   layer: 0
   name_cn: 仓库
   name_en: Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10627
   y: 9378
@@ -4896,7 +4896,7 @@
   layer: 0
   name_cn: 仓库
   name_en: Warehouses
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10713
   y: 10443
@@ -4906,7 +4906,7 @@
   layer: 0
   name_cn: 城外的仓库
   name_en: Warehouses out of town
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10050
   y: 10932
@@ -4916,7 +4916,7 @@
   layer: 0
   name_cn: Zippee便利店
   name_en: Zippee Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10604
   y: 9613
@@ -4926,7 +4926,7 @@
   layer: 0
   name_cn: 酒类商店
   name_en: Liquor Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6189
   y: 5370
@@ -4936,7 +4936,7 @@
   layer: 0
   name_cn: 汽车修理
   name_en: Auto Repair
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5429
   y: 5964
@@ -4946,7 +4946,7 @@
   layer: 0
   name_cn: 回归自然脊椎按摩
   name_en: Back to the Nurture chiropractic services
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6187
   y: 5359
@@ -4956,7 +4956,7 @@
   layer: 0
   name_cn: 诱饵和渔具
   name_en: Bait & Tackle
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3631
   y: 5722
@@ -4966,7 +4966,7 @@
   layer: 0
   name_cn: 鱼饵店
   name_en: Bait Shop
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5918
   y: 5242
@@ -4976,7 +4976,7 @@
   layer: 0
   name_cn: 面包店
   name_en: Bakery
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6493
   y: 5267
@@ -4986,7 +4986,7 @@
   layer: 0
   name_cn: 银行
   name_en: Bank
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6504
   y: 5301
@@ -4996,7 +4996,7 @@
   layer: 0
   name_cn: 酒吧
   name_en: Bar
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5963
   y: 5422
@@ -5006,7 +5006,7 @@
   layer: 0
   name_cn: 酒吧
   name_en: Bar
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6382
   y: 5208
@@ -5016,7 +5016,7 @@
   layer: 0
   name_cn: 牛肉大杂烩
   name_en: Beef Roundup
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3655
   y: 5719
@@ -5026,7 +5026,7 @@
   layer: 0
   name_cn: 游艇俱乐部
   name_en: Boat Club
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6571
   y: 5212
@@ -5036,7 +5036,7 @@
   layer: 0
   name_cn: 书店
   name_en: Book Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6437
   y: 5269
@@ -5046,7 +5046,7 @@
   layer: 0
   name_cn: 汉堡店
   name_en: Burgers
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5955
   y: 5263
@@ -5056,7 +5056,7 @@
   layer: 0
   name_cn: 咖啡馆
   name_en: Cafe
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6176
   y: 6374
@@ -5066,7 +5066,7 @@
   layer: 0
   name_cn: 相机店
   name_en: Camera Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6188
   y: 5351
@@ -5076,7 +5076,7 @@
   layer: 0
   name_cn: 汽车垃圾场
   name_en: Car Junkyard
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5820
   y: 5412
@@ -5086,7 +5086,7 @@
   layer: 0
   name_cn: 墓地
   name_en: Cementery
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5700
   y: 5331
@@ -5096,7 +5096,7 @@
   layer: 0
   name_cn: 教堂
   name_en: Church
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6568
   y: 5374
@@ -5106,7 +5106,7 @@
   layer: 0
   name_cn: 服装店
   name_en: Clothing Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6403
   y: 5268
@@ -5116,7 +5116,7 @@
   layer: 0
   name_cn: 服装店
   name_en: Clothing Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6506
   y: 5266
@@ -5126,7 +5126,7 @@
   layer: 0
   name_cn: 服装店
   name_en: Clothing Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6250
   y: 5266
@@ -5136,7 +5136,7 @@
   layer: 0
   name_cn: 咖啡店
   name_en: Coffee Shop
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6400
   y: 5252
@@ -5146,7 +5146,7 @@
   layer: 0
   name_cn: 便利店
   name_en: Convenience store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5970
   y: 5355
@@ -5156,7 +5156,7 @@
   layer: 0
   name_cn: 西枫乡村俱乐部
   name_en: West Maple Country Club
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5756
   y: 6446
@@ -5166,7 +5166,7 @@
   layer: 0
   name_cn: 小餐馆
   name_en: Diner
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5424
   y: 5914
@@ -5176,7 +5176,7 @@
   layer: 0
   name_cn: 甜甜圈店
   name_en: Donut Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6491
   y: 5224
@@ -5186,7 +5186,7 @@
   layer: 0
   name_cn: 工厂
   name_en: Factory
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5570
   y: 5899
@@ -5196,7 +5196,7 @@
   layer: 0
   name_cn: 工厂仓库
   name_en: Factory Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5617
   y: 5973
@@ -5206,7 +5206,7 @@
   layer: 0
   name_cn: 高档餐厅
   name_en: Fancy Restaurant
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6192
   y: 5340
@@ -5216,7 +5216,7 @@
   layer: 0
   name_cn: 农场
   name_en: Farm
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6817
   y: 7720
@@ -5226,7 +5226,7 @@
   layer: 0
   name_cn: 农场
   name_en: Farm
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5693
   y: 5740
@@ -5236,7 +5236,7 @@
   layer: 0
   name_cn: 农贸市场
   name_en: Farmer's Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7252
   y: 8274
@@ -5247,7 +5247,7 @@
   layer: 0
   name_cn: 用栅栏围起来的电台
   name_en: Fenced off radio station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 4849
   y: 6284
@@ -5257,7 +5257,7 @@
   layer: 0
   name_cn: 农贸市场
   name_en: Farmer's Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5969
   y: 5392
@@ -5267,7 +5267,7 @@
   layer: 0
   name_cn: 食品市场
   name_en: Food Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6344
   y: 5297
@@ -5277,7 +5277,7 @@
   layer: 0
   name_cn: 食品市场
   name_en: Food Mart
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6273
   y: 5266
@@ -5287,7 +5287,7 @@
   layer: 0
   name_cn: 家具店
   name_en: Furniture Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6239
   y: 5265
@@ -5297,7 +5297,7 @@
   layer: 0
   name_cn: 家具店
   name_en: Furniture store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6427
   y: 5300
@@ -5307,7 +5307,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6083
   y: 5309
@@ -5317,7 +5317,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5418
   y: 5870
@@ -5327,7 +5327,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3660
   y: 5950
@@ -5337,7 +5337,7 @@
   layer: 0
   name_cn: 封闭式社区
   name_en: Gated Community
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6715
   y: 5483
@@ -5347,7 +5347,7 @@
   layer: 0
   name_cn: 杂货店
   name_en: General Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3679
   y: 5743
@@ -5357,7 +5357,7 @@
   layer: 0
   name_cn: 吉佳玛特连锁超市
   name_en: GigaMart
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6505
   y: 5346
@@ -5367,7 +5367,7 @@
   layer: 0
   name_cn: 高尔夫球场
   name_en: Golf Course
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6091
   y: 6392
@@ -5377,7 +5377,7 @@
   layer: 0
   name_cn: 杂货店
   name_en: Grocery Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6140
   y: 5370
@@ -5387,7 +5387,7 @@
   layer: 0
   name_cn: 五金店
   name_en: Hardware Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6364
   y: 5327
@@ -5397,7 +5397,7 @@
   layer: 0
   name_cn: 酒店
   name_en: Hotel
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6357
   y: 5259
@@ -5407,7 +5407,7 @@
   layer: 0
   name_cn: 带农田的房子
   name_en: House with Farmland
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6956
   y: 5565
@@ -5417,7 +5417,7 @@
   layer: 0
   name_cn: 冰淇淋店
   name_en: Ice Cream Parlor
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6471
   y: 5222
@@ -5427,7 +5427,7 @@
   layer: 0
   name_cn: 珠宝店
   name_en: Jewellery store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6481
   y: 5267
@@ -5437,7 +5437,7 @@
   layer: 0
   name_cn: 自助洗衣店
   name_en: Laundromat
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6407
   y: 5339
@@ -5447,7 +5447,7 @@
   layer: 0
   name_cn: Mama Mcfudgingtons
   name_en: Mama Mcfudgingtons
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6491
   y: 5266
@@ -5457,7 +5457,7 @@
   layer: 0
   name_cn: 药店
   name_en: Pharmacy
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6471
   y: 5266
@@ -5467,7 +5467,7 @@
   layer: 0
   name_cn: 警察局
   name_en: Police Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6082
   y: 5261
@@ -5477,7 +5477,7 @@
   layer: 0
   name_cn: 娱乐中心
   name_en: Rec Centre
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6560
   y: 5305
@@ -5487,7 +5487,7 @@
   layer: 0
   name_cn: 学校
   name_en: School
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6440
   y: 5445
@@ -5497,7 +5497,7 @@
   layer: 0
   name_cn: 自选家具店
   name_en: Seat Yourself Furniture Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6236
   y: 5264
@@ -5507,7 +5507,7 @@
   layer: 0
   name_cn: 斯皮福餐厅
   name_en: Spiffo's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6123
   y: 5305
@@ -5517,7 +5517,7 @@
   layer: 0
   name_cn: 存储单元
   name_en: Storage Units
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5541
   y: 6063
@@ -5527,7 +5527,7 @@
   layer: 0
   name_cn: 玩具店
   name_en: Toy Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6452
   y: 5298
@@ -5537,7 +5537,7 @@
   layer: 0
   name_cn: 拖车公园
   name_en: Trailer Park
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5342
   y: 5980
@@ -5547,7 +5547,7 @@
   layer: 0
   name_cn: 美国邮政服务
   name_en: U.S. Mail Service
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6312
   y: 5264
@@ -5557,7 +5557,7 @@
   layer: 0
   name_cn: 录像带商店
   name_en: VHS Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6206
   y: 5344
@@ -5567,7 +5567,7 @@
   layer: 0
   name_cn: 公寓大楼
   name_en: Apartment Complex
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8081
   y: 11535
@@ -5577,7 +5577,7 @@
   layer: 0
   name_cn: 军营
   name_en: Army Barracks
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8136
   y: 10238
@@ -5587,7 +5587,7 @@
   layer: 0
   name_cn: 陆军区
   name_en: Army Quarter
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 9118
   y: 11814
@@ -5597,7 +5597,7 @@
   layer: 0
   name_cn: 汽车修理店
   name_en: Auto Repair Shop
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8154
   y: 11325
@@ -5607,7 +5607,7 @@
   layer: 0
   name_cn: 保释金代理
   name_en: Bail Bonds
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7994
   y: 11450
@@ -5617,7 +5617,7 @@
   layer: 0
   name_cn: 银行
   name_en: Bank
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8084
   y: 11588
@@ -5627,7 +5627,7 @@
   layer: 0
   name_cn: 酒吧
   name_en: Bar
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8019
   y: 11427
@@ -5637,7 +5637,7 @@
   layer: 0
   name_cn: 书店
   name_en: Book Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8087
   y: 11512
@@ -5647,7 +5647,7 @@
   layer: 0
   name_cn: 公交车站
   name_en: Bus Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8244
   y: 12239
@@ -5657,7 +5657,7 @@
   layer: 0
   name_cn: 教堂
   name_en: Church
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8124
   y: 11550
@@ -5667,7 +5667,7 @@
   layer: 0
   name_cn: 服装店
   name_en: Clothing Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8087
   y: 11489
@@ -5677,7 +5677,7 @@
   layer: 0
   name_cn: 建筑工地
   name_en: Construction Site
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8219
   y: 11841
@@ -5687,7 +5687,7 @@
   layer: 0
   name_cn: 小餐馆
   name_en: Diner
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8075
   y: 11456
@@ -5697,7 +5697,7 @@
   layer: 0
   name_cn: 汽车电影院
   name_en: Drive-In Movie Theater
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8426
   y: 12240
@@ -5707,7 +5707,7 @@
   layer: 0
   name_cn: 双农舍
   name_en: Dual Farmhouses
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7671
   y: 11098
@@ -5717,7 +5717,7 @@
   layer: 0
   name_cn: 小学
   name_en: Elementary School
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8341
   y: 11612
@@ -5727,7 +5727,7 @@
   layer: 0
   name_cn: 农贸市场
   name_en: Farmer's Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 9070
   y: 12200
@@ -5737,7 +5737,7 @@
   layer: 0
   name_cn: 消防局
   name_en: Fire Departament
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8138
   y: 11741
@@ -5747,7 +5747,7 @@
   layer: 0
   name_cn: 食品市场和自助洗衣店
   name_en: Food Market and Laundromat
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8136
   y: 11485
@@ -5757,7 +5757,7 @@
   layer: 0
   name_cn: 食品仓库
   name_en: Food Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7488
   y: 11082
@@ -5767,7 +5767,7 @@
   layer: 0
   name_cn: 新鲜食品市场
   name_en: Fresh Food Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 9074
   y: 12186
@@ -5777,7 +5777,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8297
   y: 12225
@@ -5787,7 +5787,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8164
   y: 11267
@@ -5797,7 +5797,7 @@
   layer: 0
   name_cn: 封闭式社区
   name_en: Gated Community
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8026
   y: 11525
@@ -5807,7 +5807,7 @@
   layer: 0
   name_cn: 房屋
   name_en: House
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8341
   y: 11750
@@ -5817,7 +5817,7 @@
   layer: 0
   name_cn: 孤立的房屋
   name_en: Isolated Houses
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8838
   y: 11612
@@ -5827,7 +5827,7 @@
   layer: 0
   name_cn: 肯塔基州监狱
   name_en: Kentucky State Penitentiary
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7693
   y: 11873
@@ -5837,7 +5837,7 @@
   layer: 0
   name_cn: 诺克斯县法院
   name_en: Knox County Court of Justice
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8075
   y: 11654
@@ -5847,7 +5847,7 @@
   layer: 0
   name_cn: 诺克斯县法院
   name_en: Knox County Court of Justice
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8075
   y: 11654
@@ -5857,7 +5857,7 @@
   layer: 0
   name_cn: 律师事务所
   name_en: Law Offices
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8089
   y: 11536
@@ -5867,7 +5867,7 @@
   layer: 0
   name_cn: 麦克福金顿餐厅
   name_en: Mama McFudgington's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8085
   y: 11619
@@ -5877,7 +5877,7 @@
   layer: 0
   name_cn: 麦克福金顿餐厅
   name_en: Mama McFudgington's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8085
   y: 11619
@@ -5887,7 +5887,7 @@
   layer: 0
   name_cn: 汽车旅馆
   name_en: Motel
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8078
   y: 11417
@@ -5897,7 +5897,7 @@
   layer: 0
   name_cn: 包装仓库
   name_en: Packaging Warehouses
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 9199
   y: 11853
@@ -5907,7 +5907,7 @@
   layer: 0
   name_cn: 披萨餐厅
   name_en: Pizza Restaurant
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8075
   y: 11310
@@ -5917,7 +5917,7 @@
   layer: 0
   name_cn: Rosewood Country Buffet
   name_en: Rosewood Country Buffet
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8086
   y: 11500
@@ -5927,7 +5927,7 @@
   layer: 0
   name_cn: 罗斯伍德医疗中心
   name_en: Rosewood Medical
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8089
   y: 11526
@@ -5937,7 +5937,7 @@
   layer: 0
   name_cn: 理发店
   name_en: Salon
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8086
   y: 11551
@@ -5947,7 +5947,7 @@
   layer: 0
   name_cn: 斯皮福餐厅
   name_en: Spiffo's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8074
   y: 11343
@@ -5957,7 +5957,7 @@
   layer: 0
   name_cn: 仓库
   name_en: Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 9202
   y: 11840
@@ -5967,7 +5967,7 @@
   layer: 0
   name_cn: 仓库
   name_en: Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 7887
   y: 12467
@@ -5977,7 +5977,7 @@
   layer: 0
   name_cn: Zippee便利店
   name_en: Zippee Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8089
   y: 11561
@@ -5987,7 +5987,7 @@
   layer: 0
   name_cn: 鱼饵店
   name_en: Bait Shop
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12538
   y: 5288
@@ -5997,7 +5997,7 @@
   layer: 0
   name_cn: 酒吧
   name_en: Bar
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13004
   y: 5262
@@ -6007,7 +6007,7 @@
   layer: 0
   name_cn: 美容院
   name_en: Beauty Salon
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13619
   y: 5672
@@ -6017,7 +6017,7 @@
   layer: 0
   name_cn: 大农场
   name_en: Big Farm
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13856
   y: 4740
@@ -6027,7 +6027,7 @@
   layer: 0
   name_cn: 书店
   name_en: Book Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13604
   y: 5668
@@ -6037,7 +6037,7 @@
   layer: 0
   name_cn: 桥梁
   name_en: Bridge
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12309
   y: 6730
@@ -6047,7 +6047,7 @@
   layer: 0
   name_cn: 汉堡店
   name_en: Burger Shop
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12544
   y: 5266
@@ -6057,7 +6057,7 @@
   layer: 0
   name_cn: 烧毁的拖车停车场
   name_en: Burned Trailer Park
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13887
   y: 4040
@@ -6067,7 +6067,7 @@
   layer: 0
   name_cn: 山谷车站
   name_en: Valley Station
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 12734
   y: 5772
@@ -6077,7 +6077,7 @@
   layer: 0
   name_cn: 菲茨杰拉德营地
   name_en: Camp Fitzgerald
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13721
   y: 6729
@@ -6087,7 +6087,7 @@
   layer: 0
   name_cn: 教堂
   name_en: Church
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12848
   y: 4956
@@ -6097,7 +6097,7 @@
   layer: 0
   name_cn: 教堂和墓地
   name_en: Church and Cemetery
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 14551
   y: 4970
@@ -6107,7 +6107,7 @@
   layer: 0
   name_cn: 服装店
   name_en: Clothing Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13686
   y: 5672
@@ -6117,7 +6117,7 @@
   layer: 0
   name_cn: 建筑工地
   name_en: Construction Site
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 14123
   y: 5493
@@ -6127,7 +6127,7 @@
   layer: 0
   name_cn: 建筑工地
   name_en: Construction Site
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12582
   y: 5387
@@ -6137,7 +6137,7 @@
   layer: 0
   name_cn: 十字路口购物中心
   name_en: Crossroads Mall
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13930
   y: 5878
@@ -6147,7 +6147,7 @@
   layer: 0
   name_cn: 日托中心
   name_en: Daycare
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13585
   y: 5669
@@ -6157,7 +6157,7 @@
   layer: 0
   name_cn: 日托中心
   name_en: Daycare
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13585
   y: 5669
@@ -6167,7 +6167,7 @@
   layer: 0
   name_cn: 百货商店
   name_en: Department Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13417
   y: 1461
@@ -6177,7 +6177,7 @@
   layer: 0
   name_cn: 被毁坏的小屋
   name_en: Destroyed Cabin
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12531
   y: 5232
@@ -6187,7 +6187,7 @@
   layer: 0
   name_cn: 小餐馆
   name_en: Diner
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12741
   y: 5711
@@ -6197,7 +6197,7 @@
   layer: 0
   name_cn: 飞机场
   name_en: Airfield
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12840
   y: 6402
@@ -6207,7 +6207,7 @@
   layer: 0
   name_cn: 东桥
   name_en: East Bridge
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12895
   y: 6898
@@ -6217,7 +6217,7 @@
   layer: 0
   name_cn: 小学
   name_en: Elementary School
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12857
   y: 4856
@@ -6227,7 +6227,7 @@
   layer: 0
   name_cn: 食品市场
   name_en: Food Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12571
   y: 5728
@@ -6237,7 +6237,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12734
   y: 5033
@@ -6247,7 +6247,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13734
   y: 5643
@@ -6257,7 +6257,7 @@
   layer: 0
   name_cn: 湖边的房子
   name_en: House Near the Lake
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 14059
   y: 5199
@@ -6267,7 +6267,7 @@
   layer: 0
   name_cn: 狩猎小屋
   name_en: Hunting Cabin
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13651
   y: 7145
@@ -6277,7 +6277,7 @@
   layer: 0
   name_cn: 狩猎小屋
   name_en: Hunting Lodge
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13105
   y: 5315
@@ -6287,7 +6287,7 @@
   layer: 0
   name_cn: 狩猎摊
   name_en: Hunting Stand
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13403
   y: 5338
@@ -6297,7 +6297,7 @@
   layer: 0
   name_cn: 诺克斯银行
   name_en: Knox Bank
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13656
   y: 5745
@@ -6307,7 +6307,7 @@
   layer: 0
   name_cn: 中型仓库
   name_en: Medium Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12620
   y: 4713
@@ -6317,7 +6317,7 @@
   layer: 0
   name_cn: 煎饼屋
   name_en: Pile-o-Crepe
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13602
   y: 5762
@@ -6327,7 +6327,7 @@
   layer: 0
   name_cn: 餐厅
   name_en: Restaurant
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13649
   y: 5671
@@ -6337,7 +6337,7 @@
   layer: 0
   name_cn: 靶场
   name_en: Shooting Range
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13264
   y: 5440
@@ -6347,7 +6347,7 @@
   layer: 0
   name_cn: 小码头
   name_en: Small Dock
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12482
   y: 5298
@@ -6357,7 +6357,7 @@
   layer: 0
   name_cn: 小农场
   name_en: Small Farm
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 14315
   y: 4953
@@ -6367,7 +6367,7 @@
   layer: 0
   name_cn: 小旅馆
   name_en: Small Hotel
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13008
   y: 5321
@@ -6377,7 +6377,7 @@
   layer: 0
   name_cn: 小商店
   name_en: Small Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12627
   y: 5324
@@ -6387,7 +6387,7 @@
   layer: 0
   name_cn: 星空影城
   name_en: StarEplex Cinema
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13629
   y: 5881
@@ -6397,7 +6397,7 @@
   layer: 0
   name_cn: 存储单元
   name_en: Storage Units
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12959
   y: 4876
@@ -6408,7 +6408,7 @@
   layer: 0
   name_cn: 价值保险
   name_en: Valu In$urance
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13664
   y: 5669
@@ -6418,7 +6418,7 @@
   layer: 0
   name_cn: 餐厅
   name_en: Yummmers
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13571
   y: 5762
@@ -6428,7 +6428,7 @@
   layer: 0
   name_cn: Zippee便利店
   name_en: Zippee Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13658
   y: 5766
@@ -6438,7 +6438,7 @@
   layer: 0
   name_cn: 汽车修理店
   name_en: Auto Repair Shop
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11898
   y: 6807
@@ -6448,7 +6448,7 @@
   layer: 0
   name_cn: 汽车修理店
   name_en: Auto Repair Shop
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12256
   y: 6931
@@ -6458,7 +6458,7 @@
   layer: 0
   name_cn: 面包店
   name_en: Bakery
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11907
   y: 6866
@@ -6468,7 +6468,7 @@
   layer: 0
   name_cn: 书店
   name_en: Book Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11896
   y: 6880
@@ -6478,7 +6478,7 @@
   layer: 0
   name_cn: 汉堡餐厅
   name_en: Burger Restaurant
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13965
   y: 4866
@@ -6488,7 +6488,7 @@
   layer: 0
   name_cn: 汉堡店
   name_en: Burgers
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12077
   y: 7075
@@ -6498,7 +6498,7 @@
   layer: 0
   name_cn: 小木屋
   name_en: Cabin
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13628
   y: 7222
@@ -6508,7 +6508,7 @@
   layer: 0
   name_cn: 咖啡馆
   name_en: Cafe
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13092
   y: 5449
@@ -6518,7 +6518,7 @@
   layer: 0
   name_cn: 火车守车
   name_en: Choo Choo Train Caboose
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12197
   y: 6878
@@ -6528,7 +6528,7 @@
   layer: 0
   name_cn: 教堂
   name_en: Church
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11967
   y: 6990
@@ -6539,7 +6539,7 @@
   layer: 0
   name_cn: 教堂和墓地
   name_en: Church and Cemetery
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11069
   y: 6710
@@ -6549,7 +6549,7 @@
   layer: 0
   name_cn: 旺铺招租
   name_en: Commercial Rent
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11661
   y: 7037
@@ -6559,7 +6559,7 @@
   layer: 0
   name_cn: 建筑工地
   name_en: Construction Site
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12062
   y: 6918
@@ -6569,7 +6569,7 @@
   layer: 0
   name_cn: 板条棚
   name_en: Crate Shed
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10942
   y: 6769
@@ -6579,7 +6579,7 @@
   layer: 0
   name_cn: 日托中心
   name_en: Day Care
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11739
   y: 6921
@@ -6589,7 +6589,7 @@
   layer: 0
   name_cn: 码头
   name_en: Dock
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11828
   y: 6574
@@ -6599,7 +6599,7 @@
   layer: 0
   name_cn: 码头
   name_en: Dock
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11276
   y: 6594
@@ -6609,7 +6609,7 @@
   layer: 0
   name_cn: 农舍
   name_en: Farmhouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11132
   y: 6852
@@ -6619,7 +6619,7 @@
   layer: 0
   name_cn: 农舍
   name_en: Farmhouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 14396
   y: 4568
@@ -6629,7 +6629,7 @@
   layer: 0
   name_cn: 农舍
   name_en: Farmhouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 9279
   y: 7781
@@ -6639,7 +6639,7 @@
   layer: 0
   name_cn: 食品市场
   name_en: Food Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11984
   y: 6911
@@ -6649,7 +6649,7 @@
   layer: 0
   name_cn: 农贸市场
   name_en: Famer's Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13937
   y: 4864
@@ -6659,7 +6659,7 @@
   layer: 0
   name_cn: 家具店
   name_en: Furniture Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11932
   y: 6941
@@ -6669,7 +6669,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Gas Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12069
   y: 7140
@@ -6679,7 +6679,7 @@
   layer: 0
   name_cn: 湖边的封闭式房屋
   name_en: Gated House by the Lake
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10155
   y: 6624
@@ -6689,7 +6689,7 @@
   layer: 0
   name_cn: 杂货店
   name_en: General Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11831
   y: 6912
@@ -6699,7 +6699,7 @@
   layer: 0
   name_cn: 吉佳玛特连锁超市
   name_en: GigaMart
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12024
   y: 6853
@@ -6709,7 +6709,7 @@
   layer: 0
   name_cn: 枪支店
   name_en: Gun Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12064
   y: 6758
@@ -6719,7 +6719,7 @@
   layer: 0
   name_cn: 理发店
   name_en: Hair O Genesis
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11852
   y: 6878
@@ -6729,7 +6729,7 @@
   layer: 0
   name_cn: 五金店
   name_en: Hardware Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11974
   y: 6912
@@ -6739,7 +6739,7 @@
   layer: 0
   name_cn: 湖边的房子
   name_en: House by the lake
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10182
   y: 6763
@@ -6749,7 +6749,7 @@
   layer: 0
   name_cn: 诺克斯银行
   name_en: Knox Bank
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11913
   y: 6914
@@ -6759,7 +6759,7 @@
   layer: 0
   name_cn: 大型仓库
   name_en: Large Warehouse
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12140
   y: 7084
@@ -6769,7 +6769,7 @@
   layer: 0
   name_cn: 自助洗衣店
   name_en: Laundromat
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11931
   y: 6786
@@ -6779,7 +6779,7 @@
   layer: 0
   name_cn: 迷你酒店
   name_en: Mini Hotel
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12018
   y: 6917
@@ -6789,7 +6789,7 @@
   layer: 0
   name_cn: 汽车旅馆
   name_en: Motel
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11860
   y: 6906
@@ -6799,7 +6799,7 @@
   layer: 0
   name_cn: 办公楼
   name_en: Office Building
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11976
   y: 6939
@@ -6809,7 +6809,7 @@
   layer: 0
   name_cn: 办公楼
   name_en: Office Building
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11977
   y: 6882
@@ -6819,7 +6819,7 @@
   layer: 0
   name_cn: 药店
   name_en: Pharmacy
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11935
   y: 6802
@@ -6829,7 +6829,7 @@
   layer: 0
   name_cn: 野餐区
   name_en: Picnic Area
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12033
   y: 7364
@@ -6839,7 +6839,7 @@
   layer: 0
   name_cn: 披萨旋转
   name_en: Pizza Whirled
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11660
   y: 7083
@@ -6849,7 +6849,7 @@
   layer: 0
   name_cn: 游乐场
   name_en: Playground
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11418
   y: 6782
@@ -6859,7 +6859,7 @@
   layer: 0
   name_cn: 警察局
   name_en: Police Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11898
   y: 6940
@@ -6869,7 +6869,7 @@
   layer: 0
   name_cn: 警察局
   name_en: Police station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8063
   y: 11735
@@ -6879,7 +6879,7 @@
   layer: 0
   name_cn: 邮局
   name_en: Post Office
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11956
   y: 6912
@@ -6889,7 +6889,7 @@
   layer: 0
   name_cn: 牙医诊所
   name_en: R.B. Mat, Dentist
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11880
   y: 6879
@@ -6899,7 +6899,7 @@
   layer: 0
   name_cn: 餐厅
   name_en: Restaurant
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11932
   y: 6914
@@ -6909,7 +6909,7 @@
   layer: 0
   name_cn: 学校
   name_en: School
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11345
   y: 6784
@@ -6919,7 +6919,7 @@
   layer: 0
   name_cn: 海马咖啡
   name_en: Seahorse Coffee
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11962
   y: 6879
@@ -6929,7 +6929,7 @@
   layer: 0
   name_cn: 小商店
   name_en: Small Store
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11349
   y: 6719
@@ -6939,7 +6939,7 @@
   layer: 0
   name_cn: 斯皮福餐厅
   name_en: Spiffo's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11976
   y: 6810
@@ -6949,7 +6949,7 @@
   layer: 0
   name_cn: 存储单元
   name_en: Storage Units
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12137
   y: 7024
@@ -6959,7 +6959,7 @@
   layer: 0
   name_cn: 德雷克和水晶派店
   name_en: The Drake and Crystal Pie Place
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11899
   y: 6851
@@ -6969,7 +6969,7 @@
   layer: 0
   name_cn: 加油站
   name_en: Thunder Gas
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11820
   y: 6865
@@ -6979,7 +6979,7 @@
   layer: 0
   name_cn: 市政厅
   name_en: Town Hall
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11941
   y: 6873
@@ -6989,7 +6989,7 @@
   layer: 0
   name_cn: 城镇公园
   name_en: Town Park
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11786
   y: 6913
@@ -6999,7 +6999,7 @@
   layer: 0
   name_cn: 崔吉的酒吧
   name_en: Twiggy's
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12059
   y: 6793
@@ -7010,7 +7010,7 @@
   layer: 0
   name_cn: 价值保险
   name_en: Valu In$urance
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13664
   y: 5669
@@ -7020,7 +7020,7 @@
   layer: 0
   name_cn: Zippee便利店
   name_en: Zippee Market
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 11660
   y: 7067
@@ -7030,7 +7030,7 @@
   layer: 0
   name_cn: 马尔德劳
   name_en: Muldraugh
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 10782
   y: 9950
@@ -7040,7 +7040,7 @@
   layer: 0
   name_cn: 三月岭
   name_en: March Ridge
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 10121
   y: 12720
@@ -7050,7 +7050,7 @@
   layer: 0
   name_cn: 罗斯伍德
   name_en: Rosewood
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 8107
   y: 11576
@@ -7060,7 +7060,7 @@
   layer: 0
   name_cn: 以格伦
   name_en: Ekron
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 539
   y: 9749
@@ -7070,7 +7070,7 @@
   layer: 0
   name_cn: 欧文顿
   name_en: Irvington
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 2498
   y: 14253
@@ -7080,7 +7080,7 @@
   layer: 0
   name_cn: 回声溪
   name_en: Echo Creek
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 3602
   y: 11014
@@ -7090,7 +7090,7 @@
   layer: 0
   name_cn: 勃兰登堡
   name_en: Brandenburg
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 2101
   y: 6076
@@ -7100,7 +7100,7 @@
   layer: 0
   name_cn: 河畔
   name_en: Riverside
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6443
   y: 5281
@@ -7110,7 +7110,7 @@
   layer: 0
   name_cn: 西点
   name_en: West Point
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 11697
   y: 6834
@@ -7120,7 +7120,7 @@
   layer: 0
   name_cn: 路易斯维尔
   name_en: Louisville
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 12936
   y: 2238
@@ -7130,7 +7130,7 @@
   layer: 0
   name_cn: 路易斯维尔国际机场
   name_en: Louisville International Airport
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 15436
   y: 2940
@@ -7140,7 +7140,7 @@
   layer: 0
   name_cn: 法拉斯湖
   name_en: Fallas Lake
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 7276
   y: 8345
@@ -7150,7 +7150,7 @@
   layer: 0
   name_cn: 山谷站
   name_en: Valley Station
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13515
   y: 5082
@@ -7160,7 +7160,7 @@
   layer: 0
   name_cn: 机场跑道
   name_en: Airstrip
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 986
   y: 6681
@@ -7170,7 +7170,7 @@
   layer: 0
   name_cn: 拘留中心
   name_en: Detention Center
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 1415
   y: 5878
@@ -7180,7 +7180,7 @@
   layer: 0
   name_cn: 黛利拉号
   name_en: P.S. Delilah
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 2046
   y: 5689
@@ -7190,7 +7190,7 @@
   layer: 0
   name_cn: 火车站
   name_en: Trainyard
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 2202
   y: 6695
@@ -7200,7 +7200,7 @@
   layer: 0
   name_cn: 明谷拖车公园
   name_en: Bright Valley Trailer Park
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 2733
   y: 6298
@@ -7210,7 +7210,7 @@
   layer: 0
   name_cn: 威弗利山疗养院
   name_en: Waverly Hills Sanatorium
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 4050
   y: 6520
@@ -7220,7 +7220,7 @@
   layer: 0
   name_cn: 雌鹿谷湖
   name_en: Doe Valley Lake
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6718
   y: 6208
@@ -7230,11 +7230,11 @@
   layer: 0
   name_cn: 雌鹿谷森林
   name_en: Doe Valley Forest
-  rank: 0
+  visiable_zoom_level: 0
   rects:
   - height: 512
     layer: 0
-    rank: 0
+    visiable_zoom_level: 0
     width: 512
     x: 3072
     y: 7168
@@ -7245,7 +7245,7 @@
   layer: 0
   name_cn: 旧煤田
   name_en: Historic Coalfield
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3464
   y: 8194
@@ -7255,7 +7255,7 @@
   layer: 0
   name_cn: 舒伯特庄园
   name_en: Schubert's Estate
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 1722
   y: 8631
@@ -7265,7 +7265,7 @@
   layer: 0
   name_cn: 拖车公园
   name_en: Trailer Park
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 934
   y: 9601
@@ -7275,7 +7275,7 @@
   layer: 0
   name_cn: 钢铁厂
   name_en: Steel Factory
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 567
   y: 9420
@@ -7285,7 +7285,7 @@
   layer: 0
   name_cn: 工业区
   name_en: Industrial Area
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 1918
   y: 10899
@@ -7295,7 +7295,7 @@
   layer: 0
   name_cn: 靶场
   name_en: Shooting Range
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 2565
   y: 10892
@@ -7305,7 +7305,7 @@
   layer: 0
   name_cn: AMZ钢铁
   name_en: AMZ Steel
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 1919
   y: 10739
@@ -7315,7 +7315,7 @@
   layer: 0
   name_cn: 拖车公园
   name_en: Trailer Park
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3470
   y: 10895
@@ -7325,7 +7325,7 @@
   layer: 0
   name_cn: 野生动物中心
   name_en: Wildlife Center
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3166
   y: 12126
@@ -7335,7 +7335,7 @@
   layer: 0
   name_cn: 尼尔农场
   name_en: Neil's Farm
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3827
   y: 12203
@@ -7345,7 +7345,7 @@
   layer: 0
   name_cn: 尼尔池塘
   name_en: Neil's Pond
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3803
   y: 12475
@@ -7355,7 +7355,7 @@
   layer: 0
   name_cn: 废料场
   name_en: Scrapyard
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 2941
   y: 12629
@@ -7365,7 +7365,7 @@
   layer: 0
   name_cn: 废料场
   name_en: Scrapyard
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 1939
   y: 13383
@@ -7375,7 +7375,7 @@
   layer: 0
   name_cn: 欧文顿赛车场
   name_en: Irvington Speedway
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 1085
   y: 13060
@@ -7385,7 +7385,7 @@
   layer: 0
   name_cn: 靶场
   name_en: Shooting Range
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 1858
   y: 14102
@@ -7395,7 +7395,7 @@
   layer: 0
   name_cn: 布罗特牧业
   name_en: Brott Cattle
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3796
   y: 14443
@@ -7405,7 +7405,7 @@
   layer: 0
   name_cn: 耕作工厂
   name_en: F.Arable Factory
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 3764
   y: 14672
@@ -7415,11 +7415,11 @@
   layer: 0
   name_cn: 豪格沃乐森林
   name_en: Hog Wallow Forest
-  rank: 0
+  visiable_zoom_level: 0
   rects:
   - height: 512
     layer: 0
-    rank: 0
+    visiable_zoom_level: 0
     width: 512
     x: 5120
     y: 13312
@@ -7430,7 +7430,7 @@
   layer: 0
   name_cn: 露营地
   name_en: Camping
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 6063
   y: 14550
@@ -7440,7 +7440,7 @@
   layer: 0
   name_cn: 水处理中心
   name_en: Water Treatment
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8040
   y: 15301
@@ -7450,7 +7450,7 @@
   layer: 0
   name_cn: 暗沼湖
   name_en: Dark Wallow Lake
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 8581
   y: 14854
@@ -7460,7 +7460,7 @@
   layer: 0
   name_cn: 废料场
   name_en: Scrapyard
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10762
   y: 10493
@@ -7470,7 +7470,7 @@
   layer: 0
   name_cn: 麦考伊庄园
   name_en: McCoy Estate
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 10089
   y: 8261
@@ -7480,7 +7480,7 @@
   layer: 0
   name_cn: 雌鹿谷
   name_en: Doe Valley
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 6832
   y: 9609
@@ -7490,11 +7490,11 @@
   layer: 0
   name_cn: 印第安纳
   name_en: Indiana
-  rank: 0
+  visiable_zoom_level: 0
   rects:
   - height: 512
     layer: 0
-    rank: 0
+    visiable_zoom_level: 0
     width: 512
     x: 8192
     y: 6144
@@ -7505,7 +7505,7 @@
   layer: 0
   name_cn: 盐河
   name_en: Salt River
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13275
   y: 7343
@@ -7515,11 +7515,11 @@
   layer: 0
   name_cn: 杰斐逊森林
   name_en: Jefferson Forest
-  rank: 0
+  visiable_zoom_level: 0
   rects:
   - height: 512
     layer: 0
-    rank: 0
+    visiable_zoom_level: 0
     width: 512
     x: 13568
     y: 9216
@@ -7530,7 +7530,7 @@
   layer: 0
   name_cn: 社区中心
   name_en: Community Area
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13782
   y: 5843
@@ -7540,7 +7540,7 @@
   layer: 0
   name_cn: 客运楼
   name_en: Passenger Terminal
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 15525
   y: 2948
@@ -7550,7 +7550,7 @@
   layer: 0
   name_cn: 货运楼
   name_en: Freight Terminal
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 15406
   y: 3164
@@ -7560,7 +7560,7 @@
   layer: 0
   name_cn: 帕克伍德
   name_en: Parkwood
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 12668
   y: 3582
@@ -7570,7 +7570,7 @@
   layer: 0
   name_cn: 社区中心
   name_en: Community Area
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 13534
   y: 3055
@@ -7580,7 +7580,7 @@
   layer: 0
   name_cn: 怀恩多特
   name_en: Wyandotte
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 12255
   y: 3145
@@ -7590,7 +7590,7 @@
   layer: 0
   name_cn: 奥杜邦
   name_en: Audubon
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 13875
   y: 2790
@@ -7600,7 +7600,7 @@
   layer: 0
   name_cn: 德国城
   name_en: Germantown
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 13631
   y: 2193
@@ -7610,7 +7610,7 @@
   layer: 0
   name_cn: 利默里克
   name_en: Limerick
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 12184
   y: 1945
@@ -7620,7 +7620,7 @@
   layer: 0
   name_cn: 东市场区
   name_en: East Market District
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 13360
   y: 1662
@@ -7630,7 +7630,7 @@
   layer: 0
   name_cn: 工业区
   name_en: Industrial Area
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 12086
   y: 1440
@@ -7640,7 +7640,7 @@
   layer: 0
   name_cn: 市中心
   name_en: Downtown
-  rank: 0
+  visiable_zoom_level: 0
   type: point
   x: 12600
   y: 1238
@@ -7650,7 +7650,7 @@
   layer: 0
   name_cn: 亚瑟营地
   name_en: Camp Arthur
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8315
   y: 14579
@@ -7660,7 +7660,7 @@
   layer: 0
   name_cn: 观光旅馆
   name_en: Scenic Lodges
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 8534
   y: 14416
@@ -7670,7 +7670,7 @@
   layer: 0
   name_cn: 社区中心
   name_en: Community Area
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 4305
   y: 9743
@@ -7680,7 +7680,7 @@
   layer: 0
   name_cn: 米德郡庄园
   name_en: Meadshire Estate
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 4223
   y: 9531
@@ -7690,7 +7690,7 @@
   layer: -17
   name_cn: 军事研究设施地下最深处
   name_en: The deepest part of the military research facility underground
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 5687
   y: 12439
@@ -7699,7 +7699,7 @@
   layer: -1
   name_cn: 地下走廊
   name_en: Underground passage
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 4105
   y: 6536
@@ -7709,7 +7709,7 @@
   layer: -2
   name_cn: 教堂密室
   name_en: Hidden chamber of the church
-  rank: 1
+  visiable_zoom_level: 1
   type: point
   x: 446
   y: 9937

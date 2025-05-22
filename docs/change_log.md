@@ -1,5 +1,15 @@
 # Change log
 
+# 2025-05-23: 1.0.9 + UI 1.0.11
+
+* marker system and dynamic ui refactor
+* added square cursor
+
+# 2025-05-20: 1.0.9 + UI 1.0.10
+
+* load overlays on start by params in the query string
+  * example: `pzmap.html?overlays=zombie,foraging,room,objects`
+
 # 2025-03-19: 1.0.8 + UI 1.0.9
 
 * Align tiles to map origin

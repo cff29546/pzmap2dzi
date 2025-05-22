@@ -2,10 +2,66 @@ import { g } from "./globals.js";
 import * as i18n from "./i18n.js";
 import * as c from "./coordinates.js";
 import * as util from "./util.js";
+import * as ui from "./ui.js";
 
 var ZOOM_IN_STEP = 0.25;
-var EMPTY_OBJ = {rank: 0, name: '', desc: ''};
 var ZOOM_TO_STEP = 2;
+var DEFAULT_MARKER_OPTIONS = {
+    id: '',
+    name: '',
+    desc: '',
+    class_list: undefined,
+    visiable_zoom_level: 0,
+    passthrough: undefined,
+};
+var ZOOM_LEVEL_STEP_SIZE = [
+    0,     // level 0, always visible
+    0.25,  // level 1, single square takes 0.25 pixels
+    8      // level 2, single square takes 8 pixels
+];
+
+var CURRENT = {
+    level: 0,
+    size: 0
+}
+
+export function zoom() {
+    // canvas event
+    let change = false;
+    let zoom = c.getZoom(g.viewer, false);
+    let step = zoom * g.base_map.sqr;
+    let size = 3; // large
+    if (step < 1.0) {
+        size = 1; // small
+    } else {
+        if (step < 2.0) {
+            size = 2; // mid
+        }
+    }
+    if (CURRENT.size !== size) {
+        CURRENT.size = size;
+        util.changeStyle('.point', 'width', size*10 + 'px');
+        util.changeStyle('.point', 'height', size*10 + 'px');
+        util.changeStyle('.area-iso', 'border-width', size*8 + 'px');
+        util.changeStyle('.area-top', 'border-width', size*4 + 'px');
+        change = true;
+    }
+    let zoom_level = 1;
+    while (step > ZOOM_LEVEL_STEP_SIZE[zoom_level]) {
+        zoom_level += 1;
+    }
+    if (CURRENT.zoom_level != zoom_level) {
+        // update visibility when zoom level changed
+        CURRENT.zoom_level = zoom_level;
+        for (let level in ZOOM_LEVEL_STEP_SIZE) {
+            util.changeStyle('.zoom' + level, 'visibility', level < zoom_level ? 'visible' : 'hidden');
+            util.changeStyle('.zoom' + level, 'pointer-events', level < zoom_level ? 'auto' : 'none');
+            util.changeStyle('.passthrough-zoom' + level, 'visibility', level < zoom_level ? 'visible' : 'hidden');
+        }
+        change = true;
+    }
+    return change;
+}
 
 function setMarkClass(e, type, layer, cls) {
     e.className = "";
@@ -30,8 +86,12 @@ function draw(position, size, element) {
     element.style.display = 'block';
     wrapper.style.left = position.x + 'px';
     wrapper.style.top = position.y + 'px';
+    wrapper.style['pointer-events'] = 'none';
     if (element.classList.contains('area')) {
-        let border = 8*g.marker.size;
+        let border = 8*CURRENT.size;
+        if (element.classList.contains('cursor')) {
+            border = 1;
+        }
         if (g.map_type != 'top') {
             element.style.transform = 'matrix(0.5, 0.25, -0.5, 0.25, 0, 0)';
             border *= 2;
@@ -97,17 +157,34 @@ class Mark {
         this.selected = false;
         this.removed = false;
         this.backup = {};
-        this.keys = ['id', 'name', 'desc', 'rank'].concat(keys);
+        this.keys = Object.keys(DEFAULT_MARKER_OPTIONS).concat(keys);
         for (let key of this.keys) {
-            this[key] = obj[key];
+            if (obj[key] === undefined) {
+                if (DEFAULT_MARKER_OPTIONS[key] !== undefined) {
+                    this[key] = DEFAULT_MARKER_OPTIONS[key];
+                }
+            } else {
+                this[key] = obj[key];
+            }
         }
-        this.rank = Number(!!obj.rank);
+        this.visiable_zoom_level = Number(this.visiable_zoom_level);
+        if (!Number.isInteger(this.visiable_zoom_level)) {
+            this.visiable_zoom_level = 0;
+        }
     }
 
     cls() {
         let c = [];
         if (this.selected) { c.push('selected'); }
-        if (this.rank) { c.push('rank1'); }
+        if (this.passthrough) {
+            c.push('passthrough-zoom' + this.visiable_zoom_level);
+        } else {
+            c.push('zoom' + this.visiable_zoom_level);
+        }
+        if (this.class_list) {
+            c = c.concat(this.class_list);
+        }
+
         return c;
     }
 
@@ -125,13 +202,8 @@ class Mark {
         }
     }
 
-    showOnUI(keys) {
-        for (let key of keys) {
-            if (this[key] !== undefined) {
-                util.setValue('marker_' + key, this[key]);
-            }
-        }
-        util.setChecked('marker_hide', !!this.rank);
+    showOnUI() {
+        ui.setMarkerUIData(this.toObject());
     }
 
     getBackup() {
@@ -204,13 +276,6 @@ class Point extends Mark {
         }
     }
 
-    showOnUI() {
-        super.showOnUI(['x', 'y', 'layer', 'name', 'desc']);
-        for (let key of ['width', 'height']) {
-            util.setValue('marker_' + key, '');
-        }
-    }
-
     start_drag() {
         this.sx = this.x;
         this.sy = this.y;
@@ -243,16 +308,6 @@ class Area extends Mark {
             } else {
                 let r = this.rects[i];
                 let e = overlayRect(aid, this.cls(), this.name, r.x, r.y, this.layer, r.width, r.height);
-            }
-        }
-    }
-
-    showOnUI() {
-        super.showOnUI(['layer', 'name', 'desc']);
-        if (this.rects.length) {
-            let r = this.rects[0];
-            for (let key of ['x', 'y', 'width', 'height']) {
-                util.setValue('marker_' + key, r[key] || 0);
             }
         }
     }
@@ -340,14 +395,14 @@ var is_legal = {
     point: (o) => (
         typeof o.name === 'string' &&
         typeof o.desc === 'string' &&
-        (Number(o.rank) === 0 || Number(o.rank) === 1) &&
+        Number.isInteger(o.visiable_zoom_level) &&
         Number.isInteger(o.layer) &&
         Number.isInteger(o.x) &&
         Number.isInteger(o.y)),
     area: (o) => (
         typeof o.name === 'string' &&
         typeof o.desc === 'string' &&
-        (Number(o.rank) === 0 || Number(o.rank) === 1) &&
+        Number.isInteger(o.visiable_zoom_level) &&
         Number.isInteger(o.layer) &&
         is_legal_rects(o.rects))
 }
@@ -355,10 +410,8 @@ var is_legal = {
 export class Marker {
     markers = {};
     state = 'Idle';
-    size = 0;
     sid = 0;
     new_id = 0;
-    rank = 0;
     newmark = 0;
 
     constructor() {
@@ -464,67 +517,49 @@ export class Marker {
         return false;
     }
 
-    // canvas event
-    zoom() {
-        let change = false;
-        let zoom = c.getZoom(g.viewer, false);
-        let step = zoom * g.base_map.sqr;
-        let size = 3; // large
-        if (step < 1.0) {
-            size = 1; // small
-        } else {
-            if (step < 2.0) {
-                size = 2; // mid
-            }
-        }
-        if (this.size !== size) {
-            this.size = size;
-            util.changeStyle('.point', 'width', size*10 + 'px');
-            util.changeStyle('.point', 'height', size*10 + 'px');
-            util.changeStyle('.area-iso', 'border-width', size*8 + 'px');
-            util.changeStyle('.area-top', 'border-width', size*4 + 'px');
-            change = true;
-        }
-        let rank = 1;
-        if (step > ZOOM_IN_STEP) {
-            rank = 2;
-        }
-        if (this.rank != rank) {
-            this.rank = rank;
-            util.changeStyle('.rank1', 'visibility', rank > 1 ? 'visible' : 'hidden');
-            change = true;
-        }
-        return change;
-    }
-
     redrawAll() {
         for (let id in this.markers) {
             this.markers[id].updateOverlay();
         }
     }
 
-    createNew(obj, tag_new=true) {
+    createNew(obj=null, saved=false) {
+        if (obj === null) {
+            obj = ui.getMarkerUIData();
+        }
+        if (obj.invalid) {
+            return false;
+        }   
+        if (is_legal.point(obj)) {
+            obj.type = 'point';
+        }
+        if (is_legal.area(obj)) {
+            obj.type = 'area';
+        }
+        if (!obj.type) {
+            return false;
+        }
         let uid = util.uniqueId();
         obj.id = uid;
         this.add(obj);
-        if (this.select(uid) && tag_new) {
-            this.new_id = uid;
+        if (!saved) {
+            if(this.select(uid)) {
+                this.new_id = uid;
+            }
         }
         this.update();
+        return true;
     }
 
     click(event) {
         let e = event.originalTarget;
         if (e && e.classList.contains('mark')) {
             this.selectElement(e);
-            if (event.originalEvent.ctrlKey) {
-                return this.zoomTo();
-            }
         } else {
             if (event.originalEvent.shiftKey) {
                 let [x, y] = c.getSquare(event);
-                let obj = {type: 'point', x: x, y: y, layer: g.currentLayer};
-                this.createNew(Object.assign(obj, EMPTY_OBJ));
+                let obj = {x: x, y: y, layer: g.currentLayer}; // point
+                this.createNew(Object.assign(obj, DEFAULT_MARKER_OPTIONS));
             }
         }
         return null;
@@ -543,10 +578,11 @@ export class Marker {
             return true;
         } else {
             if (event.originalEvent.shiftKey) {
-                let obj = {type: 'area',
+                let obj = {
                     rects: [{x: x, y: y, width: 1, height: 1}],
-                    layer: g.currentLayer};
-                this.createNew(Object.assign(obj, EMPTY_OBJ));
+                    layer: g.currentLayer
+                }; // area
+                this.createNew(Object.assign(obj, DEFAULT_MARKER_OPTIONS));
                 let m = this.markers[this.sid];
                 m.start_drag();
                 m.setRemove(true);
@@ -607,7 +643,10 @@ export class Marker {
         this.update();
     }
 
-    zoomTo() {
+    focusSelected() {
+        if (!this.sid) {
+            this.createNew();
+        }
         if (this.sid) {
             let m = this.markers[this.sid];
             if (m) {
@@ -624,18 +663,8 @@ export class Marker {
                 m.dropBackup();
             }
             this.new_id = 0;
-        } else { // idle TODO
-            let obj = this.collectInput();
-            if (is_legal.area(obj)) {
-                obj.type = 'area';
-                this.createNew(obj, false);
-                return;
-            }
-            if (is_legal.point(obj)) {
-                obj.type = 'point';
-                this.createNew(obj, false);
-                return;
-            }
+        } else { // no selecting, try use ui data
+            this.createNew(null, true);
         }
         this.unSelect();
         this.update();
@@ -659,35 +688,11 @@ export class Marker {
         this.update();
     }
 
-    collectInput() {
-        let obj = {rank: Number(!!util.getChecked('marker_hide'))};
-        for (let key of ['x', 'y', 'width', 'height', 'layer']) {
-            obj[key] = Number.parseInt(util.getValue('marker_' + key));
-            if (!Number.isInteger(obj[key])) {
-                util.setValue('marker_' + key, '');
-            }
-        }
-        obj.rects = [structuredClone(obj)];
-
-        if (obj.layer >= g.maxLayer) {
-            obj.layer = g.maxLayer - 1;
-            util.setValue('marker_layer', obj.layer);
-        }
-
-        if (obj.layer < g.minLayer) {
-            obj.layer = g.minLayer;
-            util.setValue('marker_layer', obj.layer);
-        }
-
-        for (let key of ['name', 'desc']) {
-            obj[key] = util.getValue('marker_' + key);
-        }
-
-        return obj;
-    }
-
     Input(e) {
-        this.updateByInput(this.collectInput());
+        let obj = ui.getMarkerUIData();
+        if (!obj.invalid) {
+            this.updateByInput(obj);
+        }
     }
 
     load(obj) {

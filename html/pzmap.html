@@ -20,7 +20,12 @@
     .inline { display: inline-block; }
     .coords { border: dashed 1px; }
     .iso {}
-    .rank1 {}
+    .zoom0 { pointer-events: auto; }
+    .zoom1 {}
+    .zoom2 {}
+    .passthrough-zoom0 { pointer-events: none; }
+    .passthrough-zoom1 { pointer-events: none; }
+    .passthrough-zoom2 { pointer-events: none; }
     .mark { border-style: solid; }
     .area { transform-origin: top left;
                   background-color: rgba(255,255,255,0.3); border-color: #39f; }
@@ -29,12 +34,14 @@
     .area.above { background-color: rgba(255,255,255,0); border-color: #9f3; }
     .area.below { background-color: rgba(255,255,255,0); border-color: #99f; }
     .area.selected { background-color: rgba(255,255,50,0.3); border-color: #ff3; }
+    .area-iso.cursor { background-color: rgba(255,255,255,0); border-color: #0f0; border-width: 2px;}
+    .area-top.cursor { background-color: rgba(255,255,255,0); border-color: #0f0; border-width: 1px;}
     .point { border-radius: 50%; border-width: 2px; width: 10px; height: 10px;
                    background-color: #39f; border-color: #33f; }
     .point.above { background-color: #9f3; border-color: #383; }
     .point.below { background-color: #99f; border-color: #93f; }
     .point.selected { background-color: #ff3; border-color: #881; }
-    .selected { visibility: visible; }
+    .selected { visibility: visible; pointer-events: auto; }
     .fly { position: absolute; z-index: 100; right: 0;}
     </style>
   </head>

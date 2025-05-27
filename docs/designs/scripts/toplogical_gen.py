@@ -108,7 +108,7 @@ def toplogical_svg(rsize, levels=3, use_image=False):
             r.style['fill-opacity'] = opacity
         svg.append(r)
         for i, text in enumerate(text_list):
-            t = Text(x - rsize/4, y + rsize/2 + 1.5*fsize, text, str(fsize), {'fill': color})
+            t = Text(x - rsize/4, y + rsize/2 + 1.5*fsize, text, str(fsize), {'fill': 'black'})
             svg.append(t)
             x += fsize/2
             y += fsize

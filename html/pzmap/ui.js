@@ -60,7 +60,7 @@ var MARKER_HTML = `
         <td id="marker_description_text">description:</td>
     </tr>
     <tr>
-        <td><button id="marker_delete_btn" type="button" onclick="onMarkerDelete()" style="width: 100%">Delete</button></td>
+        <td><button id="marker_delete_btn" type="button" onclick="onMarkerDelete(event)" style="width: 100%">Delete</button></td>
         <td id="marker_width_text">width:</td>
         <td><input id="marker_width" type="number" step="1" style="width: 5em" onchange="onMarkerInput(this)"/></td>
         <td id="marker_height_text">height:</td>
@@ -256,17 +256,19 @@ export function getMarkerUIData() {
 }
 
 export function setMarkerUIData(data) {
-    let int_keys = ['x', 'y', 'layer'];
+    let int_keys = ['x', 'y', 'width', 'height', 'layer'];
     let text_keys = ['name', 'desc'];
     let obj = {};
     if (data.type == 'area') {
-        int_keys.push('width', 'height');
         if (data.rects.length > 0) {
-            obj = data.rects[0];
+            let idx = data.selected_rect;
+            if (idx < 0 && data.rects.length == 1) {
+                idx = 0;
+            }
+            if (idx >= 0 && idx < data.rects.length) {
+                obj = data.rects[idx];
+            }
         }
-    } else {
-        util.setValue('marker_width', '');
-        util.setValue('marker_height', '');
     }
     for (let key of int_keys) {
         let value = obj[key];
@@ -275,7 +277,7 @@ export function setMarkerUIData(data) {
         }
         value = Number(value);
         if (!Number.isInteger(value)) {
-            value = 0;
+            value = '';
         }
         util.setValue('marker_' + key, value);
     }

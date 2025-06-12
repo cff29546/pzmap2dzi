@@ -19,10 +19,19 @@ var ZOOM_LEVEL_STEP_SIZE = [
     0.25,  // level 1, single square takes 0.25 pixels
     8      // level 2, single square takes 8 pixels
 ];
+var POINT_SIZE = [
+    10,    // level 0
+    20,    // level 1
+    30     // level 2
+]
+var BORDER_SIZE = [
+    8,      // level 0
+    16,     // level 1
+    24      // level 2
+]
 
 var CURRENT = {
-    level: 0,
-    size: 0
+    zoom_level: null,
 }
 
 export function zoom() {
@@ -30,33 +39,23 @@ export function zoom() {
     let change = false;
     let zoom = c.getZoom(g.viewer, false);
     let step = zoom * g.base_map.sqr;
-    let size = 3; // large
-    if (step < 1.0) {
-        size = 1; // small
-    } else {
-        if (step < 2.0) {
-            size = 2; // mid
-        }
-    }
-    if (CURRENT.size !== size) {
-        CURRENT.size = size;
-        util.changeStyle('.point', 'width', size*10 + 'px');
-        util.changeStyle('.point', 'height', size*10 + 'px');
-        util.changeStyle('.area-iso', 'border-width', size*8 + 'px');
-        util.changeStyle('.area-top', 'border-width', size*4 + 'px');
-        change = true;
-    }
     let zoom_level = 1;
     while (step > ZOOM_LEVEL_STEP_SIZE[zoom_level]) {
         zoom_level += 1;
     }
+    zoom_level -= 1; // zoom_level starts from 0
     if (CURRENT.zoom_level != zoom_level) {
-        // update visibility when zoom level changed
         CURRENT.zoom_level = zoom_level;
+        util.changeStyle('.point', 'width', POINT_SIZE[zoom_level] + 'px');
+        util.changeStyle('.point', 'height', POINT_SIZE[zoom_level] + 'px');
+        util.changeStyle('.area-iso', 'border-width', BORDER_SIZE[zoom_level] + 'px');
+        util.changeStyle('.area-top', 'border-width', (BORDER_SIZE[zoom_level]>>1) + 'px');
+
+        // update visibility when zoom level changed
         for (let level in ZOOM_LEVEL_STEP_SIZE) {
-            util.changeStyle('.zoom' + level, 'visibility', level < zoom_level ? 'visible' : 'hidden');
-            util.changeStyle('.zoom' + level, 'pointer-events', level < zoom_level ? 'auto' : 'none');
-            util.changeStyle('.passthrough-zoom' + level, 'visibility', level < zoom_level ? 'visible' : 'hidden');
+            util.changeStyle('.zoom' + level, 'visibility', level <= zoom_level ? 'visible' : 'hidden');
+            util.changeStyle('.zoom' + level, 'pointer-events', level <= zoom_level ? 'auto' : 'none');
+            util.changeStyle('.passthrough-zoom' + level, 'visibility', level <= zoom_level ? 'visible' : 'hidden');
         }
         change = true;
     }
@@ -88,16 +87,11 @@ function draw(position, size, element) {
     wrapper.style.top = position.y + 'px';
     wrapper.style['pointer-events'] = 'none';
     if (element.classList.contains('area')) {
-        let border = 8*CURRENT.size;
-        if (element.classList.contains('cursor')) {
-            border = 1;
-        }
         if (g.map_type != 'top') {
             element.style.transform = 'matrix(0.5, 0.25, -0.5, 0.25, 0, 0)';
-            border *= 2;
         }
-        element.style.width = (size.x - border) + 'px';
-        element.style.height = (size.y - border) + 'px';
+        element.style.width = size.x + 'px';
+        element.style.height = size.y + 'px';
     }
 }
 
@@ -150,7 +144,10 @@ function getId(e) {
     return id;
 }
 
-//window.addEventListener('click', click);
+function getIdx(e) {
+    let idx = parseInt(e.id.split('-')[1]);
+    return idx;
+}
 
 class Mark {
     constructor(obj, keys) {
@@ -158,6 +155,8 @@ class Mark {
         this.removed = false;
         this.backup = {};
         this.keys = Object.keys(DEFAULT_MARKER_OPTIONS).concat(keys);
+        this.mkeys = [];
+        this.non_restoreable = [];
         for (let key of this.keys) {
             if (obj[key] === undefined) {
                 if (DEFAULT_MARKER_OPTIONS[key] !== undefined) {
@@ -188,8 +187,8 @@ class Mark {
         return c;
     }
 
-    setSelect(flag) {
-        if (this.selected !== flag) {
+    setSelect(flag, update=null) {
+        if (update || this.selected !== flag) {
             this.selected = flag;
             this.updateOverlay();
         }
@@ -203,7 +202,7 @@ class Mark {
     }
 
     showOnUI() {
-        ui.setMarkerUIData(this.toObject());
+        ui.setMarkerUIData(this.toObject(true));
     }
 
     getBackup() {
@@ -218,15 +217,22 @@ class Mark {
 
     restoreBackup() {
         for (let [key, value] of Object.entries(this.backup)) {
-            this[key] = value;
+            if (!this.non_restoreable.includes(key)) {
+                this[key] = value;
+            }
         }
         this.updateOverlay();
     }
 
-    toObject() {
+    toObject(mutable=false) {
         let o  = {type: this.constructor.name.toLowerCase()};
         for (let key of this.keys) {
             o[key] = structuredClone(this[key]);
+        }
+        if (mutable) {
+            for (let key of this.mkeys) {
+                o[key] = structuredClone(this[key]);
+            }
         }
         return o;
     }
@@ -276,6 +282,10 @@ class Point extends Mark {
         }
     }
 
+    setSelect(flag, idx) {
+        super.setSelect(flag, false);
+    }
+
     start_drag() {
         this.sx = this.x;
         this.sy = this.y;
@@ -285,6 +295,10 @@ class Point extends Mark {
         let obj = this.toObject();
         obj.x = this.sx + x;
         obj.y = this.sy + y;
+        this.move(obj);
+    }
+
+    update(obj) {
         this.move(obj);
     }
 
@@ -298,64 +312,142 @@ class Point extends Mark {
 };
 
 class Area extends Mark {
-    constructor(obj) { super(obj, ['layer', 'rects']); }
+    constructor(obj) {
+        super(obj, ['layer', 'rects']);
+        this.selected_rect = -1;
+        this.rect_rendered = 0;
+        this.mkeys = ['selected_rect'];
+        this.non_restoreable = ['rect_rendered'];
+    }
 
     updateOverlay() {
-        for (let i in this.rects) {
+        let i = 0;
+        let rendered = 0;
+        for (i = 0; i < this.rects.length; i++) {
             let aid = 'ma-' + i + '-' + this.id;
             if (this.removed) {
                 removeOverlay(aid);
             } else {
                 let r = this.rects[i];
-                let e = overlayRect(aid, this.cls(), this.name, r.x, r.y, this.layer, r.width, r.height);
+                let c = this.cls();
+                let idx = this.selected_rect;
+                if (i == idx && this.selected) {
+                    c.push('selected-rect');
+                }
+                let e = overlayRect(aid, c, this.name, r.x, r.y, this.layer, r.width, r.height);
+                rendered = Math.max(i, rendered);
             }
         }
+        while (i <= this.rect_rendered) {
+            let aid = 'ma-' + i + '-' + this.id;
+            removeOverlay(aid);
+            i += 1;
+        }
+        this.rect_rendered = rendered;
     }
 
-    start_drag(i=0) {
-        if (this.rects.length <= i) {
-            this.i = -1;
-            return false;
+    setSelect(flag, idx=null) {
+        let update = false;
+        if (idx !== null && this.selected_rect !== idx) {
+            update = true;
+            this.selected_rect = idx;
         }
-        this.i = i;
-        this.sx = this.rects[i].x;
-        this.sy = this.rects[i].y;
-        this.sw = this.rects[i].width;
-        this.sh = this.rects[i].height;
+        super.setSelect(flag, update);
+    }
+
+    removeSelectedRect() {
+        if (this.rects.length == 1) {
+            return false; // remove the area
+        }
+        if (this.selected_rect < 0 || this.selected_rect >= this.rects.length) {
+            return true; // no selected rect, keep the area
+        }
+        this.getBackup();
+        this.rects.splice(this.selected_rect, 1);
+        this.updateOverlay();
+        return true; // keep rest of the area
+    }
+
+    start_drag() {
+        let idx = this.selected_rect;
+        if (idx < 0 || idx >= this.rects.length) {
+            idx = 0;
+        }
+        this.sx = this.rects[idx].x;
+        this.sy = this.rects[idx].y;
+        this.sw = this.rects[idx].width;
+        this.sh = this.rects[idx].height;
     }
 
     drag(x, y) {
         let obj = this.toObject();
-        let r = this.rects[0];
+        let idx = this.selected_rect;
+        if (idx < 0 || idx >= this.rects.length) {
+            idx = 0;
+        }
+        let r = this.rects[idx];
         let dx = this.sx + x - r.x;
         let dy = this.sy + y - r.y;
-        for (let i in obj.rects) {
-            obj.rects[i].x += dx;
-            obj.rects[i].y += dy;
+        if (this.selected_rect < 0) {
+            for (let i in obj.rects) {
+                obj.rects[i].x += dx;
+                obj.rects[i].y += dy;
+            }
+        } else {
+            obj.rects[idx].x += dx;
+            obj.rects[idx].y += dy;
         }
         this.move(obj);
     }
 
     resize(x, y) {
-        if (this.rects.length <= this.i && this.i >= 0) {
-            return false;
+        let idx = this.selected_rect;
+        if (idx < 0 || idx >= this.rects.length) {
+            return;
         }
         let obj = this.toObject();
         if (x < 0) {
-            obj.rects[this.i].x = this.sx + x;
-            obj.rects[this.i].width = this.sw - x;
+            obj.rects[idx].x = this.sx + x;
+            obj.rects[idx].width = this.sw - x;
         } else {
-            obj.rects[this.i].x = this.sx;
-            obj.rects[this.i].width = this.sw + x;
+            obj.rects[idx].x = this.sx;
+            obj.rects[idx].width = this.sw + x;
         }
         if (y < 0) {
-            obj.rects[this.i].y = this.sy + y;
-            obj.rects[this.i].height = this.sh - y;
+            obj.rects[idx].y = this.sy + y;
+            obj.rects[idx].height = this.sh - y;
         } else {
-            obj.rects[this.i].y = this.sy;
-            obj.rects[this.i].height = this.sh + y;
+            obj.rects[idx].y = this.sy;
+            obj.rects[idx].height = this.sh + y;
         }
         this.move(obj);
+    }
+
+    update(obj) {
+        if (obj.selected_rect !== undefined) {
+            this.move(obj);
+        } else {
+            if (is_legal.area(obj)) {
+                let r = obj.rects[0];
+                obj.rects = this.rects.slice(0); // copy existing rects
+                let idx = this.selected_rect;
+                if (idx < 0 || idx >= this.rects.length) {
+                    idx = 0;
+                }
+                obj.rects[idx] = r; // replace the selected rect
+                this.move(obj);
+            }
+        }
+    }
+
+    append(obj) {
+        if (is_legal.area(obj)) {
+            let r = obj.rects[0];
+            obj.rects = this.rects.slice(0); // copy existing rects
+            obj.rects.push(r); // add new rect
+            this.selected_rect = obj.rects.length - 1;
+            this.move(obj);
+        }
     }
 
     text() {
@@ -484,7 +576,7 @@ export class Marker {
         }
         let m = this.markers[this.sid];
         if (m) {
-            m.move(obj);
+            m.update(obj);
         }
     }
 
@@ -503,14 +595,13 @@ export class Marker {
         }
     }
 
-    select(id) {
-        if (id == this.sid) {
-            return true;
+    select(id, idx) {
+        if (id !== this.sid) {
+            this.unSelect();
         }
-        this.unSelect();
         let m = this.markers[id];
         if (m) {
-            m.setSelect(true);
+            m.setSelect(true, idx);
             this.sid = id;
             return true;
         }
@@ -543,7 +634,7 @@ export class Marker {
         obj.id = uid;
         this.add(obj);
         if (!saved) {
-            if(this.select(uid)) {
+            if(this.select(uid, -1)) {
                 this.new_id = uid;
             }
         }
@@ -552,43 +643,40 @@ export class Marker {
     }
 
     click(event) {
-        let e = event.originalTarget;
-        if (e && e.classList.contains('mark')) {
-            this.selectElement(e);
-        } else {
-            if (event.originalEvent.shiftKey) {
-                let [x, y] = c.getSquare(event);
-                let obj = {x: x, y: y, layer: g.currentLayer}; // point
-                this.createNew(Object.assign(obj, DEFAULT_MARKER_OPTIONS));
-            }
+        let shift = event.originalEvent.shiftKey;
+        if (shift) {
+            // create new marker
+            return true;
         }
-        return null;
+        let e = event.originalTarget; // see OpenSeadragon click event
+        if (e && e.classList.contains('mark')) {
+            // select existing marker
+            return true;
+        }
+        // click on empty area
+        return false;
     }
 
     press(event) {
-        let e = event.originalEvent.target;
+        let e = event.originalEvent.target; // see OpenSeadragon press event
         let [x, y] = c.getSquare(event);
         let s = {x:x, y:y};
-        if (e && e.classList.contains('mark')) {
-            this.selectElement(e);
-            let m = this.markers[this.sid];
-            m.start_drag();
-            this.dragging = 'move';
+        let shift = event.originalEvent.shiftKey;
+        let ctrl = event.originalEvent.ctrlKey;
+        if (shift) {
+            this.dragging = 'press';
             this.start = s;
             return true;
         } else {
-            if (event.originalEvent.shiftKey) {
-                let obj = {
-                    rects: [{x: x, y: y, width: 1, height: 1}],
-                    layer: g.currentLayer
-                }; // area
-                this.createNew(Object.assign(obj, DEFAULT_MARKER_OPTIONS));
+            if (e && e.classList.contains('mark')) {
+                this.selectElement(e, ctrl);
                 let m = this.markers[this.sid];
-                m.start_drag();
-                m.setRemove(true);
-                this.dragging = 'resize';
-                this.start = s;
-                return true;
+                if (m) {
+                    m.start_drag();
+                    this.dragging = 'move';
+                    this.start = s;
+                    return true;
+                }
             }
         }
         return false;
@@ -607,6 +695,26 @@ export class Marker {
             this.update();
             return true;
         }
+        if (this.dragging == 'press') { // create new area
+            this.dragging = 0;
+            let m = this.markers[this.sid];
+            let obj = {
+                rects: [{x: this.start.x, y: this.start.y, width: 1, height: 1}],
+                layer: g.currentLayer
+            }; // new area
+            obj = Object.assign(obj, DEFAULT_MARKER_OPTIONS);
+            if (m && m.constructor.name === 'Area') {
+                m.append(obj);
+            } else {
+                this.createNew(obj);
+                m = this.markers[this.sid];
+                m.setSelect(true, 0);
+            }
+            if (m) {
+                m.start_drag();
+                this.dragging = 'resize';
+            }
+        }
         if (this.dragging == 'resize') {
             let m = this.markers[this.sid];
             if (m) {
@@ -623,12 +731,11 @@ export class Marker {
         if (this.dragging) {
             if (this.dragging == 'resize') {
                 let m = this.markers[this.sid];
-                if (m.removed) {
-                    this.unSelect();
-                    this.update();
-                } else {
-                    m.showOnUI();
-                }
+                m.showOnUI();
+            }
+            if (this.dragging == 'press') {
+                let obj = {x: this.start.x, y: this.start.y, layer: g.currentLayer}; // new point
+                this.createNew(Object.assign(obj, DEFAULT_MARKER_OPTIONS));
             }
             this.dragging = 0;
             return true;
@@ -637,9 +744,13 @@ export class Marker {
     }
 
     // ui event
-    selectElement(e) {
+    selectElement(e, ctrl) {
         let id = getId(e);
-        this.select(id);
+        let idx = -1;
+        if (ctrl) {
+            idx = getIdx(e);
+        }
+        this.select(id, idx);
         this.update();
     }
 
@@ -675,6 +786,15 @@ export class Marker {
         this.unSelect();
         this.remove(id);
         this.update();
+    }
+
+    removeSelectedSingle() {
+        let m = this.markers[this.sid];
+        if (m && m.constructor.name === 'Area' && m.removeSelectedRect()) {
+            this.update();
+        } else {
+            this.removeSelected();
+        }
     }
 
     removeAll() {

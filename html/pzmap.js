@@ -180,7 +180,6 @@ function initOSD() {
     g.viewer.addHandler('canvas-press', function(event) {
         if (g.trimmerui) {
             if (g.trimmer.press(event)) {
-                //forceRedraw();
                 event.preventDefaultAction = true;
             }
         }
@@ -230,15 +229,10 @@ function initOSD() {
                 forceRedraw();
                 event.preventDefaultAction = true;
             }
-
             if (g.markerui) {
-                let l = g.marker.click(event);
-                if (l !== null) {
-                    g.currentLayer = l;
-                    updateLayerSelector();
-                    onLayerSelect();
+                if (g.marker.click(event)) {
+                    event.preventDefaultAction = true;
                 }
-                event.preventDefaultAction = true;
             }
         }
     });
@@ -583,8 +577,12 @@ function onMarkerSave() {
     g.marker.save();
 }
 
-function onMarkerDelete() {
-    g.marker.removeSelected();
+function onMarkerDelete(event) {
+    if (event && event.ctrlKey) {
+        g.marker.removeSelectedSingle();
+    } else {
+        g.marker.removeSelected();
+    }
 }
 
 function onMarkerImport() {

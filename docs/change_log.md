@@ -1,5 +1,9 @@
 # Change log
 
+# 2025-06-12: 1.0.9 + UI 1.0.12
+
+* add support of multi-rect area marks
+
 # 2025-05-23: 1.0.9 + UI 1.0.11
 
 * marker system and dynamic ui refactor

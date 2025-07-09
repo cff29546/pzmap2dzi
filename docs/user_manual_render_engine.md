@@ -49,7 +49,7 @@ Project Zomboid features an expansive map, which requires a significant amount o
     - Change the `pz_root` variable to the ProjectZomboid game location on your computer
     - Change the `output_path` variable to the desired output path
     - Change the `mod_root` variable to steam workshop path if you want to render a mod map
-    - Add desired mod maps to the `mod_maps` list (For more info about how to add mod maps see [adding mod maps](./docs/adding_mod_maps.md))
+    - Add desired mod maps to the `mod_maps` list (For more info about how to add mod maps see [adding mod maps](./adding_mod_maps.md))
     - Update `render_conf`. See comments on `conf/conf.yaml` for more details
         - For example: setting `enable_cache` to `true` will turn on shared memory image cache acceleration
         - **Note on shared memory image cache acceleration:**

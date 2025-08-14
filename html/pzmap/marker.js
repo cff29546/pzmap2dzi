@@ -3,653 +3,243 @@ import * as i18n from "./i18n.js";
 import * as c from "./coordinates.js";
 import * as util from "./util.js";
 import * as ui from "./ui.js";
+import { types } from "./mark/mark.js";
+import { MarkRender } from "./mark/render.js";
+import { MarkDatabase } from "./mark/memdb.js";
 
-var ZOOM_IN_STEP = 0.25;
-var ZOOM_TO_STEP = 2;
-var DEFAULT_MARKER_OPTIONS = {
-    id: '',
-    name: '',
-    desc: '',
-    class_list: undefined,
-    visiable_zoom_level: 0,
-    passthrough: undefined,
-};
-var ZOOM_LEVEL_STEP_SIZE = [
+var MARK_ZOOM_LEVEL_MIN_STEP = [
     0,     // level 0, always visible
     0.25,  // level 1, single square takes 0.25 pixels
     8      // level 2, single square takes 8 pixels
+];
+var ZOOM_TO_STEP = [
+    0.2,   // level 0
+    4,     // level 1
+    16     // level 2
 ];
 var POINT_SIZE = [
     10,    // level 0
     20,    // level 1
     30     // level 2
 ]
-var BORDER_SIZE = [
+var POINT_BORDER_SIZE = [
+    2,     // level 0
+    2,     // level 1
+    2      // level 2
+]
+var RECTANGLE_BORDER_SIZE = [
     8,      // level 0
-    16,     // level 1
-    24      // level 2
+    8,      // level 1
+    8,      // level 2
+    //16,     // level 1
+    //24      // level 2
 ]
 
-var CURRENT = {
-    zoom_level: null,
-}
-
 export function zoom() {
-    // canvas event
+    // update zoom information to current viewer
+    const zoom = c.getZoom(g.viewer, false);
+    const step = zoom * g.base_map.sqr;
     let change = false;
-    let zoom = c.getZoom(g.viewer, false);
-    let step = zoom * g.base_map.sqr;
-    let zoom_level = 1;
-    while (step > ZOOM_LEVEL_STEP_SIZE[zoom_level]) {
-        zoom_level += 1;
+    let zoomLevel = 1;
+    while (step > MARK_ZOOM_LEVEL_MIN_STEP[zoomLevel]) {
+        zoomLevel += 1;
     }
-    zoom_level -= 1; // zoom_level starts from 0
-    if (CURRENT.zoom_level != zoom_level) {
-        CURRENT.zoom_level = zoom_level;
-        util.changeStyle('.point', 'width', POINT_SIZE[zoom_level] + 'px');
-        util.changeStyle('.point', 'height', POINT_SIZE[zoom_level] + 'px');
-        util.changeStyle('.area-iso', 'border-width', BORDER_SIZE[zoom_level] + 'px');
-        util.changeStyle('.area-top', 'border-width', (BORDER_SIZE[zoom_level]>>1) + 'px');
-
-        // update visibility when zoom level changed
-        for (let level in ZOOM_LEVEL_STEP_SIZE) {
-            util.changeStyle('.zoom' + level, 'visibility', level <= zoom_level ? 'visible' : 'hidden');
-            util.changeStyle('.zoom' + level, 'pointer-events', level <= zoom_level ? 'auto' : 'none');
-            util.changeStyle('.passthrough-zoom' + level, 'visibility', level <= zoom_level ? 'visible' : 'hidden');
-        }
+    zoomLevel -= 1; // zoom_level starts from 0
+    if (g.zoomLevel != zoomLevel) {
+        g.zoomLevel = zoomLevel;
         change = true;
+
+        g.zoomInfo.rectBorder = RECTANGLE_BORDER_SIZE[zoomLevel];
+        g.zoomInfo.pointBorder = POINT_BORDER_SIZE[zoomLevel];
+        g.zoomInfo.pointSize = POINT_SIZE[zoomLevel];
+        util.changeStyle('.point', 'width', g.zoomInfo.pointSize + 'px');
+        util.changeStyle('.point', 'height', g.zoomInfo.pointSize + 'px');
+        util.changeStyle('.point.text', 'padding-top', (g.zoomInfo.pointSize >> 1) + 'px');
+        util.changeStyle('.area.rect.iso', 'border-width', g.zoomInfo.rectBorder + 'px');
+        util.changeStyle('.area.rect.top', 'border-width', (g.zoomInfo.rectBorder >> 1) + 'px');
     }
     return change;
 }
 
-function setMarkClass(e, type, layer, cls) {
-    e.className = "";
-    e.classList.add('mark')
-    e.classList.add(type)
-    e.classList.add(type + '-' + g.map_type)
-    if (layer > g.currentLayer) {
-        e.classList.add('above');
-        e.classList.add('above' + (layer - g.currentLayer)) - layer;
-    }
-    if (layer < g.currentLayer) {
-        e.classList.add('below');
-        e.classList.add('below' + (g.currentLayer - layer));
-    }
-    for (let c of cls) {
-        e.classList.add(c);
-    }
-}
 
-function draw(position, size, element) {
-    let wrapper = element.parentElement;
-    element.style.display = 'block';
-    wrapper.style.left = position.x + 'px';
-    wrapper.style.top = position.y + 'px';
-    wrapper.style['pointer-events'] = 'none';
-    if (element.classList.contains('area')) {
-        if (g.map_type != 'top') {
-            element.style.transform = 'matrix(0.5, 0.25, -0.5, 0.25, 0, 0)';
-        }
-        element.style.width = size.x + 'px';
-        element.style.height = size.y + 'px';
-    }
-}
+export class MarkManager {
+    static originPoint = new types.point({
+        id: 'origin', x: 0, y: 0, layer: 0, visiable_zoom_level: 0
+    });
 
-function overlayPoint(id, cls, title, x, y, layer) {
-    let vp = c.getViewportPointBySquare(g.viewer, g.base_map, x + 0.5, y + 0.5, layer);
-    let point = new OpenSeadragon.Point(vp.x, vp.y);
-    let e = document.getElementById(id);
-    if (e) {
-        e.title = title;
-        setMarkClass(e, 'point', layer, cls);
-        g.viewer.updateOverlay(e, point, OpenSeadragon.Placement.CENTER);
-    } else {
-        e = document.createElement('div');
-        e.id = id;
-        e.title = title;
-        setMarkClass(e, 'point', layer, cls);
-        g.viewer.addOverlay(e, point, OpenSeadragon.Placement.CENTER, draw);
-    }
-    return e;
-}
-
-function overlayRect(id, cls, title, x, y, layer, w, h) {
-    let vp = c.getViewportPointBySquare(g.viewer, g.base_map, x, y, layer);
-    let step = g.viewer.world.getItemAt(0).imageToViewportCoordinates(g.base_map.sqr, 0).x;
-    let rect = new OpenSeadragon.Rect(vp.x, vp.y, step*w, step*h);
-    let e = document.getElementById(id);
-    if (e) {
-        e.title = title;
-        setMarkClass(e, 'area', layer, cls);
-        g.viewer.updateOverlay(e, rect, OpenSeadragon.Placement.TOP_LEFT);
-    } else {
-        e = document.createElement('div');
-        e.id = id;
-        e.title = title;
-        setMarkClass(e, 'area', layer, cls);
-        g.viewer.addOverlay(e, rect, OpenSeadragon.Placement.TOP_LEFT, draw);
-    }
-    return e;
-}
-
-function removeOverlay(id) {
-    let e = document.getElementById(id);
-    if (e) {
-        g.viewer.removeOverlay(e);
-    }
-}
-
-function getId(e) {
-    let id = e.id.substring(e.id.indexOf('-',3)+1);
-    return id;
-}
-
-function getIdx(e) {
-    let idx = parseInt(e.id.split('-')[1]);
-    return idx;
-}
-
-class Mark {
-    constructor(obj, keys) {
-        this.selected = false;
-        this.removed = false;
-        this.backup = {};
-        this.keys = Object.keys(DEFAULT_MARKER_OPTIONS).concat(keys);
-        this.mkeys = [];
-        this.non_restoreable = [];
-        for (let key of this.keys) {
-            if (obj[key] === undefined) {
-                if (DEFAULT_MARKER_OPTIONS[key] !== undefined) {
-                    this[key] = DEFAULT_MARKER_OPTIONS[key];
-                }
-            } else {
-                this[key] = obj[key];
-            }
-        }
-        this.visiable_zoom_level = Number(this.visiable_zoom_level);
-        if (!Number.isInteger(this.visiable_zoom_level)) {
-            this.visiable_zoom_level = 0;
-        }
+    constructor(options = {}) {
+        const { onlyCurrentLayer = false, indexType = null, indexOptions = {} } = options;
+        this.onlyCurrentLayer = onlyCurrentLayer;
+        this.db = new MarkDatabase('top', onlyCurrentLayer, indexType, indexOptions);
+        this.render = new MarkRender();
+        this.editMark = null;
+        this.hiddenType = {};
     }
 
-    cls() {
-        let c = [];
-        if (this.selected) { c.push('selected'); }
-        if (this.passthrough) {
-            c.push('passthrough-zoom' + this.visiable_zoom_level);
-        } else {
-            c.push('zoom' + this.visiable_zoom_level);
-        }
-        if (this.class_list) {
-            c = c.concat(this.class_list);
-        }
-
-        return c;
-    }
-
-    setSelect(flag, update=null) {
-        if (update || this.selected !== flag) {
-            this.selected = flag;
-            this.updateOverlay();
-        }
-    }
-
-    setRemove(flag) {
-        if (this.removed !== flag) {
-            this.removed = flag;
-            this.updateOverlay();
-        }
-    }
-
-    showOnUI() {
-        ui.setMarkerUIData(this.toObject(true));
-    }
-
-    getBackup() {
-        if (Object.keys(this.backup).length == 0) {
-            this.backup = this.toObject();
-        }
-    }
-
-    dropBackup() {
-        this.backup = {};
-    }
-
-    restoreBackup() {
-        for (let [key, value] of Object.entries(this.backup)) {
-            if (!this.non_restoreable.includes(key)) {
-                this[key] = value;
-            }
-        }
-        this.updateOverlay();
-    }
-
-    toObject(mutable=false) {
-        let o  = {type: this.constructor.name.toLowerCase()};
-        for (let key of this.keys) {
-            o[key] = structuredClone(this[key]);
-        }
-        if (mutable) {
-            for (let key of this.mkeys) {
-                o[key] = structuredClone(this[key]);
-            }
-        }
-        return o;
-    }
-
-    move(obj) {
-        let type = this.constructor.name.toLowerCase();
-        if (is_legal[type](obj)) {
-            this.getBackup();
-            for (let key of this.keys) {
-                if (key !== 'id') {
-                    this[key] = obj[key];
-                }
-            }
-            this.updateOverlay();
-            return true;
-        }
-        return false;
-    }
-
-    zoomTo() {
-        let [x, y] = this.center();
-        let layer = Math.round(this.layer);
-        let setLayer = true;
-        if (!Number.isInteger(layer)) {
-            layer = 0;
-            setLayer = false;
-        }
-        let vp = c.getViewportPointBySquare(g.viewer, g.base_map, x, y, layer);
-        g.viewer.viewport.panTo(vp, true).zoomTo(c.stepToZoom(ZOOM_TO_STEP), vp);
-        if (setLayer) {
-            return layer;
-        } else {
+    _new(obj = null) {
+        if (obj === null) {
             return null;
         }
+        const type = types[obj.type];
+        if (!type) {
+            return null;
+        }
+        if (!obj.id) {
+            obj.id = util.uniqueId();
+        }
+        return new type(obj);
     }
-};
 
-class Point extends Mark {
-    constructor(obj) { super(obj, ['x', 'y', 'layer']); }
+    _range() {
+        const layer = this.onlyCurrentLayer ? g.currentLayer : null;
+        return c.getCanvasRange(g.viewer, g.base_map, layer);
+    }
 
-    updateOverlay() {
-        let pid = 'mp-0-' + this.id;
-        if (this.removed) {
-            removeOverlay(pid);
-        } else {
-            let e = overlayPoint(pid, this.cls(), this.name, this.x, this.y, this.layer);
+    _forceRefreshRender() {
+        // inserting a dummy mark and removing it via fast timeout
+        // force OpenSeadragon to refresh overlays
+        this.render.upsert(MarkManager.originPoint);
+        setTimeout(() => { this.render.remove(MarkManager.originPoint.id); }, 1);
+    }
+
+    setVisiableType(type, value) {
+        if (!!this.hiddenType[type] !== !value) {
+            this.hiddenType[type] = !value;
+            this.redrawAll();
+            this._forceRefreshRender();
         }
     }
 
-    setSelect(flag, idx) {
-        super.setSelect(flag, false);
-    }
-
-    start_drag() {
-        this.sx = this.x;
-        this.sy = this.y;
-    }
-
-    drag(x, y) {
-        let obj = this.toObject();
-        obj.x = this.sx + x;
-        obj.y = this.sy + y;
-        this.move(obj);
-    }
-
-    update(obj) {
-        this.move(obj);
-    }
-
-    text() {
-        return `(${this.x}, ${this.y} L ${this.layer})`;
-    }
-
-    center() {
-        return [this.x, this.y];
-    }
-};
-
-class Area extends Mark {
-    constructor(obj) {
-        super(obj, ['layer', 'rects']);
-        this.selected_rect = -1;
-        this.rect_rendered = 0;
-        this.mkeys = ['selected_rect'];
-        this.non_restoreable = ['rect_rendered'];
-    }
-
-    updateOverlay() {
-        let i = 0;
-        let rendered = 0;
-        for (i = 0; i < this.rects.length; i++) {
-            let aid = 'ma-' + i + '-' + this.id;
-            if (this.removed) {
-                removeOverlay(aid);
-            } else {
-                let r = this.rects[i];
-                let c = this.cls();
-                let idx = this.selected_rect;
-                if (i == idx && this.selected) {
-                    c.push('selected-rect');
-                }
-                let e = overlayRect(aid, c, this.name, r.x, r.y, this.layer, r.width, r.height);
-                rendered = Math.max(i, rendered);
-            }
-        }
-        while (i <= this.rect_rendered) {
-            let aid = 'ma-' + i + '-' + this.id;
-            removeOverlay(aid);
-            i += 1;
-        }
-        this.rect_rendered = rendered;
-    }
-
-    setSelect(flag, idx=null) {
-        let update = false;
-        if (idx !== null && this.selected_rect !== idx) {
-            update = true;
-            this.selected_rect = idx;
-        }
-        super.setSelect(flag, update);
-    }
-
-    removeSelectedRect() {
-        if (this.rects.length == 1) {
-            return false; // remove the area
-        }
-        if (this.selected_rect < 0 || this.selected_rect >= this.rects.length) {
-            return true; // no selected rect, keep the area
-        }
-        this.getBackup();
-        this.rects.splice(this.selected_rect, 1);
-        this.updateOverlay();
-        return true; // keep rest of the area
-    }
-
-    start_drag() {
-        let idx = this.selected_rect;
-        if (idx < 0 || idx >= this.rects.length) {
-            idx = 0;
-        }
-        this.sx = this.rects[idx].x;
-        this.sy = this.rects[idx].y;
-        this.sw = this.rects[idx].width;
-        this.sh = this.rects[idx].height;
-    }
-
-    drag(x, y) {
-        let obj = this.toObject();
-        let idx = this.selected_rect;
-        if (idx < 0 || idx >= this.rects.length) {
-            idx = 0;
-        }
-        let r = this.rects[idx];
-        let dx = this.sx + x - r.x;
-        let dy = this.sy + y - r.y;
-        if (this.selected_rect < 0) {
-            for (let i in obj.rects) {
-                obj.rects[i].x += dx;
-                obj.rects[i].y += dy;
-            }
-        } else {
-            obj.rects[idx].x += dx;
-            obj.rects[idx].y += dy;
-        }
-        this.move(obj);
-    }
-
-    resize(x, y) {
-        let idx = this.selected_rect;
-        if (idx < 0 || idx >= this.rects.length) {
-            return;
-        }
-        let obj = this.toObject();
-        if (x < 0) {
-            obj.rects[idx].x = this.sx + x;
-            obj.rects[idx].width = this.sw - x;
-        } else {
-            obj.rects[idx].x = this.sx;
-            obj.rects[idx].width = this.sw + x;
-        }
-        if (y < 0) {
-            obj.rects[idx].y = this.sy + y;
-            obj.rects[idx].height = this.sh - y;
-        } else {
-            obj.rects[idx].y = this.sy;
-            obj.rects[idx].height = this.sh + y;
-        }
-        this.move(obj);
-    }
-
-    update(obj) {
-        if (obj.selected_rect !== undefined) {
-            this.move(obj);
-        } else {
-            if (is_legal.area(obj)) {
-                let r = obj.rects[0];
-                obj.rects = this.rects.slice(0); // copy existing rects
-                let idx = this.selected_rect;
-                if (idx < 0 || idx >= this.rects.length) {
-                    idx = 0;
-                }
-                obj.rects[idx] = r; // replace the selected rect
-                this.move(obj);
-            }
-        }
-    }
-
-    append(obj) {
-        if (is_legal.area(obj)) {
-            let r = obj.rects[0];
-            obj.rects = this.rects.slice(0); // copy existing rects
-            obj.rects.push(r); // add new rect
-            this.selected_rect = obj.rects.length - 1;
-            this.move(obj);
-        }
-    }
-
-    text() {
-        return `(${this.rects[0].x}, ${this.rects[0].y} L ${this.layer}, ${this.rects[0].width}x${this.rects[0].height})`;
-    }
-
-    center() {
-        let r = this.rects[0];
-        let x = r.x + r.width/2;
-        let y = r.y + r.height/2;
-        return [x, y];
-    }
-};
-
-var mark_cls = {
-    point: Point,
-    area: Area
-};
-
-function is_legal_rects(rects) {
-    if (!Array.isArray(rects)) {
-        return false;
-    }
-    for (let r of rects) {
-        if (!Number.isInteger(r.x) ||
-            !Number.isInteger(r.y) ||
-            !Number.isInteger(r.width) ||
-            !Number.isInteger(r.height) ||
-            r.width <= 0 || r.height <= 0) {
-            return false;
-        }
-    }
-    return true;
-}
-
-var is_legal = {
-    point: (o) => (
-        typeof o.name === 'string' &&
-        typeof o.desc === 'string' &&
-        Number.isInteger(o.visiable_zoom_level) &&
-        Number.isInteger(o.layer) &&
-        Number.isInteger(o.x) &&
-        Number.isInteger(o.y)),
-    area: (o) => (
-        typeof o.name === 'string' &&
-        typeof o.desc === 'string' &&
-        Number.isInteger(o.visiable_zoom_level) &&
-        Number.isInteger(o.layer) &&
-        is_legal_rects(o.rects))
-}
-
-export class Marker {
-    markers = {};
-    state = 'Idle';
-    sid = 0;
-    new_id = 0;
-    newmark = 0;
-
-    constructor() {
-    }
-
-    add(obj) {
-        let type = obj.type;
-        let id = obj.id;
-        this.remove(id);
-        this.markers[id] = new mark_cls[type](obj);
-        this.redraw(id);
-        return id;
+    setTextVisibility(visible) {
+        this.render.setRenderOptions('hide_text', !visible);
+        this.redrawAll();
+        this._forceRefreshRender();
     }
 
     remove(id) {
-        let m = this.markers[id];
-        if (m) {
-            m.setRemove(true);
-            delete this.markers[id];
-        }
-    }
-
-    redraw(id) {
-        this.markers[id].updateOverlay();
-    }
-
-    clearUI() {
-        let keys = ['name', 'x', 'y', 'layer', 'width', 'height', 'desc'];
-        for (let key of keys) {
-            util.setValue('marker_' + key, '')
-        }
-        util.setChecked('marker_hide', false);
-    }
-
-    updateUI() {
-        let m = 0;
-        switch(this.state) {
-            case 'New':
-            case 'Select':
-                m = this.markers[this.sid];
-                if (m) {
-                    m.showOnUI();
-                }
-                break;
-            case 'Idel':
-            default:
-                this.clearUI();
-        }
+        this.db.remove(id);
+        this.render.remove(id);
     }
 
     update() {
-        // state
-        if (this.sid) {
-            let m = this.markers[this.sid];
-            let cls = m.constructor.name;
-            this.state = this.sid == this.new_id ? 'New' : 'Select';
-            let info = i18n.T('Marker' + this.state) + ' ' + i18n.T('Marker' + cls) + ' [' + m.text() + ']';
+        if (this.editMark) {
+            const state = this.db.has(this.editMark.id) ? 'Select' : 'New';
+            const cls = this.editMark.constructor.name;
+            const text = this.editMark.text();
+            const info = i18n.T('Marker' + state) + ' ' + i18n.T('Marker' + cls) + ' [' + text + ']';
+            this.editMark.showOnUI();
             util.setOutput('marker_output', 'Green', info);
         } else {
-            this.state = 'Idle';
+            ui.setMarkerUIData({});
             util.setOutput('marker_output', 'Green', i18n.T('MarkerIdle'));
         }
-        // ui
-        this.updateUI();
     }
 
     updateByInput(obj) {
-        if (!this.sid) {
-            return;
-        }
-        let m = this.markers[this.sid];
-        if (m) {
-            m.update(obj);
+        if (this.editMark) {
+            this.editMark.update(obj);
+            this.render.upsert(this.editMark);
+            this.update();
         }
     }
 
     unSelect() {
-        if (this.sid) {
-            let m = this.markers[this.sid];
-            if (m) {
-                m.setSelect(false);
-                m.restoreBackup();
+        if (this.editMark) {
+            const id = this.editMark.id;
+            if (this.db.has(id)) {
+                const mark = this.db.get(id, this._range());
+                if (mark) {
+                    this.render.upsert(mark);
+                }
+            } else {
+                this.remove(id);
             }
-            this.sid = 0;
+            this.editMark = null;
         }
-        if (this.new_id) {
-            this.remove(this.new_id);
-            this.new_id = 0;
-        }
+        this.update();
     }
 
     select(id, idx) {
-        if (id !== this.sid) {
-            this.unSelect();
+        if (this.editMark) {
+            if (this.editMark.id === id) {
+                this.Input();
+                if (this.editMark.selected_index === idx) return;
+                this.editMark.selected_index = idx;
+                this.render.upsert(this.editMark);
+                return true;
+            } else {
+                this.unSelect();
+            }
         }
-        let m = this.markers[id];
-        if (m) {
-            m.setSelect(true, idx);
-            this.sid = id;
-            return true;
+        const mark = this.db.get(id);
+        if (!mark) {
+            return false;
         }
-        return false;
+        this.editMark = this._new(mark.toObject());
+        this.editMark.selected = true;
+        this.editMark.selected_index = idx;
+        this.render.upsert(this.editMark);
+    }
+
+    changeMode(mode = null) {
+        if (!mode) {
+            mode = g.map_type || 'top';
+        }
+        this.db.changeMode(mode);
+        this.clearRenderCache();
+    }
+
+    clearRenderCache() {
+        this.render.sync([]);
     }
 
     redrawAll() {
-        for (let id in this.markers) {
-            this.markers[id].updateOverlay();
+        let marks = this.db.query(this._range(), g.currentLayer, g.zoomLevel);
+        for (const type in this.hiddenType) {
+            if (this.hiddenType[type]) {
+                marks = marks.filter(m => m.constructor.name !== type);
+            }
         }
+        if (this.editMark) {
+            const editId = this.editMark.id;
+            marks = marks.filter(m => m.id !== editId);
+            marks.push(this.editMark);
+        }
+        this.render.sync(marks);
     }
 
-    createNew(obj=null, saved=false) {
+    createNew(obj=null) {
         if (obj === null) {
             obj = ui.getMarkerUIData();
         }
         if (obj.invalid) {
             return false;
-        }   
-        if (is_legal.point(obj)) {
+        }
+        if (types.point.validObject(obj)) {
             obj.type = 'point';
         }
-        if (is_legal.area(obj)) {
+        if (types.area.validObject(obj)) {
             obj.type = 'area';
         }
         if (!obj.type) {
             return false;
         }
-        let uid = util.uniqueId();
-        obj.id = uid;
-        this.add(obj);
-        if (!saved) {
-            if(this.select(uid, -1)) {
-                this.new_id = uid;
-            }
-        }
+        this.unSelect();
+        this.editMark = this._new(obj);
+        this.editMark.selected = true;
+        this.editMark.selected_index = 0;
+        this.render.upsert(this.editMark);
         this.update();
         return true;
     }
 
     click(event) {
-        let shift = event.originalEvent.shiftKey;
-        if (shift) {
+        if (event.originalEvent.shiftKey) {
             // create new marker
             return true;
         }
-        let e = event.originalTarget; // see OpenSeadragon click event
-        if (e && e.classList.contains('mark')) {
+        const element = event.originalTarget; // see OpenSeadragon click event
+        if (element && element.classList.contains('mark')) {
             // select existing marker
             return true;
         }
@@ -658,11 +248,11 @@ export class Marker {
     }
 
     press(event) {
-        let e = event.originalEvent.target; // see OpenSeadragon press event
-        let [x, y] = c.getSquare(event);
-        let s = {x:x, y:y};
-        let shift = event.originalEvent.shiftKey;
-        let ctrl = event.originalEvent.ctrlKey;
+        const e = event.originalEvent.target; // see OpenSeadragon press event
+        const [x, y] = c.getSquare(event);
+        const s = {x, y};
+        const shift = event.originalEvent.shiftKey;
+        const ctrl = event.originalEvent.ctrlKey;
         if (shift) {
             this.dragging = 'press';
             this.start = s;
@@ -670,9 +260,8 @@ export class Marker {
         } else {
             if (e && e.classList.contains('mark')) {
                 this.selectElement(e, ctrl);
-                let m = this.markers[this.sid];
-                if (m) {
-                    m.start_drag();
+                if (this.editMark) {
+                    this.editMark.start_drag();
                     this.dragging = 'move';
                     this.start = s;
                     return true;
@@ -682,44 +271,51 @@ export class Marker {
         return false;
     }
 
+    selectElement(e, ctrl) {
+        const {name, type, index, id} = MarkRender.parseElementId(e.id);
+        if (!ctrl) {
+             this.select(id, -1);
+        } else {
+            this.select(id, index);
+        }
+        this.update();
+    }
+
     drag(event) {
         if (!this.dragging) {
             return false;
         }
-        let [x, y] = c.getSquare(event);
+        const [x, y] = c.getSquare(event);
         if (this.dragging == 'move') {
-            let m = this.markers[this.sid];
-            if (m) {
-                m.drag(x - this.start.x, y - this.start.y);
+            if (this.editMark) {
+                this.editMark.drag(x - this.start.x, y - this.start.y);
+                this.render.upsert(this.editMark);
             }
             this.update();
             return true;
         }
         if (this.dragging == 'press') { // create new area
             this.dragging = 0;
-            let m = this.markers[this.sid];
-            let obj = {
-                rects: [{x: this.start.x, y: this.start.y, width: 1, height: 1}],
+            const obj = {
+                rects: [{ x: this.start.x, y: this.start.y, width: 1, height: 1 }],
                 layer: g.currentLayer
-            }; // new area
-            obj = Object.assign(obj, DEFAULT_MARKER_OPTIONS);
-            if (m && m.constructor.name === 'Area') {
-                m.append(obj);
+            };
+            if (this.editMark && this.editMark.constructor.name === 'Area') {
+                this.editMark.append(obj);
             } else {
+                const uiData = ui.getMarkerUIData();
+                obj.visiable_zoom_level = uiData.visiable_zoom_level || 0;
                 this.createNew(obj);
-                m = this.markers[this.sid];
-                m.setSelect(true, 0);
             }
-            if (m) {
-                m.start_drag();
+            if (this.editMark) {
+                this.editMark.start_drag();
                 this.dragging = 'resize';
             }
         }
         if (this.dragging == 'resize') {
-            let m = this.markers[this.sid];
-            if (m) {
-                m.setRemove(false);
-                m.resize(x - this.start.x, y - this.start.y);
+            if (this.editMark) {
+                this.editMark.resize(x - this.start.x, y - this.start.y);
+                this.render.upsert(this.editMark);
             }
             this.update();
             return true;
@@ -730,12 +326,19 @@ export class Marker {
     release(event) {
         if (this.dragging) {
             if (this.dragging == 'resize') {
-                let m = this.markers[this.sid];
-                m.showOnUI();
+                this.editMark.showOnUI();
             }
-            if (this.dragging == 'press') {
-                let obj = {x: this.start.x, y: this.start.y, layer: g.currentLayer}; // new point
-                this.createNew(Object.assign(obj, DEFAULT_MARKER_OPTIONS));
+            if (this.dragging == 'press') { // create new point
+                const uiData = ui.getMarkerUIData();
+                const obj = {
+                    x: this.start.x, y: this.start.y,
+                    layer: g.currentLayer,
+                    visiable_zoom_level: uiData.visiable_zoom_level || 0
+                };
+                this.createNew(obj);
+            }
+            if (this.dragging == 'move') {
+                // nothing to do, just stop dragging
             }
             this.dragging = 0;
             return true;
@@ -743,118 +346,119 @@ export class Marker {
         return false;
     }
 
-    // ui event
-    selectElement(e, ctrl) {
-        let id = getId(e);
-        let idx = -1;
-        if (ctrl) {
-            idx = getIdx(e);
-        }
-        this.select(id, idx);
-        this.update();
-    }
-
     focusSelected() {
-        if (!this.sid) {
+        if (!this.editMark) {
             this.createNew();
         }
-        if (this.sid) {
-            let m = this.markers[this.sid];
-            if (m) {
-                return m.zoomTo();
-            }
+        if (this.editMark) {
+            const [x, y] = this.editMark.center();
+            const step = ZOOM_TO_STEP[this.editMark.visiable_zoom_level];
+            c.zoomTo(x, y, this.editMark.layer, step);
+            return true;
         }
-        return null;
+        return false;
     }
 
     save() {
-        if (this.sid) { // selecting & new
-            let m = this.markers[this.sid];
-            if (m) {
-                m.dropBackup();
-            }
-            this.new_id = 0;
-        } else { // no selecting, try use ui data
-            this.createNew(null, true);
+        if (!this.editMark) {
+            this.createNew(); // create new mark from UI if not exists
         }
-        this.unSelect();
-        this.update();
+        if (this.editMark) { // selecting & new
+            this.editMark.selected = false;
+            this.editMark.selected_index = -1;
+            if (this.db.upsert(this.editMark, this._range())) {
+                this.render.upsert(this.editMark);
+            } else {
+                this.render.remove(this.editMark.id);
+            }
+            this.editMark = null;
+            this.update();
+        }
     }
 
     removeSelected() {
-        let id = this.sid;
-        this.unSelect();
+        if (!this.editMark) {
+            return;
+        }
+        const id = this.editMark.id;
+        this.editMark = null;
         this.remove(id);
         this.update();
     }
 
     removeSelectedSingle() {
-        let m = this.markers[this.sid];
-        if (m && m.constructor.name === 'Area' && m.removeSelectedRect()) {
-            this.update();
+        if (!this.editMark) {
+            return;
+        }
+        if (this.editMark.constructor.name === 'Area') {
+            const result = this.editMark.removeSelectedRect();
+            if (result === 'keep') {
+                this.render.upsert(this.editMark);
+                this.update();
+            }
+            if (result === 'remove') {
+                const id = this.editMark.id;
+                this.editMark = null;
+                this.remove(id);
+                this.update();
+            } 
         } else {
             this.removeSelected();
         }
     }
 
     removeAll() {
-        this.unSelect();
-        let keys = Object.keys(this.markers);
-        for (let id of keys) {
-            this.remove(id);
-            this.unSelect();
-            this.update();
-        }
+        this.clearRenderCache();
+        this.db.clear();
+        this.editMark = null;
         this.update();
     }
 
-    Input(e) {
-        let obj = ui.getMarkerUIData();
-        if (!obj.invalid) {
-            this.updateByInput(obj);
-        }
+    Input(event = null) {
+        const obj = ui.getMarkerUIData();
+        this.updateByInput(obj);
     }
 
-    load(obj) {
-        if (!Array.isArray(obj)) {
+    load(objects, refresh = true) {
+        if (!Array.isArray(objects)) {
             return;
         }
-        for (let o of obj) {
-            if (!util.isObject(o)) {
-                continue;
-            }
-            if (typeof o.id !== 'string') {
+        const marks = [];
+        for (const obj of objects) {
+            if (!util.isObject(obj) || typeof obj.id !== 'string') {
                 continue;
             }
 
-            if (o.type === 'point' && is_legal.point(o)) {
-                this.add(o);
+            if ((obj.type === 'point' && types.point.validObject(obj))
+                || (obj.type === 'area' && types.area.validObject(obj))) {
+                marks.push(this._new(obj));
             }
-
-            if (o.type === 'area' && is_legal.area(o)) {
-                this.add(o);
-            }
+        }
+        this.db.batchInsert(marks);
+        this.redrawAll();
+        if (refresh) {
+            this._forceRefreshRender();
         }
     }
 
-    loadDefault() {
-        let path = './pzmap/i18n/marks_' + i18n.getLang() +'.json';
-        let p = window.fetch(path).then((r)=>r.json()).catch((e)=> {
-            util.setOutput('marker_output', 'Red', i18n.T('MarkerLoadDefaultFail', {lang: i18n.getLang()}));
-            let path_en = './pzmap/i18n/marks_en.json';
-            return window.fetch(path_en).then((r)=>r.json()).catch((e)=> {
-                util.setOutput('marker_output', 'Red', i18n.T('MarkerLoadDefaultFail', {lang: 'en'}));
-                return Promise.resolve([])
-            });
+    loadDefault(lang = null, failed = '') {
+        if (!lang) lang = i18n.getLang();
+        const path = './pzmap/i18n/marks_' + lang +'.json';
+        failed = failed ? failed + ',' + lang : lang;
+        return window.fetch(path)
+            .then((r)=>r.json())
+            .then((obj) => {this.load(obj); return Promise.resolve(obj);})
+            .catch((e)=> {
+                util.setOutput('marker_output', 'Red', i18n.T('MarkerLoadDefaultFail', { lang: failed }));
+                if (lang !== 'en') return this.loadDefault('en', failed);
+                return Promise.resolve([]);
         });
-        return p.then((obj) => {this.load(obj); return Promise.resolve(true);});
-
     }
 
     Import() {
         util.upload().then((data) => {
             if (data) {
-                let json = util.parseJson(data);
+                const json = util.parseJson(data);
                 if (json) {
                     this.load(json);
                 }
@@ -864,13 +468,11 @@ export class Marker {
 
     Export() {
         this.unSelect();
-        this.update();
-        let data = [];
-        for (let id in this.markers) {
-            let m = this.markers[id];
-            data.push(m.toObject());
+        const data = [];
+        for (const mark of this.db.all()) {
+            data.push(mark.toObject());
         }
-        let s = JSON.stringify(data, null, '  ');
+        const s = JSON.stringify(data, null, '  ');
         util.download('marks.json', s);
     }
 }

@@ -10,6 +10,7 @@ This page contain useful links for developers.
 # Web Viewer
 
 - [Translation and Internationalization (i18n) Support](./designs/i18n.md)
+- [Dynamic Marker System](./designs/marker.md)
 
 # Planned Features
 

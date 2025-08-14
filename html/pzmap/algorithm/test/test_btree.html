@@ -1,0 +1,283 @@
+<script src="./tinytest.js"></script>
+<script type="module">
+import { BTree, validate } from '../btree/aux_btree.js';
+tests({
+
+    'insert1': () => {
+        const tree = new BTree();
+        [5, 3, 1, 7, 9, 2, 4, 6, 8].forEach(value => tree.insert(value));
+        try {
+            eq(tree.inorderTraversal().toString(), [1, 2, 3, 4, 5, 6, 7, 8, 9].toString());
+            assert(validate(tree)[0] === true);
+        } catch (error) {
+            console.error(error);
+            console.error('Expected: [1, 2, 3, 4, 5, 6, 7, 8, 9]');
+            console.error('Got:', tree.inorderTraversal());
+        }
+    },
+
+    'insert2': () => {
+        const tree = new BTree();
+        const randomData = Array.from({length: 50}, () => Math.floor(Math.random() * 100) + 1);
+        randomData.forEach(value => tree.insert(value));
+        const sortedData = [...randomData].sort((a, b) => a - b);
+        try {
+            eq(tree.inorderTraversal().toString(), sortedData.toString());
+            assert(validate(tree)[0] === true);
+        } catch (error) {
+            console.error(error);
+            console.error('Expected:', sortedData);
+            console.error('Got:', tree.inorderTraversal());
+        }
+    },
+
+    'search': () => {
+        const tree = new BTree();
+        [5, 3, 1, 7, 9, 2, 4, 6, 8].forEach(value => tree.insert(value));
+        eq(tree.search(2), 2);
+        eq(tree.search(10), null);
+        assert(validate(tree)[0] === true);
+    },
+
+    'delete1': () => {
+        const tree = new BTree();
+        [5, 3, 1, 7, 9, 2, 4, 6, 8].forEach(value => tree.insert(value));
+        tree.delete(1);
+        eq(tree.inorderTraversal().toString(), [2, 3, 4, 5, 6, 7, 8, 9].toString());
+        tree.delete(5);
+        eq(tree.inorderTraversal().toString(), [2, 3, 4, 6, 7, 8, 9].toString());
+    },
+
+    'delete2': () => {
+        for (let i = 0; i < 5; i++) {
+            const tree = new BTree();
+            const randomData = Array.from({length: 5000}, () => Math.floor(Math.random() * 10000) + 1);
+            randomData.forEach(value => tree.insert(value));
+
+            // randomly select some values from randomData for deletion
+            let suffledData = randomData.slice();
+            for (let i = suffledData.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [suffledData[i], suffledData[j]] = [suffledData[j], suffledData[i]];
+            }
+            const selectedForDeletion = suffledData.slice(0, 2500);
+            const deletionSet = new Set(selectedForDeletion);
+            const remainingData = suffledData.slice(2500);
+            selectedForDeletion.forEach(value => tree.delete(value));
+            const sortedData = [...remainingData].sort((a, b) => a - b);
+            try {
+                eq(tree.inorderTraversal().toString(), sortedData.toString());
+                assert(validate(tree)[0] === true);
+            } catch (error) {
+                console.error(error);
+                console.error('Random Data:', randomData);
+                console.error('Selected for Deletion:', selectedForDeletion);
+                console.error('Remaining Data:', remainingData);
+                console.error('Expected:', sortedData);
+                console.error('Got:', tree.inorderTraversal());
+            }
+        }
+    },
+
+    'aux1_sum': () => {
+        function aux(node) {
+            if (!node) return 0;
+
+            let s = 0;
+            for (let i = 0; i < node.slots.length; i++) {
+                if (i & 1) {
+                    s += node.slots[i];
+                } else {
+                    if (node.slots[i]) {
+                        s += node.slots[i].aux;
+                    }
+                }
+            }
+            if (node.aux !== s) {
+                node.aux = s;
+                return true
+            } else {
+                return false;
+            }
+        }
+
+        function validateAux(node) {
+            if (!node) return true;
+            let s = 0;
+            for (let i = 0; i < node.slots.length; i++) {
+                if (i & 1) {
+                    s += node.slots[i];
+                } else {
+                    if (node.slots[i]) {
+                        s += node.slots[i].aux;
+                    }
+                }
+            }
+            if (node.aux !== s) return false;
+            return true;
+        }
+
+        const tree = new BTree(9, null, null, aux);
+        let s = 0;
+        let data = Array.from({length: 500}, () => Math.floor(Math.random() * 10000) + 1);
+        for (let i of data) {
+            s += i;
+            tree.insert(i);
+            assert(tree.root.aux === s);
+        }
+        assert(validate(tree, validateAux)[0] === true);
+        let suffledData = data.slice();
+        for (let i = suffledData.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [suffledData[i], suffledData[j]] = [suffledData[j], suffledData[i]];
+        }
+        const selectedForDeletion = suffledData.slice(0, 250);
+        for (let i of selectedForDeletion) {
+            s -= i;
+            tree.delete(i);
+            assert(tree.root.aux === s);
+        }
+        assert(validate(tree, validateAux)[0] === true);
+    },
+
+    'aux2_segment_range': () => {
+        function aux(node) {
+            if (!node) return -Infinity;
+
+            let max = -Infinity;
+            let min = +Infinity;
+            for (let i = 0; i < node.slots.length; i++) {
+                if (i & 1) {
+                    max = Math.max(max, node.slots[i].end);
+                    min = Math.min(min, node.slots[i].start);
+                } else {
+                    if (node.slots[i]) {
+                        max = Math.max(max, node.slots[i].max);
+                        min = Math.min(min, node.slots[i].min);
+                    }
+                }
+            }
+            if (node.max !== max || node.min !== min) {
+                node.max = max;
+                node.min = min;
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        function validate_aux(node) {
+            if (!node) return true;
+            let max = -Infinity;
+            let min = +Infinity;
+            for (let i = 0; i < node.slots.length; i++) {
+                if (i & 1) {
+                    max = Math.max(max, node.slots[i].end);
+                    min = Math.min(min, node.slots[i].start);
+                } else {
+                    if (node.slots[i]) {
+                        max = Math.max(max, node.slots[i].max);
+                        min = Math.min(min, node.slots[i].min);
+                    }
+                }
+            }
+            if (node.max !== max || node.min !== min) return false;
+            return true;
+        }
+
+        function cmp(a, b) {
+            let diff = a.start - b.start;
+            if (diff !== 0) return diff;
+            diff = a.end - b.end;
+            if (diff !== 0) return diff;
+            return a.index - b.index;
+        }
+
+        function intersect(a, b) {
+            return a.start <= b.end && a.end >= b.start;
+        }
+
+        function search_intersection(tree, item) {
+            const nodes = [];
+            if (tree.root) {
+                nodes.push(tree.root);
+            }
+            const result = [];
+            while (nodes.length) {
+                const node = nodes.pop();
+                const aux = { start: node.min, end: node.max };
+                if (!intersect(aux, item)) {
+                    continue;
+                }
+                for (let i = 0; i < node.slots.length; i++) {
+                    if (i & 1) {
+                        if (intersect(node.slots[i], item)) {
+                            result.push(node.slots[i].index);
+                        }
+                    } else {
+                        const slot = node.slots[i];
+                        if (slot) {
+                            nodes.push(slot);
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+
+        function calculate_intersections_n2(data) {
+            let result = [];
+            for (let i in data) {
+                const res = [];
+                for (let j in data) {
+                    if (i !== j && intersect(data[i], data[j])) {
+                        res.push(j);
+                    }
+                }
+                result.push(res);
+            }
+            return result;
+        }
+
+        const tree = new BTree(9, cmp, null, aux);
+        let n = 5000;
+        let data = Array.from({length: n}, () => Math.floor(Math.random() * 10000) + 1);
+        data = data.map(i => ({start: i, end: i + 1 + Math.floor(Math.random() * 100)}));
+
+        const result1 = calculate_intersections_n2(data);
+        const result2 = [];
+        for (let i in data) {
+            const item = data[i];
+            item.index = Number.parseInt(i);
+            const res = search_intersection(tree, item);
+            for (let j of res) {
+                result2[j].push(i);
+            }
+            result2.push(res); // unsorted results for better performance
+            tree.insert(item);
+        }
+        assert(validate(tree, validate_aux)[0] === true);
+
+        assert(result1.length === result2.length);
+        for (let i in data) {
+            const r1 = result1[i];
+            const r2 = result2[i].sort((a, b) => a - b);
+            assert(r1.length === r2.length, `Length mismatch for index ${i}: ${r1.length} vs ${r2.length}`);
+            assert(r1.toString() === r2.toString(), `Content mismatch for index ${i}: ${r1.toString()} vs ${r2.toString()}`);
+        }
+
+        let suffledData = data.slice();
+        for (let i = suffledData.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [suffledData[i], suffledData[j]] = [suffledData[j], suffledData[i]];
+        }
+        const selectedForDeletion = suffledData.slice(0, Math.floor(n / 2));
+        for (let i of selectedForDeletion) {
+            tree.delete(i);
+        }
+        assert(validate(tree, validate_aux)[0] === true);
+    },
+
+    'default': () => {}
+});
+</script>

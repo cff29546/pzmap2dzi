@@ -1,0 +1,118 @@
+<script src="./tinytest.js"></script>
+<script type="module">
+import { RTree, validate, totalOverlap } from '../rtree/rtree.js';
+import * as Node from '../rtree/node.js';
+
+function randomBoxes(n, range, size, idBase) {
+    const items = [];
+    for (let i = 0; i < n; i++) {
+        const item = {
+            L: [Math.floor(Math.random() * range), Math.floor(Math.random() * range)],
+            I: idBase + i
+        };
+        item.U = [item.L[0] + Math.floor(Math.random() * size + 1), item.L[1] + Math.floor(Math.random() * size + 1)];
+        items.push(item);
+    }
+    return items;
+}
+tests({
+    'insert1': () => {
+        const rtree = new RTree();
+        const item1 = { L: [10, 10], U: [15, 15], I: 1 };
+        const item2 = { L: [20, 20], U: [25, 25], I: 2 };
+        assert(validate(rtree)[0]);
+        rtree.insert(item1);
+        assert(validate(rtree)[0]);
+        rtree.insert(item2);
+        assert(validate(rtree)[0]);
+
+        const searchBox = { L: [15, 15], U: [25, 25] };
+        const results = rtree.query(searchBox);
+        eq(results.length, 1);
+        eq(results[0].I, item2.I);
+    },
+    'insert2': () => {
+        const rtree = new RTree();
+        const items = randomBoxes(100, 100, 10, 0);
+        for (const item of items) {
+            rtree.insert(item);
+            assert(validate(rtree)[0]);
+        }
+
+        const searchBoxes = randomBoxes(10, 100, 10, 0);
+        for (const searchBox of searchBoxes) {
+            const results = rtree.query(searchBox);
+            const index = results.map(item => item.I).sort((a, b) => a - b);
+            const expected_index = items
+                .filter(item => Node.overlapArea(searchBox, item) > 0)
+                .map(item => item.I)
+                .sort((a, b) => a - b);
+            eq(index.length, expected_index.length);
+            eq(index.toString(), expected_index.toString());
+            //console.log(index);
+        }
+    },
+    'delete1': () => {
+        const rtree = new RTree();
+        const item1 = { L: [10, 10], U: [15, 15], I: 1 };
+        const item2 = { L: [20, 20], U: [25, 25], I: 2 };
+        rtree.insert(item1);
+        rtree.insert(item2);
+        assert(validate(rtree)[0]);
+
+        rtree.delete(item1);
+        assert(validate(rtree)[0]);
+
+        const searchBox = { L: [15, 15], U: [25, 25] };
+        const results = rtree.query(searchBox);
+        eq(results.length, 1);
+        eq(results[0].I, item2.I);
+    },
+    'delete2': () => {
+        //const rtree = new RTree({strategy: {condense: false}});
+        const rtree = new RTree();
+        const items1 = randomBoxes(100, 100, 10, 0);
+        const items2 = randomBoxes(100, 100, 10, 100);
+        for (const item of items1) {
+            rtree.insert(item);
+            assert(validate(rtree)[0]);
+        }
+        for (const item of items2) {
+            rtree.insert(item);
+            assert(validate(rtree)[0]);
+        }
+
+        // delete items1
+        for (const i of items1) {
+            rtree.delete(i);
+            assert(validate(rtree)[0]);
+        }
+
+        const searchBoxes = randomBoxes(10, 100, 10, 0);
+        for (const searchBox of searchBoxes) {
+            const results = rtree.query(searchBox);
+            const index = results.map(item => item.I).sort((a, b) => a - b);
+            const expected_index = items2
+                .filter(item => Node.overlapArea(searchBox, item) > 0)
+                .map(item => item.I)
+                .sort((a, b) => a - b);
+            eq(index.length, expected_index.length);
+            eq(index.toString(), expected_index.toString());
+        }
+    },
+    'batch_load': () => {
+        const items = randomBoxes(100, 100, 10, 0);
+        const rtree = new RTree();
+        rtree.batchInsert(items);
+        assert(validate(rtree)[0]);
+        console.log('batch load total overlap:', totalOverlap(rtree));
+        rtree.clear();
+        for (const item of items) {
+            rtree.insert(item);
+        }
+        assert(validate(rtree)[0]);
+        console.log('insert total overlap:', totalOverlap(rtree));
+    },
+    'default': () => {}
+});
+</script>

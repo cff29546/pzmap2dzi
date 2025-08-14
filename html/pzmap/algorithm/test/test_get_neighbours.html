@@ -1,0 +1,80 @@
+<script src="./tinytest.js"></script>
+<script type="module">
+import {
+    getNeighbours,
+    getNeighboursN2,
+    getNeighboursN2Opt,
+    getNeighboursSweepLine
+} from '../geometry/rects_intersection.js';
+tests({
+    'getNeighbours': () => {
+        function randomRect(range) {
+            return () => ({
+                x: Math.floor(Math.random() * range),
+                y: Math.floor(Math.random() * range),
+                width: Math.floor(Math.random() * 100) + 1,
+                height: Math.floor(Math.random() * 100) + 1
+            });
+        }
+        function test(size, n) {
+            const rects = Array.from({ length: size }, randomRect(size/10));
+            const results = [];
+            const methods = [getNeighboursSweepLine, getNeighboursN2Opt, getNeighboursN2];
+            for (let i = 0; i < n; i++) {
+                const func = methods[i];
+                console.time(`${func.name} ${size}`);
+                const result = func(rects, { noCorner: true });
+                console.timeEnd(`${func.name} ${size}`);
+                results.push(result);
+            }
+            let intersections = 0;
+            for (let i = 0; i < rects.length; i++) {
+                const result = results[0][i].sort((a, b) => a - b);
+                intersections += result.length;
+                for (let j = 1; j < n; j++) {
+                    assert(result.length === results[j][i].length, `Length mismatch for index results[${j}][${i}] expected ${result.length} but got ${results[j][i].length}`);
+                    results[j][i].sort((a, b) => a - b);
+                    for (let k = 0; k < result.length; k++) {
+                        assert(result[k] === results[j][i][k]);
+                    }
+                }
+            }
+            console.log(`Total intersections: ${intersections}`);
+        }
+        for (let size of [100, 500, 1e3, 5e3, 1e4, 1e5, 1e6]) {
+            test(size, size <= 1e4 ? 3 : 2);
+        }
+    },
+
+    'getNeighbours_tree_order': () => {
+        function randomRect(range) {
+            return () => ({
+                x: Math.floor(Math.random() * range),
+                y: Math.floor(Math.random() * range),
+                width: Math.floor(Math.random() * 100) + 1,
+                height: Math.floor(Math.random() * 100) + 1
+            });
+        }
+        function test(size) {
+            const rects = Array.from({ length: size }, randomRect(size));
+            const results = [];
+            for (let i = 3; i < 11; i++) {
+                console.time(`order(${i}) size(${size})`);
+                const result = getNeighboursSweepLine(rects, i);
+                console.timeEnd(`order(${i}) size(${size})`);
+                results.push(result);
+            }
+            let intersections = 0;
+            for (let i = 0; i < rects.length; i++) {
+                intersections += results[0][i].length;
+            }
+            console.log(`Total intersections: ${intersections}`);
+        }
+        for (let size of [100, 500, 1e3, 5e3, 1e4, 1e5]) {
+            test(size);
+        }
+    },
+
+    'default': () => {}
+});
+</script>

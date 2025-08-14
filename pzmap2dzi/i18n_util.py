@@ -112,7 +112,7 @@ def yaml_item2json_dict(y):
 def yaml2json_aio(yaml_aio, splitor='&&'):
     json_aio = []
     for yaml_mark in yaml_aio:
-        json_aio.append(yaml_item2json_aio(yaml_mark))
+        json_aio.append(yaml_item2json_aio(yaml_mark, splitor))
     return json_aio
 
 
@@ -127,27 +127,28 @@ def yaml2json_by_key(yaml_aio, splitor='&&'):
     return j
 
 
-def yaml_aio_to_json_all(path, splitor='&&'):
+def yaml_aio_to_json_all(path, splitor='&&', output=''):
     data_aio = load_yaml(path)  # marks.yaml
-    base_dir = os.path.dirname(path)
+    base_dir = output if output else os.path.dirname(path)
     name, ext = os.path.splitext(os.path.basename(path))
 
     json_aio_path = os.path.join(base_dir, name + '.json')
-    save_json(json_aio_path, yaml2json_aio(data_aio, '&&'))
+    save_json(json_aio_path, yaml2json_aio(data_aio, splitor))
     json_by_key = yaml2json_by_key(data_aio)
     for key in json_by_key:
         json_path = os.path.join(base_dir, name + '_' + key + '.json')
         save_json(json_path, json_by_key[key])
 
 
-def json_aio_to_yaml(path):
+def json_aio_to_yaml(path, splitor='&&', output=''):
     data_aio = load_json(path)  # marks.json
-    base_dir = os.path.dirname(path)
+    base_dir = output if output else os.path.dirname(path)
     name, ext = os.path.splitext(os.path.basename(path))
     y = []
     for item in data_aio:
-        y.append(json_aio_item2yaml(item))
+        y.append(json_aio_item2yaml(item, splitor))
 
+    #y = sorted(y, key=lambda x: x.get('visiable_zoom_level', 0))
     yaml_aio_path = os.path.join(base_dir, name + '.yaml')
     save_yaml(yaml_aio_path, y)
 
@@ -177,6 +178,7 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='pzmap2dzi i18n tool')
     parser.add_argument('-o', '--output', type=str, default='')
+    parser.add_argument('-s', '--splitor', type=str, default='&&')
     parser.add_argument('file', type=str, default='')
     args = parser.parse_args()
 
@@ -186,6 +188,6 @@ if __name__ == '__main__':
     else:
         _, ext = os.path.splitext(args.file)
         if ext == '.yaml':
-            yaml_aio_to_json_all(args.file)
+            yaml_aio_to_json_all(args.file, args.splitor, args.output)
         if ext == '.json':
-            json_aio_to_yaml(args.file)
+            json_aio_to_yaml(args.file, args.splitor, args.output)

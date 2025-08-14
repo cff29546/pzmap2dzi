@@ -194,6 +194,9 @@ template:
     MarkerAreaLabel:
         en: 'Show Area'
         cn: '显示标记区域'
+    MarkerNameLabel:
+        en: 'Show Name'
+        cn: '显示标记名称'
     MarkCurrent:
         en: 'Marks on this floor'
         cn: '当前楼层标记'
@@ -552,6 +555,8 @@ mapping:
             innerHTML: MarkerPointLabel
         marker_area_label:
             innerHTML: MarkerAreaLabel
+        marker_name_label:
+            innerHTML: MarkerNameLabel
         mark_current:
             innerHTML: MarkCurrent
         mark_above:

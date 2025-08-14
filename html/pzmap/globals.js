@@ -7,25 +7,27 @@ export var g = {
     markerui: 0,
     aboutui: 0,
     currentLayer: 0,
+    zoomLevel: null,
     route: 'default',
     query_string: {},
+    zoomInfo: {},
     conf: {}
 };
 
 function updateQueryString() {
     g.query_string = {};
-    let params = location.search.slice(1).split('&');
-    for (let kv of params) {
+    const params = location.search.slice(1).split('&');
+    for (const kv of params) {
         if (kv.indexOf('=') >= 0) {
-            let [k, ...v] = kv.split('=');
+            const [k, ...v] = kv.split('=');
             g.query_string[k] = v.join('=');
         }
     }
     if (g.map_type === '') {
         // first time page load
         if (g.query_string.overlays) {
-            let overlays = g.query_string.overlays.split(',');
-            for (let type of overlays) {
+            const overlays = g.query_string.overlays.split(',');
+            for (const type of overlays) {
                 if (type === '') {
                     continue;
                 }
@@ -36,12 +38,13 @@ function updateQueryString() {
 }
 
 function loadConfig() {
-    let p = window.fetch('./pzmap_config.json').then((r) => r.json());
-    p = p.catch((e) => Promise.resolve({}));
-    return p.then((data) => {
-        g.conf = data;
-        return Promise.resolve(data);
-    });
+    return window.fetch('./pzmap_config.json')
+        .then((r) => r.json())
+        .catch((e) => Promise.resolve({}))
+        .then((data) => {
+            g.conf = data;
+            return Promise.resolve(data);
+        });
 }
 
 export function reset() {
@@ -51,9 +54,11 @@ export function reset() {
     g.roof_opacity = 0;
     g.minLayer = 0;
     g.maxLayer = 0;
+    g.zoomLevel = null;
     g.grid = 0;
     g.sx = 0;
     g.sy = 0;
+    g.zoomInfo = {};
     updateQueryString();
 };
 
@@ -72,7 +77,7 @@ export function getRoot(name=null) {
         }
     }
     let path = name;
-    let route = g.conf.route;
+    const route = g.conf.route;
     if (route) {
         path = route[name];
     }

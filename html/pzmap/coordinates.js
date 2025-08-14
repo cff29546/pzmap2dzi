@@ -92,11 +92,11 @@ function inScreenCoords(ctx, map_type, c00, step, border) {
     }
 
     let gx0 = -Math.floor(c00.x / step_x) - border;
-    let cx0 = c00.x + (gx0 * step_x);
+    //let cx0 = c00.x + (gx0 * step_x);
     let gy0 = -Math.floor(c00.y / step_y) - border;
-    let cy0 = c00.y + (gy0 * step_y);
+    //let cy0 = c00.y + (gy0 * step_y);
     let dx0 = gx0 + gy0;
-    let dy0 = gy0 - gx0;
+    //let dy0 = gy0 - gx0;
 
     let coords = [];
     for (let x = 0; x <= w / step_x + border * 2 - 1; x++) {
@@ -111,6 +111,54 @@ function inScreenCoords(ctx, map_type, c00, step, border) {
         }
     }
     return coords;
+}
+
+export function zoomTo(sx, sy, layer, step) {
+    const vp = getViewportPointBySquare(g.viewer, g.base_map, sx, sy, layer);
+    g.viewer.viewport.panTo(vp, true).zoomTo(stepToZoom(step), vp);
+    if (g.currentLayer !== layer) {
+        const selectElement = document.getElementById('layer_selector');
+        selectElement.value = layer;
+        selectElement.dispatchEvent(new Event('change'));
+    }
+}
+
+export function getCanvasRange(viewer, map, layer) {
+    let layer0 = layer;
+    let layer1 = layer;
+    if (layer === undefined || layer === null) {
+        layer0 = map.minlayer || 0;
+        layer1 = map.maxlayer || 0;
+    }
+    const c00 = getCanvasOrigin(viewer, map, 0);
+    const step = getSquareStep(viewer, map, true);
+    const w = viewer.drawer.context.canvas.width;
+    const h = viewer.drawer.context.canvas.height;
+    const [x0, y0] = toSquare[map.type](step, -c00.x, -c00.y, layer0);
+    let [x1, y1] = toSquare[map.type](step, w - c00.x, h - c00.y, layer1);
+    x1 += 1;
+    y1 += 1;
+    if (map.type == 'top') {
+        return { minX: x0, minY: y0, maxX: x1, maxY: y1 };
+    } else {
+        // top-left corner: (x0, y0)
+        // top-right corner:
+        //     ((x0 + x1 + y0 - y1) /2, (x0 - x1 + y0 + y1) / 2)
+        // bottom-left corner:
+        //     ((x0 + x1 - y0 + y1) / 2, (-x0 + x1 + y0 + y1) / 2)
+        // bottom-right corner: (x1, y1)
+        return {
+            minX: x0,
+            minY: ((x0 - x1 + y0 + y1) >> 1),
+            maxX: x1,
+            maxY: ((-x0 + x1 + y0 + y1 + 1) >> 1),
+            sumDiff: true,
+            minSum: x0 + y0,      // min(x + y)
+            maxSum: x1 + y1,      // max(x + y)
+            minDiff: x0 - y0,     // min(x - y)
+            maxDiff: x1 - y1      // max(x - y)
+        }
+    }
 }
 
 function getSquareByCanvas(viewer, map, x, y, layer) {
@@ -130,13 +178,14 @@ export function getZoom(viewer, current) {
 }
 
 export function stepToZoom(step) {
+    // step == pixels per square
     let zoom = g.viewer.world.getItemAt(0).imageToViewportZoom(step / g.base_map.sqr);
     return zoom / window.devicePixelRatio;
 }
 
 export function getSquare(event) {
-    let x = event.position.x * window.devicePixelRatio;
-    let y = event.position.y * window.devicePixelRatio;
+    const x = event.position.x * window.devicePixelRatio;
+    const y = event.position.y * window.devicePixelRatio;
     return getSquareByCanvas(g.viewer, g.base_map, x, y, g.currentLayer);
 }
 

@@ -1,18 +1,23 @@
 # Change log
 
+# 2025-08-15: 1.1.1 + UI 1.1.1
+
+* Better multi-rect area rendering
+* R-tree accelerated visible range mark rendering
+
 # 2025-06-12: 1.0.9 + UI 1.0.12
 
-* add support of multi-rect area marks
+* Add support of multi-rect area marks
 
 # 2025-05-23: 1.0.9 + UI 1.0.11
 
-* marker system and dynamic ui refactor
-* added square cursor
+* Marker system and dynamic ui refactor
+* Added square cursor
 
 # 2025-05-20: 1.0.9 + UI 1.0.10
 
-* load overlays on start by params in the query string
-  * example: `pzmap.html?overlays=zombie,foraging,room,objects`
+* Load overlays on start by params in the query string
+  * Example: `pzmap.html?overlays=zombie,foraging,room,objects`
 
 # 2025-03-19: 1.0.8 + UI 1.0.9
 

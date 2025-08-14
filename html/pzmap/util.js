@@ -20,18 +20,18 @@ export function setOutput(id, color, text, timeout=0) {
     }
 }
 
+function randomU32() {
+    return Number.parseInt(Math.random().toString(16).substring(2).padEnd(8, '0').substring(0, 8), 16)
+}
+
 var lastTs = '';
 var lastSeq = 0;
-
 export function uniqueId() {
-    let ts = Date.now().toString(36);
-    let seq = Math.random().toString(36).substring(2);
-    if (ts == lastTs) {
-        seq = (Number.parseInt(lastSeq, 36) + 1).toString(36); 
-    }
+    const ts = Date.now().toString(36);
+    const seq = ((ts === lastTs) ? lastSeq + 1 : randomU32());
     lastTs = ts;
     lastSeq = seq;
-    return ts + '_' + seq;
+    return ts + '_' + seq.toString(36);
 }
 
 export function setValue(id, v) {
@@ -116,6 +116,18 @@ export function format(template, args) {
 
 export function isObject(o) {
     return (typeof o === 'object' && !Array.isArray(o) && o !== null);
+}
+
+export function objectEqual(a, b) {
+    if (a === b) return true;
+    if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false;
+    const keysA = Object.keys(a);
+    const keysB = Object.keys(b);
+    if (keysA.length !== keysB.length) return false;
+    for (const key of keysA) {
+        if (!keysB.includes(key) || !objectEqual(a[key], b[key])) return false;
+    }
+    return true;
 }
 
 export function getByPath(o, ...args) {

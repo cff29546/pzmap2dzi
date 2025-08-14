@@ -41,7 +41,7 @@ window.addEventListener("keydown", (event) => {onKeyDown(event);});
 
 function initUI() {
     g.UI = ui.createUI();
-    util.changeStyle('.iso', 'display', g.map_type == 'top' ? 'none' : '');
+    util.changeStyle('.iso-only-btn', 'display', g.map_type == 'top' ? 'none' : 'inline-block');
     if (g.map_type == 'top') {
         document.getElementById('change_view_btn').innerHTML = 'Switch to Isometric View';
         g.overlays.room = 0;
@@ -50,31 +50,31 @@ function initUI() {
         document.getElementById('change_view_btn').innerHTML = 'Switch to Top View';
     }
     updateLayerSelector();
-    for (let type of ['zombie', 'foraging', 'room', 'objects']) {
-        let ui_container = document.getElementById(type + '_ui');
-        let btn = document.getElementById(type + '_btn');
+    for (const type of ['zombie', 'foraging', 'room', 'objects']) {
+        const uiContainer = document.getElementById(type + '_ui');
+        const btn = document.getElementById(type + '_btn');
         if (g.overlays[type]) {
-            if (ui_container) {
-                ui_container.innerHTML = g.UI[type].html;
+            if (uiContainer) {
+                uiContainer.innerHTML = g.UI[type].html;
             }
             if (btn) {
                 btn.classList.add('active');
             }
         } else {
-            if (ui_container) {
-                ui_container.innerHTML = '';
+            if (uiContainer) {
+                uiContainer.innerHTML = '';
             }
             if (btn) {
                 btn.classList.remove('active');
             }
         }
     }
-    for (let type of ['marker', 'grid', 'map', 'trimmer', 'about']) {
-        let ui_container = document.getElementById(type + '_ui');
-        let btn = document.getElementById(type + '_btn');
+    for (const type of ['marker', 'grid', 'map', 'trimmer', 'about']) {
+        const uiContainer = document.getElementById(type + '_ui');
+        const btn = document.getElementById(type + '_btn');
         if (g[type + 'ui']) {
-            if (ui_container) {
-                ui_container.innerHTML = g.UI[type].html;
+            if (uiContainer) {
+                uiContainer.innerHTML = g.UI[type].html;
             }
             if (btn) {
                 if (type == 'map') {
@@ -84,8 +84,8 @@ function initUI() {
                 }
             }
         } else {
-            if (ui_container) {
-                ui_container.innerHTML = '';
+            if (uiContainer) {
+                uiContainer.innerHTML = '';
             }
             if (btn) {
                 btn.classList.remove('active');
@@ -101,13 +101,13 @@ function initUI() {
         document.getElementById('legends').style.display = 'none';
     }
 
-    let change_view = false;
-    for (let type of g.base_map.available_types) {
+    let changeView = false;
+    for (const type of g.base_map.available_types) {
         if (type != g.base_map.type) {
-            change_view = true;
+            changeView = true;
         }
     }
-    if (change_view) {
+    if (changeView) {
         document.getElementById('change_view_btn').style.display = '';
     } else {
         document.getElementById('change_view_btn').style.display = 'none';
@@ -134,7 +134,7 @@ function updateMainOutput() {
 
 function initOSD() {
     g.load_error = 0;
-    let options = {
+    const options = {
         drawer: 'canvas',
         opacity: 1,
         element: document.getElementById('map_div'),
@@ -168,6 +168,14 @@ function initOSD() {
 
         if (g.gridui || g.trimmerui) {
             g.grid.draw(g.currentLayer);
+        }
+
+        if (g.marker) {
+            g.marker.redrawAll();
+        }
+
+        if (g.sys_marker) {
+            g.sys_marker.redrawAll();
         }
     });
 
@@ -257,10 +265,14 @@ function initOSD() {
 function init(callback=null) {
     globals.reset();
     if (!g.marker) {
-        g.marker = new marker.Marker();
+        g.marker = new marker.MarkManager({ indexType: 'rtree' });
+    } else {
+        g.marker.clearRenderCache();
     }
     if (!g.sys_marker) {
-        g.sys_marker = new marker.Marker();
+        g.sys_marker = new marker.MarkManager({ onlyCurrentLayer: true });
+    } else {
+        g.sys_marker.clearRenderCache();
     }
     if (!g.trimmer) {
         g.trimmer = new Trimmer();
@@ -273,11 +285,13 @@ function init(callback=null) {
         updateClip();
         initOSD();
         i18n.update('id');
+        g.marker.changeMode();
+        //g.sys_marker.changeMode(); // sys_marker does not use rtree index, always 'top' mode
 
         return new Promise(function(resolve, reject) {
             g.viewer.addOnceHandler('tile-loaded', function(e) {
                 let p = new Promise(function(res, rej) {
-                    let img = e.tiledImage;
+                    const img = e.tiledImage;
                     img.addOnceHandler('fully-loaded-change', function(e) {
                         img.setOpacity(0);
                         res();
@@ -302,13 +316,13 @@ function forceRedraw() {
 
 // layer selector
 function updateLayerSelector() {
-    let s = document.getElementById('layer_selector')
+    const s = document.getElementById('layer_selector')
     for (let i = s.options.length - 1; i >= 0; i--) {
         s.remove(i);
     }
     g.minLayer = g.base_map.minlayer;
     g.maxLayer = g.base_map.maxlayer;
-    for (let mod_map of g.mod_maps) {
+    for (const mod_map of g.mod_maps) {
         if (g.minLayer > mod_map.minlayer) {
             g.minLayer = mod_map.minlayer;
         }
@@ -317,7 +331,7 @@ function updateLayerSelector() {
         }
     }
     for (let i = g.minLayer; i < g.maxLayer; i++) {
-        let o = document.createElement('option');
+        const o = document.createElement('option');
         o.value = i;
         o.text = i18n.E('Floor', i);
         s.appendChild(o);
@@ -332,7 +346,7 @@ function updateLayerSelector() {
 }
 
 function onLayerSelect() {
-    let layer = Number(document.getElementById('layer_selector').value);
+    const layer = Number(document.getElementById('layer_selector').value);
     updateMaps(layer);
     updateCoords(true);
     g.marker.redrawAll();
@@ -340,7 +354,7 @@ function onLayerSelect() {
 
 // roof opacity
 function updateRoofOpacity() {
-    let slider = document.getElementById('roof_opacity_slider');
+    const slider = document.getElementById('roof_opacity_slider');
     g.roof_opacity = slider.value;
     slider.title = i18n.E('RoofOpacity');
     updateMaps(g.currentLayer);
@@ -362,9 +376,9 @@ function initModMapUI() {
     let p = window.fetch(globals.getRoot() + 'mod_maps/map_list.json');
     p = p.then((r) => r.json()).catch((e)=>Promise.resolve([]));
     p = p.then((map_names) => {
-        let s = document.getElementById('map_selector')
-        for (let name of map_names) {
-            let o = document.createElement('option');
+        const s = document.getElementById('map_selector')
+        for (const name of map_names) {
+            const o = document.createElement('option');
             o.value = name;
             o.text = name;
             s.appendChild(o);
@@ -376,23 +390,23 @@ function initModMapUI() {
 
 function updateModMapUI() {
     if (g.mapui) {
-        let btn = document.getElementById('map_all_btn');
+        const btn = document.getElementById('map_all_btn');
         if (g.mod_maps.length > 0) {
             btn.classList.add('active');
         } else {
             btn.classList.remove('active');
         }
         i18n.update('id', g.UI.map.ids)
-        let d = document.getElementById('map_list');
-        d.innerHTML = '';
-        let warning = [];
-        for (let mod_map of g.mod_maps) {
+        const mapListContainer = document.getElementById('map_list');
+        mapListContainer.innerHTML = '';
+        const warning = [];
+        for (const mod_map of g.mod_maps) {
             let state = 'active';
             if (mod_map.pz_version != g.base_map.pz_version) {
                 state = 'warning';
                 warning.push(mod_map.name)
             }
-            d.innerHTML += `<button class="${state}" style="cursor: not-allowed" ` +
+            mapListContainer.innerHTML += `<button class="${state}" style="cursor: not-allowed" ` +
                 `onclick="removeMap('${mod_map.name.replace("'","\\'")}')">${mod_map.name}</button>`;
         }
 
@@ -439,8 +453,8 @@ function removeMap(name) {
 }
 
 function addMap(names) {
-    let p = [];
-    for (let name of names) {
+    const p = [];
+    for (const name of names) {
         if (name != '') {
             let pos = 0;
             for (pos = 0; pos < g.mod_maps.length; pos++) {
@@ -449,7 +463,7 @@ function addMap(names) {
                 }
             }
             if (pos >= g.mod_maps.length) {
-                let m = new map.Map(globals.getRoot() + 'mod_maps/' + name + '/', g.map_type, name, g.base_map);
+                const m = new map.Map(globals.getRoot() + 'mod_maps/' + name + '/', g.map_type, name, g.base_map);
                 g.mod_maps.push(m);
                 p.push(m.init());
                 if (g.mod_maps.length == 1) {
@@ -479,9 +493,9 @@ function toggleAllMaps() {
             updateClip();
             updateLayerSelector();
         } else {
-            let s = document.getElementById('map_selector');
-            let names = [];
-            for (let o of s.options) {
+            const s = document.getElementById('map_selector');
+            const names = [];
+            for (const o of s.options) {
                 if (o.value) {
                     names.push(o.value);
                 }
@@ -493,7 +507,7 @@ function toggleAllMaps() {
 
 function onMapSelect() {
     if (g.mapui) {
-        let s = document.getElementById('map_selector');
+        const s = document.getElementById('map_selector');
         addMap([s.value]);
         s.value = '';
     }
@@ -517,16 +531,16 @@ function toggleOverlay(type) {
     g.overlays[type] = !g.overlays[type];
     if (g.overlays[type]) {
         document.getElementById(type + '_btn').classList.add('active');
-        let ui_container = document.getElementById(type + '_ui');
-        if (ui_container) {
-            ui_container.innerHTML = g.UI[type].html;
+        const uiContainer = document.getElementById(type + '_ui');
+        if (uiContainer) {
+            uiContainer.innerHTML = g.UI[type].html;
             i18n.update('id', g.UI[type].ids);
         }
     } else {
         document.getElementById(type + '_btn').classList.remove('active');
-        let ui_container = document.getElementById(type + '_ui');
-        if (ui_container) {
-            ui_container.innerHTML = '';
+        const uiContainer = document.getElementById(type + '_ui');
+        if (uiContainer) {
+            uiContainer.innerHTML = '';
         }
     }
     if (g.overlays.foraging || g.overlays.objects) {
@@ -560,12 +574,12 @@ function toggleMarkerUI() {
 
 function toggleMarkerHelp() {
     if (g.markerui) {
-        let t = document.getElementById('marker_help');
+        const help = document.getElementById('marker_help');
         if (g.markerui_help) {
-            t.innerHTML = '';
+            help.innerHTML = '';
             g.markerui_help = 0;
         } else {
-            t.innerHTML = g.UI.marker_help.html;
+            help.innerHTML = g.UI.marker_help.html;
             g.markerui_help = 1;
         }
         i18n.update('id', g.UI.marker_help.ids);
@@ -616,17 +630,25 @@ function onMarkerInput(e) {
 
 function togglePointMark(e) {
     if (e.checked) {
-        util.changeStyle('.point', 'visibility', 'visible');
+        g.marker.setVisiableType('Point', true);
     } else {
-        util.changeStyle('.point', 'visibility', 'hidden');
+        g.marker.setVisiableType('Point', false);
     }
 }
 
 function toggleAreaMark(e) {
     if (e.checked) {
-        util.changeStyle('.area', 'visibility', 'visible');
+        g.marker.setVisiableType('Area', true);
     } else {
-        util.changeStyle('.area', 'visibility', 'hidden');
+        g.marker.setVisiableType('Area', false);
+    }
+}
+
+function toggleMarkName(e) {
+    if (e.checked) {
+        g.marker.setTextVisibility(true);
+    } else {
+        g.marker.setTextVisibility(false);
     }
 }
 
@@ -652,12 +674,12 @@ function toggleTrimmer() {
 
 function toggleTrimmerHelp() {
     if (g.trimmerui) {
-        let t = document.getElementById('trimmer_help');
+        const help = document.getElementById('trimmer_help');
         if (g.trimmerui_help) {
-            t.innerHTML = '';
+            help.innerHTML = '';
             g.trimmerui_help = 0;
         } else {
-            t.innerHTML = g.UI.trimmer_help.html;
+            help.innerHTML = g.UI.trimmer_help.html;
             g.trimmerui_help = 1;
         }
         i18n.update('id', g.UI.trimmer_help.ids);
@@ -698,7 +720,7 @@ function onTrim() {
 
 // coordinates
 function copyCoords() {
-    let coords = '(' + g.sx + ',' + g.sy + ')';
+    const coords = '(' + g.sx + ',' + g.sy + ')';
     util.setClipboard(coords).then((err) => {
         if (err) {
             util.setOutput('main_output', 'Red', i18n.T('CopyCoordsError', {error: err}));
@@ -714,11 +736,11 @@ function updateCoords(recalc=false) {
     if (recalc && g.position) {
         [g.sx, g.sy] = c.getSquare(g.position);
     }
-    let e = document.getElementById('coords');
+    const e = document.getElementById('coords');
     e.style['border-color'] = '';
     e.style['color'] = '';
     e.innerHTML = i18n.E('Coords');
-    g.sys_marker.add({
+    g.sys_marker.load([{
         id: 'cursor',
         rects: [{
             x: g.sx,
@@ -731,19 +753,19 @@ function updateCoords(recalc=false) {
         class_list: ['cursor'],
         passthrough: true,
         visiable_zoom_level: 2
-    });
+    }], false);
 }
 
 function onPointerMove(event) {
-    let mouse = OpenSeadragon.getMousePosition(event);
-    let offset = OpenSeadragon.getElementOffset(g.viewer.canvas);
+    const mouse = OpenSeadragon.getMousePosition(event);
+    const offset = OpenSeadragon.getElementOffset(g.viewer.canvas);
     g.position = {position: mouse.minus(offset)};
     updateCoords(true);
 }
 
 // change route
 function updateRouteSelector() {
-    let s = document.getElementById('route_selector');
+    const s = document.getElementById('route_selector');
     for (let i = s.options.length - 1; i >= 0; i--) {
         s.remove(i);
     }
@@ -752,12 +774,12 @@ function updateRouteSelector() {
     if (g.query_string.map_name !== undefined) {
         return false;
     }
-    let route = g.conf.route;
+    const route = g.conf.route;
     if (!route) {
         return false;
     }
 
-    let keys = Object.keys(route);
+    const keys = Object.keys(route);
     if (keys.length <= 0) {
         return false;
     }
@@ -766,15 +788,15 @@ function updateRouteSelector() {
     }
 
     if (!keys.includes(g.route)) {
-        let o = document.createElement('option');
+        const o = document.createElement('option');
         o.id = "route_selector_dummy_option";
         o.value = 'default';
         o.text = i18n.T('SelectRoute');
         o.selected = true;
         s.appendChild(o);
     }
-    for (let key of keys) {
-        let o = document.createElement('option');
+    for (const key of keys) {
+        const o = document.createElement('option');
         o.value = key;
         o.text = key;
         if (g.route === key) {
@@ -786,7 +808,7 @@ function updateRouteSelector() {
 }
 
 function onChangeRoute() {
-    let route = document.getElementById('route_selector').value;
+    const route = document.getElementById('route_selector').value;
     if (route !== g.route) {
         g.route = route;
         return reloadView(false);
@@ -807,8 +829,8 @@ function reloadView(keep_mod_map=false) {
     g.viewer.destroy();
     let setup_maps = null;
     if (keep_mod_map) {
-        let map_names = [];
-        for (let mod_map of g.mod_maps) {
+        const map_names = [];
+        for (const mod_map of g.mod_maps) {
             map_names.push(mod_map.name);
         }
         setup_maps = function () {
@@ -821,13 +843,13 @@ function reloadView(keep_mod_map=false) {
 
 // language selector
 function updateLangSelector() {
-    let s = document.getElementById('language_selector')
+    const s = document.getElementById('language_selector')
     for (let i = s.options.length - 1; i >= 0; i--) {
         s.remove(i);
     }
 
-    for (let l of i18n.ALL) {
-        let o = document.createElement('option');
+    for (const l of i18n.ALL) {
+        const o = document.createElement('option');
         o.value = l;
         o.text = l;
         if (l === i18n.getLang()) {
@@ -838,7 +860,7 @@ function updateLangSelector() {
 }
 
 function onChangeLanguage() {
-    let lang = document.getElementById('language_selector').value;
+    const lang = document.getElementById('language_selector').value;
     i18n.setLang(lang);
     i18n.update('id');
     updateLayerSelector();
@@ -869,7 +891,7 @@ function toggleAbout() {
 }
 
 function updateAbout() {
-    let [ids, html] = ui.genAboutUI();
+    const [ids, html] = ui.genAboutUI();
     document.getElementById('about_ui').innerHTML = html;
     i18n.update('id', ids);
 }
@@ -883,12 +905,22 @@ function onKeyDown(event) {
     if (event.key == 'c') {
         copyCoords();
     }
+    if (g.query_string.debug && event.key == 't') {
+        // debug: test canvas range
+        const r = c.getCanvasRange(g.viewer, g.base_map, g.currentLayer);
+        g.marker.load([
+            { type: 'area', id: 'range', layer: g.currentLayer, visiable_zoom_level: 0,
+                rects: [{x: r.minX, y: r.minY, width: r.maxX - r.minX, height: r.maxY - r.minY}] },
+            { type: 'point', id: 'range-tl', x: r.minX, y: r.minY, layer: g.currentLayer, visiable_zoom_level: 0 },
+            { type: 'point', id: 'range-br', x: r.maxX, y: r.maxY, layer: g.currentLayer, visiable_zoom_level: 0 },
+        ]);
+    }
 }
 
 Promise.all(pmodules).then(() => {
     init();
 }).catch((e) => {
-    let output = document.getElementById('main_output');
+    const output = document.getElementById('main_output');
     if (output) {
         output.style.color = 'red';
         output.innerHTML = 'Failed to initialize modules.<br/>Error: ' + e;

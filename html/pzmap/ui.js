@@ -8,18 +8,18 @@ var LEGEND_TEMPLATE = {
 };
 
 function genLegendsUI(type, mapping) {
-    let label_id = type + '_legends_text';
-    let ids = [label_id];
+    const label_id = type + '_legends_text';
+    const ids = [label_id];
     let html = '<b id="' + label_id + '"></b>';
 
-    let template = LEGEND_TEMPLATE[type];
+    const template = LEGEND_TEMPLATE[type];
     if (template) {
-        for (let key in mapping) {
-            let color = mapping[key];
+        for (const key in mapping) {
+            const color = mapping[key];
             if (color == 'skip') {
                 continue;
             }
-            let legend_id = type + '_legend_' + key;
+            const legend_id = type + '_legend_' + key;
             html += util.format(template, {color: color, id: legend_id});
             ids.push(legend_id);
         }
@@ -96,6 +96,8 @@ var MARKER_HTML = `
 <label id="marker_point_label" for="marker_point">Show Point</label>
 <input type="checkbox" id="marker_area" checked onchange="toggleAreaMark(this)">
 <label id="marker_area_label" for="marker_area">Show Area</label>
+<input type="checkbox" id="marker_name" checked onchange="toggleMarkName(this)">
+<label id="marker_name_label" for="marker_name">Show Name</label>
 <div class="legend point" style="width: 1em; height: 1em; visibility: visible;"></div><span id="mark_current">marks on this floor</span>
 <div class="legend point above" style="width: 1em; height: 1em; visibility: visible;"></div><span id="mark_above">marks above</span>
 <div class="legend point below" style="width: 1em; height: 1em; visibility: visible;"></div><span id="mark_below">marks below</span>
@@ -112,8 +114,8 @@ var MARKER_IDS = [
     "marker_visiable_zoom_level_0", "marker_visiable_zoom_level_1", "marker_visiable_zoom_level_2",
     "marker_import_btn", "marker_export_btn", "marker_default_btn", "marker_clear_btn", 'marker_help_btn',
 
-    "marker_focus_btn", "marker_deselect_btn", "marker_point_label",
-    "marker_area_label", "mark_current", "mark_above", "mark_below", "mark_selected"];
+    "marker_focus_btn", "marker_deselect_btn", "marker_point_label", "marker_area_label",
+    "marker_name_label", "mark_current", "mark_above", "mark_below", "mark_selected"];
 
 var MARKER_HELP_HTML = '<div id="marker_help_text"></div>';
 var MARKER_HELP_IDS = ['marker_help_btn', 'marker_help_text'];
@@ -150,15 +152,14 @@ var TRIMMER_HELP_HTML = '<div id="trimmer_help_text"></div>';
 var TRIMMER_HELP_IDS = ['trimmer_help_btn', 'trimmer_help_text'];
 
 export function createUI() {
-    let ui = {};
+    const ui = {};
     ui.map = {html: MAP_HTML, ids: MAP_IDS};
     ui.marker = {html: MARKER_HTML, ids: MARKER_IDS};
     ui.marker_help = {html: MARKER_HELP_HTML, ids: MARKER_HELP_IDS};
     ui.trimmer = {html: TRIMMER_HTML, ids: TRIMMER_IDS};
     ui.trimmer_help = {html: TRIMMER_HELP_HTML, ids: TRIMMER_HELP_IDS};
 
-    let legends;
-    legends = util.getByPath(g, 'base_map', 'info', 'foraging', 'legends');
+    let legends = util.getByPath(g, 'base_map', 'info', 'foraging', 'legends');
     if (!legends) {
         legends = {
             Nav: 'White',
@@ -186,17 +187,18 @@ export function createUI() {
 }
 
 export function genAboutUI() {
-    let div_begin = '<div style="display: inline-block; float: right; background-color: Yellow; text-align: left;">';
-    let div_end = '</div>';
-    let args = {};
-    args.pzmap2dzi = '<a id="pzmap2dzi" href="https://github.com/cff29546/pzmap2dzi" target="_blank">pzmap2dzi</a>';
-    args.osd = '<a id="osd" href="https://github.com/openseadragon/openseadragon" target="_blank">OpenSeaDragon</a>';
-    args.pzwiki = '<a id="pzwiki" href="https://pzwiki.net/wiki/Project_Zomboid_Wiki" target="_blank">PZwiki</a>';
-    args.pz = '<a id="pz" href="https://projectzomboid.com" target="_black">Project Zomboid</a>';
-    args.pz_steam = '<a id="pz_steam" href="https://store.steampowered.com/app/108600/Project_Zomboid" target="_black">Project Zomboid</a>';
-    args.pz_version = util.getByPath(g, 'base_map', 'pz_version');
+    const div_begin = '<div style="display: inline-block; float: right; background-color: Yellow; text-align: left;">';
+    const div_end = '</div>';
+    const args = {
+        pzmap2dzi: '<a id="pzmap2dzi" href="https://github.com/cff29546/pzmap2dzi" target="_blank">pzmap2dzi</a>',
+        osd: '<a id="osd" href="https://github.com/openseadragon/openseadragon" target="_blank">OpenSeaDragon</a>',
+        pzwiki: '<a id="pzwiki" href="https://pzwiki.net/wiki/Project_Zomboid_Wiki" target="_blank">PZwiki</a>',
+        pz: '<a id="pz" href="https://projectzomboid.com" target="_black">Project Zomboid</a>',
+        pz_steam: '<a id="pz_steam" href="https://store.steampowered.com/app/108600/Project_Zomboid" target="_black">Project Zomboid</a>',
+        pz_version: util.getByPath(g, 'base_map', 'pz_version')
+    };
 
-    let link_template = '<a href="https://github.com/cff29546/pzmap2dzi/tree/{commit}" title="{branch}" target="_blank">{version}</a>';
+    const link_template = '<a href="https://github.com/cff29546/pzmap2dzi/tree/{commit}" title="{branch}" target="_blank">{version}</a>';
     if (g.base_map.commit) {
         args.render_version = util.format(link_template, {
             commit: g.base_map.commit,
@@ -215,21 +217,18 @@ export function genAboutUI() {
     } else {
         args.ui_version = g.conf.version;
     }
-    let html = div_begin + i18n.T('About', args) + div_end;
-    let ids = ['pzmap2dzi', 'osd', 'pzwiki', 'pz', 'pz_steam'];
+    const html = div_begin + i18n.T('About', args) + div_end;
+    const ids = ['pzmap2dzi', 'osd', 'pzwiki', 'pz', 'pz_steam'];
     return [ids, html];
 }
 
 export function getMarkerUIData() {
-    let data = {};
-    for (let key of ['x', 'y', 'layer']) {
+    const data = {};
+    for (const key of ['x', 'y', 'layer', 'width', 'height']) {
         data[key] = Number.parseInt(util.getValue('marker_' + key));
         if (!Number.isInteger(data[key])) {
             util.setValue('marker_' + key, '');
             data[key] = 0;
-            if (key !== 'layer') {
-                data.invalid = true;
-            }
         }
     }
     data.visiable_zoom_level = Number(util.getValue('marker_visiable_zoom_level'));
@@ -237,9 +236,10 @@ export function getMarkerUIData() {
     data.rects = [{
         x: data.x,
         y: data.y,
-        width: Number.parseInt(util.getValue('marker_width')),
-        height: Number.parseInt(util.getValue('marker_height'))
+        width: data.width,
+        height: data.height
     }];
+
     if (data.layer >= g.maxLayer) {
         data.layer = g.maxLayer - 1;
         util.setValue('marker_layer', data.layer);
@@ -249,19 +249,19 @@ export function getMarkerUIData() {
         data.layer = g.minLayer;
         util.setValue('marker_layer', data.layer);
     }
-    for (let key of ['name', 'desc']) {
+    for (const key of ['name', 'desc']) {
         data[key] = util.getValue('marker_' + key);
     }
     return data;
 }
 
 export function setMarkerUIData(data) {
-    let int_keys = ['x', 'y', 'width', 'height', 'layer'];
-    let text_keys = ['name', 'desc'];
+    const int_keys = ['x', 'y', 'width', 'height', 'layer'];
+    const text_keys = ['name', 'desc'];
     let obj = {};
     if (data.type == 'area') {
         if (data.rects.length > 0) {
-            let idx = data.selected_rect;
+            let idx = data.selected_index;
             if (idx < 0 && data.rects.length == 1) {
                 idx = 0;
             }
@@ -270,7 +270,7 @@ export function setMarkerUIData(data) {
             }
         }
     }
-    for (let key of int_keys) {
+    for (const key of int_keys) {
         let value = obj[key];
         if (value === undefined) {
             value = data[key];
@@ -281,8 +281,8 @@ export function setMarkerUIData(data) {
         }
         util.setValue('marker_' + key, value);
     }
-    for (let key of text_keys) {
-        util.setValue('marker_' + key, data[key]);
+    for (const key of text_keys) {
+        util.setValue('marker_' + key, data[key] || '');
     }
     let zoom_level = Number(data.visiable_zoom_level);
     if (!Number.isInteger(zoom_level) || zoom_level < 0 || zoom_level > 2) {

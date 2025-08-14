@@ -212,7 +212,7 @@ export class Map {
     }
 
     _unload_overlay(type) {
-        if (this.overlays[type] != 0) {
+        if (this.overlays[type]) {
             if (['loading', 'delete'].includes(this.overlays[type])) {
                 this.overlays[type] = 'delete';
             } else {

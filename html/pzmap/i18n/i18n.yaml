@@ -218,22 +218,24 @@ template:
             <b>How to use marker:</b><br/>
             <b>1. Shift+Click</b>: Create new point
             <b>2. Shift+Drag</b>: Create new area or new rect for selecting area
-            <b>3. Click existing mark</b>: Select mark
-            <b>4. Ctrl+Click</b>: Select sub rect of an area mark
-            <b>5. Drag existing mark</b>: Move mark
-            <b>6. Esc</b>: Deselect mark and discard unsaved changes
-            <b>7. Delete Button/Ctrl+Delete Button: Delete selected mark/sub rect
+            <b>3. Ctrl+Shift+Drag</b>: Create new diff-sum coordinate area
+            <b>4. Click existing mark</b>: Select mark
+            <b>5. Ctrl+Click</b>: Select sub rect of an area mark
+            <b>6. Drag existing mark</b>: Move mark
+            <b>7. Esc</b>: Deselect mark and discard unsaved changes
+            <b>8. Delete Button/Ctrl+Delete Button</b>: Delete selected mark/sub rect
             </div>
         cn: |
             <div>
             <b>标记操作方式:</b><br/>
             <b>1. Shift+单击鼠标左键:</b> 新建标记点
             <b>2. Shift+拖拽鼠标左键:</b> 新建标记区域或子区域
-            <b>3. 单击标记</b>: 选择标记
-            <b>4. Ctrl+单击标记</b>: 选择子区域
-            <b>5. 拖拽标记</b>: 移动标记
-            <b>6. Esc</b>: 取消选择，放弃未保存更改
-            <b>7. 删除按钮/Ctrl+删除按钮</b>: 删除选中标记/子区域
+            <b>3. Ctrl+Shift+拖拽鼠标左键:</b> 新建差和坐标标记区域
+            <b>4. 单击标记</b>: 选择标记
+            <b>5. Ctrl+单击标记</b>: 选择子区域
+            <b>6. 拖拽标记</b>: 移动标记
+            <b>7. Esc</b>: 取消选择，放弃未保存更改
+            <b>8. 删除按钮/Ctrl+删除按钮</b>: 删除选中标记/子区域
             </div>
     MarkerNew:
         en: 'New'
@@ -247,6 +249,9 @@ template:
     MarkerArea:
         en: 'Area'
         cn: '标记区域'
+    MarkerDiffSum:
+        en: 'Diff-Sum'
+        cn: '差和'
     MarkerIdle:
         en: 'Idle'
         cn: '就绪'

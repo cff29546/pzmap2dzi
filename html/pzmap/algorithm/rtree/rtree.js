@@ -214,7 +214,7 @@ export class RTree {
                 if (this.root.E.length === 0) {
                     // root is empty, clear the tree
                     this.clear();
-                } else if (this.root.E.length === 1) {
+                } else if (this.root.E.length === 1 && !Node.isItem(this.root.E[0])) {
                     // root has only one entry, promote it
                     this.root = this.root.E[0];
                     this.height--;

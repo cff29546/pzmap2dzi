@@ -152,11 +152,11 @@ export function getCanvasRange(viewer, map, layer) {
             minY: ((x0 - x1 + y0 + y1) >> 1),
             maxX: x1,
             maxY: ((-x0 + x1 + y0 + y1 + 1) >> 1),
-            sumDiff: true,
+            diffSum: true,
+            minDiff: x0 - y0,     // min(x - y)
+            maxDiff: x1 - y1,      // max(x - y)
             minSum: x0 + y0,      // min(x + y)
             maxSum: x1 + y1,      // max(x + y)
-            minDiff: x0 - y0,     // min(x - y)
-            maxDiff: x1 - y1      // max(x - y)
         }
     }
 }

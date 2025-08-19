@@ -1,6 +1,5 @@
 import { g } from "../globals.js";
 import * as util from "../util.js";
-import * as c from "../coordinates.js";
 import * as draw from "./draw.js";
 
 var _RENDER_MAP = {};
@@ -65,12 +64,28 @@ export class MarkRender {
         _RENDER_MAP[this.name] = this;
         this.marks = {};
         this.renderOptions = renderOptions;
+        this.removed = false;
+    }
+
+    setRenderOptions(key, value) {
+        this.renderOptions[key] = value;
+    }
+
+    remove(id) {
+        const mark = this.marks[id];
+        if (mark) {
+            for (let i = 0; i < mark.parts.length; i++) { // need length check
+                this._remove(this._eid(id, mark.type, i));
+            }
+            delete this.marks[id];
+        }
     }
 
     _remove(elementId) {
         const element = document.getElementById(elementId);
         if (element) {
             g.viewer.removeOverlay(element);
+            this.removed = true;
         }
     }
 
@@ -88,55 +103,62 @@ export class MarkRender {
         }
     }
 
+    _forceRefresh() {
+        // inserting a dummy mark and removing it
+        // force OpenSeadragon to refresh overlays
+        const mark = {
+            id: this.name + '_dummy',
+            layer: 0,
+            parts: [{ shape: 'point', x: 0, y: 0}]
+        };
+        this.marks[mark.id] = mark;
+        this._render(mark.id);
+        this.remove(mark.id);
+    }
+
     _eid(id, type, i) {
         return [this.name, type, i, id].join('-');
     }
 
-    setRenderOptions(key, value) {
-        this.renderOptions[key] = value;
+    upsert(mark) {
+        const newMark = mark.toRenderFormat(this.renderOptions);
+        this._upsert(newMark);
     }
 
-    remove(id) {
-        const mark = this.marks[id];
-        if (mark) {
-            for (let i = 0; i < mark.parts.length; i++) { // need length check
-                this._remove(this._eid(id, mark.type, i));
+    sync(marks) {
+        const oldIds = Object.keys(this.marks);
+        const newIds = new Set();
+        this.removed = false;
+        for (const mark of marks) {
+            const newMark = mark.toRenderFormat(this.renderOptions);
+            if (newIds.has(newMark.id)) continue; // only first mark
+            this._upsert(newMark);
+            newIds.add(newMark.id);
+        }
+        for (const id of oldIds) {
+            if (!newIds.has(id)) {
+                this.remove(id);
             }
-            delete this.marks[id];
+        }
+        if (newIds.size > 0 && !this.removed) {
+            this._forceRefresh();
         }
     }
 
-    upsert(mark) {
-        // add or update a mark
-        // returns the id of the mark if it was added or updated
-        const newMark = mark.toRenderFormat(this.renderOptions);
-        if (!newMark || !newMark.id) return null;
+    _upsert(newMark) {
+        if (!newMark || !newMark.id) return false;
         if (!newMark.hash) newMark.hash = util.uniqueId();
         const id = newMark.id;
         const oldMark = this.marks[id];
         if (oldMark) {
             if (oldMark.id === id && oldMark.hash === newMark.hash) {
                 // no changes, nothing to do
-                return id;
+                return false;
             }
             this.remove(id);
         }
         this.marks[id] = newMark;
         this._render(id);
-        return id;
-    }
-
-    sync(marks) {
-        const ids = Object.keys(this.marks);
-        const newIds = new Set();
-        for (const mark of marks) {
-            const id = this.upsert(mark);
-            if (id) newIds.add(id);
-        }
-        for (const id of ids) {
-            if (!newIds.has(id)) {
-                this.remove(id);
-            }
-        }
+        return true;
     }
 }

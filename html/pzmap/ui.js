@@ -223,16 +223,30 @@ export function genAboutUI() {
 }
 
 export function getMarkerUIData() {
-    const data = {};
-    for (const key of ['x', 'y', 'layer', 'width', 'height']) {
-        data[key] = Number.parseInt(util.getValue('marker_' + key));
-        if (!Number.isInteger(data[key])) {
+    const data = {
+        x: 0,
+        y: 0,
+        layer: g.currentLayer,
+        width: 0,
+        height: 0,
+    };
+    const missing = {};
+    for (const key of Object.keys(data)) {
+        const value = Number.parseInt(util.getValue('marker_' + key));
+        if (!Number.isInteger(value)) {
             util.setValue('marker_' + key, '');
-            data[key] = 0;
+            missing[key] = true;
+        } else {
+            data[key] = value;
         }
     }
     data.visiable_zoom_level = Number(util.getValue('marker_visiable_zoom_level'));
+    if (!Number.isInteger(data.visiable_zoom_level) || data.visiable_zoom_level < 0 || data.visiable_zoom_level > 2) {
+        util.setValue('marker_visiable_zoom_level', 0);
+        data.visiable_zoom_level = 0;
+    }
 
+    data.missing = missing;
     data.rects = [{
         x: data.x,
         y: data.y,

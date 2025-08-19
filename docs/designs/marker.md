@@ -17,7 +17,7 @@ Previously, area markers were rendered as single rectangles, limiting flexibilit
 Each area mark is composed of multiple rectangles, each defined by its own position and size.
 
 **Neighbour Detection:**  
-To ensure borders are rendered accurately—avoiding redundant borders between adjacent rectangles—the system detects neighbouring rectangles using an accelerated approach.
+To ensure borders are rendered accurately (avoiding redundant borders between adjacent rectangles) the system detects neighbouring rectangles using an accelerated approach.
 
 A [sweep line algorithm](https://www.cs.princeton.edu/courses/archive/fall05/cos226/lectures/geosearch.pdf) is employed to efficiently identify adjacent rectangles. This process leverages an auxiliary spatial index (such as a B-tree) to quickly locate neighbours, reducing the need for brute-force comparisons. The algorithm operates in O(m log n) time, where m is the number of adjacency checks performed.
 
@@ -31,7 +31,7 @@ For each rectangle, the system determines which border segments are exposed (not
 <p float="left">
   <table>
   <tr>
-    <td><img src="../img/multi_rect.png" width="192" alt="marking" /></td>
+    <td><img src="../img/multi_rect.png" width="192" alt="multi-rect area" /></td>
   </tr>
   <tr>
     <td>Multi-Rect Area Mark</td>

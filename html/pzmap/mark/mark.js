@@ -21,7 +21,7 @@ class Mark {
         // control if the mark is interactive
         // if true, the mark is not clickable and draggable
         // this is usually used for overlays such as 'room' and 'objects'
-        passthrough: undefined,
+        passthrough: false,
 
         // CSS color value, used for the mark and text
         // if not set, the default CSS will take effect
@@ -40,7 +40,7 @@ class Mark {
         //        (smallest x first, then smallest y if x's are equal)
         // 'centroid': the text is placed at the centroid of the mark
         // 'abs(x,y)': the text is placed at the absolute position (x,y)
-        text_position: undefined,
+        text_position: 'center',
     };
 
     constructor(obj, keys) {
@@ -91,11 +91,15 @@ class Mark {
         return o;
     }
 
+    copy() {
+        return new this.constructor(this.toObject());
+    }
+
     overwrite(obj) {
         const type = this.constructor.name.toLowerCase();
         if (types[type].validObject(obj)) {
             for (const key of this.keys) {
-                if (key !== 'id') {
+                if (key !== 'id' && obj[key] !== undefined) {
                     this[key] = obj[key];
                 }
             }
@@ -114,6 +118,7 @@ class Mark {
             layer: this.layer,
             hash: this.hash(options),
             interactive: !this.passthrough,
+            isDiffSum: this.isDiffSum,
             cls: this.cls(),
             parts: this.parts(options)
         };
@@ -198,12 +203,12 @@ class Point extends Mark {
         return { minX: this.x, minY: this.y, maxX: this.x + 1, maxY: this.y + 1 };
     }
 
-    bboxSumDiff() {
+    bboxDiffSum() {
         return {
-            minSum: this.x + this.y,
             minDiff: this.x - this.y - 1,
+            maxDiff: this.x - this.y + 1,
+            minSum: this.x + this.y,
             maxSum: this.x + this.y + 2,
-            maxDiff: this.x - this.y + 1
         };
     }
 
@@ -248,7 +253,15 @@ class Area extends Mark {
             && Number.isInteger(obj.layer)
             && Area.validRects(obj.rects));
     }
-    constructor(obj) { super(obj, ['layer', 'rects']); }
+
+    constructor(obj) {
+        super(obj, ['layer', 'rects']);
+        if (this.class_list && this.class_list.includes('diff-sum')) {
+            this.isDiffSum = true;
+            // diff-sum mode
+            // x = minDiff, y = minSum, width = maxDiff - minDiff, height = maxSum - minSum
+        }
+    }
 
     start_drag() {
         let idx = this.selected_index;
@@ -266,9 +279,15 @@ class Area extends Mark {
         if (idx < 0 || idx >= this.rects.length) {
             idx = 0;
         }
+        let finalX = this.sx + x;
+        let finalY = this.sy + y;
+        if (this.isDiffSum) {
+            finalX = this.sx + x - y;
+            finalY = this.sy + x + y;
+        }
         const r = this.rects[idx];
-        const dx = this.sx + x - r.x;
-        const dy = this.sy + y - r.y;
+        const dx = finalX - r.x;
+        const dy = finalY - r.y;
         if (this.selected_index < 0) {
             for (const rect of this.rects) {
                 rect.x += dx;
@@ -283,6 +302,12 @@ class Area extends Mark {
     resize(x, y) {
         if (this.selected_index < 0 || this.selected_index >= this.rects.length) {
             return;
+        }
+        if (this.isDiffSum) {
+            const diff = x - y;
+            const sum = x + y;
+            x = diff;
+            y = sum;
         }
         const r = this.rects[this.selected_index];
         if (x < 0) {
@@ -304,10 +329,14 @@ class Area extends Mark {
 
     update(obj) {
         if (!Area.validObject(obj)) {
-            if (!obj.invalid) this.layer = obj.layer;
+            if (Number.isInteger(obj.layer)) {
+                this.layer = obj.layer;
+            }
+            if (Number.isInteger(obj.visiable_zoom_level)) {
+                this.visiable_zoom_level = obj.visiable_zoom_level;
+            }
             this.name = obj.name;
             this.desc = obj.desc;
-            this.visiable_zoom_level = obj.visiable_zoom_level;
             return;
         }
         if (this.selected_index < 0 || this.selected_index >= this.rects.length) {
@@ -322,21 +351,25 @@ class Area extends Mark {
         }
     }
 
-    append(obj) {
-        if (Area.validRects(obj.rects)) {
-            this.rects.push(obj.rects[0]);
-            this.selected_index = this.rects.length - 1;
+    append(x, y, width, height) {
+        const r = { x, y, width, height };
+        if (this.isDiffSum) {
+            r.x = x - y; // diff
+            r.y = x + y; // sum
         }
+        this.rects.push(r);
+        this.selected_index = this.rects.length - 1;
     }
 
     removeSelectedRect() {
-        if (this.rects.length == 1) {
-            return 'remove'; // remove the area
-        }
         if (this.selected_index < 0 || this.selected_index >= this.rects.length) {
             return 'nochange'; // no selected rect, keep the area
         }
+        if (this.rects.length == 1) {
+            return 'remove'; // remove the area
+        }
         this.rects.splice(this.selected_index, 1);
+        this.selected_index = -1; // unselect
         return 'keep'; // keep rest of the area
     }
 
@@ -345,43 +378,52 @@ class Area extends Mark {
     }
 
     center(idx = -1) {
+        let x = 0, y = 0;
         if (idx < 0 || idx >= this.rects.length) {
-            const { minX, minY, maxX, maxY } = this.bbox();
-            const x = (minX + maxX) / 2;
-            const y = (minY + maxY) / 2;
+            const { minX, minY, maxX, maxY } = this.bbox(); // already checked isDiffSum
+            x = (minX + maxX) / 2;
+            y = (minY + maxY) / 2;
             return [x, y];
         } else {
             const r = this.rects[idx];
-            const x = r.x + r.width / 2;
-            const y = r.y + r.height / 2;
-            return [x, y];
+            x = r.x + r.width / 2;
+            y = r.y + r.height / 2;
+            if (this.isDiffSum) {
+                return [(x + y) / 2, (y - x) / 2];
+            } else {
+                return [x, y];
+            }
         }
     }
 
     bbox() {
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
         for (const r of this.rects) {
-            if (r.x < minX) minX = r.x;
-            if (r.y < minY) minY = r.y;
-            if (r.x + r.width > maxX) maxX = r.x + r.width;
-            if (r.y + r.height > maxY) maxY = r.y + r.height;
+            const currentMinX = this.isDiffSum ? (r.x + r.y) / 2 : r.x;
+            const currentMinY = this.isDiffSum ? (r.y - r.x - r.width) / 2 : r.y;
+            const currentMaxX = this.isDiffSum ? (r.x + r.y + r.width + r.height) / 2 : r.x + r.width;
+            const currentMaxY = this.isDiffSum ? (r.y + r.height - r.x) / 2 : r.y + r.height;
+            if (currentMinX < minX) minX = currentMinX;
+            if (currentMinY < minY) minY = currentMinY;
+            if (currentMaxX > maxX) maxX = currentMaxX;
+            if (currentMaxY > maxY) maxY = currentMaxY;
         }
         return { minX, minY, maxX, maxY };
     }
 
-    bboxSumDiff() {
-        let minSum = Infinity, minDiff = Infinity, maxSum = -Infinity, maxDiff = -Infinity;
+    bboxDiffSum() {
+        let minDiff = Infinity, maxDiff = -Infinity, minSum = Infinity, maxSum = -Infinity;
         for (const r of this.rects) {
-            const currentMinSum = r.x + r.y;
-            const currentMaxSum = r.x + r.width + r.y + r.height;
-            const currentMinDiff = r.x - r.y - r.height;
-            const currentMaxDiff = r.x + r.width - r.y;
-            if (currentMinSum < minSum) minSum = currentMinSum;
+            const currentMinDiff = this.isDiffSum ? r.x : r.x - r.y - r.height;
+            const currentMaxDiff = this.isDiffSum ? r.x + r.width : r.x + r.width - r.y;
+            const currentMinSum = this.isDiffSum ? r.y : r.x + r.y;
+            const currentMaxSum = this.isDiffSum ? r.y + r.height : r.x + r.width + r.y + r.height;
             if (currentMinDiff < minDiff) minDiff = currentMinDiff;
-            if (currentMaxSum > maxSum) maxSum = currentMaxSum;
             if (currentMaxDiff > maxDiff) maxDiff = currentMaxDiff;
+            if (currentMinSum < minSum) minSum = currentMinSum;
+            if (currentMaxSum > maxSum) maxSum = currentMaxSum;
         }
-        return { minSum, minDiff, maxSum, maxDiff };
+        return { minDiff, maxDiff, minSum, maxSum };
     }
 
     centroid() {
@@ -395,7 +437,11 @@ class Area extends Mark {
         }
         cx /= weight;
         cy /= weight;
-        return [cx, cy];
+        if (this.isDiffSum) {
+            return [(cx + cy) / 2, (cx - cy) / 2];
+        } else {
+            return [cx, cy];
+        }
     }
 
     top() {
@@ -420,7 +466,8 @@ class Area extends Mark {
     parts(options = {}) {
         const allParts = [];
         for (const r of this.rects) {
-            allParts.push({ shape: 'rect', x: r.x, y: r.y, width: r.width, height: r.height });
+            const {x, y, width, height} = r;
+            allParts.push({ shape: 'rect', x, y, width, height });
         }
         if (this.selected_index >= 0 && this.selected_index < this.rects.length) {
             allParts[this.selected_index].cls = ['selected-rect'];

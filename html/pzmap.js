@@ -177,6 +177,10 @@ function initOSD() {
         if (g.sys_marker) {
             g.sys_marker.redrawAll();
         }
+
+        if (g.debug_marker) {
+            g.debug_marker.redrawAll();
+        }
     });
 
     g.viewer.addHandler('zoom', function(event) {
@@ -193,7 +197,7 @@ function initOSD() {
         }
 
         if (g.markerui) {
-            if (g.marker.press(event)) {
+            if (g.marker.edit.press(event)) {
                 event.preventDefaultAction = true;
             }
         }
@@ -207,7 +211,7 @@ function initOSD() {
             }
         }
         if (g.markerui) {
-            if (g.marker.drag(event)) {
+            if (g.marker.edit.drag(event)) {
                 forceRedraw();
                 event.preventDefaultAction = true;
             }
@@ -222,7 +226,7 @@ function initOSD() {
             }
         }
         if (g.markerui) {
-            if (g.marker.release(event)) {
+            if (g.marker.edit.release(event)) {
                 forceRedraw();
                 event.preventDefaultAction = true;
             }
@@ -238,7 +242,7 @@ function initOSD() {
                 event.preventDefaultAction = true;
             }
             if (g.markerui) {
-                if (g.marker.click(event)) {
+                if (g.marker.edit.click(event)) {
                     event.preventDefaultAction = true;
                 }
             }
@@ -265,7 +269,7 @@ function initOSD() {
 function init(callback=null) {
     globals.reset();
     if (!g.marker) {
-        g.marker = new marker.MarkManager({ indexType: 'rtree' });
+        g.marker = new marker.MarkManager({ indexType: 'rtree', enableEdit: true });
     } else {
         g.marker.clearRenderCache();
     }
@@ -273,6 +277,11 @@ function init(callback=null) {
         g.sys_marker = new marker.MarkManager({ onlyCurrentLayer: true });
     } else {
         g.sys_marker.clearRenderCache();
+    }
+    if (!g.debug_marker) {
+        g.debug_marker = new marker.MarkManager();
+    } else {
+        g.debug_marker.clearRenderCache();
     }
     if (!g.trimmer) {
         g.trimmer = new Trimmer();
@@ -300,6 +309,8 @@ function init(callback=null) {
                 g.viewer.canvas.addEventListener('pointermove', onPointerMove);
                 updateMaps(g.currentLayer);
                 g.marker.redrawAll();
+                g.sys_marker.redrawAll();
+                g.debug_marker.redrawAll();
                 if (callback) {
                     p = Promise.all([p, callback()]);
                 }
@@ -558,7 +569,7 @@ function toggleMarkerUI() {
         g.markerui = 0;
         document.getElementById('marker_btn').classList.remove('active');
         document.getElementById('marker_ui').innerHTML = '';
-        g.marker.unSelect();
+        g.marker.edit.unselect();
     } else {
         g.markerui = 1;
         g.markerui_help = 0;
@@ -568,7 +579,7 @@ function toggleMarkerUI() {
         if (g.trimmerui) {
             toggleTrimmer();
         }
-        g.marker.update();
+        g.marker.edit.updateStatus();
     }
 }
 
@@ -588,14 +599,14 @@ function toggleMarkerHelp() {
 }
 
 function onMarkerSave() {
-    g.marker.save();
+    g.marker.edit.save();
 }
 
 function onMarkerDelete(event) {
     if (event && event.ctrlKey) {
-        g.marker.removeSelectedSingle();
+        g.marker.edit.removeSingle();
     } else {
-        g.marker.removeSelected();
+        g.marker.edit.remove();
     }
 }
 
@@ -616,16 +627,15 @@ function onMarkerClear() {
 }
 
 function onMarkerFocus() {
-    g.marker.focusSelected();
+    g.marker.edit.focus();
 }
 
 function onMarkerDeselect() {
-    g.marker.unSelect();
-    g.marker.update();
+    g.marker.edit.unselect();
 }
 
 function onMarkerInput(e) {
-    g.marker.Input(e);
+    g.marker.edit.fromUI();
 }
 
 function togglePointMark(e) {
@@ -753,7 +763,7 @@ function updateCoords(recalc=false) {
         class_list: ['cursor'],
         passthrough: true,
         visiable_zoom_level: 2
-    }], false);
+    }]);
 }
 
 function onPointerMove(event) {
@@ -872,7 +882,7 @@ function onChangeLanguage() {
         util.setOutput('trimmer_output', 'Green', '');
     }
     if (g.markerui) {
-        g.marker.update();
+        g.marker.edit.updateStatus();
     }
     updateMainOutput();
 }
@@ -899,21 +909,57 @@ function updateAbout() {
 // key listener
 function onKeyDown(event) {
     if (event.key == 'Escape' && g.markerui) {
-        g.marker.unSelect();
-        g.marker.update();
+        g.marker.edit.unselect();
     }
     if (event.key == 'c') {
         copyCoords();
     }
     if (g.query_string.debug && event.key == 't') {
-        // debug: test canvas range
-        const r = c.getCanvasRange(g.viewer, g.base_map, g.currentLayer);
-        g.marker.load([
-            { type: 'area', id: 'range', layer: g.currentLayer, visiable_zoom_level: 0,
-                rects: [{x: r.minX, y: r.minY, width: r.maxX - r.minX, height: r.maxY - r.minY}] },
-            { type: 'point', id: 'range-tl', x: r.minX, y: r.minY, layer: g.currentLayer, visiable_zoom_level: 0 },
-            { type: 'point', id: 'range-br', x: r.maxX, y: r.maxY, layer: g.currentLayer, visiable_zoom_level: 0 },
-        ]);
+        // debug: display r-tree index
+        const nodeList = (rtree, type) => {
+            const result = [];
+            const stack = [];
+            const colorList = ['white', 'red', 'green', 'blue', 'grey'];
+            const cls = type === 'iso' ? ['diff-sum'] : undefined;
+            if (rtree.root) {
+                stack.push([rtree.root, 0]);
+            }
+            while (stack.length > 0) {
+                const [current, level] = stack.pop();
+                const color = level < colorList.length ? colorList[level] : colorList[colorList.length - 1];
+                if (current.E) {
+                    result.push({
+                        type: 'area',
+                        id: util.uniqueId(),
+                        class_list: cls,
+                        background: 'transparent',
+                        color: color,
+                        layer: 0,
+                        passthrough: true,
+                        visiable_zoom_level: 0,
+                        rects: [{
+                            x: current.L[0],
+                            y: current.L[1],
+                            width: current.U[0] - current.L[0],
+                            height: current.U[1] - current.L[1]
+                        }],
+                    });
+                    if (current.E.length > 0 && current.E[0].E) {
+                        for (const entry of current.E) {
+                            stack.push([entry, level + 1]);
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+        if (g.debug_marker.db.all().length > 0) {
+            g.debug_marker.removeAll();
+        } else {
+            const index = g.marker.db._index(0, g.zoomLevel);
+            const marks = nodeList(index.rtree, index.mode);
+            g.debug_marker.load(marks);
+        }
     }
 }
 

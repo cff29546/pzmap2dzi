@@ -1,5 +1,12 @@
 # Change log
 
+# 2025-08-19: 1.1.1 + UI 1.1.2
+
+* Fix R-tree index deletion resulting illegal tree
+* Mark editor refactor
+* Add support of diff-sum area mark
+* Node debug mode R-tree index
+
 # 2025-08-15: 1.1.1 + UI 1.1.1
 
 * Better multi-rect area rendering

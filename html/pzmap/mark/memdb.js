@@ -114,9 +114,9 @@ class RTreeIndex {
             item.L = [bbox.minX, bbox.minY];
             item.U = [bbox.maxX, bbox.maxY];
         } else {
-            const bbox = mark.bboxSumDiff();
-            item.L = [bbox.minSum, bbox.minDiff];
-            item.U = [bbox.maxSum, bbox.maxDiff];
+            const bbox = mark.bboxDiffSum();
+            item.L = [bbox.minDiff, bbox.minSum];
+            item.U = [bbox.maxDiff, bbox.maxSum];
         }
 
         return item;
@@ -145,9 +145,9 @@ class RTreeIndex {
             bbox.L = [minX, minY];
             bbox.U = [maxX, maxY];
         } else {
-            const { minSum, minDiff, maxSum, maxDiff } = range;
-            bbox.L = [minSum, minDiff];
-            bbox.U = [maxSum, maxDiff];
+            const { minDiff, maxDiff, minSum, maxSum } = range;
+            bbox.L = [minDiff, minSum];
+            bbox.U = [maxDiff, maxSum];
         }
         const items = this.rtree.query(bbox);
         for (const item of items) {
@@ -186,8 +186,8 @@ var INDEX = {
 };
 
 function isInRange(mark, range) {
-    if (range.sumDiff) {
-        return isInXYRange(mark, range) && isInSumDiffRange(mark, range);
+    if (range.diffSum) {
+        return isInXYRange(mark, range) && isInDiffSumRange(mark, range);
     }
     return isInXYRange(mark, range);
 }
@@ -201,13 +201,13 @@ function isInXYRange(mark, range) {
     return (xmin <= xmax && ymin <= ymax);
 }
 
-function isInSumDiffRange(mark, range) {
-    // sum-diff range for iso view
-    const { minSum, maxSum, minDiff, maxDiff } = mark.bboxSumDiff();
-    const smin = Math.max(minSum, range.minSum);
-    const smax = Math.min(maxSum, range.maxSum);
+function isInDiffSumRange(mark, range) {
+    // diff-sum range for iso view
+    const { minDiff, maxDiff, minSum, maxSum } = mark.bboxDiffSum();
     const dmin = Math.max(minDiff, range.minDiff);
     const dmax = Math.min(maxDiff, range.maxDiff);
+    const smin = Math.max(minSum, range.minSum);
+    const smax = Math.min(maxSum, range.maxSum);
     return (smin <= smax && dmin <= dmax);
 }
 
@@ -322,7 +322,7 @@ export class MarkDatabase {
             const index = this._index(layer, zoom);
             const marks = index.query(range);
             for (const mark of marks) {
-                if (!range.sumDiff || isInSumDiffRange(mark, range)) {
+                if (!range.diffSum || isInDiffSumRange(mark, range)) {
                     result.push(mark);
                 }
             }

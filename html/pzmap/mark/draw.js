@@ -84,11 +84,15 @@ function drawRect(mark, part, position, size, element) {
     wrapper.style['pointer-events'] = 'none';
     element.style.width = size.x + 'px';
     element.style.height = size.y + 'px';
+    if (g.map_type === 'iso' && mark.isDiffSum) {
+        element.style.width = (size.x / 2) + 'px';
+        element.style.height = (size.y / 4) + 'px';
+    }
     let color = mark.color || undefined;
     let background = mark.background || undefined;
     if (part.border) {
         let borderSize = g.zoomInfo.rectBorder || 8;
-        if (g.base_map.type === 'top') {
+        if (g.map_type === 'top' || mark.isDiffSum) {
             borderSize = borderSize >> 1;
         }
         if (!color || !background) {
@@ -108,7 +112,11 @@ function drawRect(mark, part, position, size, element) {
 }
 
 function rect(id, mark, part) {
-    const { x, y, width, height } = part;
+    let { x, y, width, height } = part;
+    if (mark.isDiffSum) {
+        x = (part.x + part.y) / 2 + 0.5;
+        y = (part.y - part.x) / 2 + 0.5;
+    }
     const vp = c.getViewportPointBySquare(g.viewer, g.base_map, x, y, mark.layer);
     const step = g.viewer.world.getItemAt(0).imageToViewportCoordinates(g.base_map.sqr, 0).x;
     const r = new OpenSeadragon.Rect(vp.x, vp.y, step * width, step * height);
@@ -190,10 +198,41 @@ function text(id, mark, part) {
     element.innerText = text;
 }
 
+function drawSVG(mark, part, position, size, element) {
+    const wrapper = element.parentElement;
+    wrapper.style.left = position.x + 'px';
+    wrapper.style.top = position.y + 'px';
+    wrapper.style['pointer-events'] = 'none';
+    element.style.width = size.x + 'px';
+    element.style.height = size.y + 'px';
+}
+
+function svg(id, mark, part) {
+    const { x, y } = part;
+    const vp = c.getViewportPointBySquare(g.viewer, g.base_map, x + 0.5, y + 0.5, mark.layer);
+    const point = new OpenSeadragon.Point(vp.x, vp.y);
+    const placement = OpenSeadragon.Placement.TOP_LEFT;
+    let element = document.getElementById(id);
+    if (element) {
+        g.viewer.updateOverlay(element, point, placement, drawSVG.bind(null, mark, part));
+    } else {
+        element = document.createElement('div');
+        element.id = id;
+        g.viewer.addOverlay(element, point, placement, drawSVG.bind(null, mark, part));
+    }
+    setClass(element, mark, part);
+    element.style.display = 'block';
+    element.style['pointer-events'] = 'none';
+    element.style['background-color'] = 'rgba(0,0,0,0)';
+    element.style.border = 'none';
+    // add svg
+}
+
 var _DRAW_FUNCTIONS = {
     rect: rect,
     point: point,
-    text: text
+    text: text,
+    //svg: svg,
 };
 
 export function drawPart(id, mark, part) {

@@ -2,18 +2,11 @@ import { g } from "./globals.js";
 import * as i18n from "./i18n.js";
 import * as c from "./coordinates.js";
 import * as util from "./util.js";
-import * as ui from "./ui.js";
 import { types } from "./mark/mark.js";
 import { MarkRender } from "./mark/render.js";
 import { MarkDatabase } from "./mark/memdb.js";
 import { MarkEditor, create } from "./mark/edit.js";
-import {
-    MARK_ZOOM_LEVEL_MIN_STEP,
-    POINT_SIZE,
-    POINT_BORDER_SIZE,
-    RECTANGLE_BORDER_SIZE,
-    ZOOM_TO_STEP,
-} from "./mark/conf.js";
+import * as conf from "./mark/conf.js";
 
 export function zoom() {
     // update zoom information to current viewer
@@ -21,7 +14,8 @@ export function zoom() {
     const step = zoom * g.base_map.sqr;
     let change = false;
     let zoomLevel = 1;
-    while (step > MARK_ZOOM_LEVEL_MIN_STEP[zoomLevel]) {
+    while (zoomLevel < conf[g.map_type].length &&
+        step > conf[g.map_type][zoomLevel].minStep) {
         zoomLevel += 1;
     }
     zoomLevel -= 1; // zoom_level starts from 0
@@ -29,48 +23,72 @@ export function zoom() {
         g.zoomLevel = zoomLevel;
         change = true;
 
-        g.zoomInfo.rectBorder = RECTANGLE_BORDER_SIZE[zoomLevel];
-        g.zoomInfo.pointBorder = POINT_BORDER_SIZE[zoomLevel];
-        g.zoomInfo.pointSize = POINT_SIZE[zoomLevel];
+        const current = conf[g.map_type][zoomLevel];
+        g.zoomInfo.rectBorder = current.rectBorder;
+        g.zoomInfo.pointBorder = current.pointBorder;
+        g.zoomInfo.pointSize = current.pointSize;
+        g.zoomInfo.fontSize = current.fontSize;
         util.changeStyle('.point', 'width', g.zoomInfo.pointSize + 'px');
         util.changeStyle('.point', 'height', g.zoomInfo.pointSize + 'px');
         util.changeStyle('.point.text', 'padding-top', (g.zoomInfo.pointSize >> 1) + 'px');
         util.changeStyle('.area.rect.iso', 'border-width', g.zoomInfo.rectBorder + 'px');
         util.changeStyle('.area.rect.top', 'border-width', (g.zoomInfo.rectBorder >> 1) + 'px');
         util.changeStyle('.area.rect.diff-sum.iso', 'border-width', (g.zoomInfo.rectBorder >> 1) + 'px');
+        util.changeStyle('.text', 'font-size', g.zoomInfo.fontSize);
     }
     return change;
 }
 
-export class MarkManager {
-    static originPoint = new types.point({
-        id: 'origin', x: 0, y: 0, layer: 0, visiable_zoom_level: 0
+function sortByDist(marks, x, y) {
+    return marks.sort((a, b) => {
+        const [ax, ay] = a.center();
+        const [bx, by] = b.center();
+        const da = (ax - x) ** 2 + (ay - y) ** 2;
+        const db = (bx - x) ** 2 + (by - y) ** 2;
+        return da - db;
     });
+}
 
+export class MarkManager {
     constructor(options = {}) {
         const {
+            mode = 'top',
             onlyCurrentLayer = false,
             enableEdit = false,
             indexType = null,
+            defaultValue = null,
             indexOptions = {},
+            onScreenLimit = null,
         } = options;
         this.enabled = true;
+        this.defaultValue = defaultValue;
         this.onlyCurrentLayer = onlyCurrentLayer;
-        this.db = new MarkDatabase('top', onlyCurrentLayer, indexType, indexOptions);
+        this.onScreenLimit = onScreenLimit;
+        this.db = new MarkDatabase(mode, onlyCurrentLayer, indexType, indexOptions);
         this.render = new MarkRender();
         this.hiddenType = {};
         this.edit = enableEdit ? new MarkEditor(this) : null;
+        if (!this.edit) {
+            if (!this.defaultValue) {
+                this.defaultValue = {};
+            }
+            this.defaultValue.passthrough = true;
+        }
     }
 
     enable() {
-        this.enabled = true;
-        this.clearRenderCache();
-        this.redrawAll();
+        if (!this.enabled) {
+            this.enabled = true;
+            this.clearRenderCache();
+            this.redrawAll();
+        }
     }
 
     disable() {
-        this.enabled = false;
-        this.clearRenderCache();
+        if (this.enabled) {
+            this.enabled = false;
+            this.clearRenderCache();
+        }
     }
 
     _range() {
@@ -78,7 +96,7 @@ export class MarkManager {
         return c.getCanvasRange(g.viewer, g.base_map, layer);
     }
 
-    setVisiableType(type, value) {
+    setVisibleType(type, value) {
         if (!!this.hiddenType[type] !== !value) {
             this.hiddenType[type] = !value;
             this.redrawAll();
@@ -119,7 +137,8 @@ export class MarkManager {
 
     redrawAll() {
         if (!this.enabled) return;
-        const result = this.db.query(this._range(), g.currentLayer, g.zoomLevel);
+        const range = this._range();
+        const result = this.db.query(range, g.currentLayer, g.zoomLevel);
         const marks = [];
         if (this.edit) {
             const current = this.edit.get();
@@ -129,6 +148,12 @@ export class MarkManager {
             if (!this.hiddenType[mark.constructor.name]) {
                 marks.push(mark);
             }
+        }
+        if (this.onScreenLimit &&
+            marks.length > this.onScreenLimit &&
+            !c.isMaxZoom(g.viewer, false)) {
+            sortByDist(marks, range.centerX, range.centerY);
+            marks.splice(this.onScreenLimit);
         }
         this.render.sync(marks);
     }
@@ -141,18 +166,33 @@ export class MarkManager {
         this.clearRenderCache();
     }
 
-    load(objects) {
+    load(objects, indexes = null) {
         if (!Array.isArray(objects)) {
             return;
         }
         const marks = [];
         for (const obj of objects) {
-            if (!util.isObject(obj) || typeof obj.id !== 'string') {
-                continue;
+            if (!util.isObject(obj)) continue;
+            if (obj.id === undefined || obj.id === null) obj.id = util.uniqueId();
+            if (typeof obj.id !== 'string') continue;
+
+            if (obj.color && util.isLightColor(obj.color)) {
+                if (!obj.class_list) {
+                    obj.class_list = [];
+                }
+                obj.class_list.push('light');
             }
 
             if (types[obj.type] && types[obj.type].validObject(obj)) {
-                marks.push(create(obj));
+                if (this.defaultValue) {
+                    for (const key in this.defaultValue) {
+                        if (obj[key] === undefined || obj[key] === null) {
+                            obj[key] = this.defaultValue[key];
+                        }
+                    }
+                }
+                const mark = create(obj);
+                marks.push(mark);
             }
         }
         this.db.batchInsert(marks);

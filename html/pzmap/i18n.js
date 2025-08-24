@@ -30,7 +30,7 @@ function getTemplate() {
 
 // get raw key value
 function raw(key) {
-    let t = getTemplate();
+    const t = getTemplate();
     if (t && t[key] != undefined) {
         return t[key];
     }
@@ -40,7 +40,7 @@ function raw(key) {
 // get raw key value
 function getMapping() {
     let m = MAPPING;
-    for (let key of arguments) {
+    for (const key of arguments) {
         if (m && m[key] != undefined) {
             m = m[key];
         } else {
@@ -52,7 +52,7 @@ function getMapping() {
 
 // substitute template
 export function T(key, args=null) {
-    let t = raw(key);
+    const t = raw(key);
     if (t || t === '') {
         return util.format(t, args);
     } else {
@@ -63,7 +63,7 @@ export function T(key, args=null) {
 
 // eval template, eval(`\`${e}\``)
 export function E(key, args=null) {
-    let e = raw(key);
+    const e = raw(key);
     if (e || e === '') {
         return eval(`\`${e}\``);
     } else {
@@ -84,13 +84,13 @@ function resolve(v, args) {
 
 // get labled text
 function L(label, value, args) {
-    let m = getMapping(label, value);
-    let o = {};
+    const m = getMapping(label, value);
+    const o = {};
     if (!util.isObject(m)) {
         return o;
     }
-    for (let [k, v] of Object.entries(m)) {
-        let val = resolve(v, args);
+    for (const [k, v] of Object.entries(m)) {
+        const val = resolve(v, args);
         if (val || val === '') {
             o[k] = val;
         } else {
@@ -104,26 +104,28 @@ function L(label, value, args) {
 export function update(label, values=null, args=null) {
     let labels = [];
     if (values) {
-        for (let value of values) {
-            let hit = document.querySelectorAll('[' + label + '="' + value + '"]');
-            labels.push(...hit);
+        for (const value of values) {
+            const hit = document.querySelectorAll('[' + label + '="' + value + '"]');
+            for (const label of hit) {
+                labels.push(label);
+            }
         }
     } else {
         labels = document.querySelectorAll('[' + label + ']');
     }
-    for (let l of labels) {
-        let data = L(label, l[label], args);
-        for (let [k, text] of Object.entries(data)) {
+    for (const l of labels) {
+        const data = L(label, l[label], args);
+        for (const [k, text] of Object.entries(data)) {
             l[k] = text;
         }
     }
 }
 
 export function init() {
-    let plist = [];
+    const plist = [];
     let p = 0;
-    for (let l of ALL) {
-        let name = l;
+    for (const l of ALL) {
+        const name = l;
         p = window.fetch('./pzmap/i18n/' + name + '.json');
         p = p.then((r)=>r.json()).catch((e)=>Promise.resolve(null));
         p = p.then((data)=>{TEMPLATE[name] = data; return Promise.resolve(name);});

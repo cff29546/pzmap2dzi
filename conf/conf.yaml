@@ -230,3 +230,6 @@ render_conf:
         ParkingStall: Blue
         # Zone Story
         ZoneStory:    Yellow
+
+    # use mark for room and objects
+    use_mark: true

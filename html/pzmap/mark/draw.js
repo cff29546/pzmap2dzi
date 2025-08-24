@@ -170,7 +170,7 @@ function drawText(mark, part, position, size, element) {
     wrapper.style.left = position.x + 'px';
     wrapper.style.top = position.y + 'px';
     wrapper.style['pointer-events'] = 'none';
-
+    wrapper.style['z-index'] = 10;
 }
 
 function text(id, mark, part) {
@@ -187,7 +187,9 @@ function text(id, mark, part) {
         g.viewer.addOverlay(element, point, placement, drawText.bind(null, mark, part));
     }
     setClass(element, mark, part);
-    element.style.font = mark.font || part.font || '12px Arial';
+    if (part.font || mark.font) {
+        element.style.font = part.font || mark.font;
+    }
     if (mark.color) {
         element.style.color = mark.color;
     }

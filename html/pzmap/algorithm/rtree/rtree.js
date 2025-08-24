@@ -66,6 +66,11 @@ export class RTree {
         this.height = 0;
     }
 
+    load(root) {
+        this.clear();
+        this.insert(root);
+    }
+
     _findInsertionPath(node, height) {
         const path = [];
         let current = this.root;
@@ -284,7 +289,7 @@ export class RTree {
                 }
                 if (Node.contains(box, current)) {
                     // box contains the current node, add all items
-                    result.push(...Node.allItems(current));
+                    Node.allItems(current, result);
                     continue;
                 }
             }

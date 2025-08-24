@@ -95,19 +95,19 @@ export function isItem(box) {
     return !box.E;
 }
 
-export function allItems(node) {
-    const items = [];
+export function allItems(node, output = null) {
+    if (!output) output = [];
     const stack = [node];
     while (stack.length > 0) {
         const current = stack.pop();
         if (!current) continue;
         if (isItem(current)) {
-            items.push(current);
+            output.push(current);
         } else {
             stack.push(...current.E);
         }
     }
-    return items;
+    return output;
 }
 
 export function adjustByEntries(box) {

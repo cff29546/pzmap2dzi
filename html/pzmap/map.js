@@ -1,16 +1,17 @@
 import { g } from "./globals.js";
+import { MarkManager } from "./marker.js";
 
 export class Map {
-    layers = 0;
-    tiles = [];
-    overlays = {};
-    overlay_layer = 0;
-    cell_rects = [];
-    clip_list = [];
-    info = {};
-    available_types = [];
-
     constructor(root, map_type, name, base_map=null) {
+        this.layers = 0;
+        this.tiles = [];
+        this.overlays = {};
+        this.marks = {};
+        this.overlay_layer = 0;
+        this.cell_rects = [];
+        this.clip_list = [];
+        this.info = {};
+        this.available_types = [];
         this.root = root;
         this.name = name;
         this.type = map_type;
@@ -267,6 +268,20 @@ export class Map {
             }
         }
         this.overlay_layer = layer;
+        this.redrawMarks(overlay);
+    }
+
+    redrawMarks(overlay) {
+        for (const type of ['base', 'zombie', 'foraging', 'room', 'objects']) {
+            if (this.marks[type]) {
+                if (type === 'base' || overlay[type]) {
+                    this.marks[type].enable();
+                    this.marks[type].redrawAll();
+                } else {
+                    this.marks[type].disable();
+                }
+            }
+        }
     }
 
     destroy() {
@@ -348,30 +363,26 @@ export class Map {
     }
 
     initMap() {
-        let root = this.root;
         this.suffix = this.typeToSuffix(this.type);
-        let suffix = this.suffix;
-        let empty = function(e) { return Promise.resolve({})};
-        function getinfo(type) {
-            return window.fetch(root + type + suffix + '/map_info.json')
-                .then((r) => r.json()).catch((e) => Promise.resolve({}));
-        }
 
-        let setlayer = (function (r) {
+        const types = ['base', 'zombie', 'foraging'];
+        if (this.type !== 'top') types.push('room', 'objects');
+        const getinfo = (type) => {
+            return window.fetch(this.root + type + this.suffix + '/map_info.json')
+                .then((r) => r.json()).catch((e) => Promise.resolve({}));
+        };
+
+        const setlayer = (r) => {
             this.minlayer = this.minlayer > 0 ? 0: this.minlayer;
             this.maxlayer = this.maxlayer < 1 ? 1: this.maxlayer;
             this.layers = this.maxlayer - this.minlayer;
             this.tiles = Array(this.layers).fill(0);
             return Promise.resolve(this);
-        }).bind(this);
+        };
 
-        let infos = ['base', 'zombie', 'foraging', 'room', 'objects'];
-        if (this.type == 'top') {
-            infos = ['base', 'zombie', 'foraging'];
-        }
-        let setinfo = (function (r) {
-            for (let i in infos) {
-                let type = infos[i];
+        const setinfo = (r) => {
+            for (let i in types) {
+                let type = types[i];
                 this.info[type] = r[i];
                 this.info[type].scale = 1;
                 if ('skip' in r[i]) {
@@ -406,13 +417,53 @@ export class Map {
             } else {
                 return Promise.resolve([this.minlayer, this.maxlayer]);
             }
-        }).bind(this);
+        };
 
-        let ptypes = [];
-        for (let type of infos) {
+        const markTypes = ['base', 'zombie', 'foraging', 'room', 'objects'];
+        const getmarks = (type) => {
+            return window.fetch(this.root + type + '/marks.json') // always use marks in folder without suffix
+                .then((r) => r.json()).catch((e) => Promise.resolve(null));
+        };
+
+        const setmarks = (r) => {
+            const onScreenLimit = g.query_string.mark_limit || 128;
+            for (const i in markTypes) {
+                const type = markTypes[i];
+                if (r[i] && Array.isArray(r[i])) {
+                    this.marks[type] = new MarkManager({
+                        mode: this.type,
+                        onScreenLimit: onScreenLimit,
+                        indexType: 'rtree',
+                        onlyCurrentLayer: true,
+                        defaultValue: {
+                            text_position: 'top',
+                            background: 'transparent',
+                            visible_zoom_level: 2,
+                        },
+                    });
+                    this.marks[type].disable();
+                    this.marks[type].load(r[i]);
+                }
+            }
+            this.redrawMarks(g.overlays);
+            return Promise.resolve(this);
+        };
+
+        const getmarksAsync = (r) => {
+            const pmarks = [];
+            for (const type of markTypes) {
+                pmarks.push(getmarks(type));
+            }
+            Promise.all(pmarks).then(setmarks);
+
+            return Promise.resolve(r);
+        }
+
+        const ptypes = [];
+        for (const type of types) {
             ptypes.push(getinfo(type));
         }
-        return Promise.all(ptypes).then(setinfo).then(setlayer);
+        return Promise.all(ptypes).then(setinfo).then(setlayer).then(getmarksAsync);
     }
 };
 

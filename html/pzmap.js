@@ -44,8 +44,8 @@ function initUI() {
     util.changeStyle('.iso-only-btn', 'display', g.map_type == 'top' ? 'none' : 'inline-block');
     if (g.map_type == 'top') {
         document.getElementById('change_view_btn').innerHTML = 'Switch to Isometric View';
-        g.overlays.room = 0;
-        g.overlays.objects = 0;
+        //g.overlays.room = 0;
+        //g.overlays.objects = 0;
     } else {
         document.getElementById('change_view_btn').innerHTML = 'Switch to Top View';
     }
@@ -155,7 +155,11 @@ function initOSD() {
     g.viewer = OpenSeadragon(options);
 
     g.viewer.addHandler('add-item-failed', (event) => {
-        g.load_error = 1;
+        const sourcePath = event.source.split('/');
+        const type = sourcePath[sourcePath.length - 2];
+        if (!['room', 'objects'].includes(type)) {
+            g.load_error = 1;
+        }
         updateMainOutput();
     });
 
@@ -180,6 +184,11 @@ function initOSD() {
 
         if (g.debug_marker) {
             g.debug_marker.redrawAll();
+        }
+
+        g.base_map.redrawMarks(g.overlays);
+        for (const map of g.mod_maps) {
+            map.redrawMarks(g.overlays);
         }
     });
 
@@ -264,6 +273,18 @@ function initOSD() {
         g.viewer.drawer.context.msImageSmoothingEnabled = false;
         g.viewer.drawer.context.imageSmoothingEnabled = false;
     }
+
+    if (!g.query_string.debug) {
+        const nullfunction = (e) => {};
+        OpenSeadragon.console = {
+            log:    nullfunction,
+            debug:  nullfunction,
+            info:   nullfunction,
+            warn:   nullfunction,
+            error:  nullfunction,
+            assert: nullfunction
+        };
+    }
 }
 
 function init(callback=null) {
@@ -294,7 +315,7 @@ function init(callback=null) {
         updateClip();
         initOSD();
         i18n.update('id');
-        g.marker.changeMode();
+        g.marker.changeMode(g.map_type);
         //g.sys_marker.changeMode(); // sys_marker does not use rtree index, always 'top' mode
 
         return new Promise(function(resolve, reject) {
@@ -435,13 +456,13 @@ function updateClip() {
 }
 
 function updateMaps(layer) {
+    g.currentLayer = layer;
     g.base_map.setBaseLayer(layer);
     g.base_map.setOverlayLayer(g.overlays, layer);
     for (let i = 0; i < g.mod_maps.length; i++) {
         g.mod_maps[i].setBaseLayer(layer);
         g.mod_maps[i].setOverlayLayer(g.overlays, layer);
     }
-    g.currentLayer = layer;
 }
 
 function removeMap(name) {
@@ -640,17 +661,17 @@ function onMarkerInput(e) {
 
 function togglePointMark(e) {
     if (e.checked) {
-        g.marker.setVisiableType('Point', true);
+        g.marker.setVisibleType('Point', true);
     } else {
-        g.marker.setVisiableType('Point', false);
+        g.marker.setVisibleType('Point', false);
     }
 }
 
 function toggleAreaMark(e) {
     if (e.checked) {
-        g.marker.setVisiableType('Area', true);
+        g.marker.setVisibleType('Area', true);
     } else {
-        g.marker.setVisiableType('Area', false);
+        g.marker.setVisibleType('Area', false);
     }
 }
 
@@ -761,8 +782,7 @@ function updateCoords(recalc=false) {
         layer: g.currentLayer,
         type: 'area',
         class_list: ['cursor'],
-        passthrough: true,
-        visiable_zoom_level: 2
+        visible_zoom_level: 2,
     }]);
 }
 
@@ -935,8 +955,7 @@ function onKeyDown(event) {
                         background: 'transparent',
                         color: color,
                         layer: 0,
-                        passthrough: true,
-                        visiable_zoom_level: 0,
+                        visible_zoom_level: 0,
                         rects: [{
                             x: current.L[0],
                             y: current.L[1],
@@ -957,7 +976,7 @@ function onKeyDown(event) {
             g.debug_marker.removeAll();
         } else {
             const index = g.marker.db._index(0, g.zoomLevel);
-            const marks = nodeList(index.rtree, index.mode);
+            const marks = nodeList(index.index[index.mode], index.mode);
             g.debug_marker.load(marks);
         }
     }

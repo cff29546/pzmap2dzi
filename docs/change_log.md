@@ -1,5 +1,11 @@
 # Change log
 
+# 2025-08-24: 1.1.2 + UI 1.1.3
+
+* Enable resizing of area marks
+* Render rooms and objects as area marks
+* Overlay rooms and objects dynamically in viewer
+
 # 2025-08-19: 1.1.1 + UI 1.1.2
 
 * Fix R-tree index deletion resulting illegal tree

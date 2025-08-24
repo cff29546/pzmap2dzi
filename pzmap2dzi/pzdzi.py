@@ -167,19 +167,20 @@ class DZI(object):
         ext, path = self.tile_path(level, x, y, 0, 'pending')
         os.remove(path)
 
-    def create_empty_output(self):
+    def create_empty_output(self, no_image=False):
         util.ensure_folder(self.path)
-        for layer in range(self.render_minlayer, self.render_maxlayer):
-            layer_path = os.path.join(self.path, 'layer{}_files'.format(layer))
-            util.ensure_folder(layer_path)
-            for level in range(self.levels):
-                util.ensure_folder(os.path.join(layer_path, str(level)))
-            ext = self.ext0 if layer == 0 else self.ext
-            w, h = self.pyramid[-1 - self.skip_level]
-            dzi = DZI_TEMPLATE.format(self.tile_size, ext, w, h)
-            dzi_path = os.path.join(self.path, 'layer{}.dzi'.format(layer))
-            with open(dzi_path, 'w') as f:
-                f.write(dzi)
+        if not no_image:
+            for layer in range(self.render_minlayer, self.render_maxlayer):
+                layer_path = os.path.join(self.path, 'layer{}_files'.format(layer))
+                util.ensure_folder(layer_path)
+                for level in range(self.levels):
+                    util.ensure_folder(os.path.join(layer_path, str(level)))
+                ext = self.ext0 if layer == 0 else self.ext
+                w, h = self.pyramid[-1 - self.skip_level]
+                dzi = DZI_TEMPLATE.format(self.tile_size, ext, w, h)
+                dzi_path = os.path.join(self.path, 'layer{}.dzi'.format(layer))
+                with open(dzi_path, 'w') as f:
+                    f.write(dzi)
         self.save_map_info()
 
     def save_map_info(self):
@@ -303,22 +304,31 @@ class DZI(object):
     def render_all(self, render, n, break_key=None, verbose=False, profile=False):
         if verbose:
             print('Preparing data')
-        self.create_empty_output()
-        if hasattr(render, 'valid_cell'):
-            for x, y in self.cells:
-                if not render.valid_cell(x, y):
-                    self.skip_cells.add((x, y))
-        self.render = render
-        tasks, done = self.get_tasks(self.skip_cells)
-        schd = scheduling.TopologicalDziScheduler(self, break_key, verbose)
-        cache_prefix = 'pzdzi.{}.'.format(os.getpid())
-        worker = scheduling.TopologicalDziWorker(self, cache_prefix)
-        task = mptask.Task(worker, schd, profile)
-        task.run((tasks, done), n)
-        if schd.stop:
-            if verbose:
-                print('Render interrupted: {}'.format(schd.stop))
-            return False
+        no_image = hasattr(render, 'NO_IMAGE') and render.NO_IMAGE
+        self.create_empty_output(no_image)
+        if hasattr(render, 'render'):
+            import time, datetime
+            print('Rendering non-image elements')
+            start = time.time()
+            render.render(self)
+            time_used = time.time() - start
+            print('time used', str(datetime.timedelta(0, time_used)))
+        if not no_image:
+            if hasattr(render, 'valid_cell'):
+                for x, y in self.cells:
+                    if not render.valid_cell(x, y):
+                        self.skip_cells.add((x, y))
+            self.render = render
+            tasks, done = self.get_tasks(self.skip_cells)
+            schd = scheduling.TopologicalDziScheduler(self, break_key, verbose)
+            cache_prefix = 'pzdzi.{}.'.format(os.getpid())
+            worker = scheduling.TopologicalDziWorker(self, cache_prefix)
+            task = mptask.Task(worker, schd, profile)
+            task.run((tasks, done), n)
+            if schd.stop:
+                if verbose:
+                    print('Render interrupted: {}'.format(schd.stop))
+                return False
         if verbose:
             print('Done')
         return True

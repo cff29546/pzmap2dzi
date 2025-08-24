@@ -40,13 +40,15 @@ function pseudoPRSplit(E, m, M, dim, dir = 0) {
         sizeR = sizeLR - sizeL;
     }
 
-    const nodes = [];
-    nodes.push(Node.createByEntries(E.splice(0, sizeL)));
-    nodes.push(Node.createByEntries(E.splice(-sizeR)));
+    const pLeft = Node.createByEntries(E.splice(0, sizeL));
+    const pRight = Node.createByEntries(E.splice(-sizeR));
 
     const split = Math.floor(E.length / M / 2) * M;
     const right = E.splice(split);
-    nodes.push(...pseudoPRSplit(E, m, M, dim, (dir + 1) % dim));
-    nodes.push(...pseudoPRSplit(right, m, M, dim, (dir + 1) % dim));
+    const nodes = pseudoPRSplit(E, m, M, dim, (dir + 1) % dim);
+    for (const node of pseudoPRSplit(right, m, M, dim, (dir + 1) % dim)) {
+        nodes.push(node);
+    }
+    nodes.push(pLeft, pRight);
     return nodes;
 }

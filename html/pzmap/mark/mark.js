@@ -15,8 +15,8 @@ class Mark {
         class_list: undefined,
 
         // the minimal zoom level to show the mark
-        // if not set, visiable_zoom_level is set to 0 (visible at all zoom levels)
-        visiable_zoom_level: 0,
+        // if not set, visible_zoom_level is set to 0 (visible at all zoom levels)
+        visible_zoom_level: 0,
 
         // control if the mark is interactive
         // if true, the mark is not clickable and draggable
@@ -54,9 +54,9 @@ class Mark {
                 this[key] = obj[key];
             }
         }
-        this.visiable_zoom_level = Number(this.visiable_zoom_level);
-        if (!Number.isInteger(this.visiable_zoom_level)) {
-            this.visiable_zoom_level = 0;
+        this.visible_zoom_level = Number(this.visible_zoom_level);
+        if (!Number.isInteger(this.visible_zoom_level)) {
+            this.visible_zoom_level = 0;
         }
         this.selected = false;
         this.selected_index = -1; // selected part index
@@ -70,7 +70,11 @@ class Mark {
         } else {
             classList.push('interactive');
         }
-        if (this.class_list) classList.push(...this.class_list);
+        if (this.class_list) {
+            for (const cls of this.class_list) {
+                classList.push(cls);
+            }
+        }
         return classList;
     }
 
@@ -169,7 +173,7 @@ class Point extends Mark {
         return (obj
             && (obj.name === undefined || typeof obj.name === 'string')
             && (obj.desc === undefined || typeof obj.desc === 'string')
-            && (obj.visiable_zoom_level === undefined || Number.isInteger(obj.visiable_zoom_level))
+            && (obj.visible_zoom_level === undefined || Number.isInteger(obj.visible_zoom_level))
             && Number.isInteger(obj.layer)
             && Number.isInteger(obj.x)
             && Number.isInteger(obj.y))
@@ -177,7 +181,7 @@ class Point extends Mark {
 
     constructor(obj) { super(obj, ['x', 'y', 'layer']); }
 
-    start_drag() {
+    start_drag(x, y) {
         this.sx = this.x;
         this.sy = this.y;
     }
@@ -249,7 +253,7 @@ class Area extends Mark {
         return (obj
             && (obj.name === undefined || typeof obj.name === 'string')
             && (obj.desc === undefined || typeof obj.desc === 'string')
-            && (obj.visiable_zoom_level === undefined || Number.isInteger(obj.visiable_zoom_level))
+            && (obj.visible_zoom_level === undefined || Number.isInteger(obj.visible_zoom_level))
             && Number.isInteger(obj.layer)
             && Area.validRects(obj.rects));
     }
@@ -263,15 +267,25 @@ class Area extends Mark {
         }
     }
 
-    start_drag() {
+    start_drag(x, y) {
         let idx = this.selected_index;
         if (idx < 0 || idx >= this.rects.length) {
             idx = 0;
         }
-        this.sx = this.rects[idx].x;
-        this.sy = this.rects[idx].y;
-        this.sw = this.rects[idx].width;
-        this.sh = this.rects[idx].height;
+        if (this.isDiffSum) {
+            const diff = x - y;
+            const sum = x + y;
+            x = diff;
+            y = sum;
+        }
+        const r = this.rects[idx];
+        this.sx = r.x;
+        this.sy = r.y;
+        this.sw = r.width;
+        this.sh = r.height;
+        // direction, true: right/bottom
+        this.dx = x >= r.x + (r.width >> 1);
+        this.dy = y >= r.y + (r.height >> 1);
     }
 
     drag(x, y) {
@@ -310,20 +324,16 @@ class Area extends Mark {
             y = sum;
         }
         const r = this.rects[this.selected_index];
-        if (x < 0) {
-            r.x = this.sx + x;
-            r.width = this.sw - x;
-        } else {
-            r.x = this.sx;
-            r.width = this.sw + x;
-        }
-        if (y < 0) {
-            r.y = this.sy + y;
-            r.height = this.sh - y;
-        } else {
-            r.y = this.sy;
-            r.height = this.sh + y;
-        }
+        const fixX = this.sx + (this.dx ? 0 : this.sw);
+        const moveX = this.sx + x + (this.dx ? this.sw : 0);
+        r.x = fixX < moveX ? fixX : moveX;
+        r.width = fixX < moveX ? moveX - fixX : fixX - moveX;
+        r.width = r.width === 0 ? 1 : r.width;
+        const fixY = this.sy + (this.dy ? 0 : this.sh);
+        const moveY = this.sy + y + (this.dy ? this.sh : 0);
+        r.y = fixY < moveY ? fixY : moveY;
+        r.height = fixY < moveY ? moveY - fixY : fixY - moveY;
+        r.height = r.height === 0 ? 1 : r.height;
         return;
     }
 
@@ -332,8 +342,8 @@ class Area extends Mark {
             if (Number.isInteger(obj.layer)) {
                 this.layer = obj.layer;
             }
-            if (Number.isInteger(obj.visiable_zoom_level)) {
-                this.visiable_zoom_level = obj.visiable_zoom_level;
+            if (Number.isInteger(obj.visible_zoom_level)) {
+                this.visible_zoom_level = obj.visible_zoom_level;
             }
             this.name = obj.name;
             this.desc = obj.desc;

@@ -2,15 +2,6 @@ import { g } from "../globals.js";
 import * as util from "../util.js";
 import * as draw from "./draw.js";
 
-var _RENDER_MAP = {};
-export function reset() {
-    for (const key in _RENDER_MAP) {
-        const render = _RENDER_MAP[key];
-        render.sync([]); // clear all marks
-    }
-    _RENDER_MAP = {};
-}
-
 // render format:
 // {
 //   id: 'mark-id',
@@ -56,12 +47,11 @@ export class MarkRender {
 
     constructor(options = {}) {
         const { name = null, renderOptions = {} } = options;
-        if (name !== null && _RENDER_MAP[name] === undefined) {
+        if (name) {
             this.name = name.replace(/-/g, '_');
         } else {
             this.name = util.uniqueId();
         }
-        _RENDER_MAP[this.name] = this;
         this.marks = {};
         this.renderOptions = renderOptions;
         this.removed = false;

@@ -534,11 +534,11 @@ mapping:
             innerHTML: MarkerHeightText
         marker_visibility_text:
             innerHTML: MarkerVisibilityText
-        marker_visiable_zoom_level_0:
+        marker_visible_zoom_level_0:
             innerHTML: MarkerVisibilityLevel0
-        marker_visiable_zoom_level_1:
+        marker_visible_zoom_level_1:
             innerHTML: MarkerVisibilityLevel1
-        marker_visiable_zoom_level_2:
+        marker_visible_zoom_level_2:
             innerHTML: MarkerVisibilityLevel2
         marker_import_btn:
             innerHTML: MarkerImportButton

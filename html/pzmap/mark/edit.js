@@ -4,7 +4,7 @@ import * as i18n from "../i18n.js";
 import * as c from "../coordinates.js";
 import { g } from "../globals.js";
 import { types } from "./mark.js";
-import { ZOOM_TO_STEP } from "./conf.js";
+import * as conf from "./conf.js";
 import { MarkRender } from "./render.js";
 
 export function create(obj) {
@@ -20,10 +20,14 @@ export function create(obj) {
 }
 
 export class MarkEditor {
+    static MODE_NONE   = 0;
+    static MODE_CREATE = 1;
+    static MODE_MOVE   = 2;
+    static MODE_RESIZE = 3;
     constructor(manager) {
         this.manager = manager;
         this.current = null;
-        this.mode = null;
+        this.mode = MarkEditor.MODE_NONE;
         this.sx = 0;
         this.sy = 0;
         this.isDiffSum = false;
@@ -134,7 +138,7 @@ export class MarkEditor {
         }
         if (this.current) {
             const [x, y] = this.current.center();
-            const step = ZOOM_TO_STEP[this.current.visiable_zoom_level];
+            const step = conf[g.map_type][this.current.visible_zoom_level].zoomToStep;
             c.zoomTo(x, y, this.current.layer, step);
             return true;
         }
@@ -187,17 +191,26 @@ export class MarkEditor {
 
     press(event) {
         // return true to stop propagation
-        if (event.originalEvent.shiftKey) {
-            this.isDiffSum = !!event.originalEvent.ctrlKey;
-            this._start_drag(event, 'create');
-            return true;
-        }
         const e = event.originalEvent.target; // see OpenSeadragon press event
+        if (event.originalEvent.shiftKey) {
+            if (e && e.classList.contains('mark') && e.classList.contains('area')) {
+                // resize existing
+                const {id, index} = MarkRender.parseElementId(e.id);
+                this.select(id, index);
+                this._start_drag(event, MarkEditor.MODE_RESIZE);
+                return true;
+            } else {
+                // create new
+                this.isDiffSum = !!event.originalEvent.ctrlKey;
+                this._start_drag(event, MarkEditor.MODE_CREATE);
+                return true;
+            }
+        }
         if (e && e.classList.contains('mark')) {
-            let {index, id} = MarkRender.parseElementId(e.id);
+            let {id, index} = MarkRender.parseElementId(e.id);
             if (!event.originalEvent.ctrlKey) index = -1; // select all mark
             this.select(id, index);
-            this._start_drag(event, 'move');
+            this._start_drag(event, MarkEditor.MODE_MOVE);
             return true;
         }
         return false; // nothing hit, do not stop propagation
@@ -206,17 +219,18 @@ export class MarkEditor {
     _start_drag(event, mode) {
         this.mode = mode;
         [this.sx, this.sy] = c.getSquare(event);
-        if (this.mode === 'move' && this.current) {
+        if (this.mode === MarkEditor.MODE_NONE) return;
+        if (this.current && this.mode !== MarkEditor.MODE_CREATE) {
             this.current.start_drag(this.sx, this.sy);
         }
     }
 
     drag(event) {
-        if (!this.mode) return false;
+        if (this.mode === MarkEditor.MODE_NONE) return;
         const [x, y] = c.getSquare(event);
         const dx = x - this.sx;
         const dy = y - this.sy;
-        if (this.mode === 'move') {
+        if (this.mode === MarkEditor.MODE_MOVE) {
             if (this.current) {
                 this.current.drag(dx, dy);
                 this.manager.render.upsert(this.current);
@@ -224,7 +238,7 @@ export class MarkEditor {
             }
             return true;
         }
-        if (this.mode === 'create') {
+        if (this.mode === MarkEditor.MODE_CREATE) {
             if (!this.current || this.current.constructor.name !== 'Area') {
                 this.fromData({
                     type: 'area', rects: [], layer: g.currentLayer,
@@ -233,10 +247,10 @@ export class MarkEditor {
                 });
             }
             this.current.append(this.sx, this.sy, 1, 1);
-            this.current.start_drag();
-            this.mode = 'resize';
+            this.current.start_drag(this.sx, this.sy);
+            this.mode = MarkEditor.MODE_RESIZE;
         }
-        if (this.mode === 'resize') {
+        if (this.mode === MarkEditor.MODE_RESIZE) {
             if (this.current) {
                 this.current.resize(dx, dy);
                 this.manager.render.upsert(this.current);
@@ -248,17 +262,14 @@ export class MarkEditor {
     }
 
     release(event) {
-        if (!this.mode) return false;
-        if (this.mode === 'create') {
+        if (this.mode === MarkEditor.MODE_NONE) return;
+        if (this.mode === MarkEditor.MODE_CREATE) {
             if (this.current) this.unselect();
             this.fromData({ type: 'point', x: this.sx, y: this.sy,
                 visiable_zoom_level: ui.getMarkerUIData().visiable_zoom_level || 0,
                 layer: g.currentLayer});
         }
-        if (this.mode === 'resize' || this.mode === 'move') {
-            // nothing to do, just stop dragging
-        }
-        this.mode = null;
+        this.mode = MarkEditor.MODE_NONE;
         this.isDiffSum = false;
         if (this.current) {
             this.manager.render.upsert(this.current);

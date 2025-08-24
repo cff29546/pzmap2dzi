@@ -1,5 +1,6 @@
+import os
 from PIL import ImageDraw
-from .common import render_long_text, render_edge, LazyFont
+from .common import render_long_text, render_edge, LazyFont, dump_marks
 from .. import lotheader, geometry
 
 try:
@@ -75,6 +76,12 @@ class RoomRender(object):
         if not font_size:
             font_size = options.get('default_font_size', 20)
         self.font = LazyFont(font_name, int(font_size))
+        if options.get('use_mark'):
+            self.mark = RoomMark(**options)
+            self.NO_IMAGE = True
+
+    def render(self, dzi):
+        return self.mark.process(dzi)
 
     def update_options(self, options):
         options['render_margin'] = [-2, -2, 2, 2]  # add margin for text
@@ -103,3 +110,48 @@ class RoomRender(object):
             draw = ImageDraw.Draw(im)
             for func, args in drawing:
                 func(draw, ox, oy, *args)
+
+
+def get_room_marks_by_cell(path, cx, cy, cell_size, encoding, map_name):
+    header = lotheader.load_lotheader(path, cx, cy)
+    if not header:
+        return []
+    dx = cx * cell_size
+    dy = cy * cell_size
+    marks = []
+    for i, room in enumerate(header['rooms']):
+        name = room['name'].decode(encoding, errors='ignore')
+        layer = room['layer']
+        rects = []
+        for x, y, w, h in room['rects']:
+            rects.append({'x': x + dx, 'y': y + dy, 'width': w, 'height': h})
+        marks.append({
+            'type': 'area',
+            'color': COLOR_MAP.get(name, DEFAULT_COLOR),
+            'name': name,
+            'layer': layer,
+            'rects': rects,
+            #'text_position': 'top',
+            #'background': 'transparent',
+            #'passthrough': True,
+            #'id': 'room_{}_{}_{}_{}'.format(map_name, cx, cy, i),
+        })
+    return marks
+
+class RoomMark(object):
+    def __init__(self, **options):
+        self.input = options.get('input')
+        self.output = options.get('output')
+        self.encoding = options.get('encoding')
+        self.map_name = options.get('cache_name', 'unknown')
+
+    def process(self, dzi):
+        results = []
+        for cx, cy in dzi.cells:
+            marks = get_room_marks_by_cell(self.input, cx, cy, dzi.cell_size, self.encoding, self.map_name)
+            if marks:
+                results.extend(marks)
+        if results:
+            output_path = os.path.join(self.output, 'marks.json')
+            dump_marks(results, output_path)
+        return True

@@ -18,9 +18,11 @@ function updateQueryString() {
     g.query_string = {};
     const params = location.search.slice(1).split('&');
     for (const kv of params) {
-        if (kv.indexOf('=') >= 0) {
-            const [k, ...v] = kv.split('=');
-            g.query_string[k] = v.join('=');
+        const splitIndex = kv.indexOf('=');
+        if (splitIndex > 0) {
+            const k = kv.substring(0, splitIndex);
+            const v = kv.substring(splitIndex + 1);
+            g.query_string[k] = v;
         }
     }
     if (g.map_type === '') {

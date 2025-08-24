@@ -1,6 +1,8 @@
 from .. import pzdzi, geometry
 import PIL
 from PIL import ImageFont
+import json
+import io
 
 
 class LazyFont(object):
@@ -91,3 +93,35 @@ def render_edge(draw, x, y, color, width, border_flags):
                                        _PAD_X, _PAD_Y)
     for edge in edges:
         draw.line(edge, fill=color, width=width)
+
+
+def dump_marks(marks, output_path, compact=False):
+    with io.open(output_path, 'w', encoding='utf-8') as f:
+        start = True
+        f.write('[\n')
+        for mark in marks:
+            if not start:
+                f.write(',')
+            else:
+                start = False
+            if compact:
+                mark = compact_mark(mark)
+            f.write(json.dumps(mark, separators=(',', ':')))
+            f.write('\n')
+        f.write(']')
+
+def compact_mark(mark):
+    rects = []
+    for rect in mark.get('rects', []):
+        rects.append('{},{},{},{}'.format(
+            rect['x'],
+            rect['y'],
+            rect['width'],
+            rect['height'],
+        ))
+    return '{}:{}:{}:{}'.format(
+        mark['name'],
+        mark['layer'],
+        mark['color'],
+        ':'.join(rects),
+    )

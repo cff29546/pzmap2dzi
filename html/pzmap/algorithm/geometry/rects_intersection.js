@@ -202,19 +202,16 @@ export function getNeighboursSweepLine(rects, options = {}) {
             const r = rects[index];
             const node = [r.y, r.y + r.height, index];
             const [res, border_res] = searchIntersection(active, node);
-            if (noCorner) {
-                for (const i of border_res) {
-                    // border + ending == corner intersection
-                    if (!ending.has(i)) {
-                        res.push(i);
-                    }
-                }
-            } else {
-                res.push(...border_res);
-            }
-            neighbours[index].push(...res);
             for (const i of res) {
+                neighbours[index].push(i);
                 neighbours[i].push(index);
+            }
+            for (const i of border_res) {
+                // border + ending == corner intersection
+                if (!(noCorner && ending.has(i))) {
+                    neighbours[index].push(i);
+                    neighbours[i].push(index);
+                }
             }
             active.insert(node);
         } else { // end

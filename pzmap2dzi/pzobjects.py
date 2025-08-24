@@ -89,6 +89,12 @@ class Obj(object):
                     output.append((x, y))
         return output
 
+    def rects(self):
+        if self.geo_type == 'rect':
+            return [[self.x, self.y, self.w, self.h]]
+        else:
+            return geometry.rect_cover(self.square_list())
+
     def label_square(self):
         if self.geo_type == 'rect':
             return self.x, self.y
@@ -130,10 +136,9 @@ class CellMap(object):
         return item in self.cell_map
 
 
-def load_cell_zones(path, cell_size, types, zrange=None):
+def load_typed_objects(path, types, zrange=None):
     objects_raw = load_lua_raw(path)['objects']
-    objects_raw = filter_objects_raw(objects_raw, types, zrange)
-    return CellMap(objects_raw, cell_size)
+    return filter_objects_raw(objects_raw, types, zrange)
 
 
 def border_label_map(cell_zones, cx, cy):
@@ -187,7 +192,8 @@ class CachedGetter(object):
 
     def get_cell_zones(self):
         if self.cell_zones is None:
-            self.cell_zones = load_cell_zones(self.path, self.cell_size, self.types, self.zrange)
+            objects = load_typed_objects(self.path, self.types, self.zrange)
+            self.cell_zones = CellMap(objects, self.cell_size)
         return self.cell_zones
 
     def __call__(self, cx, cy):

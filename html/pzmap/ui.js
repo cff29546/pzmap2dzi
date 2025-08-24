@@ -67,10 +67,10 @@ var MARKER_HTML = `
         <td><input id="marker_height" type="number" step="1" style="width: 5em" onchange="onMarkerInput(this)"/></td>
         <td id="marker_visibility_text">visibility:</td>
         <td>
-            <select id="marker_visiable_zoom_level" onchange="onMarkerInput(this)">
-                <option id="marker_visiable_zoom_level_0" value="0">always</option>
-                <option id="marker_visiable_zoom_level_1" value="1">mid zoom</option>
-                <option id="marker_visiable_zoom_level_2" value="2">close zoom</option>
+            <select id="marker_visible_zoom_level" onchange="onMarkerInput(this)">
+                <option id="marker_visible_zoom_level_0" value="0">always</option>
+                <option id="marker_visible_zoom_level_1" value="1">mid zoom</option>
+                <option id="marker_visible_zoom_level_2" value="2">close zoom</option>
             </select>
         </td>
         <td class="text-right">
@@ -111,7 +111,7 @@ var MARKER_IDS = [
     "marker_name_text", "marker_description_text",
 
     "marker_delete_btn", "marker_width_text", "marker_height_text", "marker_visibility_text", 
-    "marker_visiable_zoom_level_0", "marker_visiable_zoom_level_1", "marker_visiable_zoom_level_2",
+    "marker_visible_zoom_level_0", "marker_visible_zoom_level_1", "marker_visible_zoom_level_2",
     "marker_import_btn", "marker_export_btn", "marker_default_btn", "marker_clear_btn", 'marker_help_btn',
 
     "marker_focus_btn", "marker_deselect_btn", "marker_point_label", "marker_area_label",
@@ -240,10 +240,10 @@ export function getMarkerUIData() {
             data[key] = value;
         }
     }
-    data.visiable_zoom_level = Number(util.getValue('marker_visiable_zoom_level'));
-    if (!Number.isInteger(data.visiable_zoom_level) || data.visiable_zoom_level < 0 || data.visiable_zoom_level > 2) {
-        util.setValue('marker_visiable_zoom_level', 0);
-        data.visiable_zoom_level = 0;
+    data.visible_zoom_level = Number(util.getValue('marker_visible_zoom_level'));
+    if (!Number.isInteger(data.visible_zoom_level) || data.visible_zoom_level < 0 || data.visible_zoom_level > 2) {
+        util.setValue('marker_visible_zoom_level', 0);
+        data.visible_zoom_level = 0;
     }
 
     data.missing = missing;
@@ -298,10 +298,10 @@ export function setMarkerUIData(data) {
     for (const key of text_keys) {
         util.setValue('marker_' + key, data[key] || '');
     }
-    let zoom_level = Number(data.visiable_zoom_level);
+    let zoom_level = Number(data.visible_zoom_level);
     if (!Number.isInteger(zoom_level) || zoom_level < 0 || zoom_level > 2) {
         zoom_level = 0;
     }
-    util.setValue('marker_visiable_zoom_level', zoom_level);
+    util.setValue('marker_visible_zoom_level', zoom_level);
 
 }

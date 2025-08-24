@@ -1,5 +1,5 @@
 export function changeStyle(selector, cssProp, cssVal) {
-    let rules = (document.all) ? 'rules' : 'cssRules';
+    const rules = (document.all) ? 'rules' : 'cssRules';
     for (let i=0, len=document.styleSheets[0][rules].length; i<len; i++) {
         if (document.styleSheets[0][rules][i].selectorText === selector) {
             document.styleSheets[0][rules][i].style[cssProp] = cssVal;
@@ -8,7 +8,7 @@ export function changeStyle(selector, cssProp, cssVal) {
 }
 
 export function setOutput(id, color, text, timeout=0) {
-    let output = document.getElementById(id);
+    const output = document.getElementById(id);
     if (output) {
         if (color !== null) {
             output.style.color = color;
@@ -35,21 +35,21 @@ export function uniqueId() {
 }
 
 export function setValue(id, v) {
-    let e = document.getElementById(id);
+    const e = document.getElementById(id);
     if (e) {
         e.value = v;
     }
 }
 
 export function setChecked(id, v) {
-    let e = document.getElementById(id);
+    const e = document.getElementById(id);
     if (e) {
         e.checked = v;
     }
 }
 
 export function getValue(id) {
-    let e = document.getElementById(id);
+    const e = document.getElementById(id);
     if (e) {
         return e.value;
     }
@@ -57,7 +57,7 @@ export function getValue(id) {
 }
 
 export function getChecked(id) {
-    let e = document.getElementById(id);
+    const e = document.getElementById(id);
     if (e) {
         return e.checked;
     }
@@ -65,7 +65,7 @@ export function getChecked(id) {
 }
 
 export function download(filename, data) {
-    let e= document.createElement('a');
+    const e = document.createElement('a');
     e.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(data));
     e.setAttribute('download', filename);
     e.style.display = 'none';
@@ -75,20 +75,20 @@ export function download(filename, data) {
 }
 
 export function upload() {
-    let e = document.createElement('input');
+    const e = document.createElement('input');
     e.type = 'file';
     e.style.display = 'none';
     document.body.appendChild(e);
     return new Promise(function(resolve, reject) {
-        let callback = (event) => {resolve(event); document.body.removeChild(e);};
+        const callback = (event) => {resolve(event); document.body.removeChild(e);};
         e.addEventListener('cancel', callback);
         e.addEventListener('change', callback);
         e.click();
     }).then((event) => {
         if (event.type == 'change') {
-            let file = event.target.files[0];
+            const file = event.target.files[0];
             return new Promise(function(resolve, reject) {
-                let reader = new FileReader();
+                const reader = new FileReader();
                 reader.onload = (e) => { resolve(e.target.result); };
                 reader.readAsText(file);
             });
@@ -108,7 +108,7 @@ export function parseJson(data) {
 
 export function format(template, args) {
     let formatted = template;
-    for(let arg in args) {
+    for(const arg in args) {
         formatted = formatted.replace("{" + arg + "}", args[arg]);
     }
     return formatted;
@@ -131,7 +131,7 @@ export function objectEqual(a, b) {
 }
 
 export function getByPath(o, ...args) {
-    for (let key of args) {
+    for (const key of args) {
         if (o === undefined || o === null) {
             return o;
         }
@@ -144,4 +144,24 @@ export function setClipboard(text) {
     return navigator.clipboard.writeText(text)
         .then(() => Promise.resolve(null))
         .catch((err) => Promise.resolve(err));
+}
+
+export function getColorValue(name) {
+    var canvas = document.createElement('canvas');
+    var context = canvas.getContext('2d');
+    context.fillStyle = name;
+    context.fillRect(0,0,1,1);
+    return context.getImageData(0,0,1,1).data;
+}
+
+var isLightColorCache = {};
+export function isLightColor(name) {
+    if (isLightColorCache[name] !== undefined) {
+        return isLightColorCache[name];
+    }
+    const [r, g, b, a] = getColorValue(name);
+    // https://en.wikipedia.org/wiki/Rec._709#Luma_coefficients
+    const luma = (r * 2126 + g * 7152 + b * 722) / 10000;
+    isLightColorCache[name] = (luma > 128);
+    return isLightColorCache[name];
 }

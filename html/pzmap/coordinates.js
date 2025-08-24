@@ -1,3 +1,4 @@
+import { center } from "./algorithm/rtree/node.js";
 import { g } from "./globals.js";
 
 var CELL_FONT = '12pt bold monospace';
@@ -10,12 +11,12 @@ var TEXT_PADDING = 8;
 var ISO_MIN_STEP_SCALE = 2;
 
 function textSize(ctx, font, text) {
-    let old_font = ctx.font;
+    const old_font = ctx.font;
     ctx.font = font;
-    let m = ctx.measureText('-01234,56789');
-    let ascent = m.actualBoundingBoxAscent;
-    let descent = m.actualBoundingBoxDescent;
-    let width = ctx.measureText(text).width;
+    const m = ctx.measureText('-01234,56789');
+    const ascent = m.actualBoundingBoxAscent;
+    const descent = m.actualBoundingBoxDescent;
+    const width = ctx.measureText(text).width;
     ctx.font = old_font;
     return [width, ascent, descent];
 }
@@ -34,8 +35,8 @@ var grid2key = {
 
 // return square(0, 0, layer) on canvas coordinate.
 function getCanvasOrigin(viewer, map, layer) {
-    let vp00 = getViewportPointBySquare(viewer, map, 0, 0, layer);
-    let c00 = viewer.viewport.pixelFromPoint(vp00, true);
+    const vp00 = getViewportPointBySquare(viewer, map, 0, 0, layer);
+    const c00 = viewer.viewport.pixelFromPoint(vp00, true);
     c00.x *= window.devicePixelRatio;
     c00.y *= window.devicePixelRatio;
     return c00;
@@ -54,33 +55,32 @@ function fromTopSquare(step, sx, sy, layer) {
 }
 
 function toIsoSquare(step, x, y, layer) {
-    let fgx = x / step;
-    let fgy = 2 * (y + 1.5 * layer * step) / step;
-    let sx = fgy + fgx;
-    let sy = fgy - fgx;
+    const fgx = x / step;
+    const fgy = 2 * (y + 1.5 * layer * step) / step;
+    const sx = fgy + fgx;
+    const sy = fgy - fgx;
     return [Math.floor(sx), Math.floor(sy)];
 }
 
 function fromIsoSquare(step, sx, sy, layer) {
-    let x = (sx - sy) * step / 2;
-    let y = (sx + sy) * step / 4;
-    y -= 1.5 * layer * step;
+    const x = (sx - sy) * step / 2;
+    const y = (sx + sy) * step / 4 - 1.5 * layer * step;
     return [x, y];
 }
 
 var toSquare = {
-    'iso': toIsoSquare,
-    'top': toTopSquare
+    iso: toIsoSquare,
+    top: toTopSquare
 }
 
 var fromSquare = {
-    'iso': fromIsoSquare,
-    'top': fromTopSquare
+    iso: fromIsoSquare,
+    top: fromTopSquare
 }
 
 function inScreenCoords(ctx, map_type, c00, step, border) {
-    let w = ctx.canvas.width;
-    let h = ctx.canvas.height;
+    const w = ctx.canvas.width;
+    const h = ctx.canvas.height;
     let step_x = step;
     let step_y = step;
     let y_start = 0;
@@ -91,22 +91,22 @@ function inScreenCoords(ctx, map_type, c00, step, border) {
         y_inc = 2;
     }
 
-    let gx0 = -Math.floor(c00.x / step_x) - border;
-    //let cx0 = c00.x + (gx0 * step_x);
-    let gy0 = -Math.floor(c00.y / step_y) - border;
-    //let cy0 = c00.y + (gy0 * step_y);
-    let dx0 = gx0 + gy0;
-    //let dy0 = gy0 - gx0;
+    const gx0 = -Math.floor(c00.x / step_x) - border;
+    //const cx0 = c00.x + (gx0 * step_x);
+    const gy0 = -Math.floor(c00.y / step_y) - border;
+    //const cy0 = c00.y + (gy0 * step_y);
+    const dx0 = gx0 + gy0;
+    //const dy0 = gy0 - gx0;
 
-    let coords = [];
+    const coords = [];
     for (let x = 0; x <= w / step_x + border * 2 - 1; x++) {
         if (map_type != 'top') {
             y_start = (dx0 + x) % 2;
         }
         for (let y = y_start; y <= h / step_y + border * 2 - 1; y+=y_inc) {
-            let gx = gx0 + x;
-            let gy = gy0 + y;
-            let [kx, ky] = grid2key[map_type](gx, gy);
+            const gx = gx0 + x;
+            const gy = gy0 + y;
+            const [kx, ky] = grid2key[map_type](gx, gy);
             coords.push([gx, gy, kx, ky]);
         }
     }
@@ -139,7 +139,14 @@ export function getCanvasRange(viewer, map, layer) {
     x1 += 1;
     y1 += 1;
     if (map.type == 'top') {
-        return { minX: x0, minY: y0, maxX: x1, maxY: y1 };
+        return {
+            minX: x0,
+            minY: y0,
+            maxX: x1,
+            maxY: y1,
+            centerX: (x0 + x1) / 2,
+            centerY: (y0 + y1) / 2,
+        };
     } else {
         // top-left corner: (x0, y0)
         // top-right corner:
@@ -157,16 +164,18 @@ export function getCanvasRange(viewer, map, layer) {
             maxDiff: x1 - y1,      // max(x - y)
             minSum: x0 + y0,      // min(x + y)
             maxSum: x1 + y1,      // max(x + y)
+            centerX: (x0 + x1) / 2,
+            centerY: (y0 + y1) / 2,
         }
     }
 }
 
 function getSquareByCanvas(viewer, map, x, y, layer) {
-    //let x = event.position.x * window.devicePixelRatio;
-    //let y = event.position.y * window.devicePixelRatio;
-    let c00 = getCanvasOrigin(viewer, map, 0);
-    let step = getSquareStep(viewer, map, true);
-    let [sx, sy] = toSquare[map.type](step, x - c00.x, y - c00.y, layer);
+    //const x = event.position.x * window.devicePixelRatio;
+    //const y = event.position.y * window.devicePixelRatio;
+    const c00 = getCanvasOrigin(viewer, map, 0);
+    const step = getSquareStep(viewer, map, true);
+    const [sx, sy] = toSquare[map.type](step, x - c00.x, y - c00.y, layer);
     return [sx, sy];
 }
 
@@ -177,9 +186,17 @@ export function getZoom(viewer, current) {
     return zoom;
 }
 
+export function isMaxZoom(viewer, current) {
+    let zoom = viewer.viewport.getZoom(current);
+    zoom = viewer.world.getItemAt(0).viewportToImageZoom(zoom);
+    const maxZoom = viewer.viewport.getMaxZoomPixelRatio();
+    const EPS = 1e-10;
+    return zoom + EPS >= maxZoom;
+}
+
 export function stepToZoom(step) {
     // step == pixels per square
-    let zoom = g.viewer.world.getItemAt(0).imageToViewportZoom(step / g.base_map.sqr);
+    const zoom = g.viewer.world.getItemAt(0).imageToViewportZoom(step / g.base_map.sqr);
     return zoom / window.devicePixelRatio;
 }
 
@@ -190,9 +207,9 @@ export function getSquare(event) {
 }
 
 export function getViewportPointBySquare(viewer, map, x, y, layer) {
-    let [dx, dy] = fromSquare[map.type](map.sqr, x, y, layer);
-    let imgx = (map.x0 + dx) / map.scale;
-    let imgy = (map.y0 + dy) / map.scale;
+    const [dx, dy] = fromSquare[map.type](map.sqr, x, y, layer);
+    const imgx = (map.x0 + dx) / map.scale;
+    const imgy = (map.y0 + dy) / map.scale;
     return viewer.world.getItemAt(0).imageToViewportCoordinates(imgx, imgy);
 }
 
@@ -218,14 +235,14 @@ export class Grid {
 
     update(viewer) {
         this.c00 = getCanvasOrigin(viewer, this.map, 0);
-        let step = getSquareStep(viewer, this.map, true);
+        const step = getSquareStep(viewer, this.map, true);
         if (this.step === step) {
             return;
         }
         this.step = step;
         this.block_step = this.step * this.size.block;
         this.cell_step = this.step * this.size.cell;
-        let scale = this.map.type == 'top' ? 1 : ISO_MIN_STEP_SCALE;
+        const scale = this.map.type == 'top' ? 1 : ISO_MIN_STEP_SCALE;
         if (this.block_step >= MIN_BLOCK_STEP * scale * window.devicePixelRatio) {
             this.block = 1;
             this.cell = 3;
@@ -243,10 +260,10 @@ export class Grid {
     }
 
     updateTextSize() {
-        let [cell_width, cell_ascent, cell_descent] = textSize(this.ctx, CELL_FONT, '-00,-00');
-        let cell_height = cell_ascent + cell_descent;
-        let [block_width, block_ascent, block_descent] = textSize(this.ctx, BLOCK_FONT, '-0000,-0000');
-        let block_height = block_ascent + block_descent;
+        const [cell_width, cell_ascent, cell_descent] = textSize(this.ctx, CELL_FONT, '-00,-00');
+        const cell_height = cell_ascent + cell_descent;
+        const [block_width, block_ascent, block_descent] = textSize(this.ctx, BLOCK_FONT, '-0000,-0000');
+        const block_height = block_ascent + block_descent;
         if (this.map.type == 'top') {
             this.cell_text_min_step = TEXT_PADDING + Math.max(cell_width, cell_height);
             this.cell_text_offset = TEXT_PADDING / 2 + cell_ascent;
@@ -264,19 +281,19 @@ export class Grid {
     }
 
     convertCoord(f, t, x, y) {
-        let fs = this.size[f];
-        let ts = this.size[t];
+        const fs = this.size[f];
+        const ts = this.size[t];
         return [Math.floor(x * fs / ts), Math.floor(y * fs / ts)]
     }
 
     drawEditState(trimmer, layer) {
-        let fill = this.ctx.fillStyle;
+        const fill = this.ctx.fillStyle;
         let step = this.cell_step;
         if (this.block) {
             step = this.block_step;
         }
-        let [l00, step_x, step_y] = this.layerOriginAndStep(step, layer);
-        let coords = inScreenCoords(this.ctx, this.map.type, l00, step, 2);
+        const [l00, step_x, step_y] = this.layerOriginAndStep(step, layer);
+        const coords = inScreenCoords(this.ctx, this.map.type, l00, step, 2);
 
         if (this.map.type == 'top') {
             this.ctx.setTransform(1, 0, 0, 1, l00.x, l00.y);
@@ -284,8 +301,8 @@ export class Grid {
             this.ctx.setTransform(0.5, 0.25, -0.5 ,0.25, l00.x, l00.y);
         }
         let color = 0;
-        for (let [gx, gy, kx, ky] of coords) {
-            let key = makeKey(kx, ky);
+        for (const [gx, gy, kx, ky] of coords) {
+            const key = makeKey(kx, ky);
             if ((this.block && trimmer.selected_blocks.has(key)) ||
                 (!this.block && trimmer.selected_cells[key] > 0 && trimmer.selected_cells[key] == trimmer.saved_cells[key])) {
                 color = 'rgba(255,0,0,0.5)'; // full selected, red
@@ -306,13 +323,13 @@ export class Grid {
         }
         // drag selecting area
         if (trimmer.selecting && (trimmer.start.x != trimmer.end.x || trimmer.start.y != trimmer.end.y)) {
-            let size = this.size[trimmer.selecting];
-            let xmin = Math.min(trimmer.end.x, trimmer.start.x);
-            let ymin = Math.min(trimmer.end.y, trimmer.start.y);
-            let xmax = Math.max(trimmer.end.x, trimmer.start.x) + size;
-            let ymax = Math.max(trimmer.end.y, trimmer.start.y) + size;
-            let [xs, ys] = this.convertCoord('sqr', trimmer.selecting, xmin, ymin);
-            let [xe, ye] = this.convertCoord('sqr', trimmer.selecting, xmax, ymax);
+            const size = this.size[trimmer.selecting];
+            const xmin = Math.min(trimmer.end.x, trimmer.start.x);
+            const ymin = Math.min(trimmer.end.y, trimmer.start.y);
+            const xmax = Math.max(trimmer.end.x, trimmer.start.x) + size;
+            const ymax = Math.max(trimmer.end.y, trimmer.start.y) + size;
+            const [xs, ys] = this.convertCoord('sqr', trimmer.selecting, xmin, ymin);
+            const [xe, ye] = this.convertCoord('sqr', trimmer.selecting, xmax, ymax);
 
             this.ctx.fillStyle = 'rgba(255,255,255,0.5)'; // white, semi-transparent
             this.ctx.fillRect(xs * this.step * size, ys * this.step * size, (xe - xs) * this.step * size, (ye - ys) * this.step * size);
@@ -325,8 +342,8 @@ export class Grid {
     drawGrid(step, color, line_width, layer) {
         this.ctx.strokeStyle = color;
         this.ctx.lineWidth = line_width;
-        let w = this.ctx.canvas.width;
-        let h = this.ctx.canvas.height;
+        const w = this.ctx.canvas.width;
+        const h = this.ctx.canvas.height;
         let x1 = this.c00.x
         let y1 = this.c00.y
         let max_w = w;
@@ -335,7 +352,7 @@ export class Grid {
         let y_shift = 0;
         let y_step = step;
         if (this.map.type != 'top') {
-            let layer_shift = 1.5 * this.step * layer;
+            const layer_shift = 1.5 * this.step * layer;
             x1 += 2 * (this.c00.y - layer_shift);
             y1 -= this.c00.x / 2 + layer_shift;
             max_w += 2 * h;
@@ -373,14 +390,14 @@ export class Grid {
     drawCoord(step, yoffset, color, font, layer) {
         this.ctx.fillStyle = color;
         this.ctx.font = font;
-        let [l00, step_x, step_y] = this.layerOriginAndStep(step, layer);
-        let coords = inScreenCoords(this.ctx, this.map.type, l00, step, 1);
+        const [l00, step_x, step_y] = this.layerOriginAndStep(step, layer);
+        const coords = inScreenCoords(this.ctx, this.map.type, l00, step, 1);
         let xoffset = TEXT_PADDING / 2;
         this.ctx.setTransform(1, 0, 0, 1, l00.x, l00.y);
-        for (let [gx, gy, kx, ky] of coords) {
-            let cx = gx * step_x;
-            let cy = gy * step_y;
-            let text = makeKey(kx, ky);
+        for (const [gx, gy, kx, ky] of coords) {
+            const cx = gx * step_x;
+            const cy = gy * step_y;
+            const text = makeKey(kx, ky);
             if (this.map.type != 'top') {
                 xoffset = - this.ctx.measureText(text).width / 2;
             }
@@ -392,9 +409,9 @@ export class Grid {
 
 
     draw(layer) {
-        let stroke = this.ctx.strokeStyle;
-        let fill = this.ctx.fillStyle;
-        let font = this.ctx.font;
+        const stroke = this.ctx.strokeStyle;
+        const fill = this.ctx.fillStyle;
+        const font = this.ctx.font;
 
         if (this.block) {
             this.drawGrid(this.block_step, BLOCK_COLOR, this.block, layer);

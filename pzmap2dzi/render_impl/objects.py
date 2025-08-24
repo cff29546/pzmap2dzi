@@ -1,8 +1,8 @@
 from PIL import Image, ImageDraw, ImageColor
 import os
 import struct
-from .common import draw_square, render_long_text, render_edge, LazyFont
-from .. import pzobjects
+from .common import draw_square, render_long_text, render_edge, LazyFont, dump_marks
+from .. import pzobjects, geometry
 
 try:
     from functools import lru_cache
@@ -37,10 +37,14 @@ class ColorMapper(object):
         if not key:
             return None
         if key not in self.cache:
-            name = self.color_map.get(key, self.default)
+            name = self.get_name(key)
             self.cache[key] = self.apply_alpha(name)
         return self.cache[key]
 
+    def get_name(self, key):
+        if not key:
+            return None
+        return self.color_map.get(key, self.default)
 
 class Lmap(object):
     def __init__(self, biome):
@@ -186,6 +190,13 @@ class ObjectsRender(object):
             if k in self.used_types and v != 'skip':
                 self.legends[k] = v
 
+        if options.get('use_mark'):
+            self.mark = ObjectsMark(objects_path, types, self.color_map, **options)
+            self.NO_IMAGE = True
+
+    def render(self, dzi):
+        return self.mark.process(dzi)
+
     def update_options(self, options):
         options['render_margin'] = [-2, -2, 2, 2]  # add margin for text
         options['legends'] = self.legends
@@ -219,3 +230,39 @@ class ObjectsRender(object):
             for func, args in drawing:
                 func(draw, ox, oy, *args)
 
+
+class ObjectsMark(object):
+    def __init__(self, objects_path, types, color_map, **options):
+        self.objects_path = objects_path
+        self.types = types
+        self.output = options.get('output')
+        self.encoding = options.get('encoding')
+        self.map_name = options.get('cache_name', 'unknown')
+        self.color_map = color_map
+
+    def process(self, dzi):
+        marks = self.get_objects_marks()
+        if marks:
+            output_path = os.path.join(self.output, 'marks.json')
+            dump_marks(marks, output_path)
+        return True
+
+    def get_objects_marks(self):
+        objects_raw = pzobjects.load_typed_objects(self.objects_path, types=self.types)
+        objects = map(pzobjects.Obj, objects_raw)
+        marks = []
+        for i, obj in enumerate(objects):
+            rects = [{'x': x, 'y': y, 'width': w, 'height': h} for x, y, w, h in obj.rects()]
+            marks.append({
+                'type': 'area',
+                'color': self.color_map.get_name(obj.type),
+                'layer': obj.z,
+                'name': obj.obj.get('name', ''),
+                'rects': rects,
+                #'text_position': 'top',
+                #'background': 'transparent',
+                #'passthrough': True,
+                #'id': 'obj_{}_{}'.format(self.map_name, i),
+                #'visiable_zoom_level': 2,
+            })
+        return marks

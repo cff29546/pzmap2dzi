@@ -1,5 +1,9 @@
 # Change log
 
+# 2025-08-26: 1.1.3 + UI 1.1.3
+
+* Avoid redundant texture unpacking when files are already present
+
 # 2025-08-24: 1.1.2 + UI 1.1.3
 
 * Enable resizing of area marks

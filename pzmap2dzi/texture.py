@@ -7,6 +7,7 @@ import os
 import struct
 import time
 import yaml
+import hashlib
 if __package__ is not None:
     from . import binfile, util, mptask, plants
 
@@ -73,6 +74,13 @@ def color_sum(pixels):
         return r, g, b, total
     return 0, 0, 0, 1
 
+
+def gethash(path, method='md5'):
+    with io.open(path, 'rb') as f:
+        data = f.read()
+        hasher = getattr(hashlib, method)()
+        hasher.update(data)
+        return ':'.join((method, hasher.hexdigest()))
 
 class Texture(object):
     def __init__(self, im, offset=None):
@@ -149,10 +157,25 @@ class TextureLibrary(object):
             prefix = 'tl.{}.{}'.format(os.getpid(), cache_name)
             self.mem = shared_memory_image.ImageSharedMemory(prefix, 32)
         self.lib = {}
+        self.init_hash()
+
+    def init_hash(self):
+        self.hash = {}
+        for path in self.texture_path:
+            hash_file = os.path.join(path, 'hash.yaml')
+            if os.path.isfile(hash_file):
+                with io.open(hash_file, 'r', encoding='utf8') as f:
+                    self.hash.update(yaml.safe_load(f) or {})
 
     def add_pack(self, path, debug=False):
         if not os.path.isfile(path):
             return
+        hash = gethash(path)
+        if self.hash.get(path) == hash:
+            print('{}: hash unchanged, skip.'.format(path))
+            return
+        else:
+            self.hash[path] = hash
         pages = load_pack(path)
         total = len(pages)
         for idx, page in enumerate(pages):
@@ -274,14 +297,18 @@ class TextureLibrary(object):
     def save_all(self, path, parallel=1):
         if not util.ensure_folder(path):
             return False
-        t = mptask.Task(SaveImg(path), mptask.SplitScheduler(True))
         if self.page_mode:
             tasks = list(enumerate(self.page))
             with open(os.path.join(path, 'mapping.yaml'), 'w') as f:
                 f.write(yaml.safe_dump(self.mapping))
         else:
             tasks = list(self.lib.items())
+        if not tasks:
+            return
+        t = mptask.Task(SaveImg(path), mptask.SplitScheduler(True))
         t.run(tasks, parallel)
+        with io.open(os.path.join(path, 'hash.yaml'), 'w', encoding='utf8') as f:
+            f.write(yaml.safe_dump(self.hash))
 
     def blend_textures(self, names):
         w, h = 384, 512

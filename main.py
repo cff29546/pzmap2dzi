@@ -109,13 +109,13 @@ def unpack(args):
             continue
         path = maps[d]['texture_path'].format(**dict(conf, **maps[d]))
         if os.path.isdir(path):
-            tl = texture.TextureLibrary()
+            output = os.path.join(conf['output_path'], 'texture', d)
+            tl = texture.TextureLibrary(texture_path=[output])
             for name in os.listdir(path):
                 for pattern in maps[d]['texture_files']:
                     if re.match(pattern, name):
                         tl.add_pack(os.path.join(path, name))
                         break
-            output = os.path.join(conf['output_path'], 'texture', d)
             tl.save_all(output, conf['render_conf']['worker_count'])
         else:
             print('invalid texture_path: {}'.format(path))

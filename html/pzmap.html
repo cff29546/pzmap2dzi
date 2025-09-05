@@ -14,45 +14,49 @@
     .text-right { float: right; }
     table, th, td { border: none; border-collapse: collapse; }
     button { border-radius: 4px; border-color: DarkGray; }
-    .active { background-color: LightSkyBlue; border-color: DeepSkyBlue; }
-    .warning { background-color: LightCoral; border-color: DarkRed; }
+    button.active { background-color: LightSkyBlue; border-color: DeepSkyBlue; }
+    button.warning { background-color: LightCoral; border-color: DarkRed; }
     div { border: none; }
-    .inline { display: inline-block; }
-    .coords { border: dashed 1px; }
-    .iso-only-btn { display: inline-block; }
-    .passthrough { pointer-events: none; }
-    .interactive { pointer-events: auto; }
-    .mark { border-style: solid; }
-    .text { white-space: nowrap; text-shadow: 2px 0 #fff, -2px 0 #fff, 0 2px #fff,
+    div.inline { display: inline-block; }
+    div.coords { border: dashed 1px; }
+    div.iso-only-btn { display: inline-block; }
+    div.passthrough { pointer-events: none; }
+    div.interactive { pointer-events: auto; }
+    div.mark { border-style: solid; }
+    div.text { white-space: nowrap; text-shadow: 2px 0 #fff, -2px 0 #fff, 0 2px #fff,
       0 -2px #fff, 1px 1px #fff, -1px -1px #fff, 1px -1px #fff, -1px 1px #fff;
       color: #33f; font-family: Arial, sans-serif; }
-    .text.light {
-      white-space: nowrap; text-shadow: 2px 0 #000, -2px 0 #000, 0 2px #000,
+    div.text.light { white-space: nowrap; text-shadow: 2px 0 #000, -2px 0 #000, 0 2px #000,
       0 -2px #000, 1px 1px #000, -1px -1px #000, 1px -1px #000, -1px 1px #000; }
-    .text.above { color: #383; }
-    .text.below { color: #93f; }
-    .text.selected { color: #881; }
-    .area { transform-origin: top left; background-color: rgba(255,255,255,0.3); border-color: #39f; }
-    .area.rect.iso { border-width: 8px; transform: matrix(0.5, 0.25, -0.5, 0.25, 0, 0); }
-    .area.rect.top { padding-top: 0px; }
-    .area.rect.diff-sum.iso { transform: none; /* matrix(0.5, 0, 0, 0.25, 0, 0); */ }
-    .area.rect.diff-sum.top { transform: matrix(0.5, -0.5, 0.5, 0.5, 0, 0); }
-    .area.text { padding-top: 0px;}
-    .area.above { background-color: rgba(255,255,255,0); border-color: #9f3; }
-    .area.below { background-color: rgba(255,255,255,0); border-color: #99f; }
-    .area.selected { background-color: rgba(255,255,50,0.3); border-color: #ff3; }
-    .area.selected-rect { background-color: rgba(255,255,192,0.3); border-color: #ffc; }
-    .area.iso.cursor { background-color: rgba(255,255,255,0); border-color: #0f0; border-width: 2px; }
-    .area.top.cursor { background-color: rgba(255,255,255,0); border-color: #0f0; border-width: 1px; }
-    .point { border-radius: 50%; border-width: 2px; width: 10px; height: 10px;
+    div.text.above { color: #383; }
+    div.text.below { color: #93f; }
+    div.text.selected { color: #881; }
+    div.area { transform-origin: top left; background-color: rgba(255,255,255,0.3); border-color: #39f; }
+    div.area.rect.iso { border-width: 8px; transform: matrix(0.5, 0.25, -0.5, 0.25, 0, 0); }
+    div.area.rect.top { padding-top: 0px; }
+    div.area.rect.diff-sum.iso { transform: none; }
+    div.area.rect.diff-sum.top { transform: matrix(0.5, -0.5, 0.5, 0.5, 0, 0); }
+    div.area.text { padding-top: 0px;}
+    div.area.above { background-color: rgba(255,255,255,0); border-color: #9f3; }
+    div.area.below { background-color: rgba(255,255,255,0); border-color: #99f; }
+    div.area.selected { background-color: rgba(255,255,50,0.3); border-color: #ff3; }
+    div.area.selected-rect { background-color: rgba(255,255,192,0.3); border-color: #ffc; }
+    div.area.iso.cursor { background-color: rgba(255,255,255,0); border-color: #0f0; border-width: 2px; }
+    div.area.top.cursor { background-color: rgba(255,255,255,0); border-color: #0f0; border-width: 1px; }
+    div.point { border-radius: 50%; border-width: 2px; width: 10px; height: 10px;
       background-color: #39f; border-color: #33f; }
-    .point.text { padding-top: 5px; }
-    .point.above { background-color: #9f3; border-color: #383; }
-    .point.below { background-color: #99f; border-color: #93f; }
-    .point.selected { background-color: #ff3; border-color: #881; }
-
-    .selected { visibility: visible; pointer-events: auto; }
-    .fly { position: absolute; z-index: 100; right: 0;}
+    div.point.text { padding-top: 5px; }
+    div.point.above { background-color: #9f3; border-color: #383; }
+    div.point.below { background-color: #99f; border-color: #93f; }
+    div.point.selected { background-color: #ff3; border-color: #881; }
+    div.selected { visibility: visible; pointer-events: auto; }
+    div.fly { position: absolute; z-index: 100; right: 0;}
+    svg { transform-origin: top left; border: none; }
+    svg.mark { border: none; }
+    svg.iso { transform: matrix(0.5, 0.25, -0.5, 0.25, 0, 0); }
+    svg text { text-anchor: middle; dominant-baseline: hanging; paint-order: stroke; 
+      font-family: Arial, sans-serif; }
+    svg circle { fill: #39f; stroke: #33f; }
     </style>
   </head>
   <body>
@@ -65,8 +69,9 @@
         <button id="grid_btn" onclick="toggleGrid()"></button>
         <button id="zombie_btn" onclick="toggleOverlay('zombie')"></button>
         <button id="foraging_btn" onclick="toggleOverlay('foraging')"></button>
-        <button id="room_btn" onclick="toggleOverlay('room')"></button>
+        <button id="rooms_btn" onclick="toggleOverlay('rooms')"></button>
         <button id="objects_btn" onclick="toggleOverlay('objects')"></button>
+        <button id="streets_btn" onclick="toggleOverlay('streets')"></button>
         <button id="marker_btn" onclick="toggleMarkerUI()"></button>
         <button id="trimmer_btn" onclick="toggleTrimmer()"></button>
         <div id="coords" class="inline coords" onclick="copyCoords()"></div>
@@ -88,8 +93,13 @@
           <div id="about_ui" class="fly"></div>
         </div>
       </div>
-      <div style="flex: 1 1 auto;">
-        <div id="map_div" allowfullscreen style="height: 100%"> </div>
+      <div style="flex: 1 1 auto; position: relative;">
+        <div id="map_div" allowfullscreen style="height: 100%"></div>
+        <svg id="svg_overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;" xmlns="http://www.w3.org/2000/svg">
+          <defs id="svg_defs"></defs>
+          <g id="svg_iso" transform="matrix(0.5, 0.25, -0.5, 0.25, 0, 0)"></g>
+          <g id="svg_top"></g>
+        </svg>
       </div>
     </div>
     <script type="text/javascript" src="pzmap.js"></script>

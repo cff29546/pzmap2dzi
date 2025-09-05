@@ -46,11 +46,11 @@ export class MarkEditor {
             const mark = this.manager.db.get(id);
             if (mark) {
                 this.current = mark.copy();
-                this.current.selected = true;
+                this.current.select();
             }
         }
         if (this.current) {
-            this.current.selected_index = idx;
+            this.current.select(idx);
             this.manager.render.upsert(this.current);
             this.updateStatus();
         }
@@ -98,8 +98,7 @@ export class MarkEditor {
             }
             this.current = create(obj);
             if (this.current) {
-                this.current.selected = true;
-                this.current.selected_index = 0;
+                this.current.select();
             }
         }
         if (this.current) {
@@ -113,8 +112,7 @@ export class MarkEditor {
         this.unselect();
         this.current = create(obj);
         if (this.current) {
-            this.current.selected = true;
-            this.current.selected_index = 0;
+            this.current.select();
         }
     }
 
@@ -123,8 +121,7 @@ export class MarkEditor {
             this.fromUI(true); // create new mark from UI if not exists
         }
         if (this.current) {
-            this.current.selected = false;
-            this.current.selected_index = -1;
+            this.current.unselect();
             this.manager.db.upsert(this.current);
             this.manager.redraw(this.current.id);
             this.current = null;

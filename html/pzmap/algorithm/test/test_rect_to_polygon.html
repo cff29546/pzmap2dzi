@@ -1,0 +1,138 @@
+<script src="./tinytest.js"></script>
+<script type="module">
+import { rectsToPolygons } from '../geometry/rects_intersection.js';
+import { pointInPolygon, pointInRect } from '../geometry/geometry_utils.js';
+
+var svg = null;
+var scale = 10;
+
+function init() {
+    svg = document.getElementById('svg');
+    svg.innerHTML = '';
+}
+
+function drawRect(r, title) {
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', r.x * scale);
+    rect.setAttribute('y', r.y * scale);
+    rect.setAttribute('width', r.width * scale);
+    rect.setAttribute('height', r.height * scale);
+    rect.setAttribute('fill', 'none');
+    rect.setAttribute('stroke', 'blue');
+    rect.setAttribute('stroke-width', '1');
+    svg.appendChild(rect);
+}
+
+function drawPolygon(p, title) {
+    const polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+    const points = p.points.map(pt => `${pt.x * scale},${pt.y * scale}`).join(' ');
+    polygon.setAttribute('points', points);
+    polygon.setAttribute('fill', 'rgba(255,255,0,0.3)');
+    polygon.setAttribute('stroke', 'red');
+    polygon.setAttribute('stroke-width', '3');
+    svg.appendChild(polygon);
+    for (const mask of p.masks) {
+        const maskPoly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+        const maskPoints = mask.map(pt => `${pt.x * scale},${pt.y * scale}`).join(' ');
+        maskPoly.setAttribute('points', maskPoints);
+        maskPoly.setAttribute('fill', 'rgba(0,0,0,0.5)');
+        maskPoly.setAttribute('stroke', 'red');
+        maskPoly.setAttribute('stroke-width', '3');
+        svg.appendChild(maskPoly);
+    }
+}
+
+function drawPoint(p) {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', p.x * scale);
+    circle.setAttribute('cy', p.y * scale);
+    circle.setAttribute('r', 2);
+    circle.setAttribute('fill', 'green');
+    svg.appendChild(circle);
+}
+
+function draw(rects, polygons, testPoint) {
+    init();
+    let count = 0;
+    for (const poly of polygons) {
+        drawPolygon(poly, `P${count++}`);
+    }
+    count = 0;
+    for (const r of rects) {
+        drawRect(r, `R${count++}`);
+    }
+    if (testPoint) {
+        drawPoint(testPoint);
+    }
+}
+
+function randomRect(range, size) {
+    return {
+        x: Math.floor(Math.random() * range),
+        y: Math.floor(Math.random() * range),
+        width: Math.floor(Math.random() * size) + 1,
+        height: Math.floor(Math.random() * size) + 1
+    };
+}
+
+tests({
+    'rectsToPolygons': () => {
+        function test(size, drawOutput) {
+            const rects = [];
+            for (let i = 0; i < size; i++) {
+                rects.push(randomRect(100, 10));
+            }
+            const polygons = rectsToPolygons(rects);
+            let areaPolys = 0;
+            let areaRects = 0;
+            for (let i = 0; i < 110; i++) {
+                for (let j = 0; j < 110; j++) {
+                    const p = { x: i, y: j };
+                    let inRect = 0;
+                    for (const r of rects) {
+                        if (pointInRect(p, r)) {
+                            inRect = 1;
+                            break;
+                        }
+                    }
+                    let inPoly = 0;
+                    for (const poly of polygons) {
+                        if (pointInPolygon(p, poly)) {
+                            inPoly = 1;
+                            break;
+                        }
+                    }
+                    areaRects += inRect;
+                    areaPolys += inPoly;
+                    if (inRect !== inPoly) {
+                        console.log('Rectangles:', rects);
+                        console.log('Polygons:', polygons);
+                        draw(rects, polygons, p);
+                    }
+                    assert(inRect === inPoly, `Point ${JSON.stringify(p)} inRect=${inRect} but inPoly=${inPoly}`);
+                }
+            }
+            if (drawOutput) {
+                draw(rects, polygons, null);
+                //console.log(JSON.stringify(rects), JSON.stringify(polygons));
+            }
+        }
+        for (let i = 0; i < 5; i++) {
+            console.log(`Test iteration ${i}`);
+            test(80, i === 0);
+        }
+    },
+    'perf': () => {
+        const rects = [];
+        for (let i = 0; i < 1000; i++) {
+            rects.push(randomRect(1000, 10));
+        }
+        console.time('rectsToPolygons');
+        rectsToPolygons(rects);
+        console.timeEnd('rectsToPolygons');
+    }
+});
+</script>
+<body>
+<svg id="svg" width="1100" height="1100" style="border:1px solid black"></svg>
+</body>

@@ -95,7 +95,7 @@ def render_edge(draw, x, y, color, width, border_flags):
         draw.line(edge, fill=color, width=width)
 
 
-def dump_marks(marks, output_path, compact=False):
+def dump_marks(marks, output_path):
     with io.open(output_path, 'w', encoding='utf-8') as f:
         start = True
         f.write('[\n')
@@ -104,24 +104,6 @@ def dump_marks(marks, output_path, compact=False):
                 f.write(',')
             else:
                 start = False
-            if compact:
-                mark = compact_mark(mark)
             f.write(json.dumps(mark, separators=(',', ':')))
             f.write('\n')
         f.write(']')
-
-def compact_mark(mark):
-    rects = []
-    for rect in mark.get('rects', []):
-        rects.append('{},{},{},{}'.format(
-            rect['x'],
-            rect['y'],
-            rect['width'],
-            rect['height'],
-        ))
-    return '{}:{}:{}:{}'.format(
-        mark['name'],
-        mark['layer'],
-        mark['color'],
-        ':'.join(rects),
-    )

@@ -1,5 +1,5 @@
-import { center } from "./algorithm/rtree/node.js";
 import { g } from "./globals.js";
+import { lineClip } from "./algorithm/geometry/geometry_utils.js";
 
 var CELL_FONT = '12pt bold monospace';
 var BLOCK_FONT = '12pt monospace';
@@ -46,20 +46,27 @@ function getSquareStep(viewer, map, current) {
     return map.sqr * getZoom(viewer, current) / map.scale;
 }
 
-function toTopSquare(step, x, y, layer) {
-    return [Math.floor(x/step), Math.floor(y/step)];
+function toTopSquare(step, x, y, layer, round) {
+    const coord = [x/step, y/step]
+    if (round) {
+        return coord.map(Math.floor);
+    }
+    return coord;
 }
 
 function fromTopSquare(step, sx, sy, layer) {
     return [sx*step, sy*step];
 }
 
-function toIsoSquare(step, x, y, layer) {
+function toIsoSquare(step, x, y, layer, round) {
     const fgx = x / step;
     const fgy = 2 * (y + 1.5 * layer * step) / step;
     const sx = fgy + fgx;
     const sy = fgy - fgx;
-    return [Math.floor(sx), Math.floor(sy)];
+    if (round) {
+        return [Math.floor(sx), Math.floor(sy)];
+    }
+    return [sx, sy];
 }
 
 function fromIsoSquare(step, sx, sy, layer) {
@@ -123,51 +130,142 @@ export function zoomTo(sx, sy, layer, step) {
     }
 }
 
-export function getCanvasRange(viewer, map, layer) {
-    let layer0 = layer;
-    let layer1 = layer;
-    if (layer === undefined || layer === null) {
-        layer0 = map.minlayer || 0;
-        layer1 = map.maxlayer || 0;
+class Range {
+    constructor(viewer, map, current=true) {
+        const c00 = getCanvasOrigin(viewer, map, 0);
+        const step = getSquareStep(viewer, map, current);
+        const w = viewer.drawer.context.canvas.width;
+        const h = viewer.drawer.context.canvas.height;
+        const [x0, y0] = toSquare[map.type](step, -c00.x, -c00.y, 0, false);
+        const [x1, y1] = toSquare[map.type](step, -c00.x + w, -c00.y + h, 0, false);
+        if (map.type == 'top') {
+            this.diffSum = false;
+            this._initXY(x0, y0, x1 + 1, y1 + 1);
+        } else {
+            this.diffSum = true;
+            this._initDiffSum(x0, y0, x1 + 1, y1 + 1);
+        }
     }
-    const c00 = getCanvasOrigin(viewer, map, 0);
-    const step = getSquareStep(viewer, map, true);
-    const w = viewer.drawer.context.canvas.width;
-    const h = viewer.drawer.context.canvas.height;
-    const [x0, y0] = toSquare[map.type](step, -c00.x, -c00.y, layer0);
-    let [x1, y1] = toSquare[map.type](step, w - c00.x, h - c00.y, layer1);
-    x1 += 1;
-    y1 += 1;
-    if (map.type == 'top') {
-        return {
-            minX: x0,
-            minY: y0,
-            maxX: x1,
-            maxY: y1,
-            centerX: (x0 + x1) / 2,
-            centerY: (y0 + y1) / 2,
-        };
-    } else {
+
+    _initXY(x0, y0, x1, y1) {
+        this.minX = x0;
+        this.minY = y0;
+        this.maxX = x1;
+        this.maxY = y1;
+        this.centerX = (x0 + x1) / 2;
+        this.centerY = (y0 + y1) / 2;
+    }
+
+    _initDiffSum(x0, y0, x1, y1) {
         // top-left corner: (x0, y0)
         // top-right corner:
         //     ((x0 + x1 + y0 - y1) /2, (x0 - x1 + y0 + y1) / 2)
         // bottom-left corner:
         //     ((x0 + x1 - y0 + y1) / 2, (-x0 + x1 + y0 + y1) / 2)
         // bottom-right corner: (x1, y1)
-        return {
-            minX: x0,
-            minY: ((x0 - x1 + y0 + y1) >> 1),
-            maxX: x1,
-            maxY: ((-x0 + x1 + y0 + y1 + 1) >> 1),
-            diffSum: true,
-            minDiff: x0 - y0,     // min(x - y)
-            maxDiff: x1 - y1,      // max(x - y)
-            minSum: x0 + y0,      // min(x + y)
-            maxSum: x1 + y1,      // max(x + y)
-            centerX: (x0 + x1) / 2,
-            centerY: (y0 + y1) / 2,
+        this.minX = x0;
+        this.minY = ((x0 - x1 + y0 + y1) / 2);
+        this.maxX = x1;
+        this.maxY = ((-x0 + x1 + y0 + y1 + 1) / 2);
+        this.minDiff = x0 - y0;
+        this.maxDiff = x1 - y1;
+        this.minSum = x0 + y0;
+        this.maxSum = x1 + y1;
+        this.centerX = (x0 + x1) / 2;
+        this.centerY = (y0 + y1) / 2;
+    }
+
+    intersects(mark) {
+        if (this.diffSum) {
+            return this._intersectsDiffSumBox(mark.bboxDiffSum(), mark.layer);
+        } else {
+            return this._intersectsBox(mark.bbox());
         }
     }
+
+    _intersectsBox(target) {
+        const { minX, minY, maxX, maxY } = target;
+        const xmin = minX > this.minX ? minX : this.minX;
+        const xmax = maxX < this.maxX ? maxX : this.maxX;
+        const ymin = minY > this.minY ? minY : this.minY;
+        const ymax = maxY < this.maxY ? maxY : this.maxY;
+        return (xmin <= xmax && ymin <= ymax);
+    }
+
+    _intersectsDiffSumBox(target, layer = 0) {
+        const d = this.diffSum ? layer * 6 : 0;
+        const { minDiff, maxDiff, minSum, maxSum } = target;
+        const dmin = minDiff > this.minDiff ? minDiff : this.minDiff;
+        const dmax = maxDiff < this.maxDiff ? maxDiff : this.maxDiff;
+        const smin = minSum - d > this.minSum ? minSum - d : this.minSum;
+        const smax = maxSum - d < this.maxSum ? maxSum - d : this.maxSum;
+        return (smin <= smax && dmin <= dmax);
+    }
+
+    contains(x, y, layer = 0) {
+        if (this.diffSum) {
+            const diff = x - y;
+            const sum = x + y - layer * 6;
+            return this._containsDiffSum(diff, sum);
+        } else {
+            return this._containsXY(x, y);
+        }
+
+    }
+
+    _containsXY(x, y) {
+        return (x >= this.minX && x <= this.maxX && y >= this.minY && y <= this.maxY);
+    }
+
+    _containsDiffSum(diff, sum) {
+        return (diff >= this.minDiff && diff <= this.maxDiff && sum >= this.minSum && sum <= this.maxSum);
+    }
+
+    getBound(minLayer = null, maxLayer = null) {
+        if (minLayer === null) minLayer = g.base_map.minlayer;
+        if (maxLayer === null) maxLayer = g.base_map.maxlayer;
+        if (this.diffSum) {
+            const d0 = maxLayer * 3;
+            const d1 = minLayer * 3;
+            //return this;
+            return {
+                minDiff: this.minDiff,
+                maxDiff: this.maxDiff,
+                minSum: this.minSum - d0 * 2,
+                maxSum: this.maxSum - d1 * 2,
+            };
+        } else {
+            return this;
+        }
+    }
+
+    segmentClip(x0, y0, x1, y1) {
+        // return [xa, ya, xb, yb] where segment (a, b) is the part in range
+        // return null if segment is out of range
+        if (this.diffSum) {
+            const diff0 = x0 - y0;
+            const sum0  = x0 + y0;
+            const diff1 = x1 - y1;
+            const sum1  = x1 + y1;
+            const result = lineClip(diff0, sum0, diff1, sum1, this.minDiff, this.minSum, this.maxDiff, this.maxSum);
+            if (result) {
+                const [diffa, suma, diffb, sumb] = result;
+                const xa = (suma + diffa) / 2;
+                const ya = (suma - diffa) / 2;
+                const xb = (sumb + diffb) / 2;
+                const yb = (sumb - diffb) / 2;
+                return [xa, ya, xb, yb];
+            } else {
+                return null;
+            }
+        } else {
+            return lineClip(x0, y0, x1, y1, this.minX, this.minY, this.maxX, this.maxY);
+        }
+    }
+}
+
+export function getCanvasRange(current) {
+    return new Range(g.viewer, g.base_map, current);
 }
 
 function getSquareByCanvas(viewer, map, x, y, layer) {
@@ -175,7 +273,7 @@ function getSquareByCanvas(viewer, map, x, y, layer) {
     //const y = event.position.y * window.devicePixelRatio;
     const c00 = getCanvasOrigin(viewer, map, 0);
     const step = getSquareStep(viewer, map, true);
-    const [sx, sy] = toSquare[map.type](step, x - c00.x, y - c00.y, layer);
+    const [sx, sy] = toSquare[map.type](step, x - c00.x, y - c00.y, layer, true);
     return [sx, sy];
 }
 

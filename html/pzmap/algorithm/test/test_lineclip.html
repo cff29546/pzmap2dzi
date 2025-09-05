@@ -1,0 +1,161 @@
+<script src="./tinytest.js"></script>
+<script type="module">
+import { lineClip } from '../geometry/geometry_utils.js';
+
+var svg = null;
+var scale = 10;
+
+function init() {
+    svg = document.getElementById('svg');
+    svg.innerHTML = '';
+}
+
+function drawRect(r) {
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', r.x * scale);
+    rect.setAttribute('y', r.y * scale);
+    rect.setAttribute('width', r.width * scale);
+    rect.setAttribute('height', r.height * scale);
+    rect.setAttribute('fill', 'none');
+    rect.setAttribute('stroke', 'blue');
+    rect.setAttribute('stroke-width', '1');
+    svg.appendChild(rect);
+}
+
+function drawSegment(p1, p2, color, width) {
+    const polyline = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    const points = [p1, p2].map(pt => `${pt.x * scale},${pt.y * scale}`).join(' ');
+    polyline.setAttribute('points', points);
+    polyline.setAttribute('stroke', color);
+    polyline.setAttribute('stroke-width', width);
+    svg.appendChild(polyline);
+}
+
+function drawPoint(p, color, r) {
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', p.x * scale);
+    circle.setAttribute('cy', p.y * scale);
+    circle.setAttribute('r', r || 2);
+    circle.setAttribute('fill', color);
+    svg.appendChild(circle);
+}
+
+function draw(rect, segment, clippedSegment) {
+    init();
+    const [p1, p2] = segment;
+    const [c1, c2] = clippedSegment;
+    drawRect(rect);
+    drawSegment(p1, p2, 'blue', 3);
+    drawSegment(c1, c2, 'red', 1);
+    drawPoint(p1, 'cyan', 5);
+    drawPoint(c1, 'lime');
+    drawPoint(c2, 'lime');
+}
+
+function randomRect(range, size) {
+    return {
+        x: Math.floor(Math.random() * range),
+        y: Math.floor(Math.random() * range),
+        width: Math.floor(Math.random() * size) + 1,
+        height: Math.floor(Math.random() * size) + 1
+    };
+}
+
+function randomPoint(range) {
+    return {
+        x: Math.floor(Math.random() * range),
+        y: Math.floor(Math.random() * range)
+    };
+}
+
+var eps = 1e-6;
+function onSegment(p, seg) {
+    const [p1, p2] = seg;
+    if (p.x + eps < Math.min(p1.x, p2.x) || p.x - eps > Math.max(p1.x, p2.x) ||
+        p.y + eps < Math.min(p1.y, p2.y) || p.y - eps > Math.max(p1.y, p2.y)) {
+        return false;
+    }
+    const crossProduct = (p2.x - p1.x) * (p.y - p1.y) - (p2.y - p1.y) * (p.x - p1.x);
+    return Math.abs(crossProduct) < eps;
+}
+
+function inRect(p, rect) {
+    return p.x + eps >= rect.x && p.x - eps <= rect.x + rect.width &&
+        p.y + eps >= rect.y && p.y - eps <= rect.y + rect.height;
+}
+
+function check(rect, segment, clippedSegment, result) {
+    if (!result) {
+        const p1inRect = inRect(segment[0], rect);
+        const p2inRect = inRect(segment[1], rect);
+        if (p1inRect || p2inRect) {
+            console.log('Failed test case (should be intersection):', JSON.stringify(rect), JSON.stringify(segment));
+            draw(rect, segment, segment);
+        }
+        assert(!p1inRect && !p2inRect, 'One of the segment endpoints is in rectangle but no intersection');
+        return; // no intersection
+    }
+    const [p1, p2] = segment;
+    const [c1, c2] = clippedSegment;
+    let c1inRect = inRect(c1, rect);
+    let c2inRect = inRect(c2, rect);
+    let c1onSeg = onSegment(c1, [p1, p2]);
+    let c2onSeg = onSegment(c2, [p1, p2]);
+    if (!c1inRect || !c2inRect || !c1onSeg || !c2onSeg) {
+        console.log('Failed test case:', JSON.stringify(rect), JSON.stringify([p1, p2]), JSON.stringify([c1, c2]));
+        draw(rect, [p1, p2], [c1, c2]);
+    }
+    assert(c1inRect, 'Clipped point 1 is not in rectangle');
+    assert(c2inRect, 'Clipped point 2 is not in rectangle');
+    assert(c1onSeg, 'Clipped point 1 is not on segment');
+    assert(c2onSeg, 'Clipped point 2 is not on segment');
+}
+
+tests({
+    'lineClip': () => {
+        function test(size, drawOutput) {
+            const rect = randomRect(50, 50);
+            const p1 = randomPoint(100);
+            const p2 = randomPoint(100);
+            const result = lineClip(p1.x, p1.y, p2.x, p2.y, rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
+            const [x0, y0, x1, y1] = result ? result : [0,0,0,0];
+            const c1 = { x: x0, y: y0 };
+            const c2 = { x: x1, y: y1 };
+            check(rect, [p1, p2], [c1, c2], result);
+            if (drawOutput) {
+                draw(rect, [p1, p2], [c1, c2]);
+                console.log(JSON.stringify(rect), JSON.stringify([p1, p2]), JSON.stringify([c1, c2]));
+            }
+        }
+        for (let i = 0; i < 5; i++) {
+            console.log(`Test iteration ${i}`);
+            test(80, i === 0);
+        }
+    },
+    'parrel line': () => {
+        const rect = randomRect(50, 50);
+        const p1 = randomPoint(100);
+        const p2 = randomPoint(100);
+        p2.y = p1.y; // make it horizontal
+        const result = lineClip(p1.x, p1.y, p2.x, p2.y, rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
+        const [x0, y0, x1, y1] = result ? result : [0,0,0,0];
+        const c1 = { x: x0, y: y0 };
+        const c2 = { x: x1, y: y1 };
+        check(rect, [p1, p2], [c1, c2], result);
+        //draw(rect, [p1, p2], [c1, c2]);
+    },
+    'data': () => {
+        const rect = {"x":40,"y":8,"width":4,"height":49};
+        const [p1, p2] = [{"x":93,"y":66},{"x":5,"y":21}];
+        const result = lineClip(p1.x, p1.y, p2.x, p2.y, rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
+        const [x0, y0, x1, y1] = result ? result : [0,0,0,0];
+        const c1 = { x: x0, y: y0 };
+        const c2 = { x: x1, y: y1 };
+        check(rect, [p1, p2], [c1, c2], result);
+        //draw(rect, [p1, p2], [c1, c2]);
+    }
+});
+</script>
+<body>
+<svg id="svg" width="1000" height="1000" style="border:1px solid black"></svg>
+</body>

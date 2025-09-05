@@ -1,3 +1,4 @@
+import { format } from '../../util.js';
 import { BTree } from '../btree/aux_btree.js';
 import { cmpArray } from '../common.js';
 
@@ -263,35 +264,278 @@ function convertSegmentsToRatio(segments, start, length) {
     return result;
 }
 
-export function calcBorder(rect, neighbours) {
-    const top = [], bottom = [], left = [], right = [];
-    for (const r of neighbours) {
-        const y0 = Math.max(rect.y, r.y);
-        const y1 = Math.min(rect.y + rect.height, r.y + r.height);
-        const x0 = Math.max(rect.x, r.x);
-        const x1 = Math.min(rect.x + rect.width, r.x + r.width);
-        if (y0 < y1) {
-            if (r.x < rect.x && r.x + r.width >= rect.x) {
-                left.push([y0, y1]);
-            } 
-            if (r.x <= rect.x + rect.width && r.x + r.width > rect.x + rect.width) {
-                right.push([y0, y1]);
-            } 
+function toBound(rect) {
+    return {
+        x0: rect.x,
+        y0: rect.y,
+        x1: rect.x + rect.width,
+        y1: rect.y + rect.height
+    };
+}
+
+const lt = (a, b) => a < b;
+const lte = (a, b) => a <= b;
+function calcMissingBorderSingle(r, n, result, highPriority=true) {
+    const cmp = highPriority ? lte : lt;
+    const y0 = r.y0 > n.y0 ? r.y0 : n.y0;
+    const y1 = r.y1 < n.y1 ? r.y1 : n.y1;
+    const x0 = r.x0 > n.x0 ? r.x0 : n.x0;
+    const x1 = r.x1 < n.x1 ? r.x1 : n.x1;
+    if (y0 < y1) {
+        if (cmp(n.x0, r.x0) && r.x0 <= n.x1) {
+            result.left.push([y0, y1]);
         }
-        if (x0 < x1) {
-            if (r.y < rect.y && r.y + r.height >= rect.y) {
-                top.push([x0, x1]);
-            } 
-            if (r.y <= rect.y + rect.height && r.y + r.height > rect.y + rect.height) {
-                bottom.push([x0, x1]);
-            } 
+        if (n.x0 <= r.x1 && cmp(r.x1, n.x1)) {
+            result.right.push([y0, y1]);
         }
     }
+    if (x0 < x1) {
+        if (cmp(n.y0, r.y0) && r.y0 <= n.y1) {
+            result.top.push([x0, x1]);
+        }
+        if (n.y0 <= r.y1 && cmp(r.y1, n.y1)) {
+            result.bottom.push([x0, x1]);
+        }
+    }
+}
+
+function calcMissingBorder(rect, neighbourRects, neighbourRectsLowPriority) {
+    const result = { top: [], bottom: [], left: [], right: [] };
+    const r = toBound(rect);
+    for (const n of neighbourRects) {
+        calcMissingBorderSingle(r, toBound(n), result, true);
+    }
+    for (const n of neighbourRectsLowPriority) {
+        calcMissingBorderSingle(r, toBound(n), result, false);
+    }
+
+    for (const side of ['top', 'bottom', 'left', 'right']) {
+        result[side] = mergeSegments(result[side]);
+    }
+    return result;
+}
+
+var AX_MAP = [
+    ['top',    'x0', 'x1', (b, s, e) => [{x: s, y: b.y0}, {x: e, y: b.y0}]],
+    ['right',  'y0', 'y1', (b, s, e) => [{x: b.x1, y: s}, {x: b.x1, y: e}]],
+    ['bottom', 'x0', 'x1', (b, s, e) => [{x: e, y: b.y1}, {x: s, y: b.y1}]],
+    ['left',   'y0', 'y1', (b, s, e) => [{x: b.x0, y: e}, {x: b.x0, y: s}]],
+];
+function calcBorderSegments(rect, neighbourRects, neighbourRectsLowPriority, output=null) {
+    const missing = calcMissingBorder(rect, neighbourRects, neighbourRectsLowPriority);
+    if (output === null) output = [];
+    const corners = [];
+    const bound = toBound(rect);
+    for (const [side, ax0, ax1, fmt] of AX_MAP) {
+        const start = bound[ax0];
+        let current = start;
+        const end = bound[ax1];
+        for (const [s, e] of missing[side]) {
+            if (s > current) {
+                if (current == start) {
+                    corners.push(fmt(bound, current, s));
+                } else {
+                    output.push(fmt(bound, current, s));
+                }
+            }
+            current = e;
+        }
+        if (current < end) {
+            corners.push(fmt(bound, current, end));
+        }
+    }
+    mergeSegments2D(corners, output);
+    return output;
+}
+
+function bboxArea(points) {
+    if (!points || points.length === 0) return 0;
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    for (const p of points) {
+        minX = p.x < minX ? p.x : minX;
+        minY = p.y < minY ? p.y : minY;
+        maxX = p.x > maxX ? p.x : maxX;
+        maxY = p.y > maxY ? p.y : maxY;
+    }
+    return (maxX - minX) * (maxY - minY);
+}
+
+function fmtPoint(p) {
+    return p.x + ',' + p.y;
+}
+
+export function mergeSegments2D(segs, output=null) {
+    if (output === null) output = [];
+    const startMap = {};
+    for (let i = 0; i < segs.length; i++) {
+        const seg = segs[i];
+        const start = fmtPoint(seg[0]);
+        const end = fmtPoint(seg[seg.length - 1]);
+        if (startMap[start] === undefined) {
+            startMap[start] = i;
+        }
+    }
+    for (let i = 0; i < segs.length; i++) {
+        const seg = segs[i];
+        if (seg !== null) {
+            let end = fmtPoint(seg[seg.length - 1]);
+            let j = startMap[end];
+            while (j !== undefined && segs[j] !== null && j !== i) {
+                const next = segs[j];
+                for (let k = 1; k < next.length; k++) {
+                    seg.push(next[k]);
+                }
+                segs[j] = null;
+                end = fmtPoint(seg[seg.length - 1]);
+                j = startMap[end];
+            }
+            if (j === i) {
+                segs[i] = null;
+                seg.pop();
+                output.push(seg);
+            }
+        }
+    }
+    for (const seg of segs) {
+        if (seg !== null && seg.length > 1) {
+            output.push(seg);
+        }
+    }
+    return output;
+
+    for (const p of output) {
+        compactPolygon(p);
+    }
+    let maxArea = -1;
+    let maxIndex = -1;
+    for (let i = 0; i < output.length; i++) {
+        const seg = output[i];
+        const area = bboxArea(seg);
+        if (area > maxArea) {
+            maxArea = area;
+            maxIndex = i;
+        }
+    }
+    if (maxIndex >= 0) {
+        const maxSeg = output.splice(maxIndex, 1);
+        output.push(maxSeg[0]);
+    }
+
+    return output;
+}
+
+function pointEqual(a, b) {
+    return a.x === b.x && a.y === b.y;
+}
+
+function compactPolygon(polygon) {
+    // Remove adjacent points with same coordinates and remove collinear points (in-place)
+    if (!polygon || polygon.length < 2) return;
+
+    // Remove adjacent duplicate points
+    while (polygon.length > 1 && pointEqual(polygon[0], polygon[polygon.length - 1])) {
+        polygon.pop();
+    }
+    for (let i = polygon.length - 1; i > 0; i--) {
+        const a = polygon[i];
+        const b = polygon[i - 1];
+        if (pointEqual(a, b)) {
+            polygon.splice(i, 1);
+        }
+    }
+    // Remove collinear points
+    let i = 0;
+    while (polygon.length > 2 && i < polygon.length) {
+        const prev = polygon[(i - 1 + polygon.length) % polygon.length];
+        const curr = polygon[i];
+        const next = polygon[(i + 1) % polygon.length];
+        // Check if prev, curr, next are collinear
+        const dx1 = curr.x - prev.x;
+        const dy1 = curr.y - prev.y;
+        const dx2 = next.x - curr.x;
+        const dy2 = next.y - curr.y;
+        if (dx1 * dy2 + dx2 * dy1 === 0 && dx1 * dx2 + dy1 * dy2 >= 0) {
+            polygon.splice(i, 1);
+        } else {
+            i++;
+        }
+    }
+}
+
+function splitConnectedGroups(rects, neighbours) {
+    const groups = [];
+    const visited = new Array(rects.length).fill(false);
+
+    for (let i = 0; i < rects.length; i++) {
+        if (visited[i]) continue;
+        const group = [];
+        const stack = [i];
+        visited[i] = true;
+        while (stack.length) {
+            const idx = stack.pop();
+            group.push(idx);
+            for (const n of neighbours[idx]) {
+                if (!visited[n]) {
+                    visited[n] = true;
+                    stack.push(n);
+                }
+            }
+        }
+        groups.push(group);
+    }
+    return groups;
+}
+
+function formatPolygon(segs) {
+    if (segs.length === 0) return null;
+    for (const seg of segs) {
+        compactPolygon(seg);
+    }
+    let maxArea = -1;
+    let maxIndex = -1;
+    for (let i = 0; i < segs.length; i++) {
+        const area = bboxArea(segs[i]);
+        if (area > maxArea) {
+            maxArea = area;
+            maxIndex = i;
+        }
+    }
+    return { points: segs.splice(maxIndex, 1)[0], masks: segs };
+}
+
+export function rectsToPolygons(rects) {
+    // polygons: [ polygon1, polygon2, ... ]
+    // polygon: {
+    //     points: <outer boundary>,
+    //     masks: [ <mask1>, <mask2>, ... ] }
+    // }
+    // mask or outer boundary: [ {x, y}, {x, y}, ... ]
+    const neighbours = getNeighbours(rects, { noCorner: true });
+    const groups = splitConnectedGroups(rects, neighbours);
+    const polygons = [];
+    for (const group of groups) {
+        const segs = [];
+        for (const i of group) {
+            const rect = rects[i];
+            const neighbourRects = neighbours[i].filter(j => j < i).map(j => rects[j]);
+            const neighbourRectsLowPriority = neighbours[i].filter(j => j > i).map(j => rects[j]);
+            calcBorderSegments(rect, neighbourRects, neighbourRectsLowPriority, segs);
+        }
+        const polygon = formatPolygon(mergeSegments2D(segs));
+        if (polygon) {
+            polygons.push(polygon);
+        }
+    }
+    return polygons;
+}
+
+export function calcMissingBorderRatio(rect, neighbourRects, neighbourRectsLowPriority) {
+    const missing = calcMissingBorder(rect, neighbourRects, neighbourRectsLowPriority);
     return {
-        left: convertSegmentsToRatio(mergeSegments(left), rect.y, rect.height),
-        right: convertSegmentsToRatio(mergeSegments(right), rect.y, rect.height),
-        top: convertSegmentsToRatio(mergeSegments(top), rect.x, rect.width),
-        bottom: convertSegmentsToRatio(mergeSegments(bottom), rect.x, rect.width)
+        left: convertSegmentsToRatio(missing.left, rect.y, rect.height),
+        right: convertSegmentsToRatio(missing.right, rect.y, rect.height),
+        top: convertSegmentsToRatio(missing.top, rect.x, rect.width),
+        bottom: convertSegmentsToRatio(missing.bottom, rect.x, rect.width)
     };
 }
 

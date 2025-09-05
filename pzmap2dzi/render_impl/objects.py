@@ -2,7 +2,7 @@ from PIL import Image, ImageDraw, ImageColor
 import os
 import struct
 from .common import draw_square, render_long_text, render_edge, LazyFont, dump_marks
-from .. import pzobjects, geometry
+from .. import pzobjects
 
 try:
     from functools import lru_cache

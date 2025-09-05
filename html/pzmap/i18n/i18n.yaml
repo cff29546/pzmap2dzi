@@ -104,8 +104,8 @@ template:
     LegendOrganicForest:
         en: 'Organic Forest'
         cn: '有机林'
-    RoomButton:
-        en: 'Room'
+    RoomsButton:
+        en: 'Rooms'
         cn: '房间定义'
     ObjectsButton:
         en: 'Objects'
@@ -122,6 +122,9 @@ template:
     LegendZoneStory:
         en: 'Zone Story'
         cn: '区域故事'
+    StreetsButton:
+        en: 'Streets'
+        cn: '街道'
     MarkerButton:
         en: 'Marker'
         cn: '标记'
@@ -500,8 +503,8 @@ mapping:
             innerHTML: LegendBirchMixForest
         foraging_legend_OrganicForest:
             innerHTML: LegendOrganicForest
-        room_btn:
-            innerHTML: RoomButton
+        rooms_btn:
+            innerHTML: RoomsButton
         objects_btn:
             innerHTML: ObjectsButton
         objects_legends_text:
@@ -512,6 +515,8 @@ mapping:
             innerHTML: LegendParkingStall
         objects_legend_ZoneStory:
             innerHTML: LegendZoneStory
+        streets_btn:
+            innerHTML: StreetsButton
         marker_btn:
             innerHTML: MarkerButton
         marker_save_btn:

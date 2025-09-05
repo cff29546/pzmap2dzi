@@ -7,6 +7,8 @@ var i18n; // module
 var ui; // module
 var marker; // module
 var Trimmer;
+var svg_draw; // module
+var osd_draw; // module
 var pmodules = [
     import("./pzmap/globals.js").then((m) => {
         g = m.g;
@@ -34,6 +36,12 @@ var pmodules = [
     }),
     import("./pzmap/ui.js").then((m) => {
         ui = m;
+    }),
+    import("./pzmap/mark/svg_draw.js").then((m) => {
+        svg_draw = m;
+    }),
+    import("./pzmap/mark/osd_draw.js").then((m) => {
+        osd_draw = m;
     })
 ];
 
@@ -44,13 +52,11 @@ function initUI() {
     util.changeStyle('.iso-only-btn', 'display', g.map_type == 'top' ? 'none' : 'inline-block');
     if (g.map_type == 'top') {
         document.getElementById('change_view_btn').innerHTML = 'Switch to Isometric View';
-        //g.overlays.room = 0;
-        //g.overlays.objects = 0;
     } else {
         document.getElementById('change_view_btn').innerHTML = 'Switch to Top View';
     }
     updateLayerSelector();
-    for (const type of ['zombie', 'foraging', 'room', 'objects']) {
+    for (const type of ['zombie', 'foraging', 'rooms', 'objects', 'streets']) {
         const uiContainer = document.getElementById(type + '_ui');
         const btn = document.getElementById(type + '_btn');
         if (g.overlays[type]) {
@@ -157,7 +163,7 @@ function initOSD() {
     g.viewer.addHandler('add-item-failed', (event) => {
         const sourcePath = event.source.split('/');
         const type = sourcePath[sourcePath.length - 2];
-        if (!['room', 'objects'].includes(type)) {
+        if (!['rooms', 'objects'].includes(type)) {
             g.load_error = 1;
         }
         updateMainOutput();
@@ -165,6 +171,7 @@ function initOSD() {
 
     g.viewer.addHandler('update-viewport', function() {
         g.grid.update(g.viewer);
+        g.range = c.getCanvasRange(true);
 
         if (g.trimmerui) {
             g.grid.drawEditState(g.trimmer, g.currentLayer);
@@ -174,16 +181,11 @@ function initOSD() {
             g.grid.draw(g.currentLayer);
         }
 
-        if (g.marker) {
-            g.marker.redrawAll();
-        }
-
-        if (g.sys_marker) {
-            g.sys_marker.redrawAll();
-        }
-
-        if (g.debug_marker) {
-            g.debug_marker.redrawAll();
+        svg_draw.updateViewport(g.viewer, g.base_map);
+        for (const marker of [g.marker, g.sys_marker, g.debug_marker]) {
+            if (marker) {
+                marker.redrawAll();
+            }
         }
 
         g.base_map.redrawMarks(g.overlays);
@@ -193,9 +195,11 @@ function initOSD() {
     });
 
     g.viewer.addHandler('zoom', function(event) {
-        if (marker.zoom()) {
+        if (marker.updateZoom()) {
             forceRedraw();
         }
+        svg_draw.updateZoom();
+        osd_draw.updateZoom();
     });
 
     g.viewer.addHandler('canvas-press', function(event) {
@@ -267,13 +271,6 @@ function initOSD() {
         }
     });
 
-    if (g.map_type == 'top') {
-        g.viewer.drawer.context.mozImageSmoothingEnabled = false;
-        g.viewer.drawer.context.webkitImageSmoothingEnabled = false;
-        g.viewer.drawer.context.msImageSmoothingEnabled = false;
-        g.viewer.drawer.context.imageSmoothingEnabled = false;
-    }
-
     if (!g.query_string.debug) {
         const nullfunction = (e) => {};
         OpenSeadragon.console = {
@@ -289,6 +286,7 @@ function initOSD() {
 
 function init(callback=null) {
     globals.reset();
+    svg_draw.init();
     if (!g.marker) {
         g.marker = new marker.MarkManager({ indexType: 'rtree', enableEdit: true });
     } else {
@@ -300,7 +298,7 @@ function init(callback=null) {
         g.sys_marker.clearRenderCache();
     }
     if (!g.debug_marker) {
-        g.debug_marker = new marker.MarkManager();
+        g.debug_marker = new marker.MarkManager({ renderOptions: { renderMethod: 'svg' } });
     } else {
         g.debug_marker.clearRenderCache();
     }
@@ -978,6 +976,28 @@ function onKeyDown(event) {
             const index = g.marker.db._index(0, g.zoomLevel);
             const marks = nodeList(index.index[index.mode], index.mode);
             g.debug_marker.load(marks);
+        }
+    }
+    if (g.query_string.debug && event.key == 'y') {
+        if (g.debug_marker.db.all().length > 0) {
+            g.debug_marker.removeAll();
+        } else {
+            const range = g.range;
+            g.debug_marker.load([{
+                type: 'area',
+                id: util.uniqueId(),
+                class_list: g.map_type === 'iso' ? ['diff-sum'] : undefined,
+                background: 'transparent',
+                color: 'lime',
+                layer: 0,
+                visible_zoom_level: 0,
+                rects: [{
+                    x: Math.round(g.map_type === 'iso' ? range.minDiff: range.minX),
+                    y: Math.round(g.map_type === 'iso' ? range.minSum: range.minY),
+                    width: Math.round(g.map_type === 'iso' ? range.maxDiff - range.minDiff : range.maxX - range.minX),
+                    height: Math.round(g.map_type === 'iso' ? range.maxSum - range.minSum : range.maxY - range.minY)
+                }]
+            }]);
         }
     }
 }

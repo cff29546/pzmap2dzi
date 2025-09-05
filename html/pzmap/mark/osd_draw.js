@@ -1,9 +1,22 @@
 import * as c from "../coordinates.js";
 import { g } from "../globals.js";
-import { getNeighbours, calcBorder } from "../algorithm/geometry/rects_intersection.js";
+import { getNeighbours, calcMissingBorderRatio } from "../algorithm/geometry/rects_intersection.js";
+
+export function updateZoom() {
+    util.changeStyle('div.point', 'width', g.zoomInfo.pointSize + 'px');
+    util.changeStyle('div.point', 'height', g.zoomInfo.pointSize + 'px');
+    util.changeStyle('div.point.text', 'padding-top', (g.zoomInfo.pointSize >> 1) + 'px');
+    util.changeStyle('div.area.rect.iso', 'border-width', g.zoomInfo.rectBorder + 'px');
+    util.changeStyle('div.area.rect.top', 'border-width', (g.zoomInfo.rectBorder >> 1) + 'px');
+    util.changeStyle('div.area.rect.diff-sum.iso', 'border-width', (g.zoomInfo.rectBorder >> 1) + 'px');
+    util.changeStyle('div.text', 'font-size', g.zoomInfo.fontSize);
+}
+
+var needRefresh = false;
 
 function setClass(element, mark, part) {
-    element.className = "";
+    //element.className = "";
+    element.setAttribute('class', '');
     element.classList.add('mark');
     element.classList.add(g.map_type);
     element.classList.add(part.shape);
@@ -77,6 +90,33 @@ function getCalculatedClassStyle(element, keys) {
     return style;
 }
 
+function newSVGElement(type, id=null) {
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, type);
+    if (id) {
+        svg.setAttribute("id", id);
+    }
+    return svg;
+}
+
+function upsertOverlay(id, type, pos, placement, drawFunc) {
+    let element = document.getElementById(id);
+    if (element) {
+        g.viewer.updateOverlay(element, pos, placement); // no drawFunc
+        needRefresh = false;
+    } else {
+        if (type === 'svg') {
+            element = newSVGElement(type, id);
+        } else {
+            element = document.createElement(type);
+            element.id = id;
+        }
+        g.viewer.addOverlay(element, pos, placement, drawFunc);
+        needRefresh = true;
+    }
+    return element;
+}
+
 function drawRect(mark, part, position, size, element) {
     const wrapper = element.parentElement;
     wrapper.style.left = position.x + 'px';
@@ -114,21 +154,14 @@ function drawRect(mark, part, position, size, element) {
 function rect(id, mark, part) {
     let { x, y, width, height } = part;
     if (mark.isDiffSum) {
-        x = (part.x + part.y) / 2 + 0.5;
-        y = (part.y - part.x) / 2 + 0.5;
+        x = (part.x + part.y) / 2;
+        y = (part.y - part.x) / 2;
     }
     const vp = c.getViewportPointBySquare(g.viewer, g.base_map, x, y, mark.layer);
     const step = g.viewer.world.getItemAt(0).imageToViewportCoordinates(g.base_map.sqr, 0).x;
     const r = new OpenSeadragon.Rect(vp.x, vp.y, step * width, step * height);
     const placement = OpenSeadragon.Placement.TOP_LEFT;
-    let element = document.getElementById(id);
-    if (element) {
-        g.viewer.updateOverlay(element, r, placement);
-    } else {
-        element = document.createElement('div');
-        element.id = id;
-        g.viewer.addOverlay(element, r, placement, drawRect.bind(null, mark, part));
-    }
+    const element = upsertOverlay(id, 'div', r, placement, drawRect.bind(null, mark, part));
     setClass(element, mark, part);
     element.style.display = 'block';
     element.title = mark.name || '';
@@ -146,14 +179,7 @@ function point(id, mark, part) {
     const vp = c.getViewportPointBySquare(g.viewer, g.base_map, x + 0.5, y + 0.5, mark.layer);
     const point = new OpenSeadragon.Point(vp.x, vp.y);
     const placement = OpenSeadragon.Placement.CENTER;
-    let element = document.getElementById(id);
-    if (element) {
-        g.viewer.updateOverlay(element, point, placement);
-    } else {
-        element = document.createElement('div');
-        element.id = id;
-        g.viewer.addOverlay(element, point, placement, drawPoint.bind(null, mark, part));
-    }
+    const element = upsertOverlay(id, 'div', point, placement, drawPoint.bind(null, mark, part));
     setClass(element, mark, part);
     element.style.display = 'block';
     element.title = mark.name || '';
@@ -178,20 +204,17 @@ function text(id, mark, part) {
     const vp = c.getViewportPointBySquare(g.viewer, g.base_map, x + 0.5, y + 0.5, mark.layer);
     const point = new OpenSeadragon.Point(vp.x, vp.y);
     const placement = OpenSeadragon.Placement[part.placement] || OpenSeadragon.Placement.TOP;
-    let element = document.getElementById(id);
-    if (element) {
-        g.viewer.updateOverlay(element, point, placement, drawText.bind(null, mark, part));
-    } else {
-        element = document.createElement('div');
-        element.id = id;
-        g.viewer.addOverlay(element, point, placement, drawText.bind(null, mark, part));
-    }
+    const element = upsertOverlay(id, 'div', point, placement, drawText.bind(null, mark, part));
     setClass(element, mark, part);
     if (part.font || mark.font) {
         element.style.font = part.font || mark.font;
     }
-    if (mark.color) {
-        element.style.color = mark.color;
+    const color = part.color || mark.color;
+    if (color) {
+        element.style.color = color;
+        if (util.isLightColor(color)) {
+            element.classList.add('light');
+        }
     }
     element.style.display = 'block';
     element.style['pointer-events'] = 'none';
@@ -210,58 +233,104 @@ function drawSVG(mark, part, position, size, element) {
 }
 
 function svg(id, mark, part) {
-    const { x, y } = part;
-    const vp = c.getViewportPointBySquare(g.viewer, g.base_map, x + 0.5, y + 0.5, mark.layer);
-    const point = new OpenSeadragon.Point(vp.x, vp.y);
+    const { points, shape, width, linecap, linejoin } = part;
+    const x = Math.min(...points.map(p => p.x)) - width;
+    const y = Math.min(...points.map(p => p.y)) - width;
+    const maxX = Math.max(...points.map(p => p.x)) + width;
+    const maxY = Math.max(...points.map(p => p.y)) + width;
+    const vp = c.getViewportPointBySquare(g.viewer, g.base_map, x, y, mark.layer);
+    const step = g.viewer.world.getItemAt(0).imageToViewportCoordinates(g.base_map.sqr, 0).x;
+    const r = new OpenSeadragon.Rect(vp.x, vp.y, step * (maxX - x), step * (maxY - y));
     const placement = OpenSeadragon.Placement.TOP_LEFT;
-    let element = document.getElementById(id);
-    if (element) {
-        g.viewer.updateOverlay(element, point, placement, drawSVG.bind(null, mark, part));
-    } else {
-        element = document.createElement('div');
-        element.id = id;
-        g.viewer.addOverlay(element, point, placement, drawSVG.bind(null, mark, part));
-    }
+    const element = upsertOverlay(id, 'svg', r, placement, drawSVG.bind(null, mark, part));
     setClass(element, mark, part);
-    element.style.display = 'block';
     element.style['pointer-events'] = 'none';
-    element.style['background-color'] = 'rgba(0,0,0,0)';
-    element.style.border = 'none';
-    // add svg
-}
-
-var _DRAW_FUNCTIONS = {
-    rect: rect,
-    point: point,
-    text: text,
-    //svg: svg,
-};
-
-export function drawPart(id, mark, part) {
-    const func = _DRAW_FUNCTIONS[part.shape]
-    if (func) {
-       func(id, mark, part);
+    element.setAttribute('viewBox', `0 0 ${maxX - x} ${maxY - y}`);
+    let gElement = document.getElementById(id + '-g');
+    if (!gElement) {
+        gElement = newSVGElement('g', id + '-g');
+        element.appendChild(gElement);
+    }
+    let e = document.getElementById(id + '-path');
+    if (!e) {
+        e = newSVGElement(shape, id + '-path');
+        gElement.appendChild(e);
+    }
+    if (shape === 'polygon' || shape === 'polyline') {
+        const elementPoints = [];
+        for (const p of points) {
+            const dx = p.x - x;
+            const dy = p.y - y;
+            elementPoints.push(dx + ',' + dy);
+        }
+        if (shape === 'polygon') {
+            e.setAttribute('fill', mark.background || 'none');
+            e.setAttribute('stroke', mark.color || 'none');
+        } else {
+            e.setAttribute('fill', 'none');
+            e.setAttribute('stroke', mark.color || 'white');
+        }
+        e.setAttribute('points', elementPoints.join(' '));
+        e.setAttribute('stroke-width', width);
+        if (linecap) e.setAttribute('stroke-linecap', linecap);
+        if (linejoin) e.setAttribute('stroke-linejoin', linejoin);
     }
 }
 
-function processArea(mark) {
+function processArea(id, mark) {
     const rects = mark.parts.filter(part => part.shape === 'rect');
     const neighbours = getNeighbours(rects, { noCorner: true });
     for (let i = 0; i < rects.length; i++) {
         const rect = rects[i];
         const neighbourIndexes = neighbours[i];
         if (neighbourIndexes.length === 0) continue;
-        rect.border = calcBorder(rect, neighbourIndexes.map(j => rects[j]));
+        // render rect not polygon, no need to consider priority
+        rect.border = calcMissingBorderRatio(rect, [], neighbourIndexes.map(j => rects[j]));
     }
 }
 
 var _PROCESS_FUNCTIONS = {
     area: processArea
+};
+
+var _DRAW_FUNCTIONS = {
+    rect: rect,
+    point: point,
+    text: text,
+    polygon: svg,
+    polyline: svg,
+};
+
+export function addPart(id, mark, part) {
+    const func = _DRAW_FUNCTIONS[part.shape]
+    if (func) {
+       func(id, mark, part);
+    }
 }
 
-export function processMark(mark) {
+export function addMark(id, mark) {
     const func = _PROCESS_FUNCTIONS[mark.type]
     if (func) {
-        func(mark);
+        func(id, mark);
+    }
+    return true;
+}
+
+export function removePart(id) {
+    const element = document.getElementById(id);
+    if (element) {
+        g.viewer.removeOverlay(element);
+        needRefresh = false;
+    }
+}
+
+export function removeMark(id) {
+    return true;
+}
+
+export function refresh() {
+    if (needRefresh) {
+        addPart('_osd_draw_dummy', { layer: 0 }, { shape: 'point', x: 0, y: 0 });
+        removePart('_osd_draw_dummy');
     }
 }

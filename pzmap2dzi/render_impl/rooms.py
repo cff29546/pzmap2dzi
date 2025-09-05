@@ -138,6 +138,7 @@ def get_room_marks_by_cell(path, cx, cy, cell_size, encoding, map_name):
         })
     return marks
 
+
 class RoomMark(object):
     def __init__(self, **options):
         self.input = options.get('input')

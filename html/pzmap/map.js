@@ -77,7 +77,7 @@ export class Map {
                 this.overlays[type].setCroppingPolygons(clip_list);
             }
         }
-        for (let type of ['room', 'objects']) {
+        for (let type of ['rooms', 'objects']) {
             if (![undefined, 0, 'loading', 'delete'].includes(this.overlays[type])) {
                 let clip_list = this.getClipList(this.info[type].scale, layer);
                 this.overlays[type].setCroppingPolygons(clip_list);
@@ -255,7 +255,7 @@ export class Map {
     }
 
     setOverlayLayer(overlay, layer) {
-        for (let type of ['zombie', 'foraging', 'room', 'objects']) {
+        for (let type of ['zombie', 'foraging', 'rooms', 'objects']) {
             if (overlay[type]) {
                 if (!['zombie', 'foraging'].includes(type)) {
                     if (layer != this.overlay_layer) {
@@ -272,7 +272,7 @@ export class Map {
     }
 
     redrawMarks(overlay) {
-        for (const type of ['base', 'zombie', 'foraging', 'room', 'objects']) {
+        for (const type of ['base', 'zombie', 'foraging', 'rooms', 'objects', 'streets']) {
             if (this.marks[type]) {
                 if (type === 'base' || overlay[type]) {
                     this.marks[type].enable();
@@ -366,7 +366,7 @@ export class Map {
         this.suffix = this.typeToSuffix(this.type);
 
         const types = ['base', 'zombie', 'foraging'];
-        if (this.type !== 'top') types.push('room', 'objects');
+        if (this.type !== 'top') types.push('rooms', 'objects');
         const getinfo = (type) => {
             return window.fetch(this.root + type + this.suffix + '/map_info.json')
                 .then((r) => r.json()).catch((e) => Promise.resolve({}));
@@ -419,33 +419,58 @@ export class Map {
             }
         };
 
-        const markTypes = ['base', 'zombie', 'foraging', 'room', 'objects'];
+        const markTypes = ['base', 'zombie', 'foraging', 'rooms', 'objects', 'streets'];
         const getmarks = (type) => {
             return window.fetch(this.root + type + '/marks.json') // always use marks in folder without suffix
                 .then((r) => r.json()).catch((e) => Promise.resolve(null));
         };
 
         const setmarks = (r) => {
-            const onScreenLimit = g.query_string.mark_limit || 128;
-            for (const i in markTypes) {
-                const type = markTypes[i];
-                if (r[i] && Array.isArray(r[i])) {
-                    this.marks[type] = new MarkManager({
-                        mode: this.type,
-                        onScreenLimit: onScreenLimit,
-                        indexType: 'rtree',
-                        onlyCurrentLayer: true,
-                        defaultValue: {
-                            text_position: 'top',
-                            background: 'transparent',
-                            visible_zoom_level: 2,
-                        },
-                    });
-                    this.marks[type].disable();
-                    this.marks[type].load(r[i]);
+            const options = markTypes.map((t) => {
+                const option = {
+                    type: t,
+                    mode: this.type,
+                    onScreenLimit: g.query_string.mark_limit || 256,
+                    indexType: 'rtree',
+                    onlyCurrentLayer: true,
+                    defaultValue: {
+                        text_position: 'top',
+                        background: 'transparent',
+                        visible_zoom_level: 2,
+                    },
+                    renderOptions: { renderMethod: 'svg' },
+                };
+                if (t === 'streets') {
+                    option.onlyCurrentLayer = false;
+                    option.onScreenLimit = 0;
+                    option.defaultValue.text_position = 'dynamic';
+                    option.defaultValue.layer = 0;
+                    option.renderOptions.formatterOptions = { hide_text_level: 1 };
                 }
-            }
-            this.redrawMarks(g.overlays);
+                return option;
+            });
+            const buildIndexOptions = options.map((o) => {
+                const { onlyCurrentLayer, indexType, mode } = o;
+                return { onlyCurrentLayer, indexType, mode, defaultValue: {
+                    layer: o.defaultValue.layer || 0,
+                    visible_zoom_level: o.defaultValue.visible_zoom_level || 0,
+                } };
+            });
+            const worker = new Worker('pzmap/mark/loader.js', { type: "module" });
+            worker.postMessage([r, buildIndexOptions]);
+            worker.onmessage = (e) => {
+                const [r, indexes] = e.data;
+                for (const i in markTypes) {
+                    const type = markTypes[i];
+                    if (!r[i] || !Array.isArray(r[i])) continue;
+                    this.marks[type] = new MarkManager(options[i]);
+                    this.marks[type].disable();
+                    this.marks[type].load(r[i], indexes[i]);
+                    console.log(`${this.root}${type} loaded (${r[i].length} marks)`);
+                }
+                this.redrawMarks(g.overlays);
+                worker.terminate();
+            };
             return Promise.resolve(this);
         };
 

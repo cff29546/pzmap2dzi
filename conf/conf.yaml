@@ -233,3 +233,8 @@ render_conf:
 
     # use mark for room and objects
     use_mark: true
+
+    # streets color
+    streets_large:  White
+    streets_medium: Cyan
+    streets_small:  Teal

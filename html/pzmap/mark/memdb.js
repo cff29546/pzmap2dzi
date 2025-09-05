@@ -2,7 +2,8 @@ import { RTree, validate } from "../algorithm/rtree/rtree.js";
 
 // naive index
 class NoIndex {
-    constructor(options = {}) {
+    static type = 'none';
+    constructor(options) {
         this.ids = new Set();
     }
 
@@ -14,11 +15,11 @@ class NoIndex {
         this.ids.delete(mark.id);
     }
 
-    query(data, range, output = null) {
+    query(data, range, layer, output = null) {
         if (!output) output = [];
         for (const id of this.ids) {
             const mark = data[id];
-            if (isInRange(mark, range)) {
+            if (range.intersects(mark)) {
                 output.push(mark);
             }
         }
@@ -26,78 +27,10 @@ class NoIndex {
     }
 }
 
-class GridIndex {
-    constructor(options = {}) {
-        const { gridSize = 256 } = options;
-        this.gridSize = gridSize;
-        this.grid = {};
-    }
-
-    insert(mark) {
-        const { minX, minY, maxX, maxY } = mark.bbox();
-        const minGridX = Math.floor(minX / this.gridSize);
-        const minGridY = Math.floor(minY / this.gridSize);
-        const maxGridX = Math.floor(maxX / this.gridSize);
-        const maxGridY = Math.floor(maxY / this.gridSize);
-        for (let x = minGridX; x <= maxGridX; x++) {
-            for (let y = minGridY; y <= maxGridY; y++) {
-                const key = `${x}:${y}`;
-                if (!this.grid[key]) {
-                    this.grid[key] = new Set();
-                }
-                this.grid[key].add(mark.id);
-            }
-        }
-    }
-
-    remove(mark) {
-        const { minX, minY, maxX, maxY } = mark.bbox();
-        const minGridX = Math.floor(minX / this.gridSize);
-        const minGridY = Math.floor(minY / this.gridSize);
-        const maxGridX = Math.floor(maxX / this.gridSize);
-        const maxGridY = Math.floor(maxY / this.gridSize);
-        for (let x = minGridX; x <= maxGridX; x++) {
-            for (let y = minGridY; y <= maxGridY; y++) {
-                const key = `${x}:${y}`;
-                const g = this.grid[key]
-                if (g) {
-                    delete this.grid[key][id];
-                    g.delete(mark.id);
-                    if (g.size === 0) {
-                        delete this.grid[key]; // clean up empty grid cells
-                    }
-                }
-            }
-        }
-    }
-
-    query(data, range, output = null) {
-        if (!output) output = [];
-        const { minX, minY, maxX, maxY } = range;
-        const minGridX = Math.floor(minX / this.gridSize);
-        const minGridY = Math.floor(minY / this.gridSize);
-        const maxGridX = Math.floor(maxX / this.gridSize);
-        const maxGridY = Math.floor(maxY / this.gridSize);
-        for (let x = minGridX; x <= maxGridX; x++) {
-            for (let y = minGridY; y <= maxGridY; y++) {
-                const key = `${x}:${y}`;
-                const g = this.grid[key];
-                if (g) {
-                    for (const id of g) {
-                        const mark = data[id];
-                        if (isInRange(mark, range)) {
-                            output.push(mark);
-                        }
-                    }
-                }
-            }
-        }
-        return output;
-    }
-}
-
 class RTreeIndex {
+    static type = 'rtree';
     constructor(options = {}) {
+        this.options = options;
         const {
             mode = 'top',
             maxEntries = 9,
@@ -148,15 +81,15 @@ class RTreeIndex {
         }
     }
 
-    query(data, range, output = null) {
+    query(data, range, layer, output = null) {
         if (!output) output = [];
         const bbox = {};
         if (this.mode === 'top') {
-            const { minX, minY, maxX, maxY } = range;
+            const { minX, minY, maxX, maxY } = range.getBound(layer, layer);
             bbox.L = [minX, minY];
             bbox.U = [maxX, maxY];
         } else {
-            const { minDiff, maxDiff, minSum, maxSum } = range;
+            const { minDiff, maxDiff, minSum, maxSum } = range.getBound(layer, layer);
             bbox.L = [minDiff, minSum];
             bbox.U = [maxDiff, maxSum];
         }
@@ -184,11 +117,13 @@ class RTreeIndex {
         if (this.mode === mode) return; // no change needed
         if (this.index[mode]) {
             this.mode = mode;
+            this.options.mode = mode;
             return; // reuse existing index
         }
         const marks = this.index[this.mode].items().map(item => data[item.I]);
         this.index[mode] = new RTree(this.rtreeOptions);
         this.mode = mode;
+        this.options.mode = mode;
         this.batchInsert(marks); // reinsert all marks
     }
 
@@ -215,40 +150,23 @@ class RTreeIndex {
             this.batchInsert(marks);
         }
     }
+
+    dump() {
+        const result = {};
+        if (this.index.top) {
+            result.top = this.index.top.root;
+        }
+        if (this.index.iso) {
+            result.iso = this.index.iso.root;
+        }
+        return result;
+    }
 }
 
 var INDEX = {
     none: NoIndex,
-    grid: GridIndex,
-    rtree: RTreeIndex
+    rtree: RTreeIndex,
 };
-
-function isInRange(mark, range) {
-    if (range.diffSum) {
-        return isInDiffSumRange(mark, range);
-    } else {
-        return isInXYRange(mark, range);
-    }
-}
-
-function isInXYRange(mark, range) {
-    const { minX, minY, maxX, maxY } = mark.bbox();
-    const xmin = minX > range.minX ? minX : range.minX;
-    const xmax = maxX < range.maxX ? maxX : range.maxX;
-    const ymin = minY > range.minY ? minY : range.minY;
-    const ymax = maxY < range.maxY ? maxY : range.maxY;
-    return (xmin <= xmax && ymin <= ymax);
-}
-
-function isInDiffSumRange(mark, range) {
-    // diff-sum range for iso view
-    const { minDiff, maxDiff, minSum, maxSum } = mark.bboxDiffSum();
-    const dmin = minDiff > range.minDiff ? minDiff : range.minDiff;
-    const dmax = maxDiff < range.maxDiff ? maxDiff : range.maxDiff;
-    const smin = minSum > range.minSum ? minSum : range.minSum;
-    const smax = maxSum < range.maxSum ? maxSum : range.maxSum;
-    return (smin <= smax && dmin <= dmax);
-}
 
 export class MarkDatabase {
     constructor(mode = 'top', useLayerFilter = false, indexType = null, indexOptions = {}) {
@@ -292,7 +210,7 @@ export class MarkDatabase {
             const index = this._index(mark.layer || 0, mark.visible_zoom_level || 0);
             index.insert(mark);
         }
-        if (range && !isInRange(mark, range)) {
+        if (range && !range.intersects(mark)) {
             return false; // mark not in visible range
         }
         return true; // mark in visible range
@@ -335,6 +253,20 @@ export class MarkDatabase {
         return inRange;
     }
 
+    dumpIndex() {
+        const result = {};
+        for (const key of Object.keys(this.index)) {
+            if (this.index[key] && this.index[key].dump) {
+                result[key] = {
+                    type: this.index[key].constructor.type,
+                    options: this.index[key].options,
+                    index: this.index[key].dump(),
+                };
+            }
+        }
+        return result;
+    }
+
     clear() {
         this.marks = {};
         this.index = {};
@@ -355,7 +287,7 @@ export class MarkDatabase {
     get(id, range = null) {
         const mark = this.marks[id];
         if (!mark) return null;
-        if (range && !isInRange(mark, range)) return null;
+        if (range && !range.intersects(mark)) return null;
         return mark;
     }
 
@@ -368,9 +300,10 @@ export class MarkDatabase {
             zoomLevel = 0;
         }
         const result = [];
+        if (!this.useLayerFilter) layer = null;
         for (let zoom = 0; zoom <= zoomLevel; zoom++) {
             const index = this._index(layer, zoom);
-            index.query(this.marks, range, result);
+            index.query(this.marks, range, layer, result);
         }
         return result;
     }

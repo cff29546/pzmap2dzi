@@ -1,6 +1,7 @@
 import { g } from "../globals.js";
 import * as util from "../util.js";
-import * as draw from "./draw.js";
+import * as OSDOverlayDraw from "./osd_draw.js";
+import * as SVGOverlayDraw from "./svg_draw.js";
 
 // render format:
 // {
@@ -36,91 +37,91 @@ import * as draw from "./draw.js";
 // parts specification:
 // point: { x: <x>, y: <y> }
 // rect: { x: <xmin>, y: <ymin>, width: <width>, height: <height> }
-// text: { x: <x>, y: <y>, text: 'text content', font: '12px Arial' }
+// text: { x: <x>, y: <y>, text: <text>, font: <font> }
+// polyline: { points: [{ x: <x1>, y: <y1> }, { x: <x2>, y: <y2> }, ...] }
+// polygon: { points: [{ x: <x1>, y: <y1> }, { x: <x2>, y: <y2> }, ...] }
 
 export class MarkRender {
     static parseElementId(elementId) {
-        const [name, type, idx, ...rest] = elementId.split('-');
-        const id = rest.join('-');
-        return { name, type, index: parseInt(idx), id };
+        const parts = elementId.split('-');
+        const name = parts[0];
+        const type = parts[1];
+        const id = parts[2];
+        const idx = parts[3];
+        const index = Number.parseInt(idx);
+        return { name, type, index: Number.isInteger(index) ? index : idx, id };
     }
+    static RENDER_METHODS = {
+        osd: OSDOverlayDraw,
+        svg: SVGOverlayDraw,
+    };
 
     constructor(options = {}) {
-        const { name = null, renderOptions = {} } = options;
+        const {
+            name = null,
+            formatterOptions = {},
+            renderMethod = 'osd',
+        } = options;
         if (name) {
             this.name = name.replace(/-/g, '_');
         } else {
             this.name = util.uniqueId();
         }
         this.marks = {};
-        this.renderOptions = renderOptions;
-        this.removed = false;
+        this.formatterOptions = formatterOptions;
+        this.renderMethod = renderMethod;
+        this.draw = MarkRender.RENDER_METHODS[renderMethod] || MarkRender.RENDER_METHODS.OSD;
     }
 
-    setRenderOptions(key, value) {
-        this.renderOptions[key] = value;
+    _eid(id, type, i) {
+        return [this.name, type, id, i].join('-');
+    }
+
+    setFormatterOptions(key, value) {
+        this.formatterOptions[key] = value;
     }
 
     remove(id) {
         const mark = this.marks[id];
         if (mark) {
-            for (let i = 0; i < mark.parts.length; i++) { // need length check
-                this._remove(this._eid(id, mark.type, i));
+            const markId = this._eid(id, mark.type, 'x');
+            if (this.draw.removeMark(markId)) {
+                for (let i = 0; i < mark.parts.length; i++) { // need length check
+                    this._remove(this._eid(id, mark.type, i));
+                }
             }
             delete this.marks[id];
         }
     }
 
     _remove(elementId) {
-        const element = document.getElementById(elementId);
-        if (element) {
-            g.viewer.removeOverlay(element);
-            this.removed = true;
-        }
+        this.draw.removePart(elementId);
     }
 
     _render(id) {
         const mark = this.marks[id];
         if (!mark) return;
 
-        //marker level preparation, modify parts if needed
-        draw.processMark(mark);
-
-        for (let i = 0; i < mark.parts.length; i++) {
-            const part = mark.parts[i];
-            const eid = this._eid(id, mark.type, i);
-            draw.drawPart(eid, mark, part);
+        const markId = this._eid(id, mark.type, 'x');
+        if (this.draw.addMark(markId, mark)) {
+            for (let i = 0; i < mark.parts.length; i++) {
+                const part = mark.parts[i];
+                const partId = this._eid(id, mark.type, i);
+                this.draw.addPart(partId, mark, part);
+            }
         }
     }
 
-    _forceRefresh() {
-        // inserting a dummy mark and removing it
-        // force OpenSeadragon to refresh overlays
-        const mark = {
-            id: this.name + '_dummy',
-            layer: 0,
-            parts: [{ shape: 'point', x: 0, y: 0}]
-        };
-        this.marks[mark.id] = mark;
-        this._render(mark.id);
-        this.remove(mark.id);
-    }
-
-    _eid(id, type, i) {
-        return [this.name, type, i, id].join('-');
-    }
-
     upsert(mark) {
-        const newMark = mark.toRenderFormat(this.renderOptions);
+        const newMark = mark.toRenderFormat(this.formatterOptions);
         this._upsert(newMark);
     }
 
     sync(marks) {
         const oldIds = Object.keys(this.marks);
         const newIds = new Set();
-        this.removed = false;
         for (const mark of marks) {
-            const newMark = mark.toRenderFormat(this.renderOptions);
+            const newMark = mark.toRenderFormat(this.formatterOptions);
             if (newIds.has(newMark.id)) continue; // only first mark
             this._upsert(newMark);
             newIds.add(newMark.id);
@@ -130,8 +131,8 @@ export class MarkRender {
                 this.remove(id);
             }
         }
-        if (newIds.size > 0 && !this.removed) {
-            this._forceRefresh();
+        if (this.draw.refresh && newIds.size > 0) {
+            this.draw.refresh();
         }
     }
 

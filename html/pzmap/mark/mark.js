@@ -1,4 +1,6 @@
 import { g } from "../globals.js";
+import * as util from "../util.js";
+import { polylineLabelPos } from "../algorithm/geometry/geometry_utils.js";
 
 class Mark {
     static DEFAULT = {
@@ -20,7 +22,7 @@ class Mark {
 
         // control if the mark is interactive
         // if true, the mark is not clickable and draggable
-        // this is usually used for overlays such as 'room' and 'objects'
+        // this is usually used for overlays such as 'rooms' and 'objects'
         passthrough: false,
 
         // CSS color value, used for the mark and text
@@ -34,13 +36,18 @@ class Mark {
         // text font (optional):
         font: undefined,
 
-        // position of the text (only for area marks):
+        // position of the text:
+        // 'none': the text is not displayed
+        // 'abs(x,y)': the text is placed at the absolute position (x,y)
+        //
+        // (following is for area/polygon/polyline):
         // 'center' or undefined: the text is centered on the mark bbox
         // 'top': the text is placed at the top of rect with the smallest (x, y)
         //        (smallest x first, then smallest y if x's are equal)
         // 'centroid': the text is placed at the centroid of the mark
-        // 'abs(x,y)': the text is placed at the absolute position (x,y)
         text_position: 'center',
+
+        text_color: undefined,
     };
 
     constructor(obj, keys) {
@@ -58,8 +65,7 @@ class Mark {
         if (!Number.isInteger(this.visible_zoom_level)) {
             this.visible_zoom_level = 0;
         }
-        this.selected = false;
-        this.selected_index = -1; // selected part index
+        this.unselect();
     }
 
     cls() {
@@ -84,6 +90,22 @@ class Mark {
         ui.setMarkerUIData(data);
     }
 
+    select(idx=-1) {
+        if (!this.selected || this.selected_index !== idx) {
+            this.selected = true;
+            this.selected_index = idx;
+            this.resetHash();
+        }
+    }
+
+    unselect() {
+        if (this.selected !== false || this.selected_index !== -1) {
+            this.selected = false;
+            this.selected_index = -1;
+            this.resetHash();
+        }
+    }
+
     toObject() {
         const o  = {type: this.constructor.name.toLowerCase()};
         for (const key of this.keys) {
@@ -103,8 +125,9 @@ class Mark {
         const type = this.constructor.name.toLowerCase();
         if (types[type].validObject(obj)) {
             for (const key of this.keys) {
-                if (key !== 'id' && obj[key] !== undefined) {
+                if (key !== 'id' && obj[key] !== undefined && this[key] !== obj[key]) {
                     this[key] = obj[key];
+                    this.resetHash();
                 }
             }
             return true;
@@ -129,42 +152,62 @@ class Mark {
     }
 
     textPosition() {
+        if (this.text_position === 'none') {
+            return null;
+        }
         if (this.centroid && this.text_position === 'centroid') {
             return this.centroid();
         }
         if (this.top && this.text_position === 'top') {
             return this.top();
         }
+        if (this.dynamicLabelPos && this.text_position === 'dynamic') {
+            return this.dynamicLabelPos();
+        }
         if (typeof this.text_position === 'string') {
             const match = this.text_position.match(/^abs\((\d+),(\d+)\)$/);
             if (match) {
-                return [Number(match[1]), Number(match[2])];
+                return { x: Number(match[1]), y: Number(match[2]) };
             }
         }
         // default (center)
-        return this.center(-1);
+        const [x, y] = this.center(-1);
+        return { x, y };
     }
 
     textPart(options = {}) {
-        if (options.hide_text || !this.name) {
+        if (options.hide_text_level > g.zoomLevel || !this.name) {
             return null;
         }
-        const [cx, cy] = this.textPosition();
-        const text = { shape: 'text', x: cx, y: cy, text: this.name };
-        if (this.font) {
-            text.font = this.font;
+        const pos = this.textPosition();
+        if (!pos) {
+            return null;
         }
+        const text = { shape: 'text', text: this.name };
+        Object.assign(text, pos);
+        if (this.font) text.font = this.font;
+        if (this.text_color) text.color = this.text_color;
         return text;
     }
 
-    commonHash(keys = null, options = {}) {
-        if (!keys) keys = [];
-        keys.push(this.selected ? this.selected_index : 'x');
-        keys.push(this.passthrough ? '1' : '0');
-        keys.push(options.hide_text ? '' : this.name);
-        keys.push(this.layer);
-        keys.push(g.currentLayer);
-        return keys;
+    hash(options = {}) {
+        if (!this._hash) {
+            this._hash = util.uniqueId();
+        }
+        let text = options.hide_text_level > g.zoomLevel || !this.name ? '' : 't';
+        if (text && this.dynamicLabelPos && this.text_position === 'dynamic') {
+            const pos = this.dynamicLabelPos();
+            if (pos) {
+                text += Object.entries(pos).join(',');
+            } else {
+                text = '';
+            }
+        }
+        return [this._hash, text, g.currentLayer].join(':');
+    }
+
+    resetHash() {
+        this._hash = null;
     }
 };
 
@@ -189,6 +232,7 @@ class Point extends Mark {
     drag(x, y) {
         this.x = this.sx + x;
         this.y = this.sy + y;
+        this.resetHash();
     }
 
     update(obj) {
@@ -214,12 +258,6 @@ class Point extends Mark {
             minSum: this.x + this.y,
             maxSum: this.x + this.y + 2,
         };
-    }
-
-    hash(options = {}) {
-        const keys = this.commonHash(['point'], options);
-        keys.push(this.x, this.y);
-        return keys.join(':');
     }
 
     parts(options = {}) {
@@ -311,6 +349,7 @@ class Area extends Mark {
             r.x += dx;
             r.y += dy;
         }
+        this.resetHash();
     }
 
     resize(x, y) {
@@ -334,6 +373,7 @@ class Area extends Mark {
         r.y = fixY < moveY ? fixY : moveY;
         r.height = fixY < moveY ? moveY - fixY : fixY - moveY;
         r.height = r.height === 0 ? 1 : r.height;
+        this.resetHash();
         return;
     }
 
@@ -347,6 +387,7 @@ class Area extends Mark {
             }
             this.name = obj.name;
             this.desc = obj.desc;
+            this.resetHash();
             return;
         }
         if (this.selected_index < 0 || this.selected_index >= this.rects.length) {
@@ -369,6 +410,8 @@ class Area extends Mark {
         }
         this.rects.push(r);
         this.selected_index = this.rects.length - 1;
+        this.resetHash();
+
     }
 
     removeSelectedRect() {
@@ -380,6 +423,7 @@ class Area extends Mark {
         }
         this.rects.splice(this.selected_index, 1);
         this.selected_index = -1; // unselect
+        this.resetHash();
         return 'keep'; // keep rest of the area
     }
 
@@ -448,9 +492,9 @@ class Area extends Mark {
         cx /= weight;
         cy /= weight;
         if (this.isDiffSum) {
-            return [(cx + cy) / 2, (cx - cy) / 2];
+            return { x: (cx + cy) / 2, y: (cx - cy) / 2 };
         } else {
-            return [cx, cy];
+            return { x: cx, y: cy };
         }
     }
 
@@ -462,15 +506,7 @@ class Area extends Mark {
                 minY = r.y;
             }
         }
-        return [minX, minY];
-    }
-
-    hash(options = {}) {
-        const keys = this.commonHash(['area'], options);
-        for (const r of this.rects) {
-            keys.push(r.x, r.y, r.width, r.height);
-        }
-        return keys.join(':');
+        return { x: minX, y: minY };
     }
 
     parts(options = {}) {
@@ -490,7 +526,135 @@ class Area extends Mark {
     }
 };
 
+class Polygon extends Mark {
+    static validPoints(points) {
+        if (!Array.isArray(points) || points.length < 2) {
+            return false;
+        }
+        for (const p of points) {
+            if (!Number.isFinite(p.x) || !Number.isFinite(p.y)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static validObject(obj) {
+        return (obj
+            && (obj.name === undefined || typeof obj.name === 'string')
+            && (obj.desc === undefined || typeof obj.desc === 'string')
+            && (obj.visible_zoom_level === undefined || Number.isInteger(obj.visible_zoom_level))
+            && Number.isInteger(obj.layer)
+            && Polygon.validPoints(obj.points));
+    }
+
+    constructor(obj) {
+        super(obj, ['layer', 'points', 'width', 'linecap', 'linejoin']);
+    }
+
+    text() {
+        return this.points.map(p => `(${p.x}, ${p.y})`).join(' -> ');
+    }
+
+    bbox() {
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        for (const p of this.points) {
+            if (p.x < minX) minX = p.x;
+            if (p.y < minY) minY = p.y;
+            if (p.x > maxX) maxX = p.x;
+            if (p.y > maxY) maxY = p.y;
+        }
+        if (this.width) {
+            minX -= this.width / 2;
+            maxX += this.width / 2;
+            minY -= this.width / 2;
+            maxY += this.width / 2;
+        }
+        return { minX, minY, maxX, maxY };
+    }
+
+    bboxDiffSum() {
+        let minDiff = Infinity, maxDiff = -Infinity, minSum = Infinity, maxSum = -Infinity;
+        for (const p of this.points) {
+            const currentDiff = p.x - p.y;
+            const currentSum = p.x + p.y;
+            if (currentDiff < minDiff) minDiff = currentDiff;
+            if (currentDiff > maxDiff) maxDiff = currentDiff;
+            if (currentSum < minSum) minSum = currentSum;
+            if (currentSum > maxSum) maxSum = currentSum;
+        }
+        if (this.width) {
+            minDiff -= this.width / 2;
+            maxDiff += this.width / 2;
+            minSum -= this.width;
+            maxSum += this.width;
+        }
+        return { minDiff, maxDiff, minSum, maxSum };
+    }
+
+    center() {
+        const { minX, minY, maxX, maxY } = this.bbox();
+        return [(minX + maxX) / 2, (minY + maxY) / 2];
+    }
+
+    //centroid() {
+    //    // TODO implement centroid for polygon
+    //    // ref: https://en.wikipedia.org/wiki/Centroid#Of_a_polygon
+    //}
+
+    top() {
+        let minX = Infinity, minY = Infinity;
+        for (const p of this.points) {
+            if (p.x < minX || (p.x === minX && p.y < minY)) {
+                minX = p.x;
+                minY = p.y;
+            }
+        }
+        return { x: minX, y: minY };
+    }
+
+    parts(options = {}) {
+        const allParts = [];
+        const shape = this.constructor.name.toLowerCase();
+        if (this.points.length) {
+            allParts.push({
+                shape,
+                points: this.points,
+                width: this.width || ((shape === 'polygon') ? 0 : 1),
+                linecap: this.linecap,
+                linejoin: this.linejoin,
+        });
+        }
+        const text = this.textPart(options);
+        if (text) {
+            allParts.push(text);
+        }
+        return allParts;
+    }
+};
+
+class Polyline extends Polygon {
+    dynamicLabelPos() {
+        const range = g.range;
+        if (this.lastPos && this.zoomTimestamp === g.zoomInfo.timestamp) {
+            const { x, y } = this.lastPos
+            if (range.contains(x, y)) {
+                return this.lastPos;
+            }
+        }
+        this.lastPos = null;
+        this.zoomTimestamp = g.zoomInfo.timestamp;
+        const pos = polylineLabelPos(this.points, range);
+        if (pos && range.contains(pos[0], pos[1])) {
+            this.lastPos = { x: pos[0], y: pos[1], rotate: pos[2] };
+        }
+        return this.lastPos;
+    }
+}
+
 export const types = {
     point: Point,
-    area: Area
+    area: Area,
+    polygon: Polygon,
+    polyline: Polyline,
 };

@@ -8,14 +8,14 @@ import { MarkDatabase } from "./mark/memdb.js";
 import { MarkEditor, create } from "./mark/edit.js";
 import * as conf from "./mark/conf.js";
 
-export function zoom() {
+export function updateZoom() {
     // update zoom information to current viewer
     const zoom = c.getZoom(g.viewer, false);
-    const step = zoom * g.base_map.sqr;
+    g.zoomInfo.step = zoom * g.base_map.sqr;
     let change = false;
     let zoomLevel = 1;
     while (zoomLevel < conf[g.map_type].length &&
-        step > conf[g.map_type][zoomLevel].minStep) {
+        g.zoomInfo.step > conf[g.map_type][zoomLevel].minStep) {
         zoomLevel += 1;
     }
     zoomLevel -= 1; // zoom_level starts from 0
@@ -28,25 +28,17 @@ export function zoom() {
         g.zoomInfo.pointBorder = current.pointBorder;
         g.zoomInfo.pointSize = current.pointSize;
         g.zoomInfo.fontSize = current.fontSize;
-        util.changeStyle('.point', 'width', g.zoomInfo.pointSize + 'px');
-        util.changeStyle('.point', 'height', g.zoomInfo.pointSize + 'px');
-        util.changeStyle('.point.text', 'padding-top', (g.zoomInfo.pointSize >> 1) + 'px');
-        util.changeStyle('.area.rect.iso', 'border-width', g.zoomInfo.rectBorder + 'px');
-        util.changeStyle('.area.rect.top', 'border-width', (g.zoomInfo.rectBorder >> 1) + 'px');
-        util.changeStyle('.area.rect.diff-sum.iso', 'border-width', (g.zoomInfo.rectBorder >> 1) + 'px');
-        util.changeStyle('.text', 'font-size', g.zoomInfo.fontSize);
+        g.zoomInfo.timestamp = util.uniqueId();
     }
     return change;
 }
 
 function sortByDist(marks, x, y) {
-    return marks.sort((a, b) => {
-        const [ax, ay] = a.center();
-        const [bx, by] = b.center();
-        const da = (ax - x) ** 2 + (ay - y) ** 2;
-        const db = (bx - x) ** 2 + (by - y) ** 2;
-        return da - db;
-    });
+    for (const m of marks) {
+        const [mx, my] = m.center();
+        m._dist = (mx - x) ** 2 + (my - y) ** 2;
+    }
+    return marks.sort((a, b) => a._dist - b._dist);
 }
 
 export class MarkManager {
@@ -58,6 +50,7 @@ export class MarkManager {
             indexType = null,
             defaultValue = null,
             indexOptions = {},
+            renderOptions = {},
             onScreenLimit = null,
         } = options;
         this.enabled = true;
@@ -65,7 +58,7 @@ export class MarkManager {
         this.onlyCurrentLayer = onlyCurrentLayer;
         this.onScreenLimit = onScreenLimit;
         this.db = new MarkDatabase(mode, onlyCurrentLayer, indexType, indexOptions);
-        this.render = new MarkRender();
+        this.render = new MarkRender(renderOptions);
         this.hiddenType = {};
         this.edit = enableEdit ? new MarkEditor(this) : null;
         if (!this.edit) {
@@ -91,11 +84,6 @@ export class MarkManager {
         }
     }
 
-    _range() {
-        const layer = this.onlyCurrentLayer ? g.currentLayer : null;
-        return c.getCanvasRange(g.viewer, g.base_map, layer);
-    }
-
     setVisibleType(type, value) {
         if (!!this.hiddenType[type] !== !value) {
             this.hiddenType[type] = !value;
@@ -104,7 +92,11 @@ export class MarkManager {
     }
 
     setTextVisibility(visible) {
-        this.render.setRenderOptions('hide_text', !visible);
+        if (visible) {
+            this.render.setFormatterOptions('hide_text_level', 0);
+        } else {
+            this.render.setFormatterOptions('hide_text_level', 100);
+        }
         this.redrawAll();
     }
 
@@ -126,7 +118,7 @@ export class MarkManager {
     redraw(id) {
         if (!this.enabled) return;
         if (this.db.has(id)) {
-            const mark = this.db.get(id, this._range());
+            const mark = this.db.get(id, g.range);
             if (mark) {
                 this.render.upsert(mark);
             }
@@ -137,7 +129,7 @@ export class MarkManager {
 
     redrawAll() {
         if (!this.enabled) return;
-        const range = this._range();
+        const range = g.range;
         const result = this.db.query(range, g.currentLayer, g.zoomLevel);
         const marks = [];
         if (this.edit) {
@@ -176,26 +168,20 @@ export class MarkManager {
             if (obj.id === undefined || obj.id === null) obj.id = util.uniqueId();
             if (typeof obj.id !== 'string') continue;
 
-            if (obj.color && util.isLightColor(obj.color)) {
-                if (!obj.class_list) {
-                    obj.class_list = [];
+            if (this.defaultValue) {
+                for (const key in this.defaultValue) {
+                    if (obj[key] === undefined || obj[key] === null) {
+                        obj[key] = this.defaultValue[key];
+                    }
                 }
-                obj.class_list.push('light');
             }
 
             if (types[obj.type] && types[obj.type].validObject(obj)) {
-                if (this.defaultValue) {
-                    for (const key in this.defaultValue) {
-                        if (obj[key] === undefined || obj[key] === null) {
-                            obj[key] = this.defaultValue[key];
-                        }
-                    }
-                }
                 const mark = create(obj);
                 marks.push(mark);
             }
         }
-        this.db.batchInsert(marks);
+        this.db.batchInsert(marks, null, indexes);
         this.redrawAll();
     }
 

@@ -1,21 +1,21 @@
 # pzmap2dzi
 pzmap2dzi is a command-line tool for Windows that converts Project Zomboid map data into [Deep Zoom format](https://en.wikipedia.org/wiki/Deep_Zoom).
 
-## Now fully suport B42 basement
+## Now with streets overlay
 
 <p float="left">
   <table>
   <tr>
-    <td><img src="/docs/img/markedit.jpg" width="192" alt="marking" /></td>
-    <td><img src="/docs/img/basement.jpg" width="192" alt="basement" /></td>
-    <td><img src="/docs/img/trimmer.jpg" width="192" alt="trimmer" /></td>
-    <td><img src="/docs/img/i18n.jpg" width="192" alt="i18n" /></td>
+    <td><img src="./docs/img/markedit.jpg" width="192" alt="marking" /></td>
+    <td><img src="./docs/img/trimmer.jpg" width="192" alt="trimmer" /></td>
+    <td><img src="./docs/img/i18n.jpg" width="192" alt="i18n" /></td>
+    <td><img src="./docs/img/streets.jpg" width="192" alt="streets"></td>
   </tr>
   <tr>
     <td>Marking</td>
-    <td>Basement with transparent roof layer</td>
     <td>Local savegame trimmer</td>
     <td>I18n support</td>
+    <td>Streets</td>
   </tr>
   </table>
 </p>

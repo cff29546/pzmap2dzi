@@ -1,5 +1,10 @@
 # Change log
 
+# 2025-09-06: 1.1.4 + UI 1.1.4
+
+* Render marks with svg
+* Dynamic streets overlay
+
 # 2025-08-26: 1.1.3 + UI 1.1.3
 
 * Avoid redundant texture unpacking when files are already present

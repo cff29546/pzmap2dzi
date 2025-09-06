@@ -40,15 +40,38 @@ html
     - Option 2: Use hotkey `Shift+MouseWheelUp` and `Shift+MouseWheelDown` to go up and down floors.
 - Mod maps overlay, 
     - Use the `Mod Map` button to toggle the UI
-    ![Overlay Map Example](./img/overlay_map.png)
+
+<p float="left">
+  <table>
+  <tr>
+    <td><img src="./img/overlay_map.png" width="192" alt="Overlay Map Example" /></td>
+  </tr>
+  <tr>
+    <td>Overlay Mod Maps</td>
+  </tr>
+  </table>
+</p>
 
 - Info Overlay
-    - Use the `Zombie`, `Foraging`, `Grid`, `Room`, or `Objects` buttons to enable/disable overlay
-    - (The overlay of `grid`, `room`, and `objects` will reflect the currently selected floor)
-    ![Zombie Heatmap Example](./img/zombie.jpg)
-    ![Foraging zones Example](./img/foraging.jpg)
-    ![Grid Example](./img/grid.gif)
-    ![Room Example](./img/room.jpg)
+    - Use the `Zombie`, `Foraging`, `Grid`, `Rooms`, `Objects`, or `Streets` buttons to enable/disable overlay
+    - (The overlay of `Grid`, `Rooms`, and `Objects` will reflect the currently selected floor)
+
+<p float="left">
+  <table>
+  <tr>
+    <td><img src="./img/zombie.jpg" width="192" alt="Zombie Heatmap Example" /></td>
+    <td><img src="./img/foraging.jpg" width="192" alt="Foraging zones Example" /></td>
+    <td><img src="./img/rooms.jpg" width="192" alt="Rooms Example" /></td>
+    <td><img src="./img/streets.jpg" width="192" alt="Streets Example" /></td>
+  </tr>
+  <tr>
+    <td>Zombie Heatmap</td>
+    <td>Foraging Zones</td>
+    <td>Rooms</td>
+    <td>Streets</td>
+  </tr>
+  </table>
+</p>
 
 - Switching between isometric view and top view
     - Use the `Switch to xxx View` button (it is only available when both isometric and top view output data exists)

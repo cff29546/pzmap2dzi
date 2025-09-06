@@ -184,7 +184,7 @@ class Task(object):
             worker.stop()
         if hasattr(self.scheduler, 'cleanup'):
             try:
-                self.scheduler.cleanup()
+                return self.scheduler.cleanup()
             except Exception as e:
                 print('scheduler cleanup error, Exception: {}'.format(e))
                 traceback.print_exc()
@@ -218,15 +218,20 @@ class SplitScheduler(object):
         self.verbose = verbose
 
     def init(self, tasks, n):
-        self.splits = split_list(tasks, n)
+        self.splits = split_list(list(enumerate(tasks)), n)
         self.n = n
         self.total = len(tasks)
         self.done = 0
+        self.last = [None] * n
+        self.result = [None] * len(tasks)
         return True
 
     def on_result(self, workers, wid, state, result):
-        if self.verbose:
+        idx = self.last[wid]
+        if self.result is not None:
+            self.result[idx] = result
             self.done += 1
+        if self.verbose:
             active = sum([1 if w else 0 for w in workers])
             print('job: {}/{} worker: {}/{}       '
                   .format(self.done, self.total, active, self.n), end='\r')
@@ -236,26 +241,29 @@ class SplitScheduler(object):
             rebalance(self.splits, wid)
         if len(self.splits[wid]) == 0:
             return None
-        return self.splits[wid].pop()
+        idx, task = self.splits[wid].pop()
+        self.last[wid] = idx
+        return task
 
     def cleanup(self):
         if self.verbose:
             print('job: {}/{} worker: {}/{}       '
                   .format(self.done, self.total, 0, self.n))
+        return self.result
 
 
 class TestWorker(object):
     def on_job(self, job):
         import time
-        import random
-        time.sleep(random.random())
-        # print(job)
+        time.sleep(job * 0.01)
+        return job
 
 
 def test():
     worker = TestWorker()
     task = Task(worker, SplitScheduler(True))
-    task.run(list(range(100)), 10)
+    result = task.run(list(range(100)), 10)
+    print('\nresult:', result)
 
 
 if __name__ == '__main__':

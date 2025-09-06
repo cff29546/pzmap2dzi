@@ -2,8 +2,8 @@ import os
 import sys
 sys.path.append('../..')
 import main
-from pzmap2dzi import pzobjects, i18n_util
-import json
+from pzmap2dzi import pzobjects
+from pzmap2dzi.render_impl import common
 
 
 if __name__ == '__main__':
@@ -24,14 +24,12 @@ if __name__ == '__main__':
         y = b['y'] + b['properties']['StairY']
         z = b['z']
         d = b['properties']['StairDirection']
-        mark = {'x': x, 'y': y, 'layer': z, 'id': str(i),
+        mark = {'x': x, 'y': y, 'layer': z,
                 'type': 'point', 'name': 'Random Basement',
-                'rank': 0, 'desc': 'Stair Direction: ' + d}
-
+                'desc': 'Stair Direction: ' + d}
         marks.append(mark)
 
-    i18n_util.save_json(args.output, marks)
-
+    common.dump_marks(marks, args.output)
 
 
 

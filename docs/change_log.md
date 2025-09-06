@@ -1,5 +1,9 @@
 # Change log
 
+# 2025-09-07: 1.1.5 + UI 1.1.5
+
+* Add texture location script
+
 # 2025-09-06: 1.1.4 + UI 1.1.5
 
 * Add coordinates overlay system

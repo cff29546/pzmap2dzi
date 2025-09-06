@@ -652,8 +652,16 @@ class Polyline extends Polygon {
     }
 }
 
+class Text extends Point {
+    parts(options = {}) {
+        const allParts = super.parts(options);
+        return allParts.filter(p => p.shape === 'text');
+    }
+}
+
 export const types = {
     point: Point,
+    text: Text,
     area: Area,
     polygon: Polygon,
     polyline: Polyline,

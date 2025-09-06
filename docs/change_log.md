@@ -1,5 +1,9 @@
 # Change log
 
+# 2025-09-06: 1.1.4 + UI 1.1.5
+
+* Add coordinates overlay system
+
 # 2025-09-06: 1.1.4 + UI 1.1.4
 
 * Render marks with svg

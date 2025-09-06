@@ -220,7 +220,7 @@ function text(id, mark, part) {
     element.style['pointer-events'] = 'none';
     element.style['background-color'] = 'rgba(0,0,0,0)';
     element.style.border = 'none';
-    element.innerText = text;
+    element.innerHTML = text;
 }
 
 function drawSVG(mark, part, position, size, element) {

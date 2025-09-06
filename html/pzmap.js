@@ -56,7 +56,7 @@ function initUI() {
         document.getElementById('change_view_btn').innerHTML = 'Switch to Top View';
     }
     updateLayerSelector();
-    for (const type of ['zombie', 'foraging', 'rooms', 'objects', 'streets']) {
+    for (const type of ['zombie', 'foraging', 'rooms', 'objects', 'streets', 'coords']) {
         const uiContainer = document.getElementById(type + '_ui');
         const btn = document.getElementById(type + '_btn');
         if (g.overlays[type]) {
@@ -286,6 +286,9 @@ function initOSD() {
 
 function init(callback=null) {
     globals.reset();
+    if (g.overlays.coords === undefined) {
+        g.overlays.coords = true; // default on
+    }
     svg_draw.init();
     if (!g.marker) {
         g.marker = new marker.MarkManager({ indexType: 'rtree', enableEdit: true });
@@ -578,7 +581,9 @@ function toggleOverlay(type) {
     } else {
         document.getElementById('legends').style.display = 'none';
     }
-
+    if (type == 'coords') {
+        updateCoords();
+    }
     updateMaps(g.currentLayer);
 }
 
@@ -749,14 +754,24 @@ function onTrim() {
 
 // coordinates
 function copyCoords() {
-    const coords = '(' + g.sx + ',' + g.sy + ')';
+    if (!g.overlays.coords) {
+        return;
+    }
+    const coords = 'x:' + g.sx + ',y:' + g.sy + ',layer:' + g.currentLayer;
     util.setClipboard(coords).then((err) => {
         if (err) {
             util.setOutput('main_output', 'Red', i18n.T('CopyCoordsError', {error: err}));
         } else {
-            let e = document.getElementById('coords');
-            e.style['border-color'] = 'Green';
-            util.setOutput('coords', 'Green', i18n.T('CopyCoordsSuccess'));
+            g.sys_marker.load([{
+                    id: 'coords',
+                    type: 'text',
+                    name: i18n.E('Coords') + '<br/><span style="color:yellow">' + i18n.T('CopyCoordsSuccess') + '</span>',
+                    x: g.sx + 1,
+                    y: g.sy + 1,
+                    color: 'lime',
+                    layer: g.currentLayer,
+                    class_list: ['coords'],
+            }]);
         }
     });
 }
@@ -765,23 +780,35 @@ function updateCoords(recalc=false) {
     if (recalc && g.position) {
         [g.sx, g.sy] = c.getSquare(g.position);
     }
-    const e = document.getElementById('coords');
-    e.style['border-color'] = '';
-    e.style['color'] = '';
-    e.innerHTML = i18n.E('Coords');
-    g.sys_marker.load([{
-        id: 'cursor',
-        rects: [{
-            x: g.sx,
-            y: g.sy,
-            width: 1,
-            height: 1
-        }],
-        layer: g.currentLayer,
-        type: 'area',
-        class_list: ['cursor'],
-        visible_zoom_level: 2,
-    }]);
+    if (g.overlays.coords) {
+        g.sys_marker.load([
+            {
+                id: 'cursor',
+                rects: [{
+                    x: g.sx,
+                    y: g.sy,
+                    width: 1,
+                    height: 1
+                }],
+                layer: g.currentLayer,
+                type: 'area',
+                class_list: ['cursor'],
+                visible_zoom_level: 2,
+            },
+            {
+                id: 'coords',
+                type: 'text',
+                name: i18n.E('Coords') + '<br/><span style="color:yellow">' + i18n.T('CoordsHotkey') + '</span>',
+                x: g.sx + 1,
+                y: g.sy + 1,
+                color: 'lime',
+                layer: g.currentLayer,
+                class_list: ['coords'],
+            }
+        ]);
+    } else {
+        g.sys_marker.removeAll();
+    }
 }
 
 function onPointerMove(event) {

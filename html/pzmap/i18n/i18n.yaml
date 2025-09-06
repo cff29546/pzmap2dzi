@@ -384,12 +384,18 @@ template:
     TrimmerError:
         en: '<b>Trimming failed, error: {error}</b>'
         cn: '<b>裁剪失败，错误: {error}</b>'
+    CoordsButton:
+        en: 'Coords'
+        cn: '坐标'
     Coords:
-        en: 'Coordinates: (X: ${g.sx}, Y: ${g.sy})'
-        cn: '坐标: (X: ${g.sx}, Y: ${g.sy})'
+        en: 'Coordinates: (X: ${g.sx}, Y: ${g.sy}, Layer: ${g.currentLayer})'
+        cn: '坐标: (X: ${g.sx}, Y: ${g.sy}, 楼层: ${g.currentLayer})'
+    CoordsHotkey:
+        en: 'Press "c" to copy coords to clipboard'
+        cn: '按"c"键复制坐标'
     CoordsTitle:
-        en: 'Press "c" key copy coordinates to clipboard'
-        cn: '按"c"键复制坐标到剪切板'
+        en: 'Coordinates'
+        cn: '坐标'
     CopyCoordsSuccess:
         en: 'Coordinates copied'
         cn: '坐标已复制到剪切板'
@@ -611,9 +617,8 @@ mapping:
             innerHTML: TrimmerBrowseButton
         trimmer_help_text:
             innerHTML: TrimmerHelpText
-        coords:
-            innerHTML:
-                eval: Coords
+        coords_btn:
+            innerHTML: CoordsButton
             title: CoordsTitle
         route_selector:
             title: RouteSelectorTitle

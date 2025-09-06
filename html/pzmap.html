@@ -49,6 +49,7 @@
     div.point.above { background-color: #9f3; border-color: #383; }
     div.point.below { background-color: #99f; border-color: #93f; }
     div.point.selected { background-color: #ff3; border-color: #881; }
+    div.text.coords { padding-top: 16px; text-align: center; }
     div.selected { visibility: visible; pointer-events: auto; }
     div.fly { position: absolute; z-index: 100; right: 0;}
     svg { transform-origin: top left; border: none; }
@@ -74,7 +75,7 @@
         <button id="streets_btn" onclick="toggleOverlay('streets')"></button>
         <button id="marker_btn" onclick="toggleMarkerUI()"></button>
         <button id="trimmer_btn" onclick="toggleTrimmer()"></button>
-        <div id="coords" class="inline coords" onclick="copyCoords()"></div>
+        <button id="coords_btn" onclick="toggleOverlay('coords')"></button>
         <div id="main_output" class="inline">Initialization Failed</div>
         <div class="text-right">
             <select id="route_selector" onchange="onChangeRoute()"></select>

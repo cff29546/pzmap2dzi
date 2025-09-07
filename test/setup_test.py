@@ -2,13 +2,16 @@ import os
 import io
 import sys
 import yaml
-sys.path.append('..')
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(_BASE_DIR, '..'))
+sys.path.append(os.path.join(_BASE_DIR, '../scripts'))
+_DEFAULT_CONF = os.path.join(_BASE_DIR, '../conf')
 import main
-sys.path.append('../scripts')
 from gen_example_conf import copy, update_conf, update_data
 
 def copy_map(dst, src, cells):
     copy(dst, src, 'objects.lua')
+    copy(dst, src, 'streets.xml')
     for x, y in cells:
         copy(dst, src, 'world_{}_{}.lotpack'.format(x, y))
         copy(dst, src, '{}_{}.lotheader'.format(x, y))
@@ -38,7 +41,7 @@ def load_case(path, name):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='pzmap2dzi test conf setter')
-    parser.add_argument('-c', '--conf', type=str, default='../conf')
+    parser.add_argument('-c', '--conf', type=str, default=_DEFAULT_CONF)
     parser.add_argument('-o', '--output', type=str, default='test_output')
     parser.add_argument('case_file', type=str)
     args = parser.parse_args()

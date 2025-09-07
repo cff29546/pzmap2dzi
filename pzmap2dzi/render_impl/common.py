@@ -96,14 +96,21 @@ def render_edge(draw, x, y, color, width, border_flags):
 
 
 def dump_marks(marks, output_path):
+    if bytes != str:
+        # python 3
+        convert = lambda x: x
+    else:
+        convert = unicode
+
     with io.open(output_path, 'w', encoding='utf-8') as f:
         start = True
-        f.write('[\n')
+        f.write(u'[\n')
         for mark in marks:
             if not start:
-                f.write(',')
+                f.write(u',')
             else:
                 start = False
-            f.write(json.dumps(mark, separators=(',', ':')))
-            f.write('\n')
-        f.write(']')
+            s = convert(json.dumps(mark, separators=(',', ':')))
+            f.write(s)
+            f.write(u'\n')
+        f.write(u']')

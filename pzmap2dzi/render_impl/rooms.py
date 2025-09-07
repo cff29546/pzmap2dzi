@@ -147,12 +147,13 @@ class RoomMark(object):
         self.map_name = options.get('cache_name', 'unknown')
 
     def process(self, dzi):
-        results = []
+        marks = []
         for cx, cy in dzi.cells:
-            marks = get_room_marks_by_cell(self.input, cx, cy, dzi.cell_size, self.encoding, self.map_name)
-            if marks:
-                results.extend(marks)
-        if results:
+            cell_marks = get_room_marks_by_cell(self.input, cx, cy, dzi.cell_size, self.encoding, self.map_name)
+            if cell_marks:
+                marks.extend(cell_marks)
+        print('  rooms: {}'.format(len(marks)))
+        if marks:
             output_path = os.path.join(self.output, 'marks.json')
-            dump_marks(results, output_path)
+            dump_marks(marks, output_path)
         return True

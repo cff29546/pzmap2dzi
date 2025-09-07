@@ -242,6 +242,7 @@ class ObjectsMark(object):
 
     def process(self, dzi):
         marks = self.get_objects_marks()
+        print('  objects: {}'.format(len(marks)))
         if marks:
             output_path = os.path.join(self.output, 'marks.json')
             dump_marks(marks, output_path)

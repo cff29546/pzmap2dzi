@@ -164,7 +164,7 @@ class TextureLibrary(object):
         for path in self.texture_path:
             hash_file = os.path.join(path, 'hash.yaml')
             if os.path.isfile(hash_file):
-                with io.open(hash_file, 'r', encoding='utf8') as f:
+                with io.open(hash_file, 'r') as f:
                     self.hash.update(yaml.safe_load(f) or {})
 
     def add_pack(self, path, debug=False):
@@ -307,7 +307,7 @@ class TextureLibrary(object):
             return
         t = mptask.Task(SaveImg(path), mptask.SplitScheduler(True))
         t.run(tasks, parallel)
-        with io.open(os.path.join(path, 'hash.yaml'), 'w', encoding='utf8') as f:
+        with open(os.path.join(path, 'hash.yaml'), 'w') as f:
             f.write(yaml.safe_dump(self.hash))
 
     def blend_textures(self, names):

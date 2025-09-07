@@ -1,6 +1,8 @@
 import os
 import sys
-sys.path.append('../..')
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(_BASE_DIR, '../..'))
+_DEFAULT_CONF = os.path.join(_BASE_DIR, '../../conf/conf.yaml')
 import main
 from pzmap2dzi import pzobjects
 from pzmap2dzi.render_impl import common
@@ -9,8 +11,8 @@ from pzmap2dzi.render_impl import common
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='basement marker')
-    parser.add_argument('-c', '--conf', type=str, default='../../conf/conf.yaml')
-    parser.add_argument('-o', '--output', type=str, default='basement.json')
+    parser.add_argument('-c', '--conf', type=str, default=_DEFAULT_CONF)
+    parser.add_argument('-o', '--output', type=str, default='./basement.json')
     args = parser.parse_args()
 
     map_path = main.get_map_path(args.conf, 'default')
@@ -29,7 +31,6 @@ if __name__ == '__main__':
                 'desc': 'Stair Direction: ' + d}
         marks.append(mark)
 
-    common.dump_marks(marks, args.output)
-
-
-
+    if args.output:
+        common.dump_marks(marks, args.output)
+        print('{} mark(s) saved to [{}]'.format(len(marks), args.output))

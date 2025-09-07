@@ -1,5 +1,9 @@
 # Change log
 
+# 2025-09-07: 1.1.6 + UI 1.1.5
+
+* Fix Python 2 compatibility
+
 # 2025-09-07: 1.1.5 + UI 1.1.5
 
 * Add texture location script

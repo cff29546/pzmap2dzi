@@ -10,12 +10,11 @@ import * as conf from "./mark/conf.js";
 
 export function updateZoom() {
     // update zoom information to current viewer
-    const zoom = c.getZoom(g.viewer, false);
-    g.zoomInfo.step = zoom * g.base_map.sqr;
+    const step = g.grid.step;
     let change = false;
     let zoomLevel = 1;
     while (zoomLevel < conf[g.map_type].length &&
-        g.zoomInfo.step > conf[g.map_type][zoomLevel].minStep) {
+        step > conf[g.map_type][zoomLevel].minStep) {
         zoomLevel += 1;
     }
     zoomLevel -= 1; // zoom_level starts from 0

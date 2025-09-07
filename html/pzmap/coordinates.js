@@ -335,7 +335,7 @@ export class Grid {
         this.c00 = getCanvasOrigin(viewer, this.map, 0);
         const step = getSquareStep(viewer, this.map, true);
         if (this.step === step) {
-            return;
+            return false;
         }
         this.step = step;
         this.block_step = this.step * this.size.block;
@@ -355,6 +355,7 @@ export class Grid {
         }
         this.ctx = viewer.drawer.context;
         this.updateTextSize();
+        return true;
     }
 
     updateTextSize() {

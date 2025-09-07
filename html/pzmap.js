@@ -170,8 +170,13 @@ function initOSD() {
     });
 
     g.viewer.addHandler('update-viewport', function() {
-        g.grid.update(g.viewer);
+        const zoomChange = g.grid.update(g.viewer);
         g.range = c.getCanvasRange(true);
+        if (zoomChange) {
+            marker.updateZoom();
+            svg_draw.updateZoom();
+            osd_draw.updateZoom();
+        }
 
         if (g.trimmerui) {
             g.grid.drawEditState(g.trimmer, g.currentLayer);
@@ -192,15 +197,12 @@ function initOSD() {
         for (const map of g.mod_maps) {
             map.redrawMarks(g.overlays);
         }
-    });
-
-    g.viewer.addHandler('zoom', function(event) {
-        if (marker.updateZoom()) {
+        if (zoomChange) {
             forceRedraw();
         }
-        svg_draw.updateZoom();
-        osd_draw.updateZoom();
     });
+
+    //g.viewer.addHandler('zoom', function(event) {});
 
     g.viewer.addHandler('canvas-press', function(event) {
         if (g.trimmerui) {

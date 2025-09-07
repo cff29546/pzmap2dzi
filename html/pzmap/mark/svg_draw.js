@@ -14,7 +14,7 @@ export function updateViewport(viewer, map) {
 }
 
 export function updateZoom() {
-    const step = g.zoomInfo.step;
+    const step = g.grid.step;
     g.svg.iso.setAttribute('stroke-width', 2 * g.zoomInfo.rectBorder / step);
     g.svg.top.setAttribute('stroke-width', g.zoomInfo.rectBorder / step);
     const fontSize = {

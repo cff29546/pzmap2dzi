@@ -22,7 +22,7 @@
     div.iso-only-btn { display: inline-block; }
     div.passthrough { pointer-events: none; }
     div.interactive { pointer-events: auto; }
-    div.mark { border-style: solid; }
+    div.mark { border-style: solid; user-select: none; }
     div.text { white-space: nowrap; text-shadow: 2px 0 #fff, -2px 0 #fff, 0 2px #fff,
       0 -2px #fff, 1px 1px #fff, -1px -1px #fff, 1px -1px #fff, -1px 1px #fff;
       color: #33f; font-family: Arial, sans-serif; }
@@ -52,12 +52,17 @@
     div.text.coords { padding-top: 16px; text-align: center; }
     div.selected { visibility: visible; pointer-events: auto; }
     div.fly { position: absolute; z-index: 100; right: 0;}
-    svg { transform-origin: top left; border: none; }
+    svg { transform-origin: top left; border: none; user-select: none; }
     svg.mark { border: none; }
     svg.iso { transform: matrix(0.5, 0.25, -0.5, 0.25, 0, 0); }
     svg text { text-anchor: middle; dominant-baseline: hanging; paint-order: stroke; 
       font-family: Arial, sans-serif; }
-    svg circle { fill: #39f; stroke: #33f; }
+    svg circle { r: 0; stroke-width: 0; }
+    svg use.iso.cursor { stroke-width: 0; }
+    svg use.top.cursor { stroke-width: 0; }
+    svg text.line0 { transform: none; }
+    svg text.line1 { transform: none; }
+    svg text.line2 { transform: none; }
     </style>
   </head>
   <body>
@@ -94,12 +99,15 @@
           <div id="about_ui" class="fly"></div>
         </div>
       </div>
-      <div style="flex: 1 1 auto; position: relative;">
+      <div id="working_area" style="flex: 1 1 auto; position: relative;">
         <div id="map_div" allowfullscreen style="height: 100%"></div>
         <svg id="svg_overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;" xmlns="http://www.w3.org/2000/svg">
           <defs id="svg_defs"></defs>
-          <g id="svg_iso" transform="matrix(0.5, 0.25, -0.5, 0.25, 0, 0)"></g>
+          <g id="svg_iso" transform="matrix(0.5, 0.25, -0.5, 0.25, 0, 0)" style="pointer-events: none;"></g>
+          <g id="svg_iso_active" transform="matrix(0.5, 0.25, -0.5, 0.25, 0, 0)" style="pointer-events: auto;"></g>
+          <g id="svg_top_active" style="pointer-events: auto;"></g>
           <g id="svg_top"></g>
+          <g id="svg_text"></g>
         </svg>
       </div>
     </div>

@@ -1,5 +1,11 @@
 # Change log
 
+# 2025-09-11: 1.1.6 + UI 1.1.7
+
+* Fix missing SVG overlay in full-page mode
+* Adapt mark editing for SVG overlays
+* Set SVG rendering as default
+
 # 2025-09-08: 1.1.6 + UI 1.1.6
 
 * Fix svg zoom

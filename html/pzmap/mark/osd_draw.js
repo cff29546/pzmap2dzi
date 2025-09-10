@@ -37,6 +37,17 @@ function setClass(element, mark, part) {
             element.classList.add(c);
         }
     }
+    if (mark.selected) {
+        element.classList.add('selected');
+    }
+    if (part.shape === 'rect' && part.selected) {
+        element.classList.add('selected-rect');
+    }
+    if (mark.interactive) {
+        element.classList.add('interactive');
+    } else {
+        element.classList.add('passthrough');
+    }
 }
 
 function buildLinerBorder(segments, dir, color, size) {
@@ -220,7 +231,7 @@ function text(id, mark, part) {
     element.style['pointer-events'] = 'none';
     element.style['background-color'] = 'rgba(0,0,0,0)';
     element.style.border = 'none';
-    element.innerHTML = text;
+    element.innerHTML = text.replaceAll('\n', '<br/>');
 }
 
 function drawSVG(mark, part, position, size, element) {

@@ -60,7 +60,7 @@ export class MarkRender {
         const {
             name = null,
             formatterOptions = {},
-            renderMethod = 'osd',
+            renderMethod = 'svg',
         } = options;
         if (name) {
             this.name = name.replace(/-/g, '_');

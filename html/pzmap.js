@@ -202,6 +202,14 @@ function initOSD() {
         }
     });
 
+    g.viewer.addHandler('full-page', function(event) {
+        if (event.fullPage) {
+            document.body.appendChild(g.svg.svg);
+        } else {
+            document.getElementById('working_area').appendChild(g.svg.svg);
+        }
+    });
+
     //g.viewer.addHandler('zoom', function(event) {});
 
     g.viewer.addHandler('canvas-press', function(event) {
@@ -286,6 +294,20 @@ function initOSD() {
     }
 }
 
+function onPointerMove(event) {
+    g.position = c.getEventPosition(event);
+    updateCoords(true);
+    if (g.markerui && event.buttons & 1) {
+        g.marker.edit.drag(event);
+    }
+}
+
+function onPointerUp(event) {
+    if (g.markerui) {
+        g.marker.edit.release(event);
+    }
+}
+
 function init(callback=null) {
     globals.reset();
     if (g.overlays.coords === undefined) {
@@ -293,7 +315,12 @@ function init(callback=null) {
     }
     svg_draw.init();
     if (!g.marker) {
-        g.marker = new marker.MarkManager({ indexType: 'rtree', enableEdit: true });
+        const method = g.query_string.use_osd ? 'osd' : 'svg';
+        g.marker = new marker.MarkManager({
+            indexType: 'rtree',
+            enableEdit: true,
+            renderOptions: { renderMethod: method },
+        });
     } else {
         g.marker.clearRenderCache();
     }
@@ -303,7 +330,7 @@ function init(callback=null) {
         g.sys_marker.clearRenderCache();
     }
     if (!g.debug_marker) {
-        g.debug_marker = new marker.MarkManager({ renderOptions: { renderMethod: 'svg' } });
+        g.debug_marker = new marker.MarkManager({});
     } else {
         g.debug_marker.clearRenderCache();
     }
@@ -331,6 +358,7 @@ function init(callback=null) {
                     });
                 });
                 g.viewer.canvas.addEventListener('pointermove', onPointerMove);
+                g.viewer.canvas.addEventListener('pointerup', onPointerUp);
                 updateMaps(g.currentLayer);
                 g.marker.redrawAll();
                 g.sys_marker.redrawAll();
@@ -755,6 +783,18 @@ function onTrim() {
 }
 
 // coordinates
+function getCoordsLine(isCopy=false) {
+    const coords = ['', i18n.E('Coords')];
+    const status = isCopy ? i18n.T('CopyCoordsSuccess') : i18n.T('CoordsHotkey');
+    if (g.sys_marker.render.renderMethod == 'svg') {
+        coords.push('<tspan fill="yellow">' + status + '</tspan>');
+    }
+    if (g.sys_marker.render.renderMethod == 'osd') {
+        coords.push('<span style="color:yellow">' + status + '</span>');
+    }
+    return coords.join('\n');
+}
+
 function copyCoords() {
     if (!g.overlays.coords) {
         return;
@@ -767,9 +807,9 @@ function copyCoords() {
             g.sys_marker.load([{
                     id: 'coords',
                     type: 'text',
-                    name: i18n.E('Coords') + '<br/><span style="color:yellow">' + i18n.T('CopyCoordsSuccess') + '</span>',
-                    x: g.sx + 1,
-                    y: g.sy + 1,
+                    name: getCoordsLine(true),
+                    x: g.sx,
+                    y: g.sy,
                     color: 'lime',
                     layer: g.currentLayer,
                     class_list: ['coords'],
@@ -780,7 +820,7 @@ function copyCoords() {
 
 function updateCoords(recalc=false) {
     if (recalc && g.position) {
-        [g.sx, g.sy] = c.getSquare(g.position);
+        [g.sx, g.sy] = c.getSquare(g);
     }
     if (g.overlays.coords) {
         g.sys_marker.load([
@@ -794,15 +834,16 @@ function updateCoords(recalc=false) {
                 }],
                 layer: g.currentLayer,
                 type: 'area',
+                color: 'lime',
                 class_list: ['cursor'],
                 visible_zoom_level: 2,
             },
             {
                 id: 'coords',
                 type: 'text',
-                name: i18n.E('Coords') + '<br/><span style="color:yellow">' + i18n.T('CoordsHotkey') + '</span>',
-                x: g.sx + 1,
-                y: g.sy + 1,
+                name: getCoordsLine(),
+                x: g.sx,
+                y: g.sy,
                 color: 'lime',
                 layer: g.currentLayer,
                 class_list: ['coords'],
@@ -811,13 +852,6 @@ function updateCoords(recalc=false) {
     } else {
         g.sys_marker.removeAll();
     }
-}
-
-function onPointerMove(event) {
-    const mouse = OpenSeadragon.getMousePosition(event);
-    const offset = OpenSeadragon.getElementOffset(g.viewer.canvas);
-    g.position = {position: mouse.minus(offset)};
-    updateCoords(true);
 }
 
 // change route
@@ -917,7 +951,8 @@ function updateLangSelector() {
 }
 
 function onChangeLanguage() {
-    const lang = document.getElementById('language_selector').value;
+    const selector = document.getElementById('language_selector');
+    const lang = selector.value;
     i18n.setLang(lang);
     i18n.update('id');
     updateLayerSelector();
@@ -932,6 +967,7 @@ function onChangeLanguage() {
         g.marker.edit.updateStatus();
     }
     updateMainOutput();
+    selector.blur(); // remove focus from selector
 }
 
 // about

@@ -59,8 +59,13 @@ export class MarkManager {
         this.db = new MarkDatabase(mode, onlyCurrentLayer, indexType, indexOptions);
         this.render = new MarkRender(renderOptions);
         this.hiddenType = {};
-        this.edit = enableEdit ? new MarkEditor(this) : null;
-        if (!this.edit) {
+        this.edit = null;
+        if (enableEdit) {
+            this.edit = new MarkEditor(this);
+            if (renderOptions.renderMethod === 'svg') {
+                g.svg.adapter.setListener(this.edit);
+            }
+        } else {
             if (!this.defaultValue) {
                 this.defaultValue = {};
             }

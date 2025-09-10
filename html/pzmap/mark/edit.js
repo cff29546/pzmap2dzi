@@ -172,6 +172,7 @@ export class MarkEditor {
     }
 
     click(event) {
+        if (!event.originalEvent) return true;
         // return true to stop propagation
         if (event.originalEvent.shiftKey) {
             // create new marker
@@ -186,8 +187,45 @@ export class MarkEditor {
         return false;
     }
 
+    _locateIndex(event) {
+        if (!this.current || this.current.constructor.name !== 'Area') {
+            return -1;
+        }
+        const [x, y] = c.getSquare(event, this.current.layer);
+        return this.current.locateIndex(x, y);
+    }
+    pointerdown(event) {
+        // svg pointerdown event
+        let e = event.target;
+        const tag = e.tagName.toLowerCase();
+        const { type, id } = MarkRender.parseElementId(e.id);
+        if (event.shiftKey) {
+            if (type === 'area') {
+                // resize existing
+                this.select(id, -1);
+                const idx = this._locateIndex(event);
+                if (idx >= 0) {
+                    this.select(id, idx);
+                    this._start_drag(event, MarkEditor.MODE_RESIZE);
+                } else {
+                    console.log('Cannot locate rect index');
+                }
+            }
+        } else {
+            if (['point', 'text', 'polygon', 'polyline', 'area'].includes(type)) {
+                this.select(id, -1);
+                if (event.ctrlKey && type === 'area') {
+                    const idx = this._locateIndex(event);
+                    if (idx >= 0) this.select(id, idx);
+                }
+                this._start_drag(event, MarkEditor.MODE_MOVE);
+            }
+        }
+        return true;
+    }
+
     press(event) {
-        // return true to stop propagation
+        // osd press event
         const e = event.originalEvent.target; // see OpenSeadragon press event
         if (event.originalEvent.shiftKey) {
             if (e && e.classList.contains('mark') && e.classList.contains('area')) {
@@ -215,8 +253,9 @@ export class MarkEditor {
 
     _start_drag(event, mode) {
         this.mode = mode;
-        [this.sx, this.sy] = c.getSquare(event);
         if (this.mode === MarkEditor.MODE_NONE) return;
+        this.slayer = this.current ? (this.current.layer || 0) : g.currentLayer;
+        [this.sx, this.sy] = c.getSquare(event, this.slayer);
         if (this.current && this.mode !== MarkEditor.MODE_CREATE) {
             this.current.start_drag(this.sx, this.sy);
         }
@@ -224,7 +263,7 @@ export class MarkEditor {
 
     drag(event) {
         if (this.mode === MarkEditor.MODE_NONE) return;
-        const [x, y] = c.getSquare(event);
+        const [x, y] = c.getSquare(event, this.slayer);
         const dx = x - this.sx;
         const dy = y - this.sy;
         if (this.mode === MarkEditor.MODE_MOVE) {

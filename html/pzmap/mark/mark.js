@@ -4,7 +4,7 @@ import { polylineLabelPos } from "../algorithm/geometry/geometry_utils.js";
 
 class Mark {
     static DEFAULT = {
-        // unique id of the mark
+        // unique id of the mark (must not contain '-')
         id: '',
 
         // name of the mark
@@ -61,6 +61,7 @@ class Mark {
                 this[key] = obj[key];
             }
         }
+        this.id = String(this.id).replaceAll('-', '_');
         this.visible_zoom_level = Number(this.visible_zoom_level);
         if (!Number.isInteger(this.visible_zoom_level)) {
             this.visible_zoom_level = 0;
@@ -69,19 +70,10 @@ class Mark {
     }
 
     cls() {
-        const classList = [];
-        if (this.selected) classList.push('selected');
-        if (this.passthrough) {
-            classList.push('passthrough');
-        } else {
-            classList.push('interactive');
-        }
         if (this.class_list) {
-            for (const cls of this.class_list) {
-                classList.push(cls);
-            }
+            return [...this.class_list];
         }
-        return classList;
+        return [];
     }
 
     showOnUI() {
@@ -137,17 +129,18 @@ class Mark {
 
     toRenderFormat(options = {}) {
         return {
-            id: this.id, 
+            id: this.id,
             type: this.constructor.name.toLowerCase(),
             color: this.color ? this.color : null,
             background: this.background ? this.background : null,
+            selected: this.selected,
             name: this.name,
             layer: this.layer,
             hash: this.hash(options),
             interactive: !this.passthrough,
             isDiffSum: this.isDiffSum,
             cls: this.cls(),
-            parts: this.parts(options)
+            parts: this.parts(options),
         };
     }
 
@@ -509,6 +502,16 @@ class Area extends Mark {
         return { x: minX, y: minY };
     }
 
+    locateIndex(x, y) {
+        for (let i = 0; i < this.rects.length; i++) {
+            const r = this.rects[i];
+            if (r.x <= x && r.x + r.width > x && r.y <= y && r.y + r.height > y) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     parts(options = {}) {
         const allParts = [];
         for (const r of this.rects) {
@@ -516,7 +519,7 @@ class Area extends Mark {
             allParts.push({ shape: 'rect', x, y, width, height });
         }
         if (this.selected_index >= 0 && this.selected_index < this.rects.length) {
-            allParts[this.selected_index].cls = ['selected-rect'];
+            allParts[this.selected_index].selected = true;
         }
         const text = this.textPart(options);
         if (text) {
@@ -550,6 +553,32 @@ class Polygon extends Mark {
 
     constructor(obj) {
         super(obj, ['layer', 'points', 'width', 'linecap', 'linejoin']);
+    }
+
+    start_drag(x, y) {
+        this.sp = this.points.map(p => ({ x: p.x, y: p.y }));
+    }
+
+    drag(x, y) {
+        this.points = this.sp.map(p => ({ x: p.x + x, y: p.y + y }));
+        this.lastPos = null;
+        this.resetHash();
+    }
+
+    update(obj) {
+        if (obj.layer !== undefined && Number.isInteger(obj.layer)) {
+            this.layer = obj.layer;
+        }
+        if (obj.visible_zoom_level !== undefined && Number.isInteger(obj.visible_zoom_level)) {
+            this.visible_zoom_level = obj.visible_zoom_level;
+        }
+        if (obj.name !== undefined) {
+            this.name = obj.name;
+        }
+        if (obj.desc !== undefined) {
+            this.desc = obj.desc;
+        }
+        this.resetHash();
     }
 
     text() {

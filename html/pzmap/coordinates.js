@@ -134,10 +134,11 @@ class Range {
     constructor(viewer, map, current=true) {
         const c00 = getCanvasOrigin(viewer, map, 0);
         const step = getSquareStep(viewer, map, current);
-        const w = viewer.drawer.context.canvas.width;
-        const h = viewer.drawer.context.canvas.height;
-        const [x0, y0] = toSquare[map.type](step, -c00.x, -c00.y, 0, false);
-        const [x1, y1] = toSquare[map.type](step, -c00.x + w, -c00.y + h, 0, false);
+        const { width, height } = viewer.canvas.getBoundingClientRect();
+        const w = width * window.devicePixelRatio;
+        const h = height * window.devicePixelRatio;
+        const [x0, y0] = toSquare[map.type](step, 0 - c00.x, 0 - c00.y, 0, false);
+        const [x1, y1] = toSquare[map.type](step, w - c00.x, h - c00.y, 0, false);
         if (map.type == 'top') {
             this.diffSum = false;
             this._initXY(x0, y0, x1 + 1, y1 + 1);
@@ -268,12 +269,12 @@ export function getCanvasRange(current) {
     return new Range(g.viewer, g.base_map, current);
 }
 
-function getSquareByCanvas(viewer, map, x, y, layer) {
+function getSquareByCanvas(viewer, map, x, y, layer, round) {
     //const x = event.position.x * window.devicePixelRatio;
     //const y = event.position.y * window.devicePixelRatio;
     const c00 = getCanvasOrigin(viewer, map, 0);
     const step = getSquareStep(viewer, map, true);
-    const [sx, sy] = toSquare[map.type](step, x - c00.x, y - c00.y, layer, true);
+    const [sx, sy] = toSquare[map.type](step, x - c00.x, y - c00.y, layer, round);
     return [sx, sy];
 }
 
@@ -298,10 +299,20 @@ export function stepToZoom(step) {
     return zoom / window.devicePixelRatio;
 }
 
-export function getSquare(event) {
+export function getEventPosition(event) {
+    const mouse = OpenSeadragon.getMousePosition(event);
+    const offset = OpenSeadragon.getElementOffset(g.viewer.canvas);
+    return mouse.minus(offset);
+}
+
+export function getSquare(event, layer = null, round = true) {
+    if (!event.position) {
+        event.position = getEventPosition(event);
+    }
     const x = event.position.x * window.devicePixelRatio;
     const y = event.position.y * window.devicePixelRatio;
-    return getSquareByCanvas(g.viewer, g.base_map, x, y, g.currentLayer);
+    if (layer === null) layer = g.currentLayer;
+    return getSquareByCanvas(g.viewer, g.base_map, x, y, layer, round);
 }
 
 export function getViewportPointBySquare(viewer, map, x, y, layer) {

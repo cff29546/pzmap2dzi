@@ -21,7 +21,7 @@ class ImageSharedMemory(object):
         try:
             shm = shared_memory.SharedMemory(name=self.prefix+index,
                                              create=True, size=size)
-        except:
+        except Exception as e:
             return None
 
         self.created[index] = shm
@@ -36,7 +36,7 @@ class ImageSharedMemory(object):
         if shm is None:
             try:
                 shm = shared_memory.SharedMemory(name=self.prefix+index)
-            except:
+            except Exception as e:
                 return None
             self.loaded[index] = shm
         if width * height == 0 and size_func:

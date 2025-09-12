@@ -1,7 +1,7 @@
 import pynput
 try:
     import queue
-except:
+except ImportError:
     import Queue as queue
 
 

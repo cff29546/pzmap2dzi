@@ -1,6 +1,6 @@
 setuptools
 pynput
-slpp
+lupa
 pyclipper
 pillow
 pyyaml

@@ -1,8 +1,10 @@
 from PIL import Image, ImageDraw, ImageColor
 import os
 import struct
-from .common import draw_square, render_long_text, render_edge, LazyFont, dump_marks
-from .. import pzobjects
+from .common import (
+    draw_square, render_long_text, render_edge, LazyFont, dump_marks
+)
+from .. import pzobjects, lua_util
 
 try:
     from functools import lru_cache
@@ -46,6 +48,7 @@ class ColorMapper(object):
             return None
         return self.color_map.get(key, self.default)
 
+
 class Lmap(object):
     def __init__(self, biome):
         im = Image.open(biome).convert('L')
@@ -78,9 +81,9 @@ def get_biome_mapping(pz_root):
     path = os.path.join(pz_root, 'media', 'lua', 'server', 'metazones')
     config_file = os.path.join(path, 'BiomeMapConfig.lua')
     if os.path.isfile(config_file):
-        config = pzobjects.load_lua_raw(config_file)
+        config = lua_util.run_and_get_var(config_file, 'biome_map_config')
         mapping = [None] * 256
-        for o in config['biome_map_config']:
+        for o in config:
             mapping[o['pixel']] = o['zone']
         return mapping
     return None
@@ -96,7 +99,8 @@ class ForagingBase(object):
         if self.mapping:
             self.version = 'B42'
             self.getter = CellGetterB42(os.path.join(self.input, 'maps'))
-            self.used_types = set(filter(lambda x: x is not None, self.mapping))
+            self.used_types = set(self.mapping)
+            self.used_types.discard(None)
         else:
             self.version = 'B41'
             objects_path = os.path.join(self.input, 'objects.lua')
@@ -191,7 +195,8 @@ class ObjectsRender(object):
                 self.legends[k] = v
 
         if options.get('use_mark'):
-            self.mark = ObjectsMark(objects_path, types, self.color_map, **options)
+            self.mark = ObjectsMark(objects_path, types,
+                                    self.color_map, **options)
             self.NO_IMAGE = True
 
     def render(self, dzi):
@@ -223,7 +228,8 @@ class ObjectsRender(object):
                 for t, name in label[layer][sx, sy]:
                     color = self.color_map.get(t)
                     if color:
-                        drawing.append((render_long_text, (name, color, self.font.get())))
+                        drawing.append((render_long_text,
+                                        (name, color, self.font.get())))
         if drawing:
             im = im_getter.get()
             draw = ImageDraw.Draw(im)
@@ -249,21 +255,20 @@ class ObjectsMark(object):
         return True
 
     def get_objects_marks(self):
-        objects_raw = pzobjects.load_typed_objects(self.objects_path, types=self.types)
+        objects_raw = pzobjects.load_typed_objects(
+            self.objects_path, types=self.types)
         objects = map(pzobjects.Obj, objects_raw)
         marks = []
         for i, obj in enumerate(objects):
-            rects = [{'x': x, 'y': y, 'width': w, 'height': h} for x, y, w, h in obj.rects()]
+            rects = [
+                {'x': x, 'y': y, 'width': w, 'height': h}
+                for x, y, w, h in obj.rects()
+            ]
             marks.append({
                 'type': 'area',
                 'color': self.color_map.get_name(obj.type),
                 'layer': obj.z,
                 'name': obj.obj.get('name', ''),
                 'rects': rects,
-                #'text_position': 'top',
-                #'background': 'transparent',
-                #'passthrough': True,
-                #'id': 'obj_{}_{}'.format(self.map_name, i),
-                #'visiable_zoom_level': 2,
             })
         return marks

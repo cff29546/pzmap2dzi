@@ -17,8 +17,7 @@ if __name__ == '__main__':
 
     map_path = main.get_map_path(args.conf, 'default')
     objects_path = os.path.join(map_path, 'objects.lua')
-    objects = pzobjects.load_lua_raw(objects_path)['objects']
-    basements = pzobjects.filter_objects_raw(objects, set(['Basement']))
+    basements = pzobjects.load_typed_objects(objects_path, set(['Basement']))
 
     marks = []
     for i, b in enumerate(basements):

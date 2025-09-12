@@ -1,19 +1,11 @@
-import slpp
 import os
-from . import geometry, lotheader
+from . import geometry, lotheader, lua_util
 from functools import partial
 try:
     from functools import lru_cache
 except ImportError:
     from backports.functools_lru_cache import lru_cache
 
-
-def load_lua_raw(path):
-    if not os.path.isfile(path):
-        return []
-    with open(path, 'r') as f:
-        text = f.read()
-    return slpp.slpp.decode('{' + text + '}')
 
 def filter_objects_raw(objects, types, zrange=None):
     if zrange:
@@ -74,7 +66,7 @@ class Obj(object):
     def is_inside(self, x, y):
         if self.geo_type == 'rect':
             if (x >= self.x and x < self.x + self.w and
-                y >= self.y and y < self.y + self.h):
+                    y >= self.y and y < self.y + self.h):
                 return True
             return False
         if self.geo_type in ['polygon', 'polyline']:
@@ -137,7 +129,7 @@ class CellMap(object):
 
 
 def load_typed_objects(path, types, zrange=None):
-    objects_raw = load_lua_raw(path)['objects']
+    objects_raw = lua_util.run_and_get_var(path, 'objects')
     return filter_objects_raw(objects_raw, types, zrange)
 
 

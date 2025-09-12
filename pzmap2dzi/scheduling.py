@@ -6,11 +6,11 @@ import datetime
 from . import mptask, lru, util
 try:
     from . import shared_memory_image
-except:
+except ImportError:
     shared_memory_image = None
 try:
     from . import hotkey
-except:
+except ImportError:
     hotkey = None
 
 
@@ -308,7 +308,8 @@ class TopologicalDziWorker(object):
                 self.dzi.render_tile(ic, x, y, layer, layer_cache)
             else:
                 cached = []
-                for pos, (sub_level, sub_x, sub_y) in enumerate(depend_task(level, x, y)):
+                depend_tasks = depend_task(level, x, y)
+                for pos, (sub_level, sub_x, sub_y) in enumerate(depend_tasks):
                     if sub_layer_maps[pos][layer] == 0:
                         cached.append('empty')
                     else:

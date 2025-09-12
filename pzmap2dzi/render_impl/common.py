@@ -37,10 +37,10 @@ def draw_square(draw, x, y, color, sizew=1, sizeh=1):
     h = pzdzi.IsoDZI.GRID_HEIGHT
     w = pzdzi.IsoDZI.GRID_WIDTH
     path = [
-        x                      , y - h                      ,  # top
-        x + sizew * w          , y + (sizew - 1) * h        ,  # right
+        x,                       y - h,                        # top
+        x + sizew * w,           y + (sizew - 1) * h,          # right
         x + (sizew - sizeh) * w, y + (sizew + sizeh - 1) * h,  # bottom
-        x - sizeh * w          , y + (sizeh - 1) * h        ,  # left
+        x - sizeh * w,           y + (sizeh - 1) * h,          # left
     ]
     draw.polygon(path, fill=color)
 
@@ -67,6 +67,8 @@ SUFFIX = [
     'print',
     'bottling',
 ]
+
+
 def break_long_text(text):
     for s in SUFFIX:
         if text.endswith(s):
@@ -86,6 +88,8 @@ def render_long_text(draw, x, y, text, color, font):
 
 _PAD_Y = 5
 _PAD_X = 10
+
+
 def render_edge(draw, x, y, color, width, border_flags):
     edges = geometry.get_edge_segments(border_flags, x, y,
                                        pzdzi.IsoDZI.GRID_WIDTH,
@@ -96,11 +100,8 @@ def render_edge(draw, x, y, color, width, border_flags):
 
 
 def dump_marks(marks, output_path):
-    if bytes != str:
-        # python 3
-        convert = lambda x: x
-    else:
-        convert = unicode
+    # Python 2/3 compatibility
+    convert = (lambda x: x) if bytes != str else unicode
 
     with io.open(output_path, 'w', encoding='utf-8') as f:
         start = True

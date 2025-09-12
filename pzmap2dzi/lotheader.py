@@ -52,7 +52,8 @@ def get_version_info(path, fast_mode=False):
     if len(version) != 1:
         raise Exception('Inconsistent version: {}'.format(version))
     if len(cell_size_in_block) != 1:
-        raise Exception('Inconsistent cell_size: {}'.format(cell_size_in_block))
+        bpc = list(cell_size_in_block)
+        raise Exception('Inconsistent block_per_cell: {}'.format(bpc))
     if len(block_size) != 1:
         raise Exception('Inconsistent block_size: {}'.format(block_size))
     version = version.pop()

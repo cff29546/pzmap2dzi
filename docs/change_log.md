@@ -1,5 +1,9 @@
 # Change log
 
+# 2025-09-12: 1.1.7 + UI 1.1.7
+
+* Add script to mark stash locations on the map
+
 # 2025-09-11: 1.1.6 + UI 1.1.7
 
 * Fix missing SVG overlay in full-page mode

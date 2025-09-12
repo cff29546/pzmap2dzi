@@ -54,6 +54,8 @@ _DIR = [(0, -1), (1, 0), (0, 1), (-1, 0)]
 _INSIDE = True
 _OUTSIDE = False
 _MAYBE = None
+
+
 def get_border_from_square_map(m):
     borders = []
     for x, y in m:
@@ -77,23 +79,23 @@ def rects_border(rects, may_overlap=False):
         dir_w_e = _INSIDE if w > 1 else _MAYBE
 
         # flag meannings:
-        #     _INSIDE: the adjacent tile in this direction belongs to the same room
-        #     _OUTSIDE: the adjacent tile in this direction is outside the room
+        #     _INSIDE: adjacent tile in this direction is inside
+        #     _OUTSIDE: adjacent tile in this direction is outside
         #     _MAYBE: Not sure, check later
 
         # corners
-        m[x        , y        ] = ( _MAYBE, dir_w_e, dir_n_s,  _MAYBE)
-        m[x        , y + h - 1] = (dir_n_s, dir_w_e,  _MAYBE,  _MAYBE)
-        m[x + w - 1, y        ] = ( _MAYBE,  _MAYBE, dir_n_s, dir_w_e)
+        m[x,                 y] = (_MAYBE,  dir_w_e, dir_n_s,  _MAYBE)
+        m[x,         y + h - 1] = (dir_n_s, dir_w_e,  _MAYBE,  _MAYBE)
+        m[x + w - 1,         y] = (_MAYBE,   _MAYBE, dir_n_s, dir_w_e)
         m[x + w - 1, y + h - 1] = (dir_n_s,  _MAYBE,  _MAYBE, dir_w_e)
 
         # edges
         for i in range(1, w - 1):
-            m[x + i, y        ] = ( _MAYBE, _INSIDE, dir_n_s, _INSIDE)
+            m[x + i,         y] = (_MAYBE,  _INSIDE, dir_n_s, _INSIDE)
             m[x + i, y + h - 1] = (dir_n_s, _INSIDE,  _MAYBE, _INSIDE)
         for j in range(1, h - 1):
-            m[x        , y + j] = (_INSIDE, dir_w_e, _INSIDE,  _MAYBE)
-            m[x + w - 1, y + j] = (_INSIDE,  _MAYBE, _INSIDE, dir_w_e) 
+            m[x,         y + j] = (_INSIDE, dir_w_e, _INSIDE,  _MAYBE)
+            m[x + w - 1, y + j] = (_INSIDE,  _MAYBE, _INSIDE, dir_w_e)
 
         if may_overlap:
             for i in range(1, w - 1):
@@ -127,42 +129,46 @@ X_START_WEIGHT = [
     #  outside;  inside
     #
     #  w pad_x;  w pad_x;
-    [( 0,  0), ( 0, -1)], # dir = 0 (N)
-    [( 1, -1), ( 1,  0)], # dir = 1 (E)
-    [( 0,  0), ( 0,  1)], # dir = 2 (S)
-    [(-1,  1), (-1,  0)], # dir = 3 (W)
+    [(0,  0), (0, -1)],  # dir = 0 (N)
+    [(1, -1), (1,  0)],  # dir = 1 (E)
+    [(0,  0), (0,  1)],  # dir = 2 (S)
+    [(-1, 1), (-1, 0)],  # dir = 3 (W)
 ]
 Y_START_WEIGHT = [
     # start_flag:
     #  outside;  inside
     #
     #  h pad_y;  h pad_y;
-    [(-1,  1), (-1,  0)], # dir = 0 (N)
-    [( 0,  0), ( 0, -1)], # dir = 1 (E)
-    [( 1, -1), ( 1,  0)], # dir = 2 (S)
-    [( 0,  0), ( 0,  1)], # dir = 3 (W)
+    [(-1, 1), (-1, 0)],  # dir = 0 (N)
+    [(0,  0), (0, -1)],  # dir = 1 (E)
+    [(1, -1), (1,  0)],  # dir = 2 (S)
+    [(0,  0), (0,  1)],  # dir = 3 (W)
 ]
 X_END_WEIGHT = [
     # start_flag:
     #  outside;  inside
     #
     #  w pad_x;  w pad_x;
-    [( 1, -1), ( 1,  0)], # dir = 0 (N)
-    [( 0,  0), ( 0, -1)], # dir = 1 (E)
-    [(-1,  1), (-1,  0)], # dir = 2 (S)
-    [( 0,  0), ( 0,  1)], # dir = 3 (W)
+    [(1, -1), (1,  0)],  # dir = 0 (N)
+    [(0,  0), (0, -1)],  # dir = 1 (E)
+    [(-1, 1), (-1, 0)],  # dir = 2 (S)
+    [(0,  0), (0,  1)],  # dir = 3 (W)
 ]
 Y_END_WEIGHT = [
     # start_flag:
     #  outside;  inside
     #
     #  h pad_y;  h pad_y;
-    [( 0,  0), ( 0,  1)], # dir = 0 (N)
-    [( 1, -1), ( 1,  0)], # dir = 1 (E)
-    [( 0,  0), ( 0, -1)], # dir = 2 (S)
-    [(-1,  1), (-1,  0)], # dir = 3 (W)
+    [(0,  0), (0,  1)],  # dir = 0 (N)
+    [(1, -1), (1,  0)],  # dir = 1 (E)
+    [(0,  0), (0, -1)],  # dir = 2 (S)
+    [(-1, 1), (-1, 0)],  # dir = 3 (W)
 ]
-def get_edge(edge_dir, start_flag, end_flag, x, y, w, h, pad_x, pad_y):
+
+
+def get_edge(
+    edge_dir, start_flag, end_flag, x, y, w, h, pad_x, pad_y
+):
     ww, wpx = X_START_WEIGHT[edge_dir][start_flag]
     x1 = x + ww * w + wpx * pad_x
     wh, wpy = Y_START_WEIGHT[edge_dir][start_flag]
@@ -181,7 +187,9 @@ def get_edge_segments(border_flags, x, y, w, h, pad_x, pad_y):
             continue
         start_flag = border_flags[(edge_dir - 1) % 4]
         end_flag = border_flags[(edge_dir + 1) % 4]
-        edges.append(get_edge(edge_dir, start_flag, end_flag, x, y, w, h, pad_x, pad_y))
+        edges.append(get_edge(
+            edge_dir, start_flag, end_flag, x, y, w, h, pad_x, pad_y
+        ))
     return edges
 
 

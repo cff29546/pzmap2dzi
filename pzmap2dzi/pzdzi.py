@@ -5,15 +5,19 @@ import re
 import json
 from . import util, mptask, scheduling, geometry, lotheader
 
-DZI_TEMPLATE = '''<?xml version="1.0" encoding="UTF-8"?>
-<Image xmlns="http://schemas.microsoft.com/deepzoom/2008" TileSize="{}" Overlap="0" Format="{}">
-  <Size Width="{}" Height="{}"/>
-</Image>'''
+DZI_TEMPLATE = (
+    '<?xml version="1.0" encoding="UTF-8"?>\n'
+    '<Image xmlns="http://schemas.microsoft.com/deepzoom/2008" '
+    'TileSize="{}" Overlap="0" Format="{}">\n'
+    '  <Size Width="{}" Height="{}"/>\n</Image>'
+)
 PENDING_PATTERN = re.compile('(\\d+)_(\\d+)\\.pending$')
 DONE_TEMPLATE = '(\\d+)_(\\d+)\\.(?:empty|{})$'
 
 
 RGB_FMT = set(['jpg', 'jpeg'])
+
+
 def supports_RGBA(ext):
     if ext in RGB_FMT:
         return False
@@ -43,18 +47,20 @@ def get_merge_task_depend(done, lower_task, lower_done):
             skip.add((tx, ty))
     return tasks, skip
 
+
 def align_origin(origin, align):
     align = int(align)
     if align == 0:
         return origin
     return align * (origin // align)
 
+
 class DZI(object):
     def __init__(self, w, h, **options):
         self.w = w
         self.h = h
         self.path = options.get('output', './dzi')
-        assert self.tile_size != None
+        assert self.tile_size is not None
         self.save_empty = options.get('save_empty_tile', False)
         self.ext = options.get('image_fmt', 'png').lower()
         self.ext0 = options.get('image_fmt_layer0', self.ext).lower()
@@ -121,7 +127,7 @@ class DZI(object):
         im.save(path, **self.save_options[ext])
 
         if (write_all and level != self.levels and
-            level + 1 >= self.levels - self.skip_level):
+                level + 1 >= self.levels - self.skip_level):
             self.delete_skip_tiles(level, tx, ty, layer)
 
         return 'saved'
@@ -136,7 +142,7 @@ class DZI(object):
         if os.path.isfile(path):
             try:
                 os.remove(path)
-            except:
+            except Exception as e:
                 pass
 
     def get_ext(self, layer):
@@ -169,19 +175,20 @@ class DZI(object):
 
     def create_empty_output(self, no_image=False):
         util.ensure_folder(self.path)
-        if not no_image:
-            for layer in range(self.render_minlayer, self.render_maxlayer):
-                layer_path = os.path.join(self.path, 'layer{}_files'.format(layer))
-                util.ensure_folder(layer_path)
-                for level in range(self.levels):
-                    util.ensure_folder(os.path.join(layer_path, str(level)))
-                ext = self.ext0 if layer == 0 else self.ext
-                w, h = self.pyramid[-1 - self.skip_level]
-                dzi = DZI_TEMPLATE.format(self.tile_size, ext, w, h)
-                dzi_path = os.path.join(self.path, 'layer{}.dzi'.format(layer))
-                with open(dzi_path, 'w') as f:
-                    f.write(dzi)
         self.save_map_info()
+        if no_image:
+            return
+        for layer in range(self.render_minlayer, self.render_maxlayer):
+            layer_path = os.path.join(self.path, 'layer{}_files'.format(layer))
+            util.ensure_folder(layer_path)
+            for level in range(self.levels):
+                util.ensure_folder(os.path.join(layer_path, str(level)))
+            ext = self.ext0 if layer == 0 else self.ext
+            w, h = self.pyramid[-1 - self.skip_level]
+            dzi = DZI_TEMPLATE.format(self.tile_size, ext, w, h)
+            dzi_path = os.path.join(self.path, 'layer{}.dzi'.format(layer))
+            with open(dzi_path, 'w') as f:
+                f.write(dzi)
 
     def save_map_info(self):
         w, h = self.pyramid[-1 - self.skip_level]
@@ -295,24 +302,27 @@ class DZI(object):
         ext = self.get_ext(layer)
         if supports_RGBA(ext):
             return None
-        for l in range(self.render_minlayer, layer):
-            im_below = layer_cache[l]
+        for i in range(self.render_minlayer, layer):
+            im_below = layer_cache[i]
             if im_below:
                 im = im_getter.get()
                 im.alpha_composite(im_below)
 
-    def render_all(self, render, n, break_key=None, verbose=False, profile=False):
+    def render_all(self, render, n, break_key=None, verbose=False, profile=0):
         if verbose:
             print('Preparing data')
         no_image = hasattr(render, 'NO_IMAGE') and render.NO_IMAGE
         self.create_empty_output(no_image)
         if hasattr(render, 'render'):
-            import time, datetime
-            print('Rendering non-image elements')
-            start = time.time()
+            import time
+            import datetime
+            if verbose:
+                print('Rendering non-image elements')
+                start = time.time()
             render.render(self)
-            time_used = time.time() - start
-            print('time used', str(datetime.timedelta(0, time_used)))
+            if verbose:
+                time_used = time.time() - start
+                print('time used', str(datetime.timedelta(0, time_used)))
         if not no_image:
             if hasattr(render, 'valid_cell'):
                 for x, y in self.cells:
@@ -342,7 +352,8 @@ class PZDZI(DZI):
 
     def pz_init(self, path, **options):
         version_info = lotheader.get_version_info(path)
-        self.pz_version = PZDZI.PZ_VERSION.get(version_info['version'], 'Unknown')
+        raw_version = version_info['version']
+        self.pz_version = PZDZI.PZ_VERSION.get(raw_version, 'Unknown')
         self.cells = version_info['cells']
         self.cell_size_in_block = version_info['cell_size_in_block']
         self.block_size = version_info['block_size']
@@ -364,8 +375,10 @@ class PZDZI(DZI):
         tile_align_levels = options.get('tile_align_levels', 3)
         self.align_tiles = int(2 ** (tile_align_levels - 1))
 
-        self.render_minlayer = max(options.get('render_minlayer', self.minlayer), self.minlayer)
-        self.render_maxlayer = min(options.get('render_maxlayer', self.maxlayer), self.maxlayer)
+        self.render_minlayer = max(
+            options.get('render_minlayer', self.minlayer), self.minlayer)
+        self.render_maxlayer = min(
+            options.get('render_maxlayer', self.maxlayer), self.maxlayer)
         self.layers = self.render_maxlayer - self.render_minlayer
         if options.get('verbose'):
             print('PZ version: {} , layer range [{}, {})'.format(

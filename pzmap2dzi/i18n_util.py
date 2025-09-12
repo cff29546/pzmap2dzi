@@ -63,6 +63,8 @@ def recover_dict(data, splitor):
 
 
 TEXT_KEYS = ['name', 'desc']
+
+
 def yaml_item2json_aio(y, splitor='&&'):
     j = {}
     for key in y:
@@ -148,11 +150,8 @@ def json_aio_to_yaml(path, splitor='&&', output=''):
     for item in data_aio:
         y.append(json_aio_item2yaml(item, splitor))
 
-    #y = sorted(y, key=lambda x: x.get('visiable_zoom_level', 0))
     yaml_aio_path = os.path.join(base_dir, name + '.yaml')
     save_yaml(yaml_aio_path, y)
-
-# i18n config
 
 
 def split_template(data):

@@ -7,9 +7,11 @@ try:
 except ImportError:
     from backports.functools_lru_cache import lru_cache
 
+
 @lru_cache(maxsize=16)
 def load_cell_cached(path, cx, cy):
     return cell.load_cell(path, cx, cy)
+
 
 class TextureRender(object):
     def __init__(self, **options):
@@ -69,6 +71,8 @@ _half_water = set([
     'blends_natural_02_3',
     'blends_natural_02_4',
 ])
+
+
 def rc_base_water(tl, tiles, layer):
     color_sums = []
     for i, tile in enumerate(tiles):
@@ -95,34 +99,58 @@ def rc_avg(tl, tiles, layer):
 
 
 # carto-zed rule for layer 0
-# begin position, end position, color, rule name, regex pattern
+# begin position, end position, color, rule name
 _cz_rules0 = [
-    [0,    5, (218, 165,  32, 255),      'corn', re.compile('vegetation_farm')],
-    [1, None, ( 38,  53,  22, 255),      'tree', re.compile('(_trees|jumbo)')],
-    [0,    1, (132,  81,  76, 255),  'tilesand', re.compile('(floors_exterior_tilesandstone|floors_interior_carpet|floors_interior_tilesandwood)')],
-    [1, None, ( 73,  58,  43, 255),     'rails', re.compile('_railroad')],
-    [1, None, ( 48,  73,  32, 255), 'vegetaion', re.compile('^vegetation')],
-    [1,  100, ( 93,  44,  39, 255),     'walls', re.compile('^walls')],
-    [0,    1, (108, 127, 131, 255),     'water', re.compile('_natural_(.*_)*0*2_\\d+$')],
-    [0,    1, (128, 128, 128, 255),    'street', re.compile('_street_')],
-    [0,    1, (217, 207, 183, 255),      'sand', re.compile('_natural_(.*_)*0*1_0*([0-9]|1[0-5])$')],
-    [0,    1, ( 75,  88,  27, 255), 'darkgrass', re.compile('_natural_(.*_)*0*1_0*(1[6-9]|2[0-9]|3[0-1])$')],
-    [0,    1, ( 97, 103,  36, 255),  'medgrass', re.compile('_natural_(.*_)*0*1_0*(3[2-9]|4[0-7])$')],
-    [0,    1, (127, 120,  45, 255), 'litegrass', re.compile('_natural_(.*_)*0*1_0*(4[8-9]|5[0-9]|6[0-3])$')],
-    [0,    1, ( 91,  63,  21, 255),      'dirt', re.compile('_natural_(.*_)*0*1_0*(6[4-9]|7[0-9])$')],
-    [0,    8, (132,  81,  76, 255),  'tilesand', re.compile('location_')],
+    [0,    5, (218, 165,  32, 255), 'corn'],
+    [1, None, (38,   53,  22, 255), 'tree'],
+    [0,    1, (132,  81,  76, 255), 'tilesand'],
+    [1, None, (73,   58,  43, 255), 'rails'],
+    [1, None, (48,   73,  32, 255), 'vegetation'],
+    [1,  100, (93,   44,  39, 255), 'walls'],
+    [0,    1, (108, 127, 131, 255), 'water'],
+    [0,    1, (128, 128, 128, 255), 'street'],
+    [0,    1, (217, 207, 183, 255), 'sand'],
+    [0,    1, (75,   88,  27, 255), 'darkgrass'],
+    [0,    1, (97,  103,  36, 255), 'medgrass'],
+    [0,    1, (127, 120,  45, 255), 'litegrass'],
+    [0,    1, (91,   63,  21, 255), 'dirt'],
+    [0,    8, (132,  81,  76, 255), 'tilesand'],
 ]
 # carto-zed rule for non layer 0
-# begin position, end position, color, rule name, regex pattern
+# begin position, end position, color, rule name
 _cz_rules1 = [
-    [1,  100, ( 93,  44,  39, 255),     'walls', re.compile('^walls')],
+    [1,  100, (93,   44,  39, 255), 'walls'],
 ]
+# carto-zed pattern mapping
+# key: rule name, value: regex pattern
+_cs_pattern = {
+    'corn': re.compile('vegetation_farm'),
+    'tree': re.compile('(_trees|jumbo)'),
+    'tilesand': re.compile(
+        '(floors_exterior_tilesandstone|floors_interior_carpet|'
+        'floors_interior_tilesandwood)'),
+    'rails': re.compile('_railroad'),
+    'vegetation': re.compile('^vegetation'),
+    'walls': re.compile('^walls'),
+    'water': re.compile('_natural_(.*_)*0*2_\\d+$'),
+    'street': re.compile('_street_'),
+    'sand': re.compile('_natural_(.*_)*0*1_0*([0-9]|1[0-5])$'),
+    'darkgrass': re.compile('_natural_(.*_)*0*1_0*(1[6-9]|2[0-9]|3[0-1])$'),
+    'medgrass': re.compile('_natural_(.*_)*0*1_0*(3[2-9]|4[0-7])$'),
+    'litegrass': re.compile('_natural_(.*_)*0*1_0*(4[8-9]|5[0-9]|6[0-3])$'),
+    'dirt': re.compile('_natural_(.*_)*0*1_0*(6[4-9]|7[0-9])$'),
+    'tilesand': re.compile('location_'),
+    'walls': re.compile('^walls'),
+}
+
+
 def rc_cartozed(tl, tiles, layer):
     tiles = list(tiles)
     rules = _cz_rules0 if layer == 0 else _cz_rules1
-    for begin, end, color, rname, pattern in rules:
+    for begin, end, color, rname in rules:
         if end is None or end > len(tiles):
             end = len(tiles)
+        pattern = _cs_pattern[rname]
         for i in range(begin, end):
             if pattern.search(tiles[i]):
                 return color

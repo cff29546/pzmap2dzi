@@ -18,8 +18,9 @@ class Cell(object):
         block_table = pos
         for i in range(block_num):
             pos, _ = util.read_uint32(data, block_table + i * 8)
-            block, pos = binfile.read_block(data, pos, self.block_size,
-                [self.minlayer, self.maxlayer], binfile.lotpack_data_parser)
+            block, pos = binfile.read_block(
+                data, pos, self.block_size, [self.minlayer, self.maxlayer],
+                binfile.lotpack_data_parser)
             self.blocks.append(block)
 
     def init_for_version(self):

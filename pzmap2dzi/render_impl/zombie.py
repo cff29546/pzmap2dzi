@@ -1,5 +1,4 @@
 from PIL import ImageDraw
-import os
 from .common import render_text, draw_square, LazyFont
 from .. import lotheader
 
@@ -56,18 +55,19 @@ class ZombieRender(object):
 
     def tile(self, im_getter, dzi, gx0, gy0, layer):
         draw = None
+        block_size = dzi.block_size
         gx1 = gx0 + dzi.grid_per_tilex
         gy1 = gy0 + dzi.grid_per_tiley
         sxmax = (gy1 + gx1) >> 1
         symax = (gy1 - gx0) >> 1
         sxmin = (gy0 + gx0) >> 1
         symin = (gy0 - gx1) >> 1
-        blockxmax = sxmax // dzi.block_size + 1
-        blockymax = symax // dzi.block_size + 1
-        blockxmin = sxmin // dzi.block_size
-        blockymin = symin // dzi.block_size
+        blockxmax = sxmax // block_size + 1
+        blockymax = symax // block_size + 1
+        blockxmin = sxmin // block_size
+        blockymin = symin // block_size
         for blockx in range(blockxmin, blockxmax):
-            sx = blockx * dzi.block_size
+            sx = blockx * block_size
             cx, bx = divmod(blockx, dzi.cell_size_in_block)
             for blocky in range(blockymin, blockymax):
                 cy, by = divmod(blocky, dzi.cell_size_in_block)
@@ -78,16 +78,16 @@ class ZombieRender(object):
                 if zombie == 0:
                     continue
                 color = get_color(zombie, 128)
-                sy = blocky * dzi.block_size
+                sy = blocky * block_size
                 gx = sx - sy
                 gy = sx + sy
                 ox, oy = dzi.get_sqr_center(gx - gx0, gy - gy0)
-                if draw == None:
+                if draw is None:
                     im = im_getter.get()
                     draw = ImageDraw.Draw(im)
-                draw_square(draw, ox, oy, color, dzi.block_size, dzi.block_size)
-                gxz = gx + dzi.block_size - 1
-                gyz = gy + dzi.block_size - 1
+                draw_square(draw, ox, oy, color, block_size, block_size)
+                gxz = gx + block_size - 1
+                gyz = gy + block_size - 1
                 oxz, oyz = dzi.get_sqr_center(gxz - gx0, gyz - gy0)
                 text_color = get_color(zombie, 255)
                 t = 'z:{}'.format(zombie)
@@ -138,4 +138,3 @@ class ZombieTopRender(object):
                 x, y = bx * size, by * size
                 shape = [x, y, x + size - 1, y + size - 1]
                 draw.rectangle(shape, fill=color)
-

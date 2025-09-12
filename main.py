@@ -10,6 +10,8 @@ from pzmap2dzi.i18n_util import load_yaml, update_json
 
 
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
+
+
 def git_info():
     head_path = os.path.join(SCRIPT_PATH, '.git', 'HEAD')
     if os.path.isfile(head_path):
@@ -183,14 +185,14 @@ def render_map(cmd, conf, maps, map_name, is_mod_map=False):
 
 
 def save_mod_map_list(conf):
-    mod_maps = os.path.join(conf['output_path'], 'html', 'map_data', 'mod_maps')
-    if not os.path.isdir(mod_maps):
+    mods = os.path.join(conf['output_path'], 'html', 'map_data', 'mod_maps')
+    if not os.path.isdir(mods):
         return
     maps = []
-    for f in os.listdir(mod_maps):
-        if os.path.isdir(os.path.join(mod_maps, f)):
+    for f in os.listdir(mods):
+        if os.path.isdir(os.path.join(mods, f)):
             maps.append(f)
-    with open(os.path.join(mod_maps, 'map_list.json'), 'w') as f:
+    with open(os.path.join(mods, 'map_list.json'), 'w') as f:
         f.write(json.dumps(maps))
 
 

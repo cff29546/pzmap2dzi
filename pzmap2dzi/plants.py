@@ -45,19 +45,20 @@ class PlantsInfo(object):
             snow, flower, large_bush: True or False
             tree_size: one of [0, 1, 2, 3]
             jumbo_size: one of [0, 1, 2, 3, 4, 5]
-            jumbo_type: index of tree (in _TREE_DEF) which is used to render jumbo tree
+            jumbo_type: index of tree (in _TREE_DEF)
+                        which is used to render jumbo tree
 
         '''
 
         # conf
-        season     = conf.get(         'season', 'summer2')
-        snow       = conf.get(           'snow', False)
-        flower     = conf.get(         'flower', False)
-        large_bush = conf.get(     'large_bush', False)
-        tree_size  = conf.get(      'tree_size', 2)
+        season = conf.get('season', 'summer2')
+        snow = conf.get('snow', False)
+        flower = conf.get('flower', False)
+        large_bush = conf.get('large_bush', False)
+        tree_size = conf.get('tree_size', 2)
         jumbo_size = conf.get('jumbo_tree_size', 3)
         jumbo_type = conf.get('jumbo_tree_type', 3)
-        no_grass   = conf.get('no_ground_cover', False)
+        no_grass = conf.get('no_ground_cover', False)
         unify_tree = conf.get('unify_tree_type', -1)
 
         self.mapping = {}

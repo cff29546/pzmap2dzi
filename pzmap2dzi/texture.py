@@ -13,7 +13,7 @@ if __package__ is not None:
 
 try:
     from . import shared_memory_image
-except:
+except ImportError:
     shared_memory_image = None
 
 
@@ -81,6 +81,7 @@ def gethash(path, method='md5'):
         hasher = getattr(hashlib, method)()
         hasher.update(data)
         return ':'.join((method, hasher.hexdigest()))
+
 
 class Texture(object):
     def __init__(self, im, offset=None):

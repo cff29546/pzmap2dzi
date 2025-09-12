@@ -112,9 +112,11 @@ class WorkerWarp(object):
 #          workers[id].push_msg(msg) can be called to send msg to workers
 #     [state] value may be one of following:
 #         'ready'       worker successfully started no job processed yet
-#         'init_failed' worker init failed, any exception caught will be stored in [result]
+#         'init_failed' worker init failed, any exception caught will be
+#                       stored in [result]
 #         'result'      a job is fininshed and returend [result]
-#         'error'       a job process failed, any exception caught will be stored in [result]
+#         'error'       a job process failed, any exception caught will be
+#                       stored in [result]
 #     scheduler may change its inner states in this callback
 #     if return value [info] is not None, it will be printed out.
 # scheduler.on_empty(workers, worker_id, state, result) -> next_job
@@ -149,19 +151,25 @@ class Task(object):
 
         idle = []
         working = len(workers)
+        on_result = None
+        if hasattr(self.scheduler, 'on_result'):
+            on_result = self.scheduler.on_result
+        on_empty = self.scheduler.on_empty
         while working > 0:
             wid, state, result = self.q.get()
             if state == 'init_failed':
                 working -= 1
                 workers[wid].join()
                 workers[wid] = None
-                print('worker[{}] init failed with result[{}]'.format(wid, result))
-            if state in ['result', 'error'] and hasattr(self.scheduler, 'on_result'):
+                print('worker[{}] init failed with result[{}]'
+                      .format(wid, result))
+            if state in ['result', 'error'] and on_result:
                 info = None
                 try:
-                    info = self.scheduler.on_result(workers, wid, state, result)
+                    info = on_result(workers, wid, state, result)
                 except Exception as e:
-                    print('scheduler error on result[{}] state[{}]. Exception {}'
+                    print('scheduler error on result[{}] '
+                          'state[{}]. Exception {}'
                           .format(result, state, e))
                     traceback.print_exc()
                 if info is not None:
@@ -169,9 +177,10 @@ class Task(object):
             if state in ['ready', 'result', 'error']:
                 next_job = None
                 try:
-                    next_job = self.scheduler.on_empty(workers, wid, state, result)
+                    next_job = on_empty(workers, wid, state, result)
                 except Exception as e:
-                    print('scheduler error assigning job, result[{}] state[{}]. Exception {}'
+                    print('scheduler error assigning job, '
+                          'result[{}] state[{}]. Exception {}'
                           .format(result, state, e))
                     traceback.print_exc()
                 if next_job is not None:

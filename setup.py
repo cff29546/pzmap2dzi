@@ -8,5 +8,5 @@ setup(
    version='1.0',
    description='Project zomboid map parser',
    packages=['pzmap2dzi'],
-   install_requires=['pynput', 'slpp', 'pyclipper', 'pillow', 'pyyaml'],
+   install_requires=['pynput', 'lupa', 'pyclipper', 'pillow', 'pyyaml'],
 )

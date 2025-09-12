@@ -40,7 +40,7 @@ COLOR_MAP = {
     'gym': 'lime',
 
     # Sledgehammer
-    'garagestorage': 'orange',   # 60 crate 100 locker 20 shelves,counter
+    'garagestorage': 'orange',    # 60 crate 100 locker 20 shelves,counter
     'storage': 'orange',
     'garage': 'orange',
     'warehouse': 'orange',
@@ -50,21 +50,23 @@ COLOR_MAP = {
     'firestorage': 'orange',
     'shed': 'orange',
 
-    'pawnshop': 'orange',        # 100 crate 10 other
+    'pawnshop': 'orange',         # 100 crate 10 other
     'pawnshopstorage': 'orange',
 
-    'toolstore': 'magenta',      # 100 shelves 20 other
-    'storageunit': 'magenta',    # 60
-    'farmstorage': 'magenta',    # 40
-    'loggingfactory': 'magenta', # 20 crate 100 shelves
-    'toolstorage': 'blue',       # 20
-    #'kitchen': 'blue',           # 10, only in crate
+    'toolstore': 'magenta',       # 100 shelves 20 other
+    'storageunit': 'magenta',     # 60
+    'farmstorage': 'magenta',     # 40
+    'loggingfactory': 'magenta',  # 20 crate 100 shelves
+    'toolstorage': 'blue',        # 20
+    # 'kitchen': 'blue',          # 10, only in crate
 
     # empty
     'empty': 'silver',
     'emptyoutside': 'silver',
 }
 DEFAULT_COLOR = 'cyan'
+
+
 class RoomRender(object):
     def __init__(self, **options):
         self.input = options.get('input')
@@ -112,7 +114,7 @@ class RoomRender(object):
                 func(draw, ox, oy, *args)
 
 
-def get_room_marks_by_cell(path, cx, cy, cell_size, encoding, map_name):
+def get_room_marks_by_cell(path, cx, cy, cell_size, encoding):
     header = lotheader.load_lotheader(path, cx, cy)
     if not header:
         return []
@@ -131,10 +133,6 @@ def get_room_marks_by_cell(path, cx, cy, cell_size, encoding, map_name):
             'name': name,
             'layer': layer,
             'rects': rects,
-            #'text_position': 'top',
-            #'background': 'transparent',
-            #'passthrough': True,
-            #'id': 'room_{}_{}_{}_{}'.format(map_name, cx, cy, i),
         })
     return marks
 
@@ -144,12 +142,12 @@ class RoomMark(object):
         self.input = options.get('input')
         self.output = options.get('output')
         self.encoding = options.get('encoding')
-        self.map_name = options.get('cache_name', 'unknown')
 
     def process(self, dzi):
         marks = []
         for cx, cy in dzi.cells:
-            cell_marks = get_room_marks_by_cell(self.input, cx, cy, dzi.cell_size, self.encoding, self.map_name)
+            cell_marks = get_room_marks_by_cell(self.input, cx, cy,
+                                                dzi.cell_size, self.encoding)
             if cell_marks:
                 marks.extend(cell_marks)
         print('  rooms: {}'.format(len(marks)))

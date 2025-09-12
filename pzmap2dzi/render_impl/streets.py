@@ -36,13 +36,19 @@ class StreetsRender(object):
                     x = float(point.attrib.get('x', 0))
                     y = float(point.attrib.get('y', 0))
                     p.append({'x': x, 'y': y})
-                mark = { 'type': 'polyline', 'name': name, 'width': width, 'points': p }
+                mark = {
+                    'type': 'polyline',
+                    'name': name,
+                    'width': width,
+                    'points': p,
+                }
                 mark['visible_zoom_level'] = self.get_level(mark)
                 mark['color'] = self.colors_alpha[mark['visible_zoom_level']]
                 mark['text_color'] = self.colors[mark['visible_zoom_level']]
                 marks.append(mark)
                 count[mark['visible_zoom_level']] += 1
-        print('  streets: {} (large {}, medium {}, small {})'.format(len(marks), count[0], count[1], count[2]))
+        print('  streets: {} '.format(len(marks))
+              + '(large {}, medium {}, small {})'.format(*count))
         if marks:
             output_path = os.path.join(self.output, 'marks.json')
             dump_marks(marks, output_path)

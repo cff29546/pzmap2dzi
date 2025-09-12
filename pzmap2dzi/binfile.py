@@ -132,7 +132,7 @@ def load_pzby(path):
 
     pzby['path'] = path
     pzby['version'], pos = get_version(data, 0, b'PZBY', (None, 0))
-    if pzby['version'] == None:
+    if pzby['version'] is None:
         return None
 
     # header
@@ -144,8 +144,7 @@ def load_pzby(path):
     pzby['rooms'], pos = read_rooms(data, pos)
     pzby['buildings'], pos = read_buildings(data, pos)
 
-
-    # chunks 
+    # chunks
     block_table = pos
     block_size = 8
     blocks = []
@@ -153,11 +152,11 @@ def load_pzby(path):
     attributes = []
     for i in range(pzby['width'] * pzby['height']):
         pos, _ = util.read_uint32(data, block_table + i * 8)
-        attribute, pos = read_block(data, pos,
-            block_size, layer_range, pzby_attributes_parser)
+        attribute, pos = read_block(
+            data, pos, block_size, layer_range, pzby_attributes_parser)
         attributes.append(attribute)
-        block, pos = read_block(data, pos,
-            block_size, layer_range, pzby_data_parser)
+        block, pos = read_block(
+            data, pos, block_size, layer_range, pzby_data_parser)
         blocks.append(block)
     pzby['attrib'] = attributes
     pzby['blocks'] = blocks

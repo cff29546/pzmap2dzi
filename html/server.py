@@ -6,7 +6,9 @@ import json
 import os
 import re
 
+
 app = flask.Flask(__name__)
+
 
 def load_conf(config_path=None):
     if config_path is None:
@@ -22,6 +24,7 @@ def load_conf(config_path=None):
         conf['save_path'] = os.path.expandvars(conf['save_path'])
     return conf
 
+
 @app.route('/browse')
 def browse():
     path = app.config.get('save_path', None)
@@ -29,7 +32,8 @@ def browse():
     if os.system(cmd) == 0:
         return ""
     else:
-        flask.abort(404);
+        flask.abort(404)
+
 
 @app.route('/list_save')
 def list_save():
@@ -66,11 +70,11 @@ PATH_MAP = {
         'B41': '.',
     },
 }
-
 CELL_IN_BLOCK = {
     'B41': 30,
     'B42': 32,
 }
+
 
 def get_version(path):
     map_bin = os.path.join(path, 'map.bin')
@@ -83,7 +87,10 @@ def get_version(path):
         return SIGNATURE_MAP.get((cx, cy, layer), 'unknown')
     return 'unknown'
 
+
 MAP = re.compile('^map_(\\d+)_(\\d+)\\.bin$')
+
+
 @app.route('/load/<path:save>')
 def load(save):
     path = app.config.get('save_path', None)
@@ -93,7 +100,8 @@ def load(save):
     blocks = []
     if path:
         version = get_version(save_path)
-        files = os.listdir(os.path.join(path, save, PATH_MAP['map'].get(version, '.')))
+        sub_path = PATH_MAP['map'].get(version, '.')
+        files = os.listdir(os.path.join(path, save, sub_path))
         for f in files:
             m = MAP.match(f)
             if m:
@@ -101,12 +109,22 @@ def load(save):
                 blocks.append('{},{}'.format(x, y))
     return {'version': version, 'blocks': ';'.join(blocks)}
 
+
 def remove_bin(save_path, mode, version, x, y):
     folder = PATH_MAP[mode].get(version, '.')
     name = os.path.join(save_path, folder, '{}_{}_{}.bin'.format(mode, x, y))
     if os.path.isfile(name):
         print('delete {} {},{}'.format(mode, x, y))
         os.remove(name)
+
+
+SQL_DELETE_VEHICLES_BLOCK = (
+    'DELETE FROM vehicles WHERE wx = {} AND wy = {};'
+)
+SQL_DELETE_VEHICLES = (
+    'DELETE FROM vehicles WHERE wx >= {} AND wx < {} AND wy >= {} AND wy < {};'
+)
+
 
 @app.route('/delete/<path:save>', methods=['POST'])
 def delete_save(save):
@@ -131,8 +149,8 @@ def delete_save(save):
         for c in block_str.split(';'):
             x, y = map(int, c.split(','))
             block.append((x, y))
-    
-    #backup = flask.request.form.get('backup', None)
+
+    # backup = flask.request.form.get('backup', None)
     print('trimming [{}]'.format(save))
     if app.debug:
         print('req: ', flask.request.form)
@@ -149,7 +167,7 @@ def delete_save(save):
     for x, y in block:
         remove_bin(save_path, 'map', version, x, y)
         if cursor:
-            sql = 'DELETE FROM vehicles WHERE wx = {} AND wy = {};'.format(x, y)
+            sql = SQL_DELETE_VEHICLES_BLOCK.format(x, y)
             cursor.execute(sql)
 
     for x, y in cell:
@@ -161,8 +179,8 @@ def delete_save(save):
             remove_bin(save_path, t, version, x, y)
 
         if cursor:
-            sql = 'DELETE FROM vehicles WHERE wx >= {} AND wx < {} AND wy >= {} AND wy < {};'
-            sql = sql.format(x * cb, (x + 1) * cb, y * cb, (y + 1) * cb)
+            sql = SQL_DELETE_VEHICLES.format(
+                x * cb, (x + 1) * cb, y * cb, (y + 1) * cb)
             cursor.execute(sql)
 
         for i in range(cb):
@@ -177,14 +195,18 @@ def delete_save(save):
 
     return 'done'
 
+
 @app.route('/<path:filename>.js')
 def serve_js(filename):
     file_path = f'{filename}.js'
-    return flask.send_from_directory('.', file_path, mimetype='application/javascript')
+    return flask.send_from_directory(
+        '.', file_path, mimetype='application/javascript')
+
 
 @app.route('/<path:filename>')
 def static_files(filename):
     return flask.send_from_directory('.', filename)
+
 
 if __name__ == '__main__':
     import argparse

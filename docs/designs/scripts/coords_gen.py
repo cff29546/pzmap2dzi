@@ -1,10 +1,9 @@
 import os
 import sys
-
 from svg import SVG, Polygon, Shape, Text, Animate, Line
 
-def coords_svg(size, num_squares_x=8, num_squares_y=8, tile_size=4):
 
+def coords_svg(size, num_squares_x=8, num_squares_y=8, tile_size=4):
     squares = SVG(0, 0)
     for i in range(num_squares_x + 1):
         squares.append(Line(
@@ -32,7 +31,9 @@ def coords_svg(size, num_squares_x=8, num_squares_y=8, tile_size=4):
     tiles = SVG(0, 0)
     tsize = size * tile_size // 2
     xmin = -num_squares_y // tile_size
-    xmax = num_squares_x // tile_size - 1 if num_squares_x % tile_size == 0 else num_squares_x // tile_size
+    xmax = num_squares_x // tile_size
+    if num_squares_x % tile_size == 0:
+        xmax -= 1
     ymin = -1
     dy = (num_squares_x + num_squares_y - 1) // 2
     ymax = dy // tile_size - 1 if dy % tile_size == 0 else dy // tile_size
@@ -51,8 +52,8 @@ def coords_svg(size, num_squares_x=8, num_squares_y=8, tile_size=4):
     for i in range(xmin, xmax + 1):
         for j in range(ymin, ymax + 1):
             t = Text(
-                i * tsize, j * tsize,
-                f'Tile({i-xmin},{j-ymin})', size=size // 16, style={'fill': 'red'}
+                i * tsize, j * tsize, f'Tile({i-xmin},{j-ymin})',
+                size=size // 16, style={'fill': 'red'}
             )
             t['text-anchor'] = 'left'
             t['dominant-baseline'] = 'hanging'
@@ -96,16 +97,20 @@ def coords_svg(size, num_squares_x=8, num_squares_y=8, tile_size=4):
     svg['style'] = 'background-color: white;'
     return svg
 
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Coords SVG generator')
-    parser.add_argument('-s', '--square-size', type=int, default=64, help='square size')
-    parser.add_argument('-x', '--num-squares-x', type=int, default=8, help='number of squares in x direction')
-    parser.add_argument('-y', '--num-squares-y', type=int, default=8, help='number of squares in y direction')
-    parser.add_argument('-t', '--tile-size', type=int, default=4, help='tile size')
-    parser.add_argument('-o', '--output', type=str, default='./coords.svg', help='output file')
+    parser.add_argument('-s', '--square-size', type=int,
+                        default=64, help='square size')
+    parser.add_argument('-x', '--num-squares-x', type=int,
+                        default=8, help='number of squares in x direction')
+    parser.add_argument('-y', '--num-squares-y', type=int,
+                        default=8, help='number of squares in y direction')
+    parser.add_argument('-t', '--tile-size', type=int,
+                        default=4, help='tile size')
+    parser.add_argument('-o', '--output', type=str,
+                        default='./coords.svg', help='output file')
     args = parser.parse_args()
-    coords_svg(args.square_size, args.num_squares_x, args.num_squares_y, args.tile_size).save(args.output)
-
-
-
+    coords_svg(args.square_size, args.num_squares_x,
+               args.num_squares_y, args.tile_size).save(args.output)

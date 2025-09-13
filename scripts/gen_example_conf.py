@@ -2,7 +2,6 @@ import os
 import io
 import shutil
 import ruamel.yaml
-import sys
 
 
 def copy(dst, src, name, new_name=None):
@@ -52,7 +51,8 @@ def get_all_mod_maps(conf):
     data = []
     for name in os.listdir(mod_path):
         if name.endswith('.txt'):
-            with io.open(os.path.join(mod_path, name), 'r', encoding='utf8') as f:
+            path = os.path.join(mod_path, name)
+            with io.open(path, 'r', encoding='utf8') as f:
                 data.append(f.read())
     import yaml
     mod = yaml.safe_load('\n'.join(data))

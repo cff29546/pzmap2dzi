@@ -3,9 +3,12 @@ import os
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(_BASE_DIR, '../..'))
 _DEFAULT_CONF = os.path.join(_BASE_DIR, '../../conf/conf.yaml')
-import main
-from pzmap2dzi import lotheader, cell, mptask
-from pzmap2dzi.render_impl import common
+try:
+    import main
+    from pzmap2dzi import lotheader, cell, mptask
+    from pzmap2dzi.render_impl import common
+except ImportError:
+    raise
 
 
 class SearchCell(object):
@@ -60,7 +63,8 @@ if __name__ == '__main__':
                 jobs.append((x, y))
                 break
     print('Cells containing targets: {}'.format(len(jobs)))
-    task = mptask.Task(SearchCell(map_path, textures), mptask.SplitScheduler(verbose=True))
+    scheduler = mptask.SplitScheduler(verbose=True)
+    task = mptask.Task(SearchCell(map_path, textures), scheduler)
     result = task.run(jobs, args.parallel)
     marks = [m for sub in result for m in sub]
     print('Total marks found: {}'.format(len(marks)))
@@ -71,6 +75,3 @@ if __name__ == '__main__':
     if args.output:
         common.dump_marks(marks, args.output)
         print('{} mark(s) saved to [{}]'.format(len(marks), args.output))
-
-
-

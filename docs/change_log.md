@@ -1,5 +1,10 @@
 # Change log
 
+# 2025-09-12: 1.1.7 + UI 1.1.8
+
+* Fix code linting issues
+* Add script to mark animl tracks on the map
+
 # 2025-09-12: 1.1.7 + UI 1.1.7
 
 * Add script to mark stash locations on the map

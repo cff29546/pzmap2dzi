@@ -1,8 +1,11 @@
 import sys
 import os
 sys.path.append('..')
-import main
-from pzmap2dzi import lotheader, texture
+try:
+    import main
+    from pzmap2dzi import lotheader, texture
+except ImportError:
+    raise
 
 
 def get_used_tiles(path):

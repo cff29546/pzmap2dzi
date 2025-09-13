@@ -1,14 +1,18 @@
 import copy
 
+
 def _g(f):
     # format float
     return '{:g}'.format(f)
 
+
 def _coords(c):
     return ' '.join(map(lambda x: ','.join(map(_g, x)), c))
 
+
 def _style(s):
     return ';'.join(map(lambda x: ':'.join(map(str, x)), s.items()))
+
 
 class Elem(object):
     def __init__(self, tag: str):
@@ -45,6 +49,7 @@ class Elem(object):
         tag_prop = ' '.join(tag_prop)
         return '<{}>{}'.format(tag_prop, content)
 
+
 class Animate(Elem):
     def __init__(self, tag_id, attr, begin, dur, v0, v1=None, discrete=False):
         super().__init__(tag='animate')
@@ -53,7 +58,7 @@ class Animate(Elem):
         self['begin'] = begin
         self['dur'] = dur
         self['from'] = v0
-        
+
         if discrete:
             self['calcMode'] = 'discrete'
         if v1 is not None:
@@ -63,6 +68,7 @@ class Animate(Elem):
 
     def get_content(self):
         return ''
+
 
 class Shape(Elem):
     def __init__(self, tag, coords, sizes, width, style):
@@ -108,6 +114,7 @@ class Shape(Elem):
         self.children.append(shape)
         return self
 
+
 class SVG(Shape):
     def __init__(self, w, h):
         super().__init__('svg', [], [w, h], 0, {})
@@ -129,6 +136,7 @@ class SVG(Shape):
         with open(file, 'w') as f:
             f.write(str(self))
 
+
 class Polyline(Shape):
     def __init__(self, coords, width=1, style=None):
         super().__init__('polyline', coords, [], width, style)
@@ -139,10 +147,12 @@ class Polyline(Shape):
         self['points'] = _coords(self.coords)
         self.update_style_prop()
 
+
 class Polygon(Polyline):
     def __init__(self, coords, width=1, style=None):
         super().__init__(coords, width, style)
         self.tag = 'polygon'
+
 
 class Rect(Shape):
     def __init__(self, x, y, w, h, rx=0, ry=0, width=1, style={}):
@@ -156,6 +166,7 @@ class Rect(Shape):
         self['ry'] = _g(self.sizes[3])
         self.update_style_prop()
 
+
 class Text(Shape):
     def __init__(self, x, y, text, size, style=None):
         super().__init__('text', [[x, y]], [], size, style)
@@ -165,6 +176,7 @@ class Text(Shape):
         self.update_style_prop()
         self['x'], self['y'] = map(_g, self.coords[0])
         self['font-size'] = self.width
+
 
 class Line(Shape):
     def __init__(self, x1, y1, x2, y2, width=1, style=None):

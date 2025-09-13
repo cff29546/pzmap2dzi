@@ -76,10 +76,6 @@ export const top = [
     }
 ];
 
-
-
-
-
 export var MARK_ZOOM_LEVEL_MIN_STEP = [
     0,     // level 0, always visible
     1,     // level 1, single square takes 1 pixel

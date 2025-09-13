@@ -6,8 +6,12 @@ _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(_BASE_DIR, '..'))
 sys.path.append(os.path.join(_BASE_DIR, '../scripts'))
 _DEFAULT_CONF = os.path.join(_BASE_DIR, '../conf')
-import main
-from gen_example_conf import copy, update_conf, update_data
+try:
+    import main
+    from gen_example_conf import copy, update_conf, update_data
+except ImportError:
+    raise
+
 
 def copy_map(dst, src, cells):
     copy(dst, src, 'objects.lua')

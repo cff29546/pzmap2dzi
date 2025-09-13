@@ -1,7 +1,5 @@
-import os
-import sys
-
 from svg import SVG, Polygon, Shape, Text, Animate
+
 
 def zorder(x, y):
     block = 1
@@ -21,18 +19,32 @@ def zorder(x, y):
 
 def tangram_svg(size):
     tangram = SVG(size, size)
-    tangram.append(Polygon([(0, 0), (size / 2, 0), (0, size / 2)], width=0, style={'fill': 'red'}))
-    tangram.append(Polygon([(size / 2, 0), (size, 0), (size * 3 / 4, size / 4), (size / 4, size / 4)], width=0, style={'fill': 'gold'}))
-    tangram.append(Polygon([(size / 2, size / 2), (size * 3 / 4, size / 4), (size / 4, size / 4)], width=0, style={'fill': 'indigo'}))
-    tangram.append(Polygon([(size / 2, size / 2), (size / 4, size / 4), (0, size / 2), (size / 4, size * 3 / 4)], width=0, style={'fill': 'skyblue'}))
-    tangram.append(Polygon([(0, size / 2), (size / 4, size * 3 / 4), (0, size)], width=0, style={'fill': 'plum'}))
-    tangram.append(Polygon([(size / 2, size / 2), (size, size), (0, size)], width=0, style={'fill': 'orange'}))
-    tangram.append(Polygon([(size / 2, size / 2), (size, size), (size, 0)], width=0, style={'fill': 'green'}))
+    tangram.append(Polygon([(0, 0), (size / 2, 0), (0, size / 2)],
+                           width=0, style={'fill': 'red'}))
+    tangram.append(Polygon([(size / 2, 0), (size, 0), (size * 3 / 4, size / 4),
+                            (size / 4, size / 4)],
+                           width=0, style={'fill': 'gold'}))
+    tangram.append(Polygon([(size / 2, size / 2), (size * 3 / 4, size / 4),
+                            (size / 4, size / 4)],
+                           width=0, style={'fill': 'indigo'}))
+    tangram.append(Polygon([(size / 2, size / 2), (size / 4, size / 4),
+                            (0, size / 2), (size / 4, size * 3 / 4)],
+                           width=0, style={'fill': 'skyblue'}))
+    tangram.append(Polygon([(0, size / 2), (size / 4, size * 3 / 4),
+                            (0, size)], width=0, style={'fill': 'plum'}))
+    tangram.append(Polygon([(size / 2, size / 2), (size, size), (0, size)],
+                           width=0, style={'fill': 'orange'}))
+    tangram.append(Polygon([(size / 2, size / 2), (size, size), (size, 0)],
+                           width=0, style={'fill': 'green'}))
     return tangram.move(-size / 2, -size / 2)
+
 
 def rect_polygon(size, width):
     half = size / 2
-    return Polygon([(-half, -half), (half, -half), (half, half), (-half, half)], width=width, style={'stroke': 'gray', 'fill': 'none'})
+    return Polygon([(-half, -half), (half, -half),
+                    (half, half), (-half, half)],
+                   width=width, style={'stroke': 'gray', 'fill': 'none'})
+
 
 def add_ani(r, tag, attr, ani_list):
     ani_list = list(ani_list)
@@ -46,32 +58,35 @@ def add_ani(r, tag, attr, ani_list):
         a = Animate(ani_id, attr, begin, time, value)
         r.append(a)
 
+
 def stime(z, level):
     # bottom level == 0
-    
+
     t = 0
     # layers below
     if level:
         zl = z + 1
-        for l in range(level):
+        for i in range(level):
             zl *= 4
             t += zl + (zl // 4)
         t -= 1
     # current layer
     t += (z + 1) + (z // 4)
-    
+
     while z:
         z //= 4
         t += z + (z // 4)
 
     return t
 
+
 def etime(z, level):
     return stime(z//4, level+1) + 1
 
+
 def toplogical_svg(rsize, levels=3, use_image=False):
 
-    #rsize = 50
+    # rsize = 50
     rect = rect_polygon(rsize, 4)
 
     legends = [
@@ -108,7 +123,8 @@ def toplogical_svg(rsize, levels=3, use_image=False):
             r.style['fill-opacity'] = opacity
         svg.append(r)
         for i, text in enumerate(text_list):
-            t = Text(x - rsize/4, y + rsize/2 + 1.5*fsize, text, str(fsize), {'fill': 'black'})
+            t = Text(x - rsize/4, y + rsize/2 + 1.5*fsize,
+                     text, str(fsize), {'fill': 'black'})
             svg.append(t)
             x += fsize/2
             y += fsize
@@ -120,30 +136,32 @@ def toplogical_svg(rsize, levels=3, use_image=False):
     # pyramids
     cx = rsize / 2
     cy = rsize
-    for l in range(levels):
+    for lv in range(levels):
         svg.paste(image, cx, cy)
         image.matrix(2, 0, 0, 2)
-        level = levels - l - 1
-        if l == 0:
+        level = levels - lv - 1
+        if lv == 0:
             coords = [0]
         else:
-            tiles = 2**(l-1)
+            tiles = 2**(lv-1)
             coords = list(range(int((0.5-tiles)*rsize), tiles*rsize, rsize))
         for i, x in enumerate(coords):
             for j, y in enumerate(coords):
                 z = zorder(i, j)
                 s = stime(z, level)
-                if l == 0:
+                if lv == 0:
                     e = s + 2
                 else:
                     e = etime(z, level)
                 r = rect.copyby(cx + x, cy + y)
-                add_ani(r, f'{l}_{z}', 'fill', zip([s, e - s, total - e], colors))
+                add_ani(r, f'{lv}_{z}', 'fill',
+                        zip([s, e - s, total - e], colors))
                 if use_opacity:
-                    add_ani(r, f'o_{l}_{z}', 'fill-opacity', zip([s, e - s, total - e], opacities))
+                    add_ani(r, f'o_{lv}_{z}', 'fill-opacity',
+                            zip([s, e - s, total - e], opacities))
                 svg.append(r)
 
-        if l == 0:
+        if lv == 0:
             dy = 2 * rsize
         else:
             dy = (3 * tiles + 0.5) * rsize
@@ -160,20 +178,23 @@ def toplogical_svg(rsize, levels=3, use_image=False):
     svg.resize(w, h)
     svg['style'] = 'background-color: white;'
 
-    #box = Rect(0, 0, w, h, width=4, style={'stroke': 'gray', 'fill': 'none'})
-    #svg.append(box)
+    # box = Rect(0, 0, w, h, width=4, style={'stroke': 'gray', 'fill': 'none'})
+    # svg.append(box)
 
     return svg
+
 
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='Toplogical SVG generator')
-    parser.add_argument('-s', '--tile-size', type=int, default=50, help='tile size')
-    parser.add_argument('-l', '--levels', type=int, default=3, help='levels')
-    parser.add_argument('-i', '--use-image', action='store_true', help='use image background')
-    parser.add_argument('-o', '--output', type=str, default='./toplogical.svg', help='output file')
+    parser.add_argument('-s', '--tile-size', type=int,
+                        default=50, help='tile size')
+    parser.add_argument('-l', '--levels', type=int,
+                        default=3, help='levels')
+    parser.add_argument('-i', '--use-image', action='store_true',
+                        help='use image background')
+    parser.add_argument('-o', '--output', type=str,
+                        default='./toplogical.svg', help='output file')
     args = parser.parse_args()
-    toplogical_svg(args.tile_size, args.levels, args.use_image).save(args.output)
-
-
-
+    toplogical_svg(args.tile_size, args.levels,
+                   args.use_image).save(args.output)

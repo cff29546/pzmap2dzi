@@ -1,13 +1,16 @@
 import requests
 import re
 
-URL_TEMPLATE = 'https://steamcommunity.com/sharedfiles/filedetails/?id={mod_id}'
+
+URL_TEMPLATE = 'https://steamcommunity.com/sharedfiles/filedetails/?id={id}'
 TITLE_PATTERN = re.compile('<div class="workshopItemTitle">(.*?)</div>')
-DEP_PATTERN = re.compile('<a href="([^"]*)"[^>]*>\\s*<div class="requiredItem">\\s*(.*?)\\s*</div>\\s*</a>', re.MULTILINE)
+DEP_PATTERN = re.compile(
+    '<a href="([^"]*)"[^>]*>\\s*<div class="requiredItem">'
+    '\\s*(.*?)\\s*</div>\\s*</a>', re.MULTILINE)
 
 
 def get_title_dep(mod_id):
-    url = URL_TEMPLATE.format(mod_id=mod_id)
+    url = URL_TEMPLATE.format(id=mod_id)
     rsp = requests.get(url)
 
     title = None
@@ -35,7 +38,7 @@ if __name__ == '__main__':
         title, dep = get_title_dep(steam_id)
         print(title, dep)
 
-    #info = get_info('2782415851')
-    #print(info)
-    #info = get_info('2820363371')
-    #print(info)
+    # info = get_info('2782415851')
+    # print(info)
+    # info = get_info('2820363371')
+    # print(info)

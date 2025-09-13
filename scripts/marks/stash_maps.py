@@ -3,16 +3,20 @@ import sys
 _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(os.path.join(_BASE_DIR, '../..'))
 _DEFAULT_CONF = os.path.join(_BASE_DIR, '../../conf/conf.yaml')
-import main
-from pzmap2dzi.render_impl import common
-from pzmap2dzi import lua_util
+try:
+    import main
+    from pzmap2dzi.render_impl import common
+    from pzmap2dzi import lua_util
+except ImportError:
+    raise
 
 
 def get_map_bounds(path):
-    map_def_path = os.path.join(path, 'media', 'lua', 'client', 'ISUI', 'Maps', 'ISMapDefinitions.lua')
+    map_def_path = os.path.join(
+        path, 'media', 'lua', 'client', 'ISUI', 'Maps', 'ISMapDefinitions.lua')
     pre = 'getTexture = function(path) return nil end\n'
     post = '''
-        MapUtils.initDirectoryMapData = function(mapUI, directory) return nil end
+        MapUtils.initDirectoryMapData = function(mapUI, dir) return nil end
         MapUtils.initDefaultStyleV3 = function(mapUI) return nil end
         MapUtils.overlayPaper = function(mapUI) return nil end
         worldMapImage = function(path) return path end
@@ -48,7 +52,8 @@ def get_stash_maps(path):
     for f in os.listdir(stash_desc_path):
         if f.endswith('.lua') and f != 'StashUtil.lua':
             stash_path = os.path.join(stash_desc_path, f)
-            stashes.extend(lua_util.run_and_get_var(stash_path, 'StashDescriptions', work_dir=lua_path))
+            stashes.extend(lua_util.run_and_get_var(
+                stash_path, 'StashDescriptions', work_dir=lua_path))
     return stashes
 
 
@@ -94,9 +99,10 @@ def get_marks(path):
 
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser(description='basement marker')
+    parser = argparse.ArgumentParser(description='stash map markers')
     parser.add_argument('-c', '--conf', type=str, default=_DEFAULT_CONF)
-    parser.add_argument('-o', '--output', type=str, default='./stash_maps.json')
+    parser.add_argument('-o', '--output', type=str,
+                        default='./stash_maps.json')
     args = parser.parse_args()
 
     map_path = main.get_map_path(args.conf, 'default')

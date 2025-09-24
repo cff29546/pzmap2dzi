@@ -8,7 +8,6 @@ import * as Node from './node.js';
 // Min Overlap (R*-tree 1990)
 // Slightly modified, considering candidates from all axis.
 export function minOverlap(node, m) {
-    // TODO: Implement the split logic based on the R*-tree algorithm.
     let bestOverlap = Infinity;
     let bestPerimeter = Infinity;
     let bestArea = Infinity;

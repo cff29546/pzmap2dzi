@@ -5,6 +5,10 @@ import datetime
 import get_mod_dep
 
 
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+_DEFAULT_CONF = os.path.join(_BASE_DIR, '../conf/conf.yaml')
+
+
 def load_yaml(path):
     with io.open(path, 'r', encoding='utf8') as f:
         data = yaml.safe_load(f.read())
@@ -189,7 +193,7 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(
         description='collect mod map info for installed mods')
-    parser.add_argument('-c', '--conf', type=str, default='../conf/conf.yaml')
+    parser.add_argument('-c', '--conf', type=str, default=_DEFAULT_CONF)
     parser.add_argument('-o', '--output', type=str, default='./output')
     parser.add_argument('-g', '--get-depend', action='store_true')
     parser.add_argument('-d', '--depend', action='append', default=[])

@@ -36,6 +36,7 @@ pzmap2dzi is a command-line tool for Windows that converts Project Zomboid map d
 
 - Convert map data using the [render engine](./docs/user_manual_render_engine.md).
 - Set up and use the [web viewer](./docs/user_manual_web_viewer.md).
+- Explore helpful [utility scripts](./docs/utility_scripts.md).
 
 # Documentation
 

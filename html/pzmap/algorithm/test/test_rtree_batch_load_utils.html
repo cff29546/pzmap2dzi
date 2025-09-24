@@ -1,0 +1,43 @@
+<script src="./tinytest.js"></script>
+<script type="module">
+import { test } from '../rtree/batch_load.js';
+
+tests({
+    'priority queue': () => {
+        const size = 1000;
+        const array = Array.from({ length: size }, () => Math.floor(Math.random() * size * 10));
+        const pq = new test.PriorityQueue((a, b) => a - b, size / 10);
+        const rest = [];
+        for (const item of array) {
+            const removed = pq.push(item);
+            if (removed) {
+                rest.push(removed);
+            }
+        }
+        const maxRest = Math.max(...rest);
+        const minPQ = Math.min(...pq.items);
+        assert(minPQ >= maxRest);
+        console.log(minPQ, maxRest);
+    },
+    'partition': () => {
+        const size = 1000;
+        const array = Array.from({ length: size }, () => Math.floor(Math.random() * size * 10));
+        const sorted = Array.from(array).sort((a, b) => a - b);
+        const split = Math.floor(Math.random() * size);
+        test.partition(array, (a, b) => a - b, split, true);
+        assert(array.length === size);
+        const maxLeft = Math.max(...array.slice(0, split));
+        const minRight = Math.min(...array.slice(split));
+        const maxSortedLeft = split > 0 ? sorted[split - 1] : -Infinity;
+        const minSortedRight = sorted[split];
+        assert(maxLeft <= minRight);
+        assert(maxLeft === maxSortedLeft);
+        assert(minRight === minSortedRight);
+        array.sort((a, b) => a - b);
+        eq(array.toString(), sorted.toString()); // check no element is lost
+
+        console.log(split, maxLeft, minRight, maxSortedLeft, minSortedRight);
+    },
+    'default': () => {}
+});
+</script>

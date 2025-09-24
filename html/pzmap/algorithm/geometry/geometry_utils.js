@@ -23,7 +23,6 @@ export function pointInPolygon(p, polygon) {
     return rayHits & 1;
 }
 
-// TODO: validate AI code
 export function lineClip(x0, y0, x1, y1, xmin, ymin, xmax, ymax) {
     // Liang-Barsky line clipping algorithm
     const dx = x1 - x0;

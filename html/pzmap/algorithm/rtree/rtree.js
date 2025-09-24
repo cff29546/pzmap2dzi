@@ -203,7 +203,6 @@ export class RTree {
         let [current, index] = path.pop();
         current.E.splice(index, 1); // remove the item from the leaf
         if (this.condense) {
-            // TODO: condense mode
             let height = 0;
             const orphaned = [];
             while (current.E.length < this.m && path.length > 0) {
@@ -269,7 +268,6 @@ export class RTree {
             return [];
         }
 
-        // TODO validate implementation
         // DFS to find all items that intersect with the box
         const result = [];
         const stack = [];

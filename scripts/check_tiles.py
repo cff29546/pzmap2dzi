@@ -1,6 +1,8 @@
 import sys
 import os
-sys.path.append('..')
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.join(_BASE_DIR, '..'))
+_DEFAULT_CONF = os.path.join(_BASE_DIR, '../conf/conf.yaml')
 try:
     import main
     from pzmap2dzi import lotheader, texture
@@ -25,7 +27,7 @@ def get_pack_textures(path):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='tiles checker')
-    parser.add_argument('-c', '--conf', type=str, default='../conf/conf.yaml')
+    parser.add_argument('-c', '--conf', type=str, default=_DEFAULT_CONF)
     args = parser.parse_args()
 
     map_path = main.get_map_path(args.conf, 'default')
@@ -59,8 +61,8 @@ if __name__ == '__main__':
         if len(names) > 1:
             multi.append([tile, names])
 
-    print(len(missing))
-    print(len(multi))
+    print('Multi-mapped tiles: {}'.format(len(multi)))
+    print('Missing tiles: {}'.format(len(missing)))
 
     for tile in sorted(missing):
-        print(tile)
+        print('  {}'.format(tile))

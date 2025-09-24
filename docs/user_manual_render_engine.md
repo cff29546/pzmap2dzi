@@ -13,6 +13,12 @@ Project Zomboid features an expansive map, which requires a significant amount o
 
 * Output size and generation time
 
+| Game Version </th><th> B42.11.0 </th> <th> Engine Version </th> <th> [1.1.7](https://github.com/cff29546/pzmap2dzi/tree/b866ce8187f7c47890306c746bd6312cbe56622c) </th> <th> Test Environment: [Test1](#test1) </th> </tr> <tr> |  View Type </th><th> Image Format | Overlay Task | Output Size | Generation Time (h:mm:ss) |
+|-|-|-|-|-|
+| all | json (marks) | rooms | 12 MB | 0:00:05 |
+| all | json (marks) | objects | 1 MB | 0:00:01 |
+| all | json (marks) | streets | 0.25 MB | 0:00:01 |
+
 | Game Version </th><th> B42.6.0 </th> <th> Engine Version </th> <th> [1.0.8](https://github.com/cff29546/pzmap2dzi/tree/a3f403716182e21997a5c14e6c8c8df25d9510ea) </th> <th> Test Environment: [Test1](#test1) </th> </tr> <tr> |  View Type </th><th> Image Format | Overlay Task | Output Size | Generation Time (h:mm:ss) |
 |-|-|-|-|-|
 | isometric | webp | base | 404 GB | 12:45:54 |

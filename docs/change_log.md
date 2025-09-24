@@ -1,5 +1,9 @@
 # Change log
 
+# 2025-09-25: 1.1.7 + UI 1.1.9
+
+* Optimize batch loading speed for R-Tree indexes
+
 # 2025-09-12: 1.1.7 + UI 1.1.8
 
 * Fix code linting issues

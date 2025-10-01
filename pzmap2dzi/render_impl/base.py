@@ -18,7 +18,7 @@ class TextureRender(object):
         texture_path = options.get('texture')
         cache_name = None
         if options.get('enable_cache'):
-            cahce_name = options.get('cache_name')
+            cache_name = options.get('cache_name')
         plants_conf = options.get('plants_conf', {})
 
         self.tl = texture.TextureLibrary(texture_path, cache_name)

@@ -1,5 +1,9 @@
 # Change log
 
+# 2025-09-25: 1.1.7 + UI 1.1.10
+
+* Fix Trimmer for game version B42.13+
+
 # 2025-09-25: 1.1.7 + UI 1.1.9
 
 * Optimize batch loading speed for R-Tree indexes

@@ -89,7 +89,25 @@ def get_version(path):
 
 
 MAP = re.compile('^map_(\\d+)_(\\d+)\\.bin$')
-
+MAP_Y = re.compile('^(\\d+).bin$')
+def load_blocks(path):
+    blocks = set()
+    items = os.listdir(path)
+    for i in items:
+        m = MAP.match(i)
+        if m:
+            x, y = map(int, m.groups())
+            blocks.add((x, y))
+        if i.isdigit():
+            x = int(i)
+            sub_path = os.path.join(path, i)
+            sub_items = os.listdir(sub_path)
+            for j in sub_items:
+                my = MAP_Y.match(j)
+                if my:
+                    y = int(my.group(1))
+                    blocks.add((x, y))
+    return blocks
 
 @app.route('/load/<path:save>')
 def load(save):
@@ -101,14 +119,18 @@ def load(save):
     if path:
         version = get_version(save_path)
         sub_path = PATH_MAP['map'].get(version, '.')
-        files = os.listdir(os.path.join(path, save, sub_path))
-        for f in files:
-            m = MAP.match(f)
-            if m:
-                x, y = map(int, m.groups())
-                blocks.append('{},{}'.format(x, y))
+        save_path = os.path.join(path, save, sub_path)
+        for x, y in load_blocks(save_path):
+            blocks.append('{},{}'.format(x, y))
     return {'version': version, 'blocks': ';'.join(blocks)}
 
+
+def remove_bin_from_folder(save_path, x, y):
+    folder = os.path.join(save_path, 'map', str(x))
+    name = os.path.join(folder, '{}.bin'.format(y))
+    if os.path.isfile(name):
+        print('delete map {},{}'.format(x, y))
+        os.remove(name)
 
 def remove_bin(save_path, mode, version, x, y):
     folder = PATH_MAP[mode].get(version, '.')
@@ -116,6 +138,9 @@ def remove_bin(save_path, mode, version, x, y):
     if os.path.isfile(name):
         print('delete {} {},{}'.format(mode, x, y))
         os.remove(name)
+    elif mode == 'map':
+        # for B42.13+ folder structure
+        remove_bin_from_folder(save_path, x, y)
 
 
 SQL_DELETE_VEHICLES_BLOCK = (

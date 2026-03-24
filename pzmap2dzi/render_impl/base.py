@@ -1,4 +1,3 @@
-from PIL import ImageDraw
 from .. import cell, texture
 import re
 
@@ -175,8 +174,7 @@ class BaseTopRender(TextureRender):
         c = cell.load_cell(self.input, cx, cy)
         if not c:
             return
-        im = im_getter.get()
-        draw = ImageDraw.Draw(im)
+        draw = im_getter.get_draw()
         box_size = dzi.square_size - 1
         for x in range(dzi.cell_size):
             for y in range(dzi.cell_size):

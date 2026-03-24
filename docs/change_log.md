@@ -1,5 +1,29 @@
 # Change log
 
+# 2026-03-24: 1.1.8 + UI 1.1.11
+
+* Add save game render mode
+  * Add new render jobs: `save` and `save_top`
+  * Add parser loading flow for save data (latest/local pzdataspec)
+  * Add `run_saves.bat` for save render workflow (`deploy`, `unpack`, `render save save_top`)
+  * Extend render configuration for save rendering
+* Add save map support in web viewer
+  * Load/unload save maps from map UI
+  * Add save-map highlight toggle
+  * Rename "Mod Map" UI label to "Overlay Map"
+* Improve render engine internals and compatibility
+  * Initialize renderers with `init_dzi` hook
+  * Reuse draw context in workers to reduce repeated `ImageDraw` creation
+  * Improve top-view rendering fallback and tile processing behavior
+  * Update vegetation/jumbo tree handling for newer data mapping
+* Update dependencies
+  * Add `kaitaistruct` dependency for save game parsing
+  * Adjust Python 2/3 conditional versions for `pynput` and `lupa`
+* Update tests
+  * Add save-game test cases
+  * Add unified test runner and remove legacy runners
+  * Improve test setup/config merge behavior
+
 # 2025-09-25: 1.1.7 + UI 1.1.10
 
 * Fix Trimmer for game version B42.13+

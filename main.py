@@ -1,4 +1,4 @@
-import yaml
+import sys
 import os
 import io
 from distutils.dir_util import copy_tree
@@ -10,6 +10,11 @@ from pzmap2dzi.i18n_util import load_yaml, update_json
 
 
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__))
+
+
+def sanitize_folder_name(folder_name):
+    # Replace illegal characters with _
+    return re.sub(r'(?u)[^-\w.]', '_', folder_name)
 
 
 def git_info():
@@ -111,7 +116,7 @@ def unpack(args):
             continue
         path = maps[d]['texture_path'].format(**dict(conf, **maps[d]))
         if os.path.isdir(path):
-            output = os.path.join(conf['output_path'], 'texture', d)
+            output = os.path.join(conf['output_root'], 'texture', d)
             tl = texture.TextureLibrary(texture_path=[output])
             for name in os.listdir(path):
                 for pattern in maps[d]['texture_files']:
@@ -139,33 +144,70 @@ def get_conf(options, name, cmd, key, default):
     return default
 
 
-def render_map(cmd, conf, maps, map_name, is_mod_map=False):
+CONF_KEY_PATTERN = re.compile(r'(?P<key>[a-zA-Z0-9_]+?)(?:\[(?P<name>[a-zA-Z0-9_]*?)\])?(?:\((?P<cmd>[a-zA-Z0-9_]*?)\))?$')
+def copy_options(src, dst, map_name, cmd):
+    if isinstance(src, list):
+        return [copy_options(v, None, map_name, cmd) for v in src]
+    if not isinstance(src, dict):
+        return src
+    options = dst if dst is not None else {}
+    for raw_key in src:
+        m = CONF_KEY_PATTERN.match(raw_key)
+        if m:
+            key = m.group('key')
+            if key not in options:
+                value = get_conf(src, map_name, cmd, key, src.get(raw_key))
+                if isinstance(value, dict) or isinstance(value, list):
+                    value = copy_options(value, None, map_name, cmd)
+                options[key] = value
+    return options
+
+
+OPTION_RENAME_MAPPING = {
+    'omit_levels': 'skip_level',
+}
+def rename_options(options):
+    for old_key, new_key in OPTION_RENAME_MAPPING.items():
+        if old_key in options:
+            options[new_key] = options.pop(old_key)
+    return options
+
+
+def render_map(cmd, conf, maps, map_name, map_type=None):
     from pzmap2dzi import render
     if cmd not in render.RENDER_CMD:
         print('unspported render cmd: {}'.format(cmd))
         return False
     DZI, Render = render.RENDER_CMD[cmd]
-    options = conf['render_conf'].copy()
+    options = {
+        'render_conf': 'DO_NOT_COPY',
+        'map_conf': 'DO_NOT_COPY',
+        'mod_maps': 'DO_NOT_COPY',
+    }
+    copy_options(conf['render_conf'], options, map_name, cmd)
+    copy_options(conf, options, map_name, cmd)
     map_conf = maps[map_name]
     map_path = map_conf['map_path'].format(**dict(conf, **map_conf))
-    options['pz_root'] = conf['pz_root']
+    rename_options(options)
     options['input'] = map_path
 
-    options['skip_level'] = get_conf(options, map_name, cmd, 'omit_levels', 0)
     # base / base_top
     options['cache_name'] = map_name
     dep = get_dep(conf, maps, [map_name, 'default'])
     options['texture'] = []
     for d in dep:
-        texture_path = os.path.join(conf['output_path'], 'texture', d)
+        texture_path = os.path.join(conf['output_root'], 'texture', d)
         if os.path.isdir(texture_path):
             options['texture'].append(texture_path)
-    output_path_parts = [conf['output_path'], 'html', 'map_data']
-    if is_mod_map:
+    output_path_parts = [conf['output_root'], 'html', 'map_data']
+    if map_type == 'mod':
         output_path_parts += ['mod_maps', map_name]
-    elif cmd == 'base':
+    if map_type is None and cmd == 'base':
         options['image_fmt_layer0'] = options.get('image_fmt_base_layer0')
-    output_path_parts += [cmd]
+    if cmd in ['save', 'save_top']:
+        output_path_parts += ['saves', sanitize_folder_name(conf['save_game']), cmd.replace('save', 'base')]
+    else:
+        output_path_parts += [cmd]
     options['output'] = os.path.join(*output_path_parts)
 
     # room / objects
@@ -175,17 +217,20 @@ def render_map(cmd, conf, maps, map_name, is_mod_map=False):
     r = Render(**options)
     if hasattr(r, 'update_options'):
         options = r.update_options(options)
-    options['pzmap2dzi_version'] = VERSION.get('pzmap2dzi', 'unknown')
+    options['pzmap2dzi_version'] = VERSION.get('pzmap2dzi', 'Unknown')
     options['git_branch'] = VERSION.get('git_branch', '')
     options['git_commit'] = VERSION.get('git_commit', '')
     dzi = DZI(options['input'], **options)
-    suc = dzi.render_all(r, options['worker_count'], options['break_key'],
-                         options['verbose'], options['profile'])
+    worker_count = options.get('worker_count', 16)
+    break_key = options.get('break_key', '')
+    verbose = options.get('verbose', False)
+    profile = options.get('profile', False)
+    suc = dzi.render_all(r, worker_count, break_key, verbose, profile)
     return suc
 
 
-def save_mod_map_list(conf):
-    mods = os.path.join(conf['output_path'], 'html', 'map_data', 'mod_maps')
+def gen_map_list(conf, folder):
+    mods = os.path.join(conf['output_root'], 'html', 'map_data', folder)
     if not os.path.isdir(mods):
         return
     maps = []
@@ -196,23 +241,75 @@ def save_mod_map_list(conf):
         f.write(json.dumps(maps))
 
 
+def render_save(cmd, conf, maps, map_name, save_game):
+    conf['save_game'] = save_game
+    return render_map(cmd, conf, maps, map_name, 'save')
+
+
+def render_saves(cmd, conf, maps, map_name):
+    if sys.version_info[0] < 3:
+        print('save game render only support python 3.x')
+        return
+    if not conf.get('save_games'):
+        print('no save game specified in conf.yaml')
+        return
+    if conf['save_games'] == 'all':
+        from pzmap2dzi import lotheader
+        from pzmap2dzi.render_impl.save import get_save_version, match_version
+        from pzmap2dzi.pzdzi import PZDZI
+        map_conf = maps[map_name]
+        map_path = map_conf['map_path'].format(**dict(conf, **map_conf))
+        version_info = lotheader.get_version_info(map_path, True)
+        map_version = PZDZI.PZ_VERSION.get(version_info['version'], 'Unknown')
+        save_root = os.path.expandvars(conf.get('save_game_root'))
+        if not save_root or not os.path.isdir(save_root):
+            print('invalid save_game_root: {}'.format(save_root))
+            return
+        conf['save_games'] = []
+        for mode_folder in os.listdir(save_root):
+            mode_path = os.path.join(save_root, mode_folder)
+            if not os.path.isdir(mode_path):
+                continue
+            for save_folder in os.listdir(mode_path):
+                path = os.path.join(mode_path, save_folder)
+                if not os.path.isdir(path):
+                    continue
+                world_version = get_save_version(path)
+                if match_version(map_version, world_version):
+                    print('Save game found: v{}: {}'.format(world_version, path))
+                    save_game = os.path.join(mode_folder, save_folder)
+                    conf['save_games'].append(save_game)
+                else:
+                    print('Save game skipped: v{}: {}'.format(world_version, path))
+    for save_game in conf['save_games']:
+        conf['save_game'] = save_game
+        if render_save(cmd, conf, maps, map_name, save_game):
+            conf['render_conf']['save_game_parser_tag'] = 'local'
+        else:
+            print('render [{}] for save game [{}] error'.format(cmd, save_game))
+    gen_map_list(conf, 'saves')
+
+
 def render(args):
     conf, maps = parse_map(args.conf)
     for cmd in args.args:
         # base map
         if conf.get('base_map'):
-            if not render_map(cmd, conf, maps, conf['base_map'], False):
+            if cmd in ['save', 'save_top']:
+                render_saves(cmd, conf, maps, conf['base_map'])
+                continue
+            if not render_map(cmd, conf, maps, conf['base_map']):
                 break
         # mod maps
         if not conf.get('mod_maps'):
             continue
         for map_name in conf['mod_maps']:
-            if not render_map(cmd, conf, maps, map_name, True):
+            if not render_map(cmd, conf, maps, map_name, 'mod'):
                 print('render [{}] for map [{}] error'.format(cmd, map_name))
-                save_mod_map_list(conf)
+                gen_map_list(conf, 'mod_maps')
                 return
             print('render [{}] for map [{}] done'.format(cmd, map_name))
-    save_mod_map_list(conf)
+    gen_map_list(conf, 'mod_maps')
 
 
 def unzip(path):
@@ -229,7 +326,7 @@ def deploy(args):
     conf = load_yaml(args.conf)
     script_path = os.path.dirname(os.path.realpath(__file__))
     src = os.path.join(script_path, 'html')
-    dst = os.path.join(conf['output_path'], 'html')
+    dst = os.path.join(conf['output_root'], 'html')
     copy_tree(src, dst)
     unzip(os.path.join(dst, 'openseadragon', 'openseadragon.zip'))
     process_i18n(os.path.join(dst, 'pzmap', 'i18n'))
@@ -239,6 +336,18 @@ def deploy(args):
     update_json(os.path.join(dst, 'pzmap_config.json'), {
         'route': {
             entry: route,
+        },
+        'features': {
+            'map': True, # mod maps and save maps
+            'grid': True,
+            'marker': True,
+            'trimmer': True,
+            'zombie': True,
+            'foraging': True,
+            'rooms': True,
+            'objects': True,
+            'streets': True,
+            'coords': True,
         },
         'version': VERSION.get('html', 'unknown'),
         'git_branch': VERSION.get('git_branch', ''),

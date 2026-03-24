@@ -122,10 +122,7 @@ class CellMap(object):
         self.cells = set(self.cell_map.keys())
 
     def __getitem__(self, key):
-        return self.cell_map[key]
-
-    def __contains__(self, item):
-        return item in self.cell_map
+        return self.cell_map.get(key)
 
 
 def load_typed_objects(path, types, zrange=None):
@@ -134,11 +131,12 @@ def load_typed_objects(path, types, zrange=None):
 
 
 def border_label_map(cell_zones, cx, cy):
-    if (cx, cy) not in cell_zones:
+    zones = cell_zones[cx, cy]
+    if not zones:
         return {}, {}
     l_map = {}
     b_map = {}
-    for z in cell_zones[cx, cy]:
+    for z in zones:
         if z.z not in l_map:
             l_map[z.z] = {}
         if z.z not in b_map:
@@ -156,10 +154,11 @@ def border_label_map(cell_zones, cx, cy):
 
 
 def square_map(cell_zones, cell_size, cx, cy):
-    if (cx, cy) not in cell_zones:
+    zones = cell_zones[cx, cy]
+    if not zones:
         return None
     m = {}
-    for z in cell_zones[cx, cy]:
+    for z in zones:
         for sx, sy in z.square_list():
             x = sx - cx * cell_size
             y = sy - cy * cell_size

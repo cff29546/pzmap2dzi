@@ -54,15 +54,17 @@ if __name__ == '__main__':
         print('{}: {}/{}'.format(name, hit, len(tiles)))
 
     missing = []
-    multi = []
+    multi = {}
     for tile, names in count.items():
         if len(names) == 0:
             missing.append(tile)
         if len(names) > 1:
-            multi.append([tile, names])
+            multi[tile] = names
 
     print('Multi-mapped tiles: {}'.format(len(multi)))
-    print('Missing tiles: {}'.format(len(missing)))
+    for tile, names in multi.items():
+        print('  {}: {}'.format(tile, ', '.join(names)))
 
+    print('Missing tiles: {}'.format(len(missing)))
     for tile in sorted(missing):
         print('  {}'.format(tile))

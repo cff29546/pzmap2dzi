@@ -75,6 +75,7 @@ function initUI() {
             }
         }
     }
+    const features = g.conf.features || {};
     for (const type of ['marker', 'grid', 'map', 'trimmer', 'about']) {
         const uiContainer = document.getElementById(type + '_ui');
         const btn = document.getElementById(type + '_btn');
@@ -97,9 +98,39 @@ function initUI() {
                 btn.classList.remove('active');
             }
         }
+        if (features[type] === false && type != 'about') {
+            if (uiContainer) {
+                uiContainer.classList.add('disabled');
+            }
+            if (btn) {
+                btn.classList.add('disabled');
+            }
+        } else {
+            if (uiContainer) {
+                uiContainer.classList.remove('disabled');
+            }
+            if (btn) {
+                btn.classList.remove('disabled');
+            }
+        }
     }
+
+    for (const type of ['zombie', 'foraging', 'rooms', 'objects', 'streets', 'coords']) {
+        const btn = document.getElementById(type + '_btn');
+        if (btn) {
+            if (features[type] === false) {
+                btn.classList.add('disabled');
+                if (g.overlays[type]) {
+                    toggleOverlay(type);
+                }
+            } else {
+                btn.classList.remove('disabled');
+            }
+        }
+    }
+
     if (g.mapui) {
-        initModMapUI();
+        initMapUI();
     }
     if (g.overlays.foraging || g.overlays.objects) {
         document.getElementById('legends').style.display = '';
@@ -423,19 +454,19 @@ function updateRoofOpacity() {
     updateMaps(g.currentLayer);
 }
 
-// mod map ui
-function toggleModMapUI() {
+// overlay map ui
+function toggleMapUI() {
     if (g.mapui) {
         g.mapui = 0;
         document.getElementById('map_ui').innerHTML = '';
     } else {
         g.mapui = 1;
         document.getElementById('map_ui').innerHTML = g.UI.map.html;
-        initModMapUI();
+        initMapUI();
     }
 }
 
-function initModMapUI() {
+function initMapUI() {
     let p = window.fetch(globals.getRoot() + 'mod_maps/map_list.json');
     p = p.then((r) => r.json()).catch((e)=>Promise.resolve([]));
     p = p.then((map_names) => {
@@ -447,6 +478,18 @@ function initModMapUI() {
             s.appendChild(o);
         }
         updateModMapUI();
+    });
+    let s = window.fetch(globals.getRoot() + 'saves/map_list.json');
+    s = s.then((r) => r.json()).catch((e)=>Promise.resolve([]));
+    s = s.then((map_names) => {
+        const selector = document.getElementById('save_selector');
+        for (const name of map_names) {
+            const o = document.createElement('option');
+            o.value = name;
+            o.text = name;
+            selector.appendChild(o);
+        }
+        updateSaveMapUI();
     });
     return p;
 }
@@ -470,11 +513,28 @@ function updateModMapUI() {
                 warning.push(mod_map.name)
             }
             mapListContainer.innerHTML += `<button class="${state}" style="cursor: not-allowed" ` +
-                `onclick="removeMap('${mod_map.name.replace("'","\\'")}')">${mod_map.name}</button>`;
+                `onclick="removeModMap('${mod_map.name.replace("'","\\'")}')">${mod_map.name}</button>`;
         }
 
         if (warning.length > 0) {
             util.setOutput('map_output', 'red', '<b>' + i18n.T('MapErrorVersion') + '</b> ' + warning.join(','), 5000);
+        }
+    }
+}
+
+function updateSaveMapUI() {
+    if (g.mapui) {
+        const unload = document.getElementById('unload_save_btn');
+        const highlight = document.getElementById('highlight_save_btn');
+        if (g.save_map) {
+            unload.classList.remove('disabled');
+        } else {
+            unload.classList.add('disabled');
+        }
+        if (g.save_highlight) {
+            highlight.classList.add('active');
+        } else {
+            highlight.classList.remove('active');
         }
     }
 }
@@ -494,9 +554,12 @@ function updateMaps(layer) {
         g.mod_maps[i].setBaseLayer(layer);
         g.mod_maps[i].setOverlayLayer(g.overlays, layer);
     }
+    if (g.save_map) {
+        g.save_map.setBaseLayer(layer, g.save_highlight);
+    }
 }
 
-function removeMap(name) {
+function removeModMap(name) {
     let pos = 0;
     for (pos = 0; pos < g.mod_maps.length; pos++) {
         if (name == g.mod_maps[pos].name) {
@@ -506,7 +569,7 @@ function removeMap(name) {
     if (pos < g.mod_maps.length) {
         g.mod_maps[pos].destroy();
         g.mod_maps.splice(pos, 1);
-        if (g.mod_maps.length == 0) {
+        if (g.mod_maps.length == 0 && !g.save_map) {
             document.getElementById('map_btn').classList.remove('active');
         }
         updateModMapUI();
@@ -515,7 +578,7 @@ function removeMap(name) {
     }
 }
 
-function addMap(names) {
+function addModMap(names) {
     const p = [];
     for (const name of names) {
         if (name != '') {
@@ -563,7 +626,7 @@ function toggleAllMaps() {
                     names.push(o.value);
                 }
             }
-            addMap(names);
+            addModMap(names);
         }
     }
 }
@@ -571,8 +634,67 @@ function toggleAllMaps() {
 function onMapSelect() {
     if (g.mapui) {
         const s = document.getElementById('map_selector');
-        addMap([s.value]);
+        addModMap([s.value]);
         s.value = '';
+    }
+}
+
+function switchSaveMap(name) {
+    if (g.save_map) {
+        if (name == g.save_map.name) {
+            return;
+        }
+        g.save_map.destroy();
+        g.save_map = null;
+    }
+    if (name) {
+        g.save_map = new map.Map(globals.getRoot() + 'saves/' + name + '/', g.map_type, 'save', g.base_map);
+    }
+    const unload = document.getElementById('unload_save_btn');
+    if (g.save_map) {
+        unload.classList.remove('disabled');
+        g.save_map.init().then(() => {
+            updateSaveMapUI();
+            updateMaps(g.currentLayer);
+        });
+    } else {
+        unload.classList.add('disabled');
+    }
+    const mapBtn = document.getElementById('map_btn');
+    if (g.mod_maps.length == 0 && !g.save_map) {
+        mapBtn.classList.remove('active');
+    } else {
+        mapBtn.classList.add('active');
+    }
+}
+
+function onSaveSelect() {
+    if (g.mapui) {
+        const s = document.getElementById('save_selector');
+        switchSaveMap(s.value);
+    }
+}
+
+function onUnloadSave() {
+    if (g.mapui) {
+        const s = document.getElementById('save_selector');
+        switchSaveMap(null);
+        s.value = '';
+        const unload = document.getElementById('unload_save_btn');
+        unload.classList.add('disabled');
+    }
+}
+
+function toggleSaveHighlight() {
+    if (g.mapui) {
+        if (g.save_highlight) {
+            g.save_highlight = false;
+            document.getElementById('highlight_save_btn').classList.remove('active');
+        } else {
+            g.save_highlight = true;
+            document.getElementById('highlight_save_btn').classList.add('active');
+        }
+        updateMaps(g.currentLayer);
     }
 }
 
@@ -925,7 +1047,7 @@ function reloadView(keep_mod_map=false) {
             map_names.push(mod_map.name);
         }
         setup_maps = function () {
-            addMap(map_names);
+            addModMap(map_names);
             return Promise.resolve();
         }
     }

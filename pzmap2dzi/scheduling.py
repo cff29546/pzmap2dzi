@@ -1,5 +1,5 @@
 from __future__ import print_function
-from PIL import Image
+from PIL import Image, ImageDraw
 import sys
 import time
 import datetime
@@ -218,6 +218,7 @@ class ImageCreater(object):
         self.index = index
         self.size = size
         self.im = None
+        self.draw = None
 
     def get(self):
         if self.im is None:
@@ -229,8 +230,17 @@ class ImageCreater(object):
             raise Exception('cannot create im')
         return self.im
 
+    def get_draw(self):
+        if self.draw is None:
+            self.draw = ImageDraw.Draw(self.get())
+        return self.draw
+
     def is_created(self):
         return self.im is not None
+
+    def release_reference(self):
+        self.im = None
+        self.draw = None
 
 
 class CacheLoader(object):
@@ -322,14 +332,14 @@ class TopologicalDziWorker(object):
 
             if state == 'empty':
                 if self.mem is not None:
-                    ic.im = None
+                    ic.release_reference()
                     self.mem.release(index)
             else:
                 if self.mem is not None:
                     self.cache_map[(level, x, y, layer)] = state
                 layer_map[layer] = 1
             layer_cache[layer] = ic.im
-            ic.im = None
+            ic.release_reference()
 
         if not layer_map[0]:
             self.dzi.mark_empty(level, x, y, 0)

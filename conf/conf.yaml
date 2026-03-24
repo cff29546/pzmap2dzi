@@ -1,7 +1,7 @@
 pz_root: |- # project zomboid game folder
     D:/SteamLibrary/steamapps/common/ProjectZomboid
 
-output_path: |- # render output folder
+output_root: |- # render output folder
     E:/pzmap
 
 mod_root: |- # steam workshop folder for project zomboid
@@ -9,6 +9,9 @@ mod_root: |- # steam workshop folder for project zomboid
 
 custom_root: |- # custom file folder
     .
+
+save_game_root: |- # save game folder
+    %UserProfile%/zomboid/Saves
 
 # for multi map set
 # output_entry: map set name
@@ -29,13 +32,14 @@ map_conf:
 # dependencies in the map's description will be used. This may cause the render
 # failure for maps with incomplete dependency descriptions.
 # The default setting is false, which means it will try to use all the textures
-# available in the description files.
+# available in all declared mods.
 use_depend_texture_only: false
 
 # Specify maps to be rendered.
 # See vanilla.txt for map names.
 # default = Muldraugh, KY
 base_map: default
+
 # Additional overlay maps
 # See mod/ folder for map names.
 mod_maps:
@@ -51,6 +55,17 @@ mod_maps:
 #    - Petroville
 #    - RavenCreek
 #    - Trelai_4x4_Steam
+
+# list of save game folders, the path is relative from save_game_root
+# e.g.
+# save_games:
+#    - Apocalypse/2026-02-26_15-11-44
+#    - Sandbox/2026-02-27_20-30-00
+#
+# or use 'all' to render all save games with same version of the base map
+# e.g.
+# save_games: all
+save_games: all
 
 render_conf:
     # main conf
@@ -70,12 +85,17 @@ render_conf:
     # dzi conf
     # dzi tile size
     tile_size: 1024
+    tile_size(foraging): 4096
+    tile_size(zombie): 4096
+
     # make sure map origin (cell 0,0) lies on (0, 0) of a tile
-    # for how many bottem levels
-    # 0 for not align
+    # for how many bottom levels (minimum allowed is 1)
     # default is 3 bottom levels
     tile_align_levels: 3
-    # how may layer of map to render
+    tile_align_levels(foraging): 1
+    tile_align_levels(zombie): 1
+
+    # how many layers of map to render
     # examples:
     # render layer 0 to layer 7
     #     layer_range: [0, 8]
@@ -84,6 +104,7 @@ render_conf:
     # render all possible layers
     #     layer_range: all
     layer_range: all
+
     # discard bottom levels to save space at the cost of zoom in resolution
     # you can customize this setting for each job by adding variables
     # in following format:
@@ -107,9 +128,11 @@ render_conf:
     # output image format, affect base and all overlay map, mush support transparent
     # supported formats: [png, webp]
     image_fmt: webp
+
     # output image format for base map layer0, can use jpg to save space
     # supported formats: [png, webp, jpg]
     image_fmt_base_layer0: jpg
+
     # output image options for each output format
     # more options see:
     #     https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html#png-saving
@@ -144,16 +167,16 @@ render_conf:
         tree_size: 2
         # large tree size, range from 0 to 5 (inclusive)
         jumbo_tree_size: 4
-        # large tree type, from: 0 to 10  (inclusive)
+        # large tree type, from: 1 to 11  (inclusive)
         # see _TREE_DEF in pzmap2dzi/plants.py for more detail
-        jumbo_tree_type: 0
+        jumbo_tree_type: 1
         # disable ground cover grass
         no_ground_cover: false
         # use only one type of tree
         # supported values:
-        # -1        trees not unified
-        # 0 to 10   the unified tree type
-        unify_tree_type: -1
+        # 0        trees not unified
+        # 1 to 11   the unified tree type
+        unify_tree_type: 0
 
     # square color method in top view mode
     # supported method:
@@ -238,3 +261,18 @@ render_conf:
     streets_large:  White
     streets_medium: Cyan
     streets_small:  Teal
+
+    # save game render
+
+    # the release tag of pzdataspec to use for save game parsing
+    # options are:
+    # - latest: use the latest release version of pzdataspec
+    # - local: use save_game_parser_path to load a local copy of parser
+    save_game_parser_tag: latest
+
+    # when save_game_parser_tag is set to 'local'
+    # save_game_parser_path is the local path to the save game parser
+    # when save_game_parser_tag is set to 'latest'
+    # the downloaded parser will be cached in save_game_parser_path for future use
+    # if left empty, it will default to '<output_path>/lib'
+    save_game_parser_path:

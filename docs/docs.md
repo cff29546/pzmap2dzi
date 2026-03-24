@@ -6,6 +6,7 @@ This page contain useful links for developers.
 
 - [Engine Concepts](./designs/engine.md)
 - [Multi-Thread Render Scheduler and Shared Memory](./designs/multi_thread.md)
+- [Render Performance Reference](./render_performance.md)
 
 # Web Viewer
 

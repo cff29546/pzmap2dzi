@@ -1,5 +1,5 @@
 from . import pzdzi
-from .render_impl import base, rooms, zombie, objects, streets
+from .render_impl import base, rooms, zombie, objects, streets, save
 
 RENDER_CMD = {
     'base':         (pzdzi.IsoDZI, base.BaseRender),
@@ -11,4 +11,6 @@ RENDER_CMD = {
     'foraging_top': (pzdzi.TopDZI, objects.ForagingTopRender),
     'objects':      (pzdzi.IsoDZI, objects.ObjectsRender),
     'streets':      (pzdzi.IsoDZI, streets.StreetsRender),
+    'save':         (pzdzi.IsoDZI, save.SaveGameRender),
+    'save_top':     (pzdzi.TopDZI, save.SaveGameTopRender),
 }

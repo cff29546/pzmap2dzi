@@ -1,4 +1,3 @@
-from PIL import ImageDraw
 from .common import render_text, draw_square, LazyFont
 from .. import lotheader
 
@@ -83,8 +82,7 @@ class ZombieRender(object):
                 gy = sx + sy
                 ox, oy = dzi.get_sqr_center(gx - gx0, gy - gy0)
                 if draw is None:
-                    im = im_getter.get()
-                    draw = ImageDraw.Draw(im)
+                    draw = im_getter.get_draw()
                 draw_square(draw, ox, oy, color, block_size, block_size)
                 gxz = gx + block_size - 1
                 gyz = gy + block_size - 1
@@ -104,8 +102,7 @@ class ZombieRender(object):
         zombie = zpop[bx][by]
         if zombie == 0:
             return
-        im = im_getter.get()
-        draw = ImageDraw.Draw(im)
+        draw = im_getter.get_draw()
         color = get_color(zombie, 128)
         draw_square(draw, ox, oy, color)
         if self.zombie_count and x == 9 and y == 0:
@@ -128,8 +125,7 @@ class ZombieTopRender(object):
         if not zpop:
             return
         size = dzi.square_size*dzi.block_size
-        im = im_getter.get()
-        draw = ImageDraw.Draw(im)
+        draw = im_getter.get_draw()
         for bx, row in enumerate(zpop):
             for by, zombie in enumerate(row):
                 if zombie == 0:

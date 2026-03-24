@@ -311,6 +311,8 @@ class DZI(object):
     def render_all(self, render, n, break_key=None, verbose=False, profile=0):
         if verbose:
             print('Preparing data')
+        if hasattr(render, 'init_dzi'):
+            render.init_dzi(self)
         no_image = hasattr(render, 'NO_IMAGE') and render.NO_IMAGE
         self.create_empty_output(no_image)
         if hasattr(render, 'render'):
@@ -423,7 +425,10 @@ class IsoDZI(PZDZI):
         self.tile_size = options.get('tile_size', 1024)
         self.grid_per_tilex = self.tile_size // IsoDZI.GRID_WIDTH
         self.grid_per_tiley = self.tile_size // IsoDZI.GRID_HEIGHT
-        self.use_jumbo_tree = options.get('jumbo_tree_size', 3) > 3
+        plants_conf = options.get('plants_conf', {})
+        self.use_jumbo_tree = plants_conf.get('jumbo_tree_size', 3) > 3
+        # always assume large texture for output size calculation
+        # to ensure alignment between base map and overlays
         self.output_margin = self.get_output_margin(True)
         self.cell_margin = self.get_output_margin()
         self.render_margin = options.get('render_margin', 'default')
@@ -459,10 +464,10 @@ class IsoDZI(PZDZI):
         h = self.gh * IsoDZI.GRID_HEIGHT
         DZI.__init__(self, w, h, **options)
 
-    def get_output_margin(self, use_large_texture=False):
+    def get_output_margin(self, force_large_texture=False):
         texture_width = IsoDZI.TEXTURE_WIDTH
         texture_height = IsoDZI.TEXTURE_HEIGHT
-        if use_large_texture or self.use_jumbo_tree:
+        if force_large_texture or self.use_jumbo_tree:
             texture_width = IsoDZI.LARGE_TEXTURE_WIDTH
             texture_height = IsoDZI.LARGE_TEXTURE_HEIGHT
         width = (texture_width // 2) // IsoDZI.GRID_WIDTH
@@ -487,7 +492,7 @@ class IsoDZI(PZDZI):
         left = -width
         right = width
         top = 0
-        bottom = (texture_height // IsoDZI.GRID_HEIGHT) - 2
+        bottom = (texture_height // IsoDZI.GRID_HEIGHT) - 1
         return left, top, right, bottom
 
     def tile2grid(self, tx, ty, layer):
@@ -577,7 +582,16 @@ class TopDZI(PZDZI):
     def render_tile(self, im_getter, tx, ty, layer, layer_cache):
         self.render_below(im_getter, layer, layer_cache)
         cx, cy = self.tile2cell(tx, ty)
-        self.render.tile(im_getter, self, cx, cy, layer)
+        if hasattr(self.render, 'tile'):
+            return self.render.tile(im_getter, self, cx, cy, layer)
+
+        sx = cx * self.cell_size
+        sy = cy * self.cell_size
+        for x in range(self.cell_size):
+            for y in range(self.cell_size):
+                ox = x * self.square_size
+                oy = y * self.square_size
+                self.render.square(im_getter, self, ox, oy, sx + x, sy + y, layer)
 
     def update_map_info(self, info):
         info = self.update_pz_map_info(info)

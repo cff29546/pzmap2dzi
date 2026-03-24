@@ -1,10 +1,17 @@
 import { g } from "./globals.js";
 import { MarkManager } from "./marker.js";
 
+const BLACK_TILE = 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoQABAAAUAmJaQAA3AA/v02aAA=';
+const WHITE_TILE = 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoQABAAAUAmJaQAA3AA/vz0AAA=';
+
 export class Map {
     constructor(root, map_type, name, base_map=null) {
         this.layers = 0;
         this.tiles = [];
+        this.mask = {
+            'bottom': 0,
+            'top': 0,
+        };
         this.overlays = {};
         this.marks = {};
         this.overlay_layer = 0;
@@ -133,7 +140,7 @@ export class Map {
                         success: (function (obj) {
                             if ([0, 'loading'].includes(this.getTile(layer))) {
                                 this.setTile(layer, obj.item);
-                                positionItem(obj.item, this.name, layer);
+                                positionItem(obj.item);
                                 obj.item.setOpacity(opacity);
                             } else {
                                 g.viewer.world.removeItem(obj.item);
@@ -200,6 +207,47 @@ export class Map {
         }
     }
 
+    _load_mask(name, opacity) {
+        if (g.viewer && this.mask[name] == 0) {
+            this.mask[name] = 'loading';
+            console.log('loading mask', name);
+            g.viewer.addTiledImage({
+                tileSource: {
+                    height: this.w,
+                    width: this.h,
+                    tileSize: 1024,
+                    getTileUrl: function(level, x, y) {
+                        return BLACK_TILE;
+                    }.bind(this)
+                },
+                x: 0,
+                y: 0,
+                width: 1,
+                opacity: opacity,
+                success: (function (obj) {
+                    if ([0, 'loading'].includes(this.mask[name])) {
+                        this.mask[name] = obj.item;
+                        positionItem(obj.item);
+                    } else {
+                        g.viewer.world.removeItem(obj.item);
+                        if (this.mask[name] == 'delete') {
+                            this.mask[name] = 0;
+                        }
+                    }
+                }).bind(this),
+                error: (function (e) {
+                    if (['delete', 0, 'loading'].includes(this.mask[name])) {
+                        this.mask[name] = 0;
+                    }
+                }).bind(this),
+            });
+        } else {
+            if (!['delete', 'loading'].includes(this.mask[name])) {
+                this.mask[name].setOpacity(opacity);
+            }
+        }
+    }
+
     _unload_tile(layer) {
         if (layer < this.maxlayer && layer >= this.minlayer && this.getTile(layer) != 0) {
             if (['loading', 'delete'].includes(this.getTile(layer))) {
@@ -223,6 +271,17 @@ export class Map {
         }
     }
 
+    _unload_mask(name) {
+        if (this.mask[name]) {
+            if (['loading', 'delete'].includes(this.mask[name])) {
+                this.mask[name] = 'delete';
+            } else {
+                g.viewer.world.removeItem(this.mask[name]);
+                this.mask[name] = 0;
+            }
+        }
+    }
+
     setTile(layer, tile) {
         this.tiles[layer - this.minlayer] = tile;
     }
@@ -231,10 +290,15 @@ export class Map {
         return this.tiles[layer - this.minlayer];
     }
 
-    setBaseLayer(layer) {
+    setBaseLayer(layer, bottom_mask=false) {
         let start = this.minlayer;
         if (layer >= 0) {
             start = 0;
+        }
+        if (bottom_mask) {
+            this._load_mask('bottom', 0.5);
+        } else {
+            this._unload_mask('bottom');
         }
         for (let i = start; i < this.maxlayer ; i++) {
             if (i > layer) {
@@ -288,7 +352,8 @@ export class Map {
         this.setOverlayLayer({}, 0);
         for (let i = this.minlayer; i < this.maxlayer ; i++) {
             this._unload_tile(i);
-        } 
+        }
+        this._unload_mask('bottom');
     }
 
     getLayerRange() {
@@ -493,24 +558,41 @@ export class Map {
 };
 
 // order layered maps
-function positionItem(item, name, layer) {
+function positionItem(item) {
     let pos = 1;
     for (let i = g.minLayer; i < g.maxLayer; i++) {
-        if (name == '' && layer == i) {
-            g.viewer.world.setItemIndex(item, pos);
-            return;
-        }
         if (![undefined, 0, 'loading', 'delete'].includes(g.base_map.getTile(i))) {
-            pos++;
-        }
-        for (let j = 0; j < g.mod_maps.length; j++ ) {
-            if (name == g.mod_maps[j].name && layer == i) {
+            if (item == g.base_map.getTile(i)) {
                 g.viewer.world.setItemIndex(item, pos);
                 return;
             }
-            if (![undefined, 0, 'loading', 'delete'].includes(g.mod_maps[j].getTile(i))) {
+            pos++;
+        }
+        for (const map of g.mod_maps) {
+            if (![undefined, 0, 'loading', 'delete'].includes(map.getTile(i))) {
+                if (item == map.getTile(i)) {
+                    g.viewer.world.setItemIndex(item, pos);
+                    return;
+                }
                 pos++;
             }
+        }
+    }
+
+    if (![undefined, 0, 'loading', 'delete'].includes(g.save_map.mask['bottom'])) {
+        if (item == g.save_map.mask['bottom']) {
+            g.viewer.world.setItemIndex(item, pos);
+            return;
+        }
+        pos++;
+    }
+    for (let i = g.minLayer; i < g.maxLayer; i++) {
+        if (![undefined, 0, 'loading', 'delete'].includes(g.save_map.getTile(i))) {
+            if (item == g.save_map.getTile(i)) {
+                g.viewer.world.setItemIndex(item, pos);
+                return;
+            }
+            pos++;
         }
     }
 }
@@ -522,11 +604,21 @@ function positionAll() {
             g.viewer.world.setItemIndex(g.base_map.getTile(i), pos);
             pos++;
         }
-        for (let j = 0; j < g.mod_maps.length; j++ ) {
-            if (![undefined, 0, 'loading', 'delete'].includes(g.mod_maps[j].getTile(i))) {
-                g.viewer.world.setItemIndex(g.mod_maps[j].getTile(i), pos);
+        for (const map of g.mod_maps) {
+            if (![undefined, 0, 'loading', 'delete'].includes(map.getTile(i))) {
+                g.viewer.world.setItemIndex(map.getTile(i), pos);
                 pos++;
             }
+        }
+    }
+    if (![undefined, 0, 'loading', 'delete'].includes(g.save_map.mask['bottom'])) {
+        g.viewer.world.setItemIndex(g.save_map.mask['bottom'], pos);
+        pos++;
+    }
+    for (let i = g.minLayer; i < g.maxLayer; i++) {
+        if (![undefined, 0, 'loading', 'delete'].includes(g.save_map.getTile(i))) {
+            g.viewer.world.setItemIndex(g.save_map.getTile(i), pos);
+            pos++;
         }
     }
 }

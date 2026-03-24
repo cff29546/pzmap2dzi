@@ -15,20 +15,26 @@ template:
         en: 'Mod Map Selector'
         cn: '模组地图选择器'
     MapButton:
-        en: 'Mod Map'
-        cn: '模组地图'
+        en: 'Overlay Map'
+        cn: '叠加地图'
     MapAllButtonTitle:
         en: '${g.mod_maps.length>0?"Remove":"Load"} All Mod Maps'
         cn: '${g.mod_maps.length>0?"移除":"加载"}所有模组地图'
     MapAllButton:
         en: '${g.mod_maps.length>0?"Remove":"Load"} All'
         cn: '全部${g.mod_maps.length>0?"移除":"加载"}'
-    SelectToLoad:
+    SelectModMapToLoad:
         en: '(Select Mod Map to Load)'
         cn: '(选择要加载的模组地图)'
     LoadedMaps:
         en: 'Loaded maps:'
         cn: '已加载模组地图:'
+    SelectSaveMapToLoad:
+        en: '(Select Save Map to Load)'
+        cn: '(选择要加载的存档地图)'
+    HighlightSaveMap:
+        en: 'Highlight Save Map'
+        cn: '高亮存档地图'
     MapErrorVersion:
         en: 'Version conflict maps:'
         cn: '以下模组地图版本冲突:'
@@ -460,9 +466,13 @@ mapping:
             innerHTML:
                 eval: MapAllButton
         map_selector_dummy_option:
-            innerHTML: SelectToLoad
+            innerHTML: SelectModMapToLoad
         map_loaded_text:
             innerHTML: LoadedMaps
+        save_selector_dummy_option:
+            innerHTML: SelectSaveMapToLoad
+        highlight_save_btn:
+            innerHTML: HighlightSaveMap
         grid_btn:
             innerHTML: GridButton
         zombie_btn:

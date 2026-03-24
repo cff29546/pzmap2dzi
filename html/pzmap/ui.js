@@ -28,18 +28,31 @@ function genLegendsUI(type, mapping) {
 }
 
 var MAP_HTML = `
-<button id="map_all_btn" onclick="toggleAllMaps()"></button>
-<select id="map_selector" onchange="onMapSelect()">
-    <option id="map_selector_dummy_option" value=""></option>
-</select>
-<b id="map_loaded_text"></b>
-<div id="map_list" style="display: inline-block"></div>
-<div id="map_output" style="display: inline-block"></div>`;
+<div>
+    <button id="map_all_btn" onclick="toggleAllMaps()"></button>
+    <select id="map_selector" onchange="onMapSelect()">
+        <option id="map_selector_dummy_option" value=""></option>
+    </select>
+    <b id="map_loaded_text"></b>
+    <div id="map_list" style="display: inline-block"></div>
+    <div id="map_output" style="display: inline-block"></div>
+</div>
+<div>
+    <select id="save_selector" onchange="onSaveSelect()">
+        <option id="save_selector_dummy_option" value=""></option>
+    </select>
+    <button id="unload_save_btn" type="button" onclick="onUnloadSave()">❌</button>
+    <button id="highlight_save_btn" type="button" onclick="toggleSaveHighlight()"></button>
+</div>
+`;
 
 var MAP_IDS = [
     'map_all_btn',
     'map_selector_dummy_option',
-    'map_loaded_text'
+    'map_loaded_text',
+    'save_selector_dummy_option',
+    'unload_save_btn',
+    'highlight_save_btn'
 ];
 
 var MARKER_HTML = `
@@ -303,5 +316,4 @@ export function setMarkerUIData(data) {
         zoom_level = 0;
     }
     util.setValue('marker_visible_zoom_level', zoom_level);
-
 }

@@ -1,5 +1,6 @@
 import lupa
 import os
+import io
 
 
 def _is_list_keys(keys):
@@ -36,7 +37,7 @@ def unpack_lua_table(table, filter_type=None):
 def run_lua_file(path, env=None, pre_code=None, post_code=None, work_dir=None):
     lua_code = ''
     if os.path.isfile(path):
-        with open(path, 'r', encoding='utf-8') as file:
+        with io.open(path, 'r', encoding='utf-8') as file:
             lua_code = file.read()
     if not pre_code:
         pre_code = ''

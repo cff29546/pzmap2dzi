@@ -6,7 +6,7 @@ conf:
             map_path: '{custom_root}/custom'
 
     conf.yaml:
-        output_path: .
+        output_root: .
         use_depend_texture_only: true
         mod_maps: [custom]
         render_conf:

@@ -1,6 +1,8 @@
 setuptools
-pynput
-lupa
+pynput ; python_version >= '3.0'
+pynput==1.7.7 ; python_version < '3.0'
+lupa ; python_version >= '3.0'
+lupa==1.14.1 ; python_version < '3.0'
 pyclipper
 pillow
 pyyaml
@@ -9,3 +11,4 @@ waitress
 requests
 ruamel.yaml
 backports.functools_lru_cache==1.6.6 ; python_version < '3.0'
+kaitaistruct

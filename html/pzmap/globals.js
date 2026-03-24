@@ -7,6 +7,7 @@ export var g = {
     markerui: 0,
     aboutui: 0,
     currentLayer: 0,
+    save_highlight: true,
     zoomLevel: null,
     route: 'default',
     query_string: {},

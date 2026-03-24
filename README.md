@@ -1,7 +1,7 @@
 # pzmap2dzi
 pzmap2dzi is a command-line tool for Windows that converts Project Zomboid map data into [Deep Zoom format](https://en.wikipedia.org/wiki/Deep_Zoom).
 
-## Now with streets overlay
+## Now with save game render mode
 
 <p float="left">
   <table>
@@ -24,6 +24,7 @@ pzmap2dzi is a command-line tool for Windows that converts Project Zomboid map d
 
 - Ability to render mod maps as switchable overlays.
 - Featured overlay maps include zombie heatmaps, foraging zones, story areas, etc.
+- Save game render mode for rendering local save data.
 - HTML viewer for displaying the generated Deep Zoom image in both isometric and top-down views.
 - Tools for trimming local saved games.
 - Options for editing, exporting, and importing customized marks.
@@ -35,6 +36,7 @@ pzmap2dzi is a command-line tool for Windows that converts Project Zomboid map d
 # Quick Start
 
 - Convert map data using the [render engine](./docs/user_manual_render_engine.md).
+- Render local save game data with [save game render mode](./docs/user_manual_render_engine.md#save-game-render).
 - Set up and use the [web viewer](./docs/user_manual_web_viewer.md).
 - Explore helpful [utility scripts](./docs/utility_scripts.md).
 

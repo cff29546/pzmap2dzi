@@ -1,6 +1,9 @@
-from PIL import Image, ImageDraw, ImageColor
+from PIL import Image, ImageColor
 import os
 import struct
+import itertools
+
+from pzmap2dzi import pzdzi
 from .common import (
     draw_square, render_long_text, render_edge, LazyFont, dump_marks
 )
@@ -18,13 +21,38 @@ def non_skip_key_set(d):
 
 
 class ColorMapper(object):
-    def __init__(self, color_map, default_color, default_alpha=255):
-        self.color_map = color_map
+    def __init__(self, color_map, default_color_name, default_alpha=255):
+        self.k2n = color_map
         self.alpha = default_alpha
-        self.default = default_color
-        self.cache = {}
+        self.default_name = default_color_name
+        self.default_color = self.resolve_color_name(default_color_name)
+        self.k2c = {}
+        self.k2i = {}
+        self.init()
+    
+    def init(self, mapping=None):
+        if mapping:
+            self.i2c = [None] * len(mapping)
+            for i, k in enumerate(mapping):
+                n = self.k2n.get(k)
+                if n is None:
+                    continue
+                c = self.resolve_color_name(n)
+                self.i2c[i] = c
+                self.k2c[k] = c
+                self.k2i[k] = i
+        else:
+            self.i2c = [self.default_color]
+            for k, n in self.k2n.items():
+                c = self.resolve_color_name(n)
+                if c in self.i2c:
+                    self.k2i[k] = self.i2c.index(c)
+                else:
+                    self.k2i[k] = len(self.i2c)
+                    self.i2c.append(c)
+                self.k2c[k] = c
 
-    def apply_alpha(self, color):
+    def resolve_color_name(self, color):
         if color == 'skip':
             return None
         color_tuple = ImageColor.getrgb(color)
@@ -35,19 +63,15 @@ class ColorMapper(object):
         else:
             return None
 
-    def get(self, key):
+    def get_color(self, key):
         if not key:
             return None
-        if key not in self.cache:
-            name = self.get_name(key)
-            self.cache[key] = self.apply_alpha(name)
-        return self.cache[key]
-
+        return self.k2c.get(key, self.default_color)
+    
     def get_name(self, key):
         if not key:
-            return None
-        return self.color_map.get(key, self.default)
-
+            return self.default_name
+        return self.k2n.get(key, self.default_name)
 
 class Lmap(object):
     def __init__(self, biome):
@@ -56,8 +80,7 @@ class Lmap(object):
         self.bytes = struct.unpack('B'*len(b), b)
         self.w, self.h = im.size
 
-    def get(self, key):
-        x, y = key
+    def get(self, x, y):
         return self.bytes[x + y * self.w]
 
 
@@ -89,6 +112,40 @@ def get_biome_mapping(pz_root):
     return None
 
 
+def forward(x, y, remain, width):
+    x += remain
+    l, x = divmod(x, width)
+    y += l
+    return x, y
+
+def segmentation(x, y, remain, width):
+    if remain <= 0 or width <= 0:
+        return []
+
+    ops = []
+
+    # 1) First partial row when starting in the middle of a row.
+    if x != 0:
+        rw = min(remain, width - x)
+        ops.append((x, y, rw, 1))
+        remain -= rw
+        y += 1
+
+    if remain <= 0:
+        return ops
+
+    # 2) Middle area made of whole rows.
+    rows, tail = divmod(remain, width)
+    if rows > 0:
+        ops.append((0, y, width, rows))
+        y += rows
+
+    # 3) Last partial row.
+    if tail > 0:
+        ops.append((0, y, tail, 1))
+
+    return ops
+
 class ForagingBase(object):
     def __init__(self, **options):
         self.input = options.get('input')
@@ -96,6 +153,7 @@ class ForagingBase(object):
         color_default = options.get('foraging_color_default', 'Gray')
         self.color_map = ColorMapper(legends, color_default, 128)
         self.mapping = get_biome_mapping(options.get('pz_root', '.'))
+        self.color_map.init(self.mapping)
         if self.mapping:
             self.version = 'B42'
             self.getter = CellGetterB42(os.path.join(self.input, 'maps'))
@@ -127,6 +185,41 @@ class ForagingBase(object):
     def valid_cell_B41(self, x, y):
         return (x, y) in self.cells
 
+    def values_fill(self, im_getter, dzi, values, width):
+        draw = None
+        x = 0
+        y = 0
+        remain = 0
+        tailing_wildcards = 0
+        # None: must be empty
+        # False: wildcard, can be any type
+        # last will never be False
+        last = None
+        for v in itertools.chain(values, [None]):
+            if v == last:
+                remain += 1
+                tailing_wildcards = 0
+                continue
+
+            if v is False:
+                remain += 1
+                tailing_wildcards += 1
+                continue
+
+            if last is not None:
+                color = self.color_map.i2c[last]
+                if color is not None:
+                    ops = segmentation(x, y, remain - tailing_wildcards, width)
+                    if ops and draw is None:
+                        draw = im_getter.get_draw()
+                    for ox, oy, rw, rh in ops:
+                        self.fill_rect(draw, dzi, ox, oy, rw, rh, color)
+
+            x, y = forward(x, y, remain, width)
+            remain = 1
+            last = v
+            tailing_wildcards = 0
+
 
 class ForagingRender(ForagingBase):
     def square(self, im_getter, dzi, ox, oy, sx, sy, layer):
@@ -135,38 +228,78 @@ class ForagingRender(ForagingBase):
         zone = self.getter(cx, cy)
         if not zone:
             return
-        zone_type = zone.get((subx, suby))
+        zone_type = zone.get(subx, suby)
         if self.mapping:
             zone_type = self.mapping[zone_type]
-        color = self.color_map.get(zone_type)
+        color = self.color_map.get_color(zone_type)
         if color:
-            im = im_getter.get()
-            draw = ImageDraw.Draw(im)
+            draw = im_getter.get_draw()
             draw_square(draw, ox, oy, color)
+
+    def init_dzi(self, dzi):
+        self.ox = dzi.tile_size >> 1
+        self.oy = - dzi.tile_size >> 2
+        self.og = dzi.grid_per_tilex >> 1
+        self.values_width = (dzi.grid_per_tilex + dzi.grid_per_tiley + 2) >> 1
+        if self.version == 'B42':
+            self.tile = self.scan_tile
+
+    def fill_rect(self, draw, dzi, x, y, rw, rh, color):
+        dx = pzdzi.IsoDZI.GRID_WIDTH * (x - y)
+        dy = pzdzi.IsoDZI.GRID_HEIGHT * (x + y)
+        draw_square(draw, self.ox + dx, self.oy + dy, color, rw, rh)
+
+    def scan_tile(self, im_getter, dzi, gx0, gy0, layer):
+        x0 = (gx0 + gy0) >> 1
+        y0 = (gy0 - gx0 - dzi.grid_per_tilex) >> 1
+        cell = dzi.cell_size
+        values = [False] * (self.values_width * self.values_width)
+        cy, suby = divmod(y0 - 1, cell)
+        for y in range(self.values_width):
+            suby += 1
+            if suby == cell:
+                suby = 0
+                cy += 1
+            xmin = abs(y - self.og)
+            xmax = min(dzi.grid_per_tilex + y - self.og, dzi.grid_per_tiley - y + self.og) + 1
+            cx, subx = divmod(x0 + xmin - 1, cell)
+            zone = self.getter(cx, cy)
+            for x in range(xmin, xmax):
+                subx += 1
+                if subx == cell:
+                    subx = 0
+                    cx += 1
+                    zone = self.getter(cx, cy)
+                if zone:
+                    values[x + y * self.values_width] = zone.get(subx, suby)
+        self.values_fill(im_getter, dzi, values, self.values_width)
 
 
 class ForagingTopRender(ForagingBase):
-    def tile(self, im_getter, dzi, cx, cy, layer):
+    def sparse_fill(self, im_getter, dzi, cx, cy, layer):
         zone = self.getter(cx, cy)
         if not zone:
             return
-        im = None
-        draw = None
+        draw = im_getter.get_draw()
         size = dzi.square_size
-        for x in range(dzi.cell_size):
-            for y in range(dzi.cell_size):
-                zone_type = zone.get((x, y))
-                if self.mapping:
-                    zone_type = self.mapping[zone_type]
-                color = self.color_map.get(zone_type)
-                if color:
-                    if draw is None:
-                        im = im_getter.get()
-                        draw = ImageDraw.Draw(im)
-                    ox = x*size
-                    oy = y*size
-                    shape = [ox, oy, ox + size - 1, oy + size - 1]
-                    draw.rectangle(shape, fill=color)
+        for (x, y), t in zone.items():
+            color = self.color_map.get_color(t)
+            if color is not None:
+                self.fill_rect(draw, dzi, x, y, 1, 1, color)
+
+    def fill_rect(self, draw, dzi, x, y, rw, rh, color):
+        size = dzi.square_size
+        shape = [x * size, y * size, (x + rw) * size - 1, (y + rh) * size - 1]
+        draw.rectangle(shape, fill=color)
+                    
+    def tile(self, im_getter, dzi, cx, cy, layer):
+        if self.version == 'B41':
+            return self.sparse_fill(im_getter, dzi, cx, cy, layer)
+        
+        zone = self.getter(cx, cy)
+        if not zone:
+            return
+        self.values_fill(im_getter, dzi, zone.bytes, dzi.cell_size)
 
 
 class ObjectsRender(object):
@@ -175,6 +308,7 @@ class ObjectsRender(object):
         legends = options.get('objects_color', {})
         color_default = options.get('objects_color_default', 'White')
         self.color_map = ColorMapper(legends, color_default, 255)
+        self.color_map.init()
         font_name = options.get('objects_font')
         if not font_name:
             font_name = options.get('default_font', 'arial.tff')
@@ -220,19 +354,18 @@ class ObjectsRender(object):
         if layer in border:
             if (sx, sy) in border[layer]:
                 for t, flag in border[layer][sx, sy]:
-                    color = self.color_map.get(t)
+                    color = self.color_map.get_color(t)
                     if color:
                         drawing.append((render_edge, (color, 3, flag)))
         if layer in label:
             if (sx, sy) in label[layer]:
                 for t, name in label[layer][sx, sy]:
-                    color = self.color_map.get(t)
+                    color = self.color_map.get_color(t)
                     if color:
                         drawing.append((render_long_text,
                                         (name, color, self.font.get())))
         if drawing:
-            im = im_getter.get()
-            draw = ImageDraw.Draw(im)
+            draw = im_getter.get_draw()
             for func, args in drawing:
                 func(draw, ox, oy, *args)
 

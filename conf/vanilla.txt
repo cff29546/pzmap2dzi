@@ -4,10 +4,9 @@ default:
     texture: true
     texture_path: '{pz_root}/media/texturepacks'
     texture_files:
-        - Erosion[.]pack
-        - ApCom[.]pack
-        - JumboTrees2x[.]pack
         - Tiles2x[.]floor.pack
+        - JumboTrees2x[.]pack
+        - Overlays2x[.]pack
         - Tiles2x[.]pack
 
 # challenge maps

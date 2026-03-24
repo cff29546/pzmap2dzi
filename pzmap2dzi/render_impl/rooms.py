@@ -1,5 +1,4 @@
 import os
-from PIL import ImageDraw
 from .common import render_long_text, render_edge, LazyFont, dump_marks
 from .. import lotheader, geometry
 
@@ -108,8 +107,7 @@ class RoomRender(object):
             color = COLOR_MAP.get(name, DEFAULT_COLOR)
             drawing.append((render_edge, (color, 3, flag)))
         if drawing:
-            im = im_getter.get()
-            draw = ImageDraw.Draw(im)
+            draw = im_getter.get_draw()
             for func, args in drawing:
                 func(draw, ox, oy, *args)
 

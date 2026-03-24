@@ -1,0 +1,11 @@
+conf:
+    conf.yaml:
+        output_root: .
+        mod_root: ''
+        save_games: all
+        #  - Apocalypse/2026-02-26_15-11-44
+        use_depend_texture_only: true
+        render_conf:
+            enable_cache: true
+            break_key: <f9>
+            #save_game_parser_tag: local

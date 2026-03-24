@@ -69,6 +69,6 @@ if __name__ == '__main__':
     else:
         version = 'B41'
 
-    maps = case['maps'][version]
+    maps = case.get('maps', {}).get(version, {})
     for name, cells in maps.items():
         copy_map(os.path.join(args.output, name), map_path, cells)

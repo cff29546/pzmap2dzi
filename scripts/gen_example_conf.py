@@ -5,11 +5,15 @@ import ruamel.yaml
 
 
 def copy(dst, src, name, new_name=None):
+    if not os.path.exists(src):
+        return None
     if not os.path.exists(dst):
         os.makedirs(dst)
     if not new_name:
         new_name = name
     source = os.path.join(src, name)
+    if not os.path.exists(source):
+        return None
     target = os.path.join(dst, new_name)
     shutil.copy(source, target)
 

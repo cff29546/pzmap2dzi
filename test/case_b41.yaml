@@ -1,5 +1,1 @@
-copy: [case_default.yaml]
-conf:
-    conf.yaml:
-        pz_root: F:/drop/B41
-map_source: 'F:/drop/B41/media/maps/Muldraugh, KY'
+copy: [case_default.yaml, b41.yaml]

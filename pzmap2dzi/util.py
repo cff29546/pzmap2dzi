@@ -1,5 +1,6 @@
 import struct
 import os
+import re
 
 
 def read_until(data, pos, pattern):
@@ -38,3 +39,27 @@ def ensure_folder(path):
     if not os.path.isdir(path):
         return False
     return True
+
+
+def scan_folder(path, pattern, fields=('x', 'y'), hash_func=None):
+    result = {}
+    if isinstance(pattern, str):
+        pattern = re.compile(pattern)
+    for filename in os.listdir(path):
+        m = pattern.match(filename)
+        if not m:
+            continue
+        key = tuple(map(int, m.group(*fields)))
+        mtime = os.path.getmtime(os.path.join(path, filename))
+        hash = None
+        if hash_func:
+            hasher = hash_func()
+            with open(os.path.join(path, filename), 'rb') as f:
+                while True:
+                    chunk = f.read(256 * 1024)
+                    if not chunk:
+                        break
+                    hasher.update(chunk)
+            hash = hasher.hexdigest()
+        result[key] = (mtime, hash)
+    return result

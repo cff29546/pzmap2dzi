@@ -3,6 +3,8 @@ import os
 import sys
 import re
 import json
+import time
+import datetime
 from . import util, mptask, scheduling, geometry, lotheader
 
 DZI_TEMPLATE = (
@@ -73,7 +75,6 @@ class DZI(object):
             self.save_options[self.ext0] = save_options.get(self.ext0, {})
         self.done_pattern = re.compile(DONE_TEMPLATE.format(self.ext0))
         self.skip_level = options.get('skip_level', 0)
-        self.skip_cells = set()
         self.cache_enabled = False
         self.cache_limit = 0
         if sys.version_info >= (3, 8):
@@ -173,11 +174,7 @@ class DZI(object):
         ext, path = self.tile_path(level, x, y, 0, 'pending')
         os.remove(path)
 
-    def create_empty_output(self, no_image=False):
-        util.ensure_folder(self.path)
-        self.save_map_info()
-        if no_image:
-            return
+    def create_empty_output(self):
         for layer in range(self.render_minlayer, self.render_maxlayer):
             layer_path = os.path.join(self.path, 'layer{}_files'.format(layer))
             util.ensure_folder(layer_path)
@@ -196,7 +193,6 @@ class DZI(object):
             'w': w,
             'h': h,
             'skip': self.skip_level,
-            'cell_rects': geometry.rect_cover(self.cells),
         }
         if hasattr(self, 'update_map_info'):
             info = self.update_map_info(info)
@@ -223,19 +219,10 @@ class DZI(object):
         with open(path, 'w') as f:
             f.write(data)
 
-    def get_bottom_task_depend(self, skip_cells, done):
-        tasks = {}
-        for cx, cy in self.cells:
-            if (cx, cy) not in skip_cells:
-                for t in self.cell2tiles(cx, cy):
-                    if t not in done:
-                        tasks[t] = 0
-        return tasks
-
-    def get_done_tasks(self, level):
+    def get_completed_tasks(self, level):
         path = os.path.join(self.path, 'layer0_files', str(level))
         if not os.path.isdir(path):
-            return set()
+            return set(), set()
         done = set()
         pending = set()
         for f in os.listdir(path):
@@ -248,34 +235,36 @@ class DZI(object):
             if m:
                 x, y = map(int, m.groups())
                 pending.add((x, y))
-        return done - pending
+        return done - pending, pending
 
-    def get_tasks(self, skip_cells=set()):
-        level_tasks = [None for i in range(self.levels)]
-        level_done = [None for i in range(self.levels)]
-        level_skip = [set() for i in range(self.levels)]
+    def get_tasks(self):
+        tasks_by_level = [None] * self.levels
+        completed_by_level = [None] * self.levels
+        skipped_by_level = [set() for _ in range(self.levels)]
         for level in reversed(range(self.levels)):
-            done = self.get_done_tasks(level)
+            completed, pending = self.get_completed_tasks(level)
             if level == self.levels - 1:
-                task = self.get_bottom_task_depend(skip_cells, done)
+                tasks = self.get_bottom_level_tasks(completed)
             else:
-                task, skip = get_merge_task_depend(
-                    done, level_tasks[level+1], level_done[level+1])
-                level_skip[level + 1] = skip
-            level_tasks[level] = task
-            level_done[level] = done
+                tasks, skip = get_merge_task_depend(
+                    completed,
+                    tasks_by_level[level+1],
+                    completed_by_level[level+1])
+                skipped_by_level[level + 1] = skip
+            tasks_by_level[level] = tasks
+            completed_by_level[level] = completed
 
-        # skip tasks from high level done
+        # skip tasks covered by high level completed thumbnails
         for level in range(1, self.levels):
-            for t in level_skip[level - 1]:
+            for t in skipped_by_level[level - 1]:
                 for lt in lower_level_depend(*t):
-                    if lt in level_tasks[level]:
-                        level_skip[level].add(lt)
-            for t in level_skip[level]:
-                level_done[level].add(t)
-                del level_tasks[level][t]
+                    if lt in tasks_by_level[level]:
+                        skipped_by_level[level].add(lt)
+            for t in skipped_by_level[level]:
+                completed_by_level[level].add(t)
+                del tasks_by_level[level][t]
 
-        return level_tasks, level_done
+        return tasks_by_level, completed_by_level
 
     def merge_tile(self, im_getter, level, tx, ty, layer, cached=None):
         tile = None
@@ -313,11 +302,9 @@ class DZI(object):
             print('Preparing data')
         if hasattr(render, 'init_dzi'):
             render.init_dzi(self)
-        no_image = hasattr(render, 'NO_IMAGE') and render.NO_IMAGE
-        self.create_empty_output(no_image)
+        util.ensure_folder(self.path)
+        self.save_map_info()
         if hasattr(render, 'render'):
-            import time
-            import datetime
             if verbose:
                 print('Rendering non-image elements')
                 start = time.time()
@@ -325,22 +312,23 @@ class DZI(object):
             if verbose:
                 time_used = time.time() - start
                 print('time used', str(datetime.timedelta(0, time_used)))
-        if not no_image:
-            if hasattr(render, 'valid_cell'):
-                for x, y in self.cells:
-                    if not render.valid_cell(x, y):
-                        self.skip_cells.add((x, y))
-            self.render = render
-            tasks, done = self.get_tasks(self.skip_cells)
-            schd = scheduling.TopologicalDziScheduler(self, break_key, verbose)
-            cache_prefix = 'pzdzi.{}.'.format(os.getpid())
-            worker = scheduling.TopologicalDziWorker(self, cache_prefix)
-            task = mptask.Task(worker, schd, profile)
-            task.run((tasks, done), n)
-            if schd.stop:
-                if verbose:
-                    print('Render interrupted: {}'.format(schd.stop))
-                return False
+        no_image = hasattr(render, 'NO_IMAGE') and render.NO_IMAGE
+        if no_image:
+            if verbose:
+                print('No image to render, done')
+            return True
+        self.create_empty_output()
+        self.render = render
+        tasks_by_level, completed_by_level = self.get_tasks()
+        schd = scheduling.TopologicalDziScheduler(self, break_key, verbose)
+        cache_prefix = 'pzdzi.{}.'.format(os.getpid())
+        worker = scheduling.TopologicalDziWorker(self, cache_prefix)
+        task = mptask.Task(worker, schd, profile)
+        task.run((tasks_by_level, completed_by_level), n)
+        if schd.stop:
+            if verbose:
+                print('Render interrupted: {}'.format(schd.stop))
+            return False
         if verbose:
             print('Done')
         return True
@@ -396,7 +384,23 @@ class PZDZI(DZI):
         info['git_branch'] = self.git_branch
         info['git_commit'] = self.git_commit
         info['legends'] = self.legends
+        info['cell_rects'] = geometry.rect_cover(self.cells)
         return info
+
+    def get_bottom_level_tasks(self, done):
+        skip_cells = set()
+        if hasattr(self.render, 'valid_cell'):
+            for x, y in self.cells:
+                if not self.render.valid_cell(x, y):
+                    skip_cells.add((x, y))
+        tasks = {}
+        for cx, cy in self.cells:
+            if (cx, cy) in skip_cells:
+                continue
+            for t in self.cell2tiles(cx, cy):
+                if t not in done:
+                    tasks[t] = 0
+        return tasks
 
 
 class IsoDZI(PZDZI):

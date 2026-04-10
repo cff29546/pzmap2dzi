@@ -68,6 +68,15 @@ mod_maps:
 save_games: all
 
 render_conf:
+    # you can customize each setting under render_conf for each job or mod map by using the following syntax:
+    #     setting_name[<map name>](<render job>)
+    #     setting_name(<render job>)
+    #     setting_name[<map name>]
+    # examples:
+    #     verbose[Bedford Falls](base): false
+    #     verbose[default]: true
+    #     verbose(zombie): false
+
     # main conf
     verbose: true
     # show profiling infomation
@@ -105,12 +114,21 @@ render_conf:
     #     layer_range: all
     layer_range: all
 
+    # A list of cell ranges to render or 'all' to render all cells.
+    # Each cell range can be specified in two formats:
+    #     [x_min, y_min, width, height]
+    #     or
+    #     [x, y] equal to [x, y, 1, 1]
+    # examples:
+    # render cells in rect (30, 30) to (50, 50) inclusively for default map
+    #     cell_range[default]:
+    #         - [30, 30, 21, 21]
+    # render cell (30, 30) only for default map
+    #     cell_range[default]:
+    #         - [30, 30]
+    cell_range: all
+
     # discard bottom levels to save space at the cost of zoom in resolution
-    # you can customize this setting for each job by adding variables
-    # in following format:
-    #     omit_levels[<map name>](<render job>)
-    #     omit_levels(<render job>)
-    #     omit_levels[<map name>]
     #
     # Here is an example:
     #     render main map with omit_levels = 2

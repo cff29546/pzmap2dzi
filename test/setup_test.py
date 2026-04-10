@@ -9,6 +9,7 @@ _DEFAULT_CONF = os.path.join(_BASE_DIR, '../conf')
 try:
     import main
     from gen_example_conf import copy, update_conf, update_data
+    from pzmap2dzi import lotheader
 except ImportError:
     raise
 
@@ -42,6 +43,13 @@ def load_case(path, name):
     return output
 
 
+def apply_change(conf_path, changes):
+    for name, value in changes.items():
+        conf = os.path.join(conf_path, name)
+        if os.path.exists(conf):
+            update_conf(conf, value)
+
+
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='pzmap2dzi test conf setter')
@@ -56,18 +64,17 @@ if __name__ == '__main__':
     conf_path = os.path.join(args.output, 'conf')
     conf_yaml = os.path.join(conf_path, 'conf.yaml')
     copy_conf(conf_path, args.conf)
-    map_path = case.get('map_source')
-    if not map_path:
-        map_path = main.get_map_path(conf_yaml, 'default')
-    for name, value in case.get('conf', {}).items():
-        conf = os.path.join(conf_path, name)
-        if os.path.exists(conf):
-            update_conf(conf, value)
 
-    if os.path.exists(os.path.join(map_path, '..', 'Echo Creek, KY')):
+    apply_change(conf_path, case.get('preprocess', {}))
+    map_path = main.get_map_path(conf_yaml, 'default')
+    version_info = lotheader.get_version_info(map_path, True)
+    if version_info and version_info.get('version') == 1:
         version = 'B42'
     else:
         version = 'B41'
+
+    apply_change(conf_path, case.get('conf', {}))
+    apply_change(conf_path, case.get('conf', {}).get(version, {}))
 
     maps = case.get('maps', {}).get(version, {})
     for name, cells in maps.items():

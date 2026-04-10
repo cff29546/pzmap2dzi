@@ -1,13 +1,16 @@
 copy: [case_default.yaml]
-maps:
-    B41:
-        main:
-            - [22, 17]
-        custom:
-            - [22, 18]
-    B42:
-        main:
-            - [26, 20]
-        custom:
-            - [26, 21]
+conf:
+    conf.yaml:
+        mod_maps: []
 
+    B41:
+        conf.yaml:
+            render_conf:
+                cell_range[default]:
+                    - [22, 17, 1, 1]
+
+    B42:
+        conf.yaml:
+            render_conf:
+                cell_range[default]:
+                    - [26, 20, 1, 1]

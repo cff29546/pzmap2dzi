@@ -85,7 +85,7 @@ class RoomRender(object):
         return self.mark.process(dzi)
 
     def update_options(self, options):
-        options['render_margin'] = [-2, -2, 2, 2]  # add margin for text
+        options['render_margin'] = (-2, -2, 2, 2)  # add margin for text
         return options
 
     def square(self, im_getter, dzi, ox, oy, sx, sy, layer):

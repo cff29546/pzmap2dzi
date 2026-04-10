@@ -1,7 +1,5 @@
 conf:
     vanilla.txt:
-        default:
-            map_path: '{custom_root}/main'
         custom:
             map_path: '{custom_root}/custom'
 
@@ -12,21 +10,25 @@ conf:
         render_conf:
             enable_cache: true
             break_key: <f9>
-            image_save_options:
-                png: {compress_level: 1}
+
+    B41:
+        conf.yaml:
+            render_conf:
+                cell_range[default]:
+                    - [26, 38, 1, 2]
+
+    B42:
+        conf.yaml:
+            render_conf:
+                cell_range[default]:
+                    - [31, 44, 1, 2]
+
 maps:
     B41:
-        main:
-            - [26, 38]
-            - [26, 39]
         custom:
             - [27, 38]
             - [27, 39]
     B42:
-        main:
-            - [31, 44]
-            - [31, 45]
         custom:
             - [32, 44]
             - [32, 45]
-

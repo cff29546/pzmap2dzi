@@ -27,7 +27,13 @@ class TextureRender(object):
 class BaseRender(TextureRender):
     def __init__(self, **options):
         self.input = options.get('input')
+        plants_conf = options.get('plants_conf', {})
+        self.use_jumbo_tree = plants_conf.get('jumbo_tree_size', 3) > 3
         TextureRender.__init__(self, **options)
+
+    def update_options(self, options):
+        options['render_margin'] = 'large' if self.use_jumbo_tree else 'normal'
+        return options
 
     def square(self, im_getter, dzi, ox, oy, sx, sy, layer):
         oy += dzi.sqr_height >> 1  # center -> bottom center

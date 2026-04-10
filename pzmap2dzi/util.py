@@ -1,5 +1,7 @@
 import struct
 import os
+import re
+import json
 
 
 def read_until(data, pos, pattern):
@@ -38,3 +40,87 @@ def ensure_folder(path):
     if not os.path.isdir(path):
         return False
     return True
+
+
+def scan_folder(path, pattern, fields=('x', 'y'), hash_func=None):
+    result = {}
+    if isinstance(pattern, str):
+        pattern = re.compile(pattern)
+    for filename in os.listdir(path):
+        m = pattern.match(filename)
+        if not m:
+            continue
+        key = tuple(map(int, m.group(*fields)))
+        mtime = os.path.getmtime(os.path.join(path, filename))
+        hash = None
+        if hash_func:
+            hasher = hash_func()
+            with open(os.path.join(path, filename), 'rb') as f:
+                while True:
+                    chunk = f.read(256 * 1024)
+                    if not chunk:
+                        break
+                    hasher.update(chunk)
+            hash = hasher.hexdigest()
+        result[key] = (mtime, hash)
+    return result
+
+
+def save_json_compact(path, data):
+        # dump and compact list values
+        raw = json.dumps(data, indent=1)
+        level = 0
+        output = []
+        for c in raw:
+            if c == '[':
+                level += 1
+            elif c == ']':
+                level -= 1
+            elif c in ' \n':
+                if level:
+                    continue
+            elif c == ',':
+                output.append(', ')
+                continue
+            output.append(c)
+        with open(path, 'w') as f:
+            f.write(''.join(output))
+
+
+def load_json(path):
+    if not os.path.isfile(path):
+        return None
+    with open(path, 'r') as f:
+        return json.load(f)
+
+
+def dict_diff(left, right, keys=None, left_name='left', right_name='right'):
+    if keys is None:
+        keys = set(left.keys()) | set(right.keys())
+    mismatch = []
+    for key in keys:
+        if left.get(key) != right.get(key):
+            mismatch_info = '{}: {}={}, {}={}'.format(
+                key, left_name, left.get(key), right_name, right.get(key))
+            mismatch.append(mismatch_info)
+    return mismatch
+
+
+def save_coord_map(path, coord_map):
+    serializable = []
+    for coord, data in coord_map.items():
+        serializable.append([coord, data])
+    with open(path, 'w') as f:
+        json.dump(serializable, f)
+
+
+def load_coord_map(path):
+    if not os.path.isfile(path):
+        return {}
+    coord_map = {}
+    serialized = []
+    with open(path, 'r') as f:
+        serialized = json.load(f)
+    for coord, data in serialized:
+        coord_map[tuple(coord)] = data
+    return coord_map

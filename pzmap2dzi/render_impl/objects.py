@@ -180,6 +180,8 @@ class ForagingBase(object):
         options['render_maxlayer'] = 1
         options['render_margin'] = None
         options['legends'] = self.legends
+        if self.version == 'B42':
+            options['source_tags'] = ['foraging']
         return options
 
     def valid_cell_B41(self, x, y):
@@ -222,15 +224,15 @@ class ForagingBase(object):
 
 
 class ForagingRender(ForagingBase):
-    def square(self, im_getter, dzi, ox, oy, sx, sy, layer):
+    def square_B41(self, im_getter, dzi, ox, oy, sx, sy, layer):
         cx, subx = divmod(sx, dzi.cell_size)
         cy, suby = divmod(sy, dzi.cell_size)
         zone = self.getter(cx, cy)
         if not zone:
             return
-        zone_type = zone.get(subx, suby)
-        if self.mapping:
-            zone_type = self.mapping[zone_type]
+        zone_type = zone.get((subx, suby))
+        if not zone_type:
+            return
         color = self.color_map.get_color(zone_type)
         if color:
             draw = im_getter.get_draw()
@@ -243,6 +245,8 @@ class ForagingRender(ForagingBase):
         self.values_width = (dzi.grid_per_tilex + dzi.grid_per_tiley + 2) >> 1
         if self.version == 'B42':
             self.tile = self.scan_tile
+        else:
+            self.square = self.square_B41
 
     def fill_rect(self, draw, dzi, x, y, rw, rh, color):
         dx = pzdzi.IsoDZI.GRID_WIDTH * (x - y)
@@ -337,7 +341,7 @@ class ObjectsRender(object):
         return self.mark.process(dzi)
 
     def update_options(self, options):
-        options['render_margin'] = [-2, -2, 2, 2]  # add margin for text
+        options['render_margin'] = (-2, -2, 2, 2)  # add margin for text
         options['legends'] = self.legends
         return options
 

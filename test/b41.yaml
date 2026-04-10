@@ -1,4 +1,3 @@
-conf:
+preprocess:
     conf.yaml:
         pz_root: D:/drop/B41
-map_source: 'D:/drop/B41/media/maps/Muldraugh, KY'

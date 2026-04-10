@@ -17,6 +17,7 @@ OLD_BLOCK_NAME = re.compile(r'^map_(\d+)_(\d+)\.bin$')
 NEW_BLOCK_NAME = re.compile(r'^(\d+)\.bin$')
 def scan_blocks(save_game_path, first_only=False):
     blocks = {}
+    path_type = 'map/map_{}_{}.bin'
     map_dir = os.path.join(save_game_path, 'map')
     if os.path.isdir(map_dir):
         # new format
@@ -31,31 +32,34 @@ def scan_blocks(save_game_path, first_only=False):
                 if m:
                     y = int(m.group(1))
                     blocks[(x, y)] = os.path.normpath(os.path.join(map_dir, folder, name))
+                    path_type = 'map/{}/{}.bin'
                     if first_only:
-                        return blocks
+                        return blocks, path_type
     else:
         map_dir = save_game_path
+        path_type = 'map_{}_{}.bin'
     for name in os.listdir(map_dir):
         m = OLD_BLOCK_NAME.match(name)
         if m:
             x, y = int(m.group(1)), int(m.group(2))
             blocks[(x, y)] = os.path.normpath(os.path.join(map_dir, name))
             if first_only:
-                return blocks
-    return blocks
+                return blocks, path_type
+    return blocks, path_type
 
 
 def get_save_version(save_game_path):
-    blocks = scan_blocks(save_game_path, first_only=True)
+    blocks, path_type = scan_blocks(save_game_path, first_only=True)
     if not blocks:
-        return None
+        return None, None
     block_path = blocks.popitem()[1]
     with open(block_path, 'rb') as f:
         data = f.read(5)
         if len(data) < 5:
-            return None
+            return None, None
     version = struct.unpack('>I', data[1:5])[0]
-    return version
+    path_template = os.path.normpath(os.path.join(save_game_path, path_type))
+    return version, path_template
 
 
 def match_version(map_version, world_version):
@@ -144,6 +148,8 @@ class SaveGameBase(base.TextureRender):
     OLD_BLOCK_NAME = re.compile(r'map_(\d+)_(\d+).bin')
     NEW_BLOCK_NAME = re.compile(r'(\d+).bin')
     def __init__(self, **options):
+        options.setdefault('plants_conf', {}).setdefault('jumbo_tree_size', 4)
+        self.use_jumbo_tree = options['plants_conf']['jumbo_tree_size'] > 3
         base.TextureRender.__init__(self, **options)
         self.pz_root = options.get('pz_root')
         self.mod_root = options.get('mod_root')
@@ -160,22 +166,24 @@ class SaveGameBase(base.TextureRender):
         self.init_in_worker = False
 
     def update_options(self, options):
-        options.setdefault('plants_conf', {})
-        options['plants_conf']['jumbo_tree_size'] = max(4, options['plants_conf'].get('jumbo_tree_size', 4))
+        options['render_margin'] = 'large' if self.use_jumbo_tree else 'normal'
+        options['source_tags'] = ['save']
+        options['source_path'] = 'save_game'
+        options['source_unit_size'] = 'block'
         return options
 
     def load_block(self, x, y):
-        block_path = self.blocks.get((x, y))
-        if not block_path:
+        block_path = self.path_template.format(x, y)
+        if not os.path.exists(block_path):
             return None
         return self.utils.load_chunk(block_path, self.save_version)
 
     def init_dzi(self, dzi):
-        self.cells = set()
-        self.blocks = scan_blocks(self.save_game)
-        version = get_save_version(self.save_game)
+        version, path_template = get_save_version(self.save_game)
         if not version:
+            self.NO_IMAGE = True
             return
+        self.path_template = path_template
         lib_tag = self.parser_tag
         self.block_size = 8
         self.save_version = 42
@@ -189,16 +197,15 @@ class SaveGameBase(base.TextureRender):
         utils = self.lib_loader.load('pzdataspec.utils')
         if not utils:
             print('Failed to load parser utils')
+            self.NO_IMAGE = True
             return
         if self.block_size != dzi.block_size:
             print('Block size mismatch, map:{}, save:{}, skip rendering'.format(dzi.block_size, self.block_size))
+            self.NO_IMAGE = True
             return
-        for x, y in self.blocks.keys():
-            cx = (x * self.block_size) // dzi.cell_size
-            cy = (y * self.block_size) // dzi.cell_size
-            self.cells.add((cx, cy))
+        return
 
-    def init_worker(self):
+    def init_worker(self, dzi):
         self.utils = self.lib_loader.load('pzdataspec.utils')
         self.tiledef = self.utils.load_tile_defs(self.pz_root, self.mod_root, self.save_version)
         jumbo_tree_file_number = 5 if self.save_version == 41 else 6
@@ -209,14 +216,12 @@ class SaveGameBase(base.TextureRender):
         self.load_block_cached = lru_cache(maxsize=128)(self.load_block)
         self.init_in_worker = True
 
-    def valid_cell(self, x, y):
-        return (x, y) in self.cells
-
 
 class SaveGameRender(SaveGameBase):
     def square(self, im_getter, dzi, ox, oy, sx, sy, layer):
+        oy += dzi.sqr_height >> 1  # center -> bottom center
         if not self.init_in_worker:
-            self.init_worker()
+            self.init_worker(dzi)
         wx, x = divmod(sx, self.block_size)
         wy, y = divmod(sy, self.block_size)
         block = self.load_block_cached(wx, wy)
@@ -245,7 +250,7 @@ class SaveGameTopRender(SaveGameBase):
 
     def square(self, im_getter, dzi, ox, oy, sx, sy, layer):
         if not self.init_in_worker:
-            self.init_worker()
+            self.init_worker(dzi)
         wx, x = divmod(sx, self.block_size)
         wy, y = divmod(sy, self.block_size)
         block = self.load_block_cached(wx, wy)
@@ -288,7 +293,7 @@ class SaveGameTopRender(SaveGameBase):
     
     def tile(self, im_getter, dzi, cx, cy, layer):
         if not self.init_in_worker:
-            self.init_worker()
+            self.init_worker(dzi)
 
         size = dzi.square_size * dzi.block_size
         count = dzi.cell_size_in_block

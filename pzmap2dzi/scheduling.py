@@ -130,7 +130,7 @@ class TopologicalDziScheduler(object):
                     self.cache_used += sum(layer_map)
                     if self.cache_used > self.cache_max:
                         self.cache_max = self.cache_used
-                    if level == 0:
+                    if self.get_thumbnail_task(key) is None:
                         self.release_cache(workers, key, 'save')
                     for key in depend_task(level, tx, ty):
                         self.release_cache(workers, key, 'drop')
@@ -139,6 +139,15 @@ class TopologicalDziScheduler(object):
                         while self.cache_used > self.cache_size:
                             self.release_cache(workers, None, 'save')
         self.info()
+
+    def get_thumbnail_task(self, key):
+        level, x, y = key
+        if level <= 0:
+            return None
+        tlevel, tx, ty = level - 1, x >> 1, y >> 1
+        if (tlevel, tx, ty) in self.done_task:
+            return None
+        return tlevel, tx, ty
 
     def get_layer_maps(self, job):
         level, x, y = job
@@ -175,8 +184,8 @@ class TopologicalDziScheduler(object):
                 return None if result[1] == 0 else 'hold'
             level, x, y, layer_map = result
             self.done_task.add((level, x, y))
-            if level:
-                key = level - 1, x >> 1, y >> 1
+            key = self.get_thumbnail_task((level, x, y))
+            if key is not None:
                 self.dep[key] -= 1
                 if self.dep[key] == 0:
                     del self.dep[key]

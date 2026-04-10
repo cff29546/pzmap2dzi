@@ -274,7 +274,7 @@ def render_saves(cmd, conf, maps, map_name):
                 path = os.path.join(mode_path, save_folder)
                 if not os.path.isdir(path):
                     continue
-                world_version = get_save_version(path)
+                world_version, _ = get_save_version(path)
                 if match_version(map_version, world_version):
                     print('Save game found: v{}: {}'.format(world_version, path))
                     save_game = os.path.join(mode_folder, save_folder)

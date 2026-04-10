@@ -5,14 +5,13 @@ import re
 import json
 import time
 import datetime
-from . import util, mptask, scheduling, geometry, lotheader
+from . import util, mptask, scheduling, geometry, lotheader, source_manager
 
-DZI_TEMPLATE = (
-    '<?xml version="1.0" encoding="UTF-8"?>\n'
-    '<Image xmlns="http://schemas.microsoft.com/deepzoom/2008" '
-    'TileSize="{}" Overlap="0" Format="{}">\n'
-    '  <Size Width="{}" Height="{}"/>\n</Image>'
-)
+DZI_TEMPLATE = '''<?xml version="1.0" encoding="UTF-8"?>
+<Image xmlns="http://schemas.microsoft.com/deepzoom/2008" TileSize="{tile_size}" Overlap="0" Format="{format}">
+  <Size Width="{width}" Height="{height}"/>
+</Image>
+'''
 PENDING_PATTERN = re.compile('(\\d+)_(\\d+)\\.pending$')
 DONE_TEMPLATE = '(\\d+)_(\\d+)\\.(?:empty|{})$'
 
@@ -138,8 +137,8 @@ class DZI(object):
             for j in [0, 1]:
                 self.delete_tile(level + 1, i + tx*2, j + ty*2, layer)
 
-    def delete_tile(self, level, tx, ty, layer):
-        ext, path = self.tile_path(level, tx, ty, layer)
+    def delete_tile(self, level, tx, ty, layer, ext=None):
+        ext, path = self.tile_path(level, tx, ty, layer, ext)
         if os.path.isfile(path):
             try:
                 os.remove(path)
@@ -182,12 +181,12 @@ class DZI(object):
                 util.ensure_folder(os.path.join(layer_path, str(level)))
             ext = self.ext0 if layer == 0 else self.ext
             w, h = self.pyramid[-1 - self.skip_level]
-            dzi = DZI_TEMPLATE.format(self.tile_size, ext, w, h)
+            dzi = DZI_TEMPLATE.format(tile_size=self.tile_size, format=ext, width=w, height=h)
             dzi_path = os.path.join(self.path, 'layer{}.dzi'.format(layer))
             with open(dzi_path, 'w') as f:
                 f.write(dzi)
 
-    def save_map_info(self):
+    def gen_map_info(self):
         w, h = self.pyramid[-1 - self.skip_level]
         info = {
             'w': w,
@@ -196,75 +195,176 @@ class DZI(object):
         }
         if hasattr(self, 'update_map_info'):
             info = self.update_map_info(info)
+        return info
+
+    def map_info_mismatch(self, new_info):
+        # Stop early when map geometry layout changes to avoid mixed outputs.
         path = os.path.join(self.path, 'map_info.json')
+        if not os.path.isfile(path):
+            return False
+        old_info = util.load_json(path)
+        check_keys = ['w', 'h', 'skip', 'x0', 'y0', 'sqr']
+        mismatch = util.dict_diff(old_info, new_info, keys=check_keys, left_name='old', right_name='new')
+        if mismatch:
+            print('map_info mismatch detected:')
+            for m in mismatch:
+                print('  {}'.format(m))
+            return True
+        return False
 
-        # dump and compact list values
-        data = json.dumps(info, indent=1)
-        level = 0
-        output = []
-        for c in data:
-            if c == '[':
-                level += 1
-            elif c == ']':
-                level -= 1
-            elif c in ' \n':
-                if level:
+    def save_map_info(self, info):
+        path = os.path.join(self.path, 'map_info.json')
+        util.save_json_compact(path, info)
+
+    def delete_tile_all_layers(self, existing_tiles, level, tx, ty):
+        if not existing_tiles:
+            return
+        for layer in range(self.minlayer, self.maxlayer):
+            if not existing_tiles[layer] or level >= len(existing_tiles[layer]):
+                continue
+            if (tx, ty) not in existing_tiles[layer][level]:
+                continue
+            tags = existing_tiles[layer][level][(tx, ty)][1]
+            for tag in tags:
+                self.delete_tile(level, tx, ty, layer, tag)
+
+    def clear_pending_tiles(self, existing_tiles, pending, verbose):
+        if not pending:
+            return
+        pending = pending[0] # pending only has layer 0
+        if not pending:
+            return
+        pending_coords = [None] * len(pending)
+        pending_count = 0
+        for level, coord_map in enumerate(pending):
+            if not coord_map:
+                continue
+            pending_coords[level] = set(coord_map.keys())
+            pending_count += len(coord_map)
+        if pending_count == 0:
+            return
+        if verbose:
+            print('Cleaning {} stale pending coordinates'.format(pending_count))
+        for level, coords in enumerate(pending_coords):
+            if not coords:
+                continue
+            for tx, ty in coords:
+                self.delete_tile_all_layers(existing_tiles, level, tx, ty)
+                self.delete_tile(level, tx, ty, 0, 'pending')
+
+    def normalize_layered_tile_map(self, tile_map):
+        if not tile_map:
+            return [None for _ in range(self.maxlayer - self.minlayer)]
+        max_layer = tile_map.get('max_layer')
+        layers = tile_map.get('layers', [])
+        total_layers = self.maxlayer - self.minlayer
+        missing_layers = [None] * (total_layers - len(layers))
+        if missing_layers:
+            layers[max_layer:max_layer] = missing_layers
+        return layers
+
+    def get_existing_tiles(self, clear_pending, verbose):
+        if verbose:
+            print('Scanning existing tiles.', end=' ')
+        existing = source_manager.collect(self.path, ['tiles', 'pending'], source_manager.SIGNATURE_MTIME, None, verbose)
+        pending = self.normalize_layered_tile_map(existing['pending'])
+        existing_tiles = self.normalize_layered_tile_map(existing['tiles'])
+        if clear_pending:
+            self.clear_pending_tiles(existing_tiles, pending, verbose)
+        return existing_tiles
+
+    def get_completed_signatures(self, existing_tiles):
+        completed_sigs = [{} for _ in range(self.levels)]
+        for l in range(self.minlayer, self.maxlayer):
+            layer = existing_tiles[l]
+            if not layer:
+                 continue
+            ext = self.get_ext(l)
+            for level, coord_map in enumerate(layer):
+                if not coord_map:
                     continue
-            elif c == ',':
-                output.append(', ')
+                for coord, (mtime, tags) in coord_map.items():
+                    if ext in tags or 'empty' in tags:
+                        if (coord not in completed_sigs[level] or
+                            mtime < completed_sigs[level][coord]):
+                            completed_sigs[level][coord] = mtime
+        return completed_sigs
+
+    def compute_incremental_tasks(self, source_units, unit_size, completed_sigs):
+        # compare source snapshot with completed signatures to determine which tiles are stale and which are still valid
+        # collect tasks for affected tiles that need to be re-rendered, and count their dependencies for scheduling
+
+        # calculate affected tiles (tasks) and remove invalid completed tiles
+        level = self.levels - 1
+        eps = self.incremental_mtime_epsilon
+        tasks_by_level = [{} for _ in range(self.levels)]
+        stale_coords = set()
+        for coord, (mtime, _) in source_units.items():
+            sx, sy = coord
+            if self.is_source_empty(sx, sy):
                 continue
-            output.append(c)
-        data = ''.join(output)
+            sx *= unit_size
+            sy *= unit_size
+            affected = self.square_rect2tiles(sx, sy, unit_size, unit_size)
+            for tx, ty in affected:
+                if (tx, ty) in completed_sigs[level]:
+                    if completed_sigs[level][(tx, ty)] >= mtime + eps:
+                        continue
+                    else:
+                        del completed_sigs[level][(tx, ty)]
+                        stale_coords.add((level, tx, ty))
+                tasks_by_level[level][(tx, ty)] = 0
 
-        with open(path, 'w') as f:
-            f.write(data)
-
-    def get_completed_tasks(self, level):
-        path = os.path.join(self.path, 'layer0_files', str(level))
-        if not os.path.isdir(path):
-            return set(), set()
-        done = set()
-        pending = set()
-        for f in os.listdir(path):
-            m = self.done_pattern.match(f)
-            if m:
-                x, y = map(int, m.groups())
-                done.add((x, y))
-                continue
-            m = PENDING_PATTERN.match(f)
-            if m:
-                x, y = map(int, m.groups())
-                pending.add((x, y))
-        return done - pending, pending
-
-    def get_tasks(self):
-        tasks_by_level = [None] * self.levels
-        completed_by_level = [None] * self.levels
-        skipped_by_level = [set() for _ in range(self.levels)]
-        for level in reversed(range(self.levels)):
-            completed, pending = self.get_completed_tasks(level)
-            if level == self.levels - 1:
-                tasks = self.get_bottom_level_tasks(completed)
+        # drop sigs and convert completed to sets per level
+        completed_by_level = []
+        for level in range(self.levels):
+            if completed_sigs[level]:
+                completed_by_level.append(set(completed_sigs[level].keys()))
             else:
-                tasks, skip = get_merge_task_depend(
-                    completed,
-                    tasks_by_level[level+1],
-                    completed_by_level[level+1])
-                skipped_by_level[level + 1] = skip
-            tasks_by_level[level] = tasks
-            completed_by_level[level] = completed
+                completed_by_level.append(set())
+        return tasks_by_level, completed_by_level, stale_coords
 
-        # skip tasks covered by high level completed thumbnails
-        for level in range(1, self.levels):
-            for t in skipped_by_level[level - 1]:
-                for lt in lower_level_depend(*t):
-                    if lt in tasks_by_level[level]:
-                        skipped_by_level[level].add(lt)
-            for t in skipped_by_level[level]:
-                completed_by_level[level].add(t)
-                del tasks_by_level[level][t]
+    def remove_stale_tiles(self, existing_tiles, stale_coords, verbose):
+        total = len(stale_coords)
+        for progress, (level, tx, ty) in enumerate(stale_coords, start=1):
+            if verbose:
+                print('Cleaning stale tiles: {} / {}'.format(progress, total), end='\r')
+            self.delete_tile_all_layers(existing_tiles, level, tx, ty)
 
-        return tasks_by_level, completed_by_level
+    def add_thumbnail_tasks(self, tasks_by_level, completed_by_level, verbose):
+        # tasks_by_level only have bottom level populated, add thumbnail tasks for upper levels if needed
+        for level in reversed(range(1, self.levels)):
+            for x, y in completed_by_level[level]:
+                # thumbnail coords in upper level
+                tx = x >> 1
+                ty = y >> 1
+                if (tx, ty) not in completed_by_level[level - 1]:
+                    tasks_by_level[level - 1].setdefault((tx, ty), 0)
+            for x, y in tasks_by_level[level]:
+                tx = x >> 1
+                ty = y >> 1
+                if (tx, ty) not in completed_by_level[level - 1]:
+                    tasks_by_level[level - 1].setdefault((tx, ty), 0)
+                    tasks_by_level[level - 1][(tx, ty)] += 1
+
+    def remove_skipped_tasks(self, tasks_by_level, completed_by_level, verbose):
+        if self.skip_level <= 0:
+            return
+        gate_level = self.levels - self.skip_level - 1
+        completed = completed_by_level[gate_level]
+        stack = []
+        for x, y in completed:
+            level = gate_level + 1
+            stack.append((level, x, y))
+            while stack:
+                level, x, y = stack.pop()
+                if level >= self.levels:
+                    continue
+                if (x, y) in tasks_by_level[level]:
+                    del tasks_by_level[level][(x, y)]
+                if level + 1 < self.levels:
+                    for cx, cy in lower_level_depend(x, y):
+                        stack.append((level + 1, cx, cy))
 
     def merge_tile(self, im_getter, level, tx, ty, layer, cached=None):
         tile = None
@@ -303,7 +403,11 @@ class DZI(object):
         if hasattr(render, 'init_dzi'):
             render.init_dzi(self)
         util.ensure_folder(self.path)
-        self.save_map_info()
+        map_info = self.gen_map_info()
+        if self.map_info_mismatch(map_info):
+            print('Render stopped. Please use new output path or remove existing output to avoid mixed outputs.')
+            return False
+        self.save_map_info(map_info)
         if hasattr(render, 'render'):
             if verbose:
                 print('Rendering non-image elements')
@@ -319,7 +423,7 @@ class DZI(object):
             return True
         self.create_empty_output()
         self.render = render
-        tasks_by_level, completed_by_level = self.get_tasks()
+        tasks_by_level, completed_by_level = self.get_tasks(verbose)
         schd = scheduling.TopologicalDziScheduler(self, break_key, verbose)
         cache_prefix = 'pzdzi.{}.'.format(os.getpid())
         worker = scheduling.TopologicalDziWorker(self, cache_prefix)
@@ -329,6 +433,8 @@ class DZI(object):
             if verbose:
                 print('Render interrupted: {}'.format(schd.stop))
             return False
+        if hasattr(self, 'post_process'):
+            self.post_process()
         if verbose:
             print('Done')
         return True
@@ -373,6 +479,46 @@ class PZDZI(DZI):
         if options.get('verbose'):
             print('PZ version: {} , layer range [{}, {})'.format(
                   self.pz_version, self.minlayer, self.maxlayer))
+        self.rect_cover = geometry.rect_cover(self.cells)
+
+        # incremental rendering options
+        self.incremental_mtime_epsilon = float(options.get('incremental_render_mtime_epsilon_sec', 1.0))
+        self.delete_stale_tiles = options.get('delete_stale_tiles', False)
+        # per render options
+        self.source_path = options.get('source_path', 'input')
+
+        source_unit_size = options.get('source_unit_size', 'cell')
+        if source_unit_size == 'cell':
+            self.source_unit_size = self.cell_size
+        elif source_unit_size == 'block':
+            self.source_unit_size = self.block_size
+        else:
+            self.source_unit_size = int(source_unit_size)
+        source_tags = options.get('source_tags', ['map_source'])
+        source_tags = source_tags if source_tags else []
+        if not isinstance(source_tags, list):
+            source_tags = [source_tags]
+        self.source_tags = source_tags
+        cell_range = options.get('cell_range', 'all')
+        self.init_unit_range(cell_range)
+
+    def init_unit_range(self, cell_range):
+        self.unit_range = []
+        if cell_range != 'all':
+            for rect in cell_range:
+                if len(rect) == 2:
+                    rect.extend([1, 1])
+                x, y, w, h = rect
+                sx = x * self.cell_size
+                sy = y * self.cell_size
+                ex = sx + w * self.cell_size
+                ey = sy + h * self.cell_size
+                ux = sx // self.source_unit_size
+                uy = sy // self.source_unit_size
+                uw = (ex - 1) // self.source_unit_size - ux + 1
+                uh = (ey - 1) // self.source_unit_size - uy + 1
+                self.unit_range.append((ux, uy, uw, uh))
+        print('Unit range:', self.unit_range if self.unit_range else 'all')
 
     def update_pz_map_info(self, info):
         info['cell_size'] = self.cell_size
@@ -384,23 +530,98 @@ class PZDZI(DZI):
         info['git_branch'] = self.git_branch
         info['git_commit'] = self.git_commit
         info['legends'] = self.legends
-        info['cell_rects'] = geometry.rect_cover(self.cells)
+        info['cell_rects'] = self.rect_cover
         return info
 
-    def get_bottom_level_tasks(self, done):
-        skip_cells = set()
-        if hasattr(self.render, 'valid_cell'):
-            for x, y in self.cells:
-                if not self.render.valid_cell(x, y):
-                    skip_cells.add((x, y))
-        tasks = {}
-        for cx, cy in self.cells:
-            if (cx, cy) in skip_cells:
-                continue
-            for t in self.cell2tiles(cx, cy):
-                if t not in done:
-                    tasks[t] = 0
-        return tasks
+    def is_source_empty(self, cx, cy):
+        # check if in range
+        if self.unit_range:
+            for ux, uy, uw, uh in self.unit_range:
+                if ux <= cx < ux + uw and uy <= cy < uy + uh:
+                    break
+            else:
+                return True
+        # legacy render.valid_cell() check
+        if self.source_unit_size != self.cell_size:
+            return False
+        if not hasattr(self.render, 'valid_cell'):
+            return False
+        return not self.render.valid_cell(cx, cy)
+
+    def get_source_snapshot(self, last_units, verbose):
+        source_path = getattr(self.render, self.source_path, None)
+        if not source_path:
+            return {}
+        if not self.source_tags:
+            return {}
+        if verbose:
+            print('Scanning source files.', end=' ')
+        sources = source_manager.collect(source_path, self.source_tags, source_manager.SIGNATURE_MTIME, None, verbose)
+        snapshot = {}
+        if len(self.source_tags) == 1:
+            snapshot = sources.get(self.source_tags[0])
+        else:
+            for tag in self.source_tags:
+                for coord, sig in sources.get(tag, {}).items():
+                    cur = snapshot.get(coord)
+                    if cur is None:
+                        snapshot[coord] = sig
+                        continue
+                    # Keep the newest signature when multiple tags contribute.
+                    cur_mtime, _ = cur
+                    mtime, _ = sig
+                    if (mtime or 0) >= (cur_mtime or 0):
+                        snapshot[coord] = sig
+        if last_units:
+            now = time.time() + 1
+            for coord, sig in last_units.items():
+                if coord not in snapshot:
+                    snapshot[coord] = (now, None)
+        return snapshot
+
+    def get_tasks(self, verbose):
+        # return tasks_by_level: List[Dict[Tuple[int, int], int]], completed_by_level: List[Set[Tuple[int, int]]]
+        # tasks_by_level[layer][(tx, ty)] = dependency count for the task
+        #     indicate number of lower level tiles that need to be completed before this tile can be rendered
+        #     not including already completed lower level tiles
+        # completed_by_level[layer] = set of (tx, ty) that are already completed
+
+        self.source_snapshot_path = os.path.join(self.path, 'sources.json')
+        self.source_snapshot_path_wip = os.path.join(self.path, 'sources_current.json')
+
+        last_units = util.load_coord_map(self.source_snapshot_path)
+        source_units = self.get_source_snapshot(last_units, verbose)
+        util.save_coord_map(self.source_snapshot_path_wip, source_units)
+
+        # get existing tiles and clean up pending tiles
+        existing_tiles = self.get_existing_tiles(clear_pending=True, verbose=verbose)
+
+        completed_sigs = self.get_completed_signatures(existing_tiles)
+        tasks = self.compute_incremental_tasks(source_units, self.source_unit_size, completed_sigs)
+        tasks_by_level, completed_by_level, stale_coords = tasks
+        print('Stale tiles:', len(stale_coords), 'Affected tiles:', sum(len(t) for t in tasks_by_level))
+
+        if self.delete_stale_tiles and stale_coords:
+            self.remove_stale_tiles(existing_tiles, stale_coords, verbose)
+        self.add_thumbnail_tasks(tasks_by_level, completed_by_level, verbose)
+        self.remove_skipped_tasks(tasks_by_level, completed_by_level, verbose)
+        return tasks_by_level, completed_by_level
+
+    def post_process(self):
+        # post process after all tiles are rendered
+        self.finalize_snapshot()
+
+    def finalize_snapshot(self):
+        if os.path.isfile(self.source_snapshot_path_wip):
+            if os.path.isfile(self.source_snapshot_path):
+                try:
+                    os.remove(self.source_snapshot_path)
+                except Exception:
+                    print('WARNING: failed to remove old source snapshot')
+            try:
+                os.rename(self.source_snapshot_path_wip, self.source_snapshot_path)
+            except Exception:
+                print('WARNING: failed to finalize source snapshot')
 
 
 class IsoDZI(PZDZI):
@@ -429,15 +650,21 @@ class IsoDZI(PZDZI):
         self.tile_size = options.get('tile_size', 1024)
         self.grid_per_tilex = self.tile_size // IsoDZI.GRID_WIDTH
         self.grid_per_tiley = self.tile_size // IsoDZI.GRID_HEIGHT
-        plants_conf = options.get('plants_conf', {})
-        self.use_jumbo_tree = plants_conf.get('jumbo_tree_size', 3) > 3
         # always assume large texture for output size calculation
         # to ensure alignment between base map and overlays
-        self.output_margin = self.get_output_margin(True)
-        self.cell_margin = self.get_output_margin()
-        self.render_margin = options.get('render_margin', 'default')
-        if self.render_margin == 'default':
-            self.render_margin = self.get_default_render_margin()
+        self.output_margin = self.get_output_margin()
+        self.render_margin = options.get('render_margin')
+        if isinstance(self.render_margin, str):
+            texture_size = self.render_margin.lower()
+            self.render_margin = self.get_texture_render_margin(texture_size == 'large')
+        # if render margin is a falsy value, (0, 0, 0, 0) will be used
+        self.affected_margin = self.render2affected(self.render_margin, 'render')
+        self.affected_margin_single_layers = self.render2affected(self.render_margin, 'single')
+        if options.get('debug'):
+            print('output margin', self.output_margin)
+            print('render margin', self.render_margin)
+            print('affected margin', self.affected_margin)
+            print('affected margin single layers', self.affected_margin_single_layers)
 
         assert self.tile_size % self.sqr_width == 0
         assert self.tile_size % self.sqr_height == 0
@@ -462,41 +689,47 @@ class IsoDZI(PZDZI):
         # grid offset
         self.gxo = align_origin(gxmin, self.grid_per_tilex * self.align_tiles)
         self.gyo = align_origin(gymin, self.grid_per_tiley * self.align_tiles)
-        self.gw = gxmax - self.gxo + 1
-        self.gh = gymax - self.gyo + 1
+        self.gw = gxmax - self.gxo
+        self.gh = gymax - self.gyo
         w = self.gw * IsoDZI.GRID_WIDTH
         h = self.gh * IsoDZI.GRID_HEIGHT
         DZI.__init__(self, w, h, **options)
 
-    def get_output_margin(self, force_large_texture=False):
-        texture_width = IsoDZI.TEXTURE_WIDTH
-        texture_height = IsoDZI.TEXTURE_HEIGHT
-        if force_large_texture or self.use_jumbo_tree:
-            texture_width = IsoDZI.LARGE_TEXTURE_WIDTH
-            texture_height = IsoDZI.LARGE_TEXTURE_HEIGHT
-        width = (texture_width // 2) // IsoDZI.GRID_WIDTH
-        left = -width
-        right = width
+    def get_output_margin(self):
+        # largest affected area of a square from its center in grid coordinates
+        render_margin = self.get_texture_render_margin(True)
+        return self.render2affected(render_margin, 'output')
 
-        # +1 for grid center to grid bottom
-        top = 1 - IsoDZI.GRID_HEIGHT_PER_LAYER * self.maxlayer
-        top -= (texture_height // IsoDZI.GRID_HEIGHT)
-        # +1 for grid center to grid bottom
-        bottom = IsoDZI.GRID_HEIGHT_PER_LAYER * (-self.minlayer) + 1
+    def render2affected(self, margin, layer_range='render'):
+        # convert render margin for one tile to affecting margin for a square from its center
+        minlayer, maxlayer = self.minlayer, self.maxlayer
+        if layer_range in ['all', 'output']:
+            minlayer, maxlayer = self.minlayer, self.maxlayer
+        elif layer_range == 'render':
+            minlayer, maxlayer = self.render_minlayer, self.render_maxlayer
+        elif layer_range == 'single':
+            minlayer, maxlayer = 0, 1
+        left, top, right, bottom = margin if margin else (0, 0, 0, 0)
+        # the square size itself is 2x2 in grid coordinates, so add 1 to each side
+        left, top, right, bottom = -1 - right, -1 - bottom, 1 - left, 1 - top
+        if minlayer < 0:
+            bottom -= minlayer * IsoDZI.GRID_HEIGHT_PER_LAYER
+        if maxlayer > 1:
+            top -= maxlayer * IsoDZI.GRID_HEIGHT_PER_LAYER
         return left, top, right, bottom
 
-    def get_default_render_margin(self):
-        # render grid neighbours for tile
+    def get_texture_render_margin(self, use_large_texture=None):
+        # source outside of a tile that may affect the tile in grid coordinates on the same layer
         texture_width = IsoDZI.TEXTURE_WIDTH
         texture_height = IsoDZI.TEXTURE_HEIGHT
-        if self.use_jumbo_tree:
+        if use_large_texture:
             texture_width = IsoDZI.LARGE_TEXTURE_WIDTH
             texture_height = IsoDZI.LARGE_TEXTURE_HEIGHT
         width = (texture_width // 2) // IsoDZI.GRID_WIDTH - 1
         left = -width
         right = width
         top = 0
-        bottom = (texture_height // IsoDZI.GRID_HEIGHT) - 1
+        bottom = (texture_height // IsoDZI.GRID_HEIGHT) - 2
         return left, top, right, bottom
 
     def tile2grid(self, tx, ty, layer):
@@ -519,15 +752,115 @@ class IsoDZI(PZDZI):
         symax = symin + self.cell_size - 1
         return self.square_grid_bound(sxmin, symin, sxmax, symax)
 
-    def cell2tiles(self, cx, cy):
-        gbox = map(sum, zip(self.cell_grid_bound(cx, cy), self.cell_margin))
+    def square_rect2tiles_rough(self, sx, sy, w, h):
+        sx2 = sx + w - 1
+        sy2 = sy + h - 1
+        gbox = map(sum, zip(self.square_grid_bound(sx, sy, sx2, sy2), self.affected_margin))
         left, top, right, bottom = gbox
-        txmin = (left - self.gxo - 1) // self.grid_per_tilex
+        txmin = (left - self.gxo) // self.grid_per_tilex
         txmax = (right - self.gxo) // self.grid_per_tilex
-        tymin = (top - self.gyo - 1) // self.grid_per_tiley
+        tymin = (top - self.gyo) // self.grid_per_tiley
         tymax = (bottom - self.gyo) // self.grid_per_tiley
         tiles = [(tx, ty) for ty in range(tymin, tymax + 1)
                  for tx in range(txmin, txmax + 1)]
+        return tiles
+
+    def square_rect2oct(self, sx, sy, w, h, margin=None):
+        # calculate the affected octagon of a square rect in grid coordinates with output margin
+        #
+        # Vertices are computed in (gx, gy) order clockwise:
+        #   T(top), R(right), B(bottom), L(left)
+        #
+        # diamond (from square rect)               octagon (after margins)
+        #                                             (0) ___ (1)
+        #            T  (gx, gy)                         /   \
+        #           / \                            (7)  /     \  (2)
+        #          /   \                               |       |
+        #         L     R          expand by           |       |
+        #          \   /        ---------------->      |       |
+        #           \ /                            (6)  \     /  (3)
+        #            B  (gx2, gy2)                       \___/
+        #                                             (5)     (4)
+
+        # calculate square coordinates for bottom
+        sx2 = sx + w - 1
+        sy2 = sy + h - 1
+
+        # Rectangle in (sx, sy) maps to a diamond in (gx, gy).
+        top = (sx - sy, sx + sy)
+        right = (sx2 - sy, sx2 + sy)
+        bottom = (sx2 - sy2, sx2 + sy2)
+        left = (sx - sy2, sx + sy2)
+
+        # Expand upper hull upward, lower hull downward, then widen sides.
+        if margin is None:
+            margin = self.affected_margin
+        margin_left, margin_top, margin_right, margin_bottom = margin
+
+        octagon = [
+            (top[0] + margin_left, top[1] + margin_top),
+            (top[0] + margin_right, top[1] + margin_top),
+            (right[0] + margin_right, right[1] + margin_top),
+            (right[0] + margin_right, right[1] + margin_bottom),
+            (bottom[0] + margin_right, bottom[1] + margin_bottom),
+            (bottom[0] + margin_left, bottom[1] + margin_bottom),
+            (left[0] + margin_left, left[1] + margin_bottom),
+            (left[0] + margin_left, left[1] + margin_top),
+        ]
+        return octagon
+
+    def square_rect2tiles(self, sx, sy, w, h, margin=None):
+        octagon = self.square_rect2oct(sx, sy, w, h, margin)
+        n = len(octagon)
+
+        gy_min = min(v[1] for v in octagon)
+        gy_max = max(v[1] for v in octagon)
+        tymin = (gy_min - self.gyo) // self.grid_per_tiley
+        tymax = (gy_max - self.gyo - 1) // self.grid_per_tiley
+
+        tiles = []
+        for ty in range(tymin, tymax + 1):
+            tile_gy0 = self.gyo + ty * self.grid_per_tiley
+            tile_gy1 = tile_gy0 + self.grid_per_tiley
+
+            gx_lo = None
+            gx_hi = None
+
+            for i in range(n):
+                x0, y0 = octagon[i - 1]
+                x1, y1 = octagon[i]
+                if y0 > y1:
+                    x0, y0, x1, y1 = x1, y1, x0, y0
+
+                if y1 < tile_gy0 or y0 > tile_gy1:
+                    continue
+
+                if y0 == y1:
+                    lo = min(x0, x1)
+                    hi = max(x0, x1)
+                else:
+                    cl_y0 = max(y0, tile_gy0)
+                    cl_y1 = min(y1, tile_gy1)
+                    dy = y1 - y0
+                    dx = x1 - x0
+                    num0 = (cl_y0 - y0) * dx
+                    num1 = (cl_y1 - y0) * dx
+                    lo = x0 + (min(num0, num1) // dy)
+                    hi = x0 + (-(-max(num0, num1) // dy)) # ceil
+
+                if gx_lo is None or lo < gx_lo:
+                    gx_lo = lo
+                if gx_hi is None or hi > gx_hi:
+                    gx_hi = hi
+
+            if gx_lo is None:
+                continue
+
+            txmin = (gx_lo - self.gxo) // self.grid_per_tilex
+            txmax = (gx_hi - self.gxo - 1) // self.grid_per_tilex
+            for tx in range(txmin, txmax + 1):
+                tiles.append((tx, ty))
+
         return tiles
 
     def render_tile(self, im_getter, tx, ty, layer, layer_cache):
@@ -578,10 +911,24 @@ class TopDZI(PZDZI):
         DZI.__init__(self, w, h, **options)
 
     def tile2cell(self, tx, ty):
-        return (tx + self.cxo, ty + self.cyo)
+        cx = tx + self.cxo
+        cy = ty + self.cyo
+        return cx, cy
 
-    def cell2tiles(self, cx, cy):
-        return [(cx - self.cxo, cy - self.cyo)]
+    def square_rect2tiles(self, sx, sy, w, h, margin=None):
+        sx2 = sx + w - 1
+        sy2 = sy + h - 1
+
+        cxmin = sx // self.cell_size
+        cymin = sy // self.cell_size
+        cxmax = sx2 // self.cell_size
+        cymax = sy2 // self.cell_size
+
+        tiles = []
+        for cy in range(cymin, cymax + 1):
+            for cx in range(cxmin, cxmax + 1):
+                tiles.append((cx - self.cxo, cy - self.cyo))
+        return tiles
 
     def render_tile(self, im_getter, tx, ty, layer, layer_cache):
         self.render_below(im_getter, layer, layer_cache)

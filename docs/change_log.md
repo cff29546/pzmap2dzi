@@ -1,5 +1,22 @@
 # Change log
 
+# 2026-04-10: 1.1.9 + UI 1.1.11
+
+* Add incremental render planning framework for map/save outputs
+  * Add source snapshot tracking (`sources_current.json` -> `sources.json`) and source/tile signature scanning
+  * Add pending tile cleanup and stale tile detection and optional cleanup before render (`delete_stale_tiles` config option)
+  * Add output overwrite guard by validating `map_info.json` geometry keys before rendering
+* Add new source scanning utility module
+* Improve render task generation and geometry mapping
+  * Refactor DZI task generation to avoid redundant tiles
+  * Allow renderers to specify range to render instead of entire map (see `cell_range` in `render_conf`)
+  * Adjust scheduler to support non-connected tasks topology
+* Improve save-game rendering compatibility and source tracking
+* Improve output boundary calculation and render margin handling
+* Fix B41 foraging issue in isometric renderer
+* Improve utility helpers for serialization
+* Improve configuration docs and test setup
+
 # 2026-03-24: 1.1.8 + UI 1.1.11
 
 * Add save game render mode

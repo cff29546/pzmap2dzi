@@ -1,0 +1,5 @@
+copy: [case_default.yaml]
+conf:
+    conf.yaml:
+        render_conf:
+            omit_levels[custom]: 1

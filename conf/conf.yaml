@@ -272,7 +272,7 @@ render_conf:
         # Zone Story
         ZoneStory:    Yellow
 
-    # use mark for room and objects
+    # use mark for room/objects/zombie_count
     use_mark: true
 
     # streets color

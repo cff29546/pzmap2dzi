@@ -512,6 +512,12 @@ export class Map {
                     option.defaultValue.layer = 0;
                     option.renderOptions.formatterOptions = { hide_text_level: 1 };
                 }
+                if (t === 'zombie') {
+                    option.onlyCurrentLayer = false;
+                    option.onScreenLimit = 0;
+                    option.defaultValue.layer = 0;
+                    option.defaultValue.visible_zoom_level = 3;
+                }
                 return option;
             });
             const buildIndexOptions = options.map((o) => {

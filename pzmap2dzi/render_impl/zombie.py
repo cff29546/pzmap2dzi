@@ -1,4 +1,5 @@
-from .common import render_text, draw_square, LazyFont
+import os
+from .common import render_text, draw_square, LazyFont, dump_marks
 from .. import lotheader
 
 try:
@@ -31,10 +32,56 @@ def get_color(zombie, alpha):
     return (r, g, b, alpha)
 
 
+def to_css_color(rgba):
+    r, g, b, a = rgba
+    return '#{:02x}{:02x}{:02x}'.format(r, g, b)
+
+
+class ZombieMark(object):
+    def __init__(self, **options):
+        self.input = options.get('input')
+        self.output = options.get('output')
+
+    def process(self, dzi):
+        marks = []
+        block_size = dzi.block_size
+        for cx, cy in dzi.cells:
+            zpop = load_cell(self.input, cx, cy)
+            if not zpop:
+                continue
+            dx = cx * dzi.cell_size
+            dy = cy * dzi.cell_size
+            for bx, row in enumerate(zpop):
+                sx = dx + bx * block_size
+                for by, zombie in enumerate(row):
+                    if zombie == 0:
+                        continue
+                    sy = dy + by * block_size
+                    text = str(zombie)
+                    text_color = to_css_color(get_color(zombie, 255))
+                    marks.append({
+                        'type': 'text',
+                        'x': sx + block_size // 2,
+                        'y': sy + block_size // 2,
+                        'name': text,
+                        'color': text_color,
+                    })
+
+        print('  zombie marks: {}'.format(len(marks)))
+        if marks:
+            output_path = os.path.join(self.output, 'marks.json')
+            dump_marks(marks, output_path)
+        return True
+
+
 class ZombieRender(object):
     def __init__(self, **options):
         self.input = options.get('input')
         self.zombie_count = options.get('zombie_count', False)
+        self.use_mark = options.get('use_mark')
+        if self.use_mark:
+            self.mark = ZombieMark(**options)
+
         font_name = options.get('zombie_count_font')
         if not font_name:
             font_name = options.get('default_font', 'arial.tff')
@@ -42,6 +89,11 @@ class ZombieRender(object):
         if not font_size:
             font_size = options.get('default_font_size', 40)
         self.font = LazyFont(font_name, int(font_size))
+
+    def render(self, dzi):
+        if self.zombie_count and self.use_mark:
+            return self.mark.process(dzi)
+        return True
 
     def update_options(self, options):
         options['render_minlayer'] = 0
@@ -87,9 +139,10 @@ class ZombieRender(object):
                 gxz = gx + block_size - 1
                 gyz = gy + block_size - 1
                 oxz, oyz = dzi.get_sqr_center(gxz - gx0, gyz - gy0)
-                text_color = get_color(zombie, 255)
-                t = 'z:{}'.format(zombie)
-                render_text(draw, oxz, oyz, t, text_color, self.font.get())
+                if self.zombie_count and not self.use_mark:
+                    text_color = get_color(zombie, 255)
+                    t = 'z:{}'.format(zombie)
+                    render_text(draw, oxz, oyz, t, text_color, self.font.get())
 
     def square(self, im_getter, dzi, ox, oy, sx, sy, layer):
         cx, subx = divmod(sx, dzi.cell_size)
@@ -105,7 +158,7 @@ class ZombieRender(object):
         draw = im_getter.get_draw()
         color = get_color(zombie, 128)
         draw_square(draw, ox, oy, color)
-        if self.zombie_count and x == 9 and y == 0:
+        if self.zombie_count and not self.use_mark and x == 9 and y == 0:
             color = get_color(zombie, 255)
             t = 'z:{}'.format(zombie)
             render_text(draw, ox, oy, t, color, self.font.get())

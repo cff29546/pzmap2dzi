@@ -1,5 +1,9 @@
 # Change log
 
+# 2026-04-11: 1.1.10 + UI 1.1.12
+
+* Add zombie count marks
+
 # 2026-04-10: 1.1.9 + UI 1.1.11
 
 * Add incremental render planning framework for map/save outputs

@@ -201,6 +201,20 @@ class Mark {
 
     resetHash() {
         this._hash = null;
+        this._bboxRect = null;
+    }
+
+    bboxRect() {
+        if (!this._bboxRect) {
+            const bbox = this.bbox();
+            this._bboxRect = {
+                x: bbox.minX,
+                y: bbox.minY,
+                width: bbox.maxX - bbox.minX,
+                height: bbox.maxY - bbox.minY,
+            };
+        }
+        return this._bboxRect;
     }
 };
 

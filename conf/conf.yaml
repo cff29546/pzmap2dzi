@@ -114,6 +114,11 @@ render_conf:
     #     layer_range: all
     layer_range: all
 
+    # hash function for detecting source file changes
+    # if omitted or set to null, last modified time will be used for change detection, which is faster but less accurate
+    # supported hash functions from hashlib: e.g. md5, sha1, sha256, etc.
+    hash_method: null
+
     # A list of cell ranges to render or 'all' to render all cells.
     # Each cell range can be specified in two formats:
     #     [x_min, y_min, width, height]

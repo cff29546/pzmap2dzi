@@ -1,0 +1,200 @@
+<script src="./tinytest.js"></script>
+<script type="module">
+import { rectsToRectCover } from '../geometry/rect_cover.js';
+import { pointInRect } from '../geometry/geometry_utils.js';
+
+let svg = null;
+const scale = 6;
+
+function init() {
+    svg = document.getElementById('svg');
+    svg.innerHTML = '';
+}
+
+function drawRect(r, style) {
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', r.x * scale);
+    rect.setAttribute('y', r.y * scale);
+    rect.setAttribute('width', r.width * scale);
+    rect.setAttribute('height', r.height * scale);
+    rect.setAttribute('fill', style.fill);
+    rect.setAttribute('stroke', style.stroke);
+    rect.setAttribute('stroke-width', style.strokeWidth);
+    svg.appendChild(rect);
+}
+
+function draw(inputRects, coverRects, mismatchPoint = null) {
+    init();
+    for (const r of inputRects) {
+        drawRect(r, { fill: 'rgba(50, 120, 220, 0.15)', stroke: '#2b6cb0', strokeWidth: 1 });
+    }
+    for (const r of coverRects) {
+        drawRect(r, { fill: 'rgba(220, 90, 20, 0.25)', stroke: '#c05621', strokeWidth: 1 });
+    }
+    if (mismatchPoint) {
+        const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        c.setAttribute('cx', (mismatchPoint.x + 0.5) * scale);
+        c.setAttribute('cy', (mismatchPoint.y + 0.5) * scale);
+        c.setAttribute('r', 3);
+        c.setAttribute('fill', 'red');
+        svg.appendChild(c);
+    }
+}
+
+function randomRect(range, size) {
+    return {
+        x: Math.floor(Math.random() * range),
+        y: Math.floor(Math.random() * range),
+        width: Math.floor(Math.random() * size) + 1,
+        height: Math.floor(Math.random() * size) + 1
+    };
+}
+
+function createSeededRandom(seed) {
+    let state = seed >>> 0;
+    return function next() {
+        state = (1664525 * state + 1013904223) >>> 0;
+        return state / 0x100000000;
+    };
+}
+
+function randomRectsFromSeed(seed, count, range, size) {
+    const rand = createSeededRandom(seed);
+    const rects = [];
+    for (let i = 0; i < count; i++) {
+        rects.push({
+            x: Math.floor(rand() * range),
+            y: Math.floor(rand() * range),
+            width: Math.floor(rand() * size) + 1,
+            height: Math.floor(rand() * size) + 1
+        });
+    }
+    return rects;
+}
+
+function intersectsArea(a, b) {
+    const x0 = Math.max(a.x, b.x);
+    const x1 = Math.min(a.x + a.width, b.x + b.width);
+    const y0 = Math.max(a.y, b.y);
+    const y1 = Math.min(a.y + a.height, b.y + b.height);
+    return x1 > x0 && y1 > y0;
+}
+
+function insideAny(point, rects) {
+    for (const r of rects) {
+        if (pointInRect(point, r)) return true;
+    }
+    return false;
+}
+
+tests({
+    'rect cover no-overlap + equivalent coverage': () => {
+        function testCase(rectCount, drawOutput) {
+            const inputRects = [];
+            for (let i = 0; i < rectCount; i++) {
+                inputRects.push(randomRect(80, 16));
+            }
+
+            const coverRects = rectsToRectCover(inputRects);
+
+            for (let i = 0; i < coverRects.length; i++) {
+                for (let j = i + 1; j < coverRects.length; j++) {
+                    assert(!intersectsArea(coverRects[i], coverRects[j]), `Cover rectangles overlap at ${i},${j}`);
+                }
+            }
+
+            for (let x = 0; x < 100; x++) {
+                for (let y = 0; y < 100; y++) {
+                    const p = { x, y };
+                    const inInput = insideAny(p, inputRects);
+                    const inCover = insideAny(p, coverRects);
+                    if (inInput !== inCover) {
+                        draw(inputRects, coverRects, p);
+                    }
+                    assert(inInput === inCover, `Coverage mismatch at ${JSON.stringify(p)}`);
+                }
+            }
+
+            if (drawOutput) {
+                draw(inputRects, coverRects);
+            }
+        }
+
+        for (let i = 0; i < 5; i++) {
+            testCase(60, i === 0);
+        }
+    },
+
+    'manual sample': () => {
+        const inputRects = [
+            { x: 2, y: 2, width: 14, height: 8 },
+            { x: 8, y: 6, width: 16, height: 12 },
+            { x: 20, y: 4, width: 10, height: 10 },
+            { x: 5, y: 14, width: 10, height: 8 }
+        ];
+        const coverRects = rectsToRectCover(inputRects);
+        draw(inputRects, coverRects);
+
+        for (let i = 0; i < coverRects.length; i++) {
+            for (let j = i + 1; j < coverRects.length; j++) {
+                assert(!intersectsArea(coverRects[i], coverRects[j]));
+            }
+        }
+    },
+
+    'seeded random generated sample': () => {
+        const seed = Math.floor(Math.random() * 0x100000000);
+        console.log(`Using seed ${seed}`);
+        const inputRects = randomRectsFromSeed(seed, 40, 90, 20);
+        const coverRects = rectsToRectCover(inputRects);
+        draw(inputRects, coverRects);
+
+        for (let i = 0; i < coverRects.length; i++) {
+            for (let j = i + 1; j < coverRects.length; j++) {
+                assert(!intersectsArea(coverRects[i], coverRects[j]), `Cover rectangles overlap at ${i},${j}`);
+            }
+        }
+
+        for (let x = 0; x < 110; x++) {
+            for (let y = 0; y < 110; y++) {
+                const p = { x, y };
+                const inInput = insideAny(p, inputRects);
+                const inCover = insideAny(p, coverRects);
+                if (inInput !== inCover) {
+                    draw(inputRects, coverRects, p);
+                }
+                assert(inInput === inCover, `Coverage mismatch at ${JSON.stringify(p)}`);
+            }
+        }
+    },
+
+    'edge-touch groups': () => {
+        const inputRects = [
+            { x: 0, y: 0, width: 10, height: 10 },
+            { x: 10, y: 0, width: 8, height: 10 },
+            { x: 18, y: 0, width: 6, height: 10 },
+            { x: 40, y: 5, width: 8, height: 8 }
+        ];
+        const coverRects = rectsToRectCover(inputRects);
+
+        for (let x = 0; x < 60; x++) {
+            for (let y = 0; y < 30; y++) {
+                const p = { x, y };
+                const inInput = insideAny(p, inputRects);
+                const inCover = insideAny(p, coverRects);
+                assert(inInput === inCover, `Coverage mismatch at ${JSON.stringify(p)}`);
+            }
+        }
+
+        for (let i = 0; i < coverRects.length; i++) {
+            for (let j = i + 1; j < coverRects.length; j++) {
+                assert(!intersectsArea(coverRects[i], coverRects[j]), `Cover rectangles overlap at ${i},${j}`);
+            }
+        }
+    }
+});
+</script>
+
+<body>
+<svg id="svg" width="1000" height="700" style="border:1px solid black"></svg>
+</body>

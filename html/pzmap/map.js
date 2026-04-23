@@ -1,5 +1,6 @@
 import { g } from "./globals.js";
 import { MarkManager } from "./marker.js";
+import { rectsToRectCover } from "./algorithm/geometry/rect_cover.js";
 
 const BLACK_TILE = 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoQABAAAUAmJaQAA3AA/v02aAA=';
 const WHITE_TILE = 'data:image/webp;base64,UklGRiQAAABXRUJQVlA4IBgAAAAwAQCdASoQABAAAUAmJaQAA3AA/vz0AAA=';
@@ -28,21 +29,32 @@ export class Map {
         }
     }
 
-    cell2pixel(cx, cy) {
+    cell2square(cx, cy) {
+        return {x: cx * this.cell_size, y: cy * this.cell_size};
+    }
+
+    square2pixel(sx, sy) {
         let x = this.x0;
         let y = this.y0;
+
         if (this.type == 'iso') {
-            x += (cx - cy) * this.sqr * this.cell_size / 2;
-            y += (cx + cy) * this.sqr * this.cell_size / 4;
+            x += (sx - sy) * this.sqr / 2;
+            y += (sx + sy) * this.sqr / 4;
         } else {
-            x += cx * this.sqr * this.cell_size;
-            y += cy * this.sqr * this.cell_size;
+            x += sx * this.sqr;
+            y += sy * this.sqr;
         }
+
         return {x: x, y: y};
     }
 
-    getClipPoints(rects, remove=true) {
-        let points = [];
+    cell2pixel(cx, cy) {
+        const {x, y} = this.cell2square(cx, cy);
+        return this.square2pixel(x, y);
+    }
+
+    getClipPoints(rects, remove) {
+        const points = [];
         if (remove) {
             points.push({x: 0, y: 0});
             points.push({x: 0, y: this.h});
@@ -50,44 +62,64 @@ export class Map {
             points.push({x: this.w, y: 0});
         }
         points.push({x: 0, y: 0});
-        for (let [x, y, w, h] of rects) {
-            points.push(this.cell2pixel(x, y));
-            points.push(this.cell2pixel(x + w, y));
-            points.push(this.cell2pixel(x + w, y + h));
-            points.push(this.cell2pixel(x, y + h));
-            points.push(this.cell2pixel(x, y));
+        for (const {x, y, width, height} of rects) {
+            points.push(this.square2pixel(x, y));
+            points.push(this.square2pixel(x + width, y));
+            points.push(this.square2pixel(x + width, y + height));
+            points.push(this.square2pixel(x, y + height));
+            points.push(this.square2pixel(x, y));
             points.push({x: 0, y: 0});
         }
         return points;
     }
 
+    squareRects() {
+        const rects = [];
+        for (const [x, y, w, h] of this.cell_rects) {
+            const {x: sx, y: sy} = this.cell2square(x, y);
+            const {x: sw, y: sh} = this.cell2square(w, h);
+            rects.push({x: sx, y: sy, width: sw, height: sh});
+        }
+        return rects;
+    }
+
     setClipByOtherMaps(maps, layer) {
-        this.clip_list = [this.getClipPoints(this.cell_rects, false)];
+        const rects = this.square_rects;
+        const excludeRects = [];
+        this.clip_list = [this.getClipPoints(rects, false)];
         for (let i = maps.length - 1; i >= 0; i--) {
-            let rlist = [];
-            for (let r of maps[i].cell_rects) {
-                for (let b of this.cell_rects) {
+            for (const r of maps[i].square_rects) {
+                for (const b of rects) {
                     if (rectIntersect(b, r)) {
-                        rlist.push(r);
+                        excludeRects.push(r);
                         break;
                     }
                 }
             }
-            if (rlist.length > 0) {
-                this.clip_list.push(this.getClipPoints(rlist));
+        }
+        const excludeRectCover = rectsToRectCover(excludeRects);
+        if (excludeRectCover.length > 0) {
+            this.clip_list.push(this.getClipPoints(excludeRectCover, true));
+        }
+
+        for (const type of ['zombie', 'foraging']) {
+            if (![undefined, 0, 'loading', 'delete'].includes(this.overlays[type])) {
+                const clipList = this.getClipList(this.info[type].scale, 0);
+                this.overlays[type].setCroppingPolygons(clipList);
             }
         }
-        
-        for (let type of ['zombie', 'foraging']) {
+        for (const type of ['rooms', 'objects']) {
             if (![undefined, 0, 'loading', 'delete'].includes(this.overlays[type])) {
-                let clip_list = this.getClipList(this.info[type].scale, 0);
-                this.overlays[type].setCroppingPolygons(clip_list);
+                const clipList = this.getClipList(this.info[type].scale, layer);
+                this.overlays[type].setCroppingPolygons(clipList);
             }
         }
-        for (let type of ['rooms', 'objects']) {
-            if (![undefined, 0, 'loading', 'delete'].includes(this.overlays[type])) {
-                let clip_list = this.getClipList(this.info[type].scale, layer);
-                this.overlays[type].setCroppingPolygons(clip_list);
+        // clip for marks
+        for (const type in this.marks) {
+            if (this.marks[type]) {
+                this.marks[type].setIncludeRectCover(rects);
+                this.marks[type].setExcludeRectCover(excludeRectCover);
+                this.marks[type].redrawAll();
             }
         }
     }
@@ -475,6 +507,7 @@ export class Map {
                 this.commit = this.info.base.git_commit;
                 this.minlayer = this.info.base.minlayer;
                 this.maxlayer = this.info.base.maxlayer;
+                this.square_rects = this.squareRects();
             }
 
             if (this.minlayer === undefined || this.maxlayer === undefined) {
@@ -630,7 +663,7 @@ function positionAll() {
 }
 
 function rectIntersect(r1, r2) {
-    let [x1, y1, w1, h1] = r1;
-    let [x2, y2, w2, h2] = r2;
+    const {x: x1, y: y1, width: w1, height: h1} = r1;
+    const {x: x2, y: y2, width: w2, height: h2} = r2;
     return (x1 < x2 + w2) && (x2 < x1 + w1) && (y1 < y2 + h2) && (y2 < y1 + h1);
 }

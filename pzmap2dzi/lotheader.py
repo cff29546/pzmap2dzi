@@ -3,13 +3,15 @@ import re
 from . import binfile, util
 
 VERSION_LIMITATIONS = {
-    0: {  # B41
+    0: {
+        'PZ_VERSION': 'B41',
         'CELL_SIZE_IN_BLOCKS': 30,
         'BLOCK_SIZE_IN_SQUARES': 10,
         'MIN_LAYER':  0,
         'MAX_LAYER':  8,
     },
-    1: {  # B42
+    1: {
+        'PZ_VERSION': 'B42',
         'CELL_SIZE_IN_BLOCKS': 32,
         'BLOCK_SIZE_IN_SQUARES':  8,
         'MIN_LAYER': -32,
@@ -18,6 +20,17 @@ VERSION_LIMITATIONS = {
 }
 
 HEADER_FILE_PATTERN = re.compile('(\\d+)_(\\d+)\\.lotheader$')
+
+def scan_headers(path):
+    headers = set()
+    for f in os.listdir(path):
+        m = HEADER_FILE_PATTERN.match(f)
+        if not m:
+            continue
+
+        x, y = map(int, m.groups())
+        headers.add((x, y))
+    return headers
 
 
 def load_all_headers(path, first_only=False):
@@ -34,19 +47,15 @@ def load_all_headers(path, first_only=False):
     return headers
 
 
-def get_version_info(path, fast_mode=False):
+def get_version_info(path, fast_mode=True):
     headers = load_all_headers(path, fast_mode)
     cells = set()
     version = set()
-    minlayer = []
-    maxlayer = []
     cell_size_in_block = set()
     block_size = set()
     for (x, y), header in headers.items():
         cells.add((x, y))
         version.add(header['version'])
-        minlayer.append(header['minlayer'])
-        maxlayer.append(header['maxlayer'])
         cell_size_in_block.add(header['CELL_SIZE_IN_BLOCKS'])
         block_size.add(header['BLOCK_SIZE_IN_SQUARES'])
     if len(version) != 1:
@@ -57,13 +66,15 @@ def get_version_info(path, fast_mode=False):
     if len(block_size) != 1:
         raise Exception('Inconsistent block_size: {}'.format(block_size))
     version = version.pop()
+    pz_version = VERSION_LIMITATIONS[version].get('PZ_VERSION', 'unknown')
     cell_size_in_block = cell_size_in_block.pop()
     block_size = block_size.pop()
     cell_size = cell_size_in_block*block_size
-    minlayer = min(minlayer)
-    maxlayer = max(maxlayer)
+    minlayer = VERSION_LIMITATIONS[version]['MIN_LAYER']
+    maxlayer = VERSION_LIMITATIONS[version]['MAX_LAYER']
     version_info = {
-        'version': version,
+        'header_version': version,
+        'pz_version': pz_version,
         'cells': cells,
         'cell_size_in_block': cell_size_in_block,
         'block_size': block_size,
@@ -164,4 +175,4 @@ if __name__ == '__main__':
 
     header = load_lotheader(args.input, args.x, args.y)
     print_header(header)
-    print(get_version_info(args.input, 1))
+    print(get_version_info(args.input))

@@ -1,0 +1,20 @@
+copy: [case_default.yaml]
+conf:
+    B41:
+        conf.yaml:
+            render_conf:
+                cell_range[default]:
+                    - [26, 38, 2, 2]
+
+    B42:
+        conf.yaml:
+            render_conf:
+                cell_range[default]:
+                    - [31, 44, 2, 2]
+maps:
+    B41:
+        custom:
+            - {src: [36, 33], dst: [27, 38], size: [1, 2]}
+    B42:
+        custom:
+            - {src: [42, 39], dst: [32, 44], size: [1, 2]}

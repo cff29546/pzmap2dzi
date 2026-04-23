@@ -173,7 +173,7 @@ class CachedGetter(object):
     def __init__(self, path, types, zrange=None, cache_size=16):
         self.path = path
         map_path = os.path.dirname(path)
-        version_info = lotheader.get_version_info(map_path, fast_mode=True)
+        version_info = lotheader.get_version_info(map_path)
         self.cell_size = version_info['cell_size']
         self.types = types
         self.zrange = zrange

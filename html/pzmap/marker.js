@@ -40,6 +40,16 @@ function sortByDist(marks, x, y) {
     return marks.sort((a, b) => a._dist - b._dist);
 }
 
+function intersectionArea(r1, r2) {
+    const minX = (r1.x > r2.x) ? r1.x : r2.x;
+    const maxX = (r1.x + r1.width < r2.x + r2.width) ? r1.x + r1.width : r2.x + r2.width;
+    const minY = (r1.y > r2.y) ? r1.y : r2.y;
+    const maxY = (r1.y + r1.height < r2.y + r2.height) ? r1.y + r1.height : r2.y + r2.height;
+    const x_overlap = minX < maxX ? maxX - minX : 0;
+    const y_overlap = minY < maxY ? maxY - minY : 0;
+    return x_overlap * y_overlap;
+}
+
 export class MarkManager {
     constructor(options = {}) {
         const {
@@ -131,26 +141,61 @@ export class MarkManager {
         }
     }
 
+    setIncludeRectCover(rects) {
+        this.includeRectCover = rects;
+    }
+
+    setExcludeRectCover(rects) {
+        this.excludeRectCover = rects;
+    }
+
+    filterMarks(marks, excludeMark = null) {
+        const result = [];
+        for (const mark of marks) {
+            if (excludeMark !== null && mark.id === excludeMark.id) continue;
+            if (this.hiddenType[mark.constructor.name]) continue;
+            if (this.includeRectCover || this.excludeRectCover) {
+                const bboxRect = mark.bboxRect();
+                if (this.includeRectCover) {
+                    let inInclude = false;
+                    for (const rect of this.includeRectCover) {
+                        if (intersectionArea(bboxRect, rect) > 0) {
+                            inInclude = true;
+                            break;
+                        }
+                    }
+                    if (!inInclude) continue;
+                }
+                if (this.excludeRectCover) {
+                    const totalArea = bboxRect.width * bboxRect.height;
+                    let excludeArea = 0;
+                    for (const rect of this.excludeRectCover) {
+                        const area = intersectionArea(bboxRect, rect);
+                        if (area > 0) {
+                            excludeArea += area;
+                        }
+                    }
+                    if (excludeArea == totalArea) continue;
+                }
+            }
+            result.push(mark);
+        }
+        return result;
+    }
+
     redrawAll() {
         if (!this.enabled) return;
         const range = g.range;
         const result = this.db.query(range, g.currentLayer, g.zoomLevel);
-        const marks = [];
-        if (this.edit) {
-            const current = this.edit.get();
-            if (current) marks.push(current);
-        }
-        for (const mark of result) {
-            if (!this.hiddenType[mark.constructor.name]) {
-                marks.push(mark);
-            }
-        }
+        const current = this.edit ? this.edit.get() : null;
+        const marks = this.filterMarks(result, current);
         if (this.onScreenLimit &&
             marks.length > this.onScreenLimit &&
             !c.isMaxZoom(g.viewer, false)) {
             sortByDist(marks, range.centerX, range.centerY);
             marks.splice(this.onScreenLimit);
         }
+        if (current) marks.push(current);
         this.render.sync(marks);
     }
 

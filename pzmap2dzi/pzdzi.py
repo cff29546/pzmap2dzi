@@ -104,10 +104,9 @@ class DZI(object):
         return im.crop((0, 0, w, h))
 
     def mark_empty(self, level, tx, ty, layer):
-        if self.save_empty:
-            ext, path = self.tile_path(level, tx, ty, layer, 'empty')
-            with open(path, 'w') as f:
-                pass
+        ext, path = self.tile_path(level, tx, ty, layer, 'empty')
+        with open(path, 'w') as f:
+            pass
 
     def save_tile(self, im, level, tx, ty, layer, force=False):
         write_all = force or not self.cache_enabled
@@ -118,7 +117,10 @@ class DZI(object):
         if im and im.getbbox():
             ext, path = self.tile_path(level, tx, ty, layer)
         else:
-            self.mark_empty(level, tx, ty, layer)
+            if self.save_empty and layer == 0:
+                # only layer 0 is used as sentinel
+                self.mark_empty(level, tx, ty, layer)
+            self.delete_tile(level, tx, ty, layer)
             return 'empty'
 
         if not supports_RGBA(ext):
@@ -299,7 +301,7 @@ class DZI(object):
         eps = self.incremental_mtime_epsilon
         tasks_by_level = [{} for _ in range(self.levels)]
         stale_coords = set()
-        for coord, (mtime, _) in source_units.items():
+        for coord, (mtime, sig) in source_units.items():
             sx, sy = coord
             if self.is_source_empty(sx, sy):
                 continue
@@ -441,21 +443,16 @@ class DZI(object):
 
 
 class PZDZI(DZI):
-    PZ_VERSION = {
-        0: 'B41',
-        1: 'B42',
-    }
-
     def pz_init(self, path, **options):
         version_info = lotheader.get_version_info(path)
-        raw_version = version_info['version']
-        self.pz_version = PZDZI.PZ_VERSION.get(raw_version, 'Unknown')
-        self.cells = version_info['cells']
+        self.pz_version = version_info['pz_version']
+        self.cells = lotheader.scan_headers(path)
         self.cell_size_in_block = version_info['cell_size_in_block']
         self.block_size = version_info['block_size']
         self.cell_size = version_info['cell_size']
         self.minlayer = version_info['minlayer']
         self.maxlayer = version_info['maxlayer']
+        self.hash_method = options.get('hash_method')
         self.pzmap2dzi_version = options.get('pzmap2dzi_version', 'unknown')
         self.git_branch = options.get('git_branch', '')
         self.git_commit = options.get('git_commit', '')
@@ -520,6 +517,25 @@ class PZDZI(DZI):
                 self.unit_range.append((ux, uy, uw, uh))
         print('Unit range:', self.unit_range if self.unit_range else 'all')
 
+    def filter_source_by_unit_range(self, coord_map):
+        if not self.unit_range:
+            return {}
+        to_delete = []
+        for coord in coord_map:
+            ux, uy = coord
+            cx = ux * self.source_unit_size // self.cell_size
+            cy = uy * self.source_unit_size // self.cell_size
+            for rx, ry, rw, rh in self.unit_range:
+                if rx <= cx < rx + rw and ry <= cy < ry + rh:
+                    break
+            else:
+                to_delete.append(coord)
+        deleted = {}
+        for coord in to_delete:
+            deleted[coord] = coord_map[coord]
+            del coord_map[coord]
+        return deleted
+
     def update_pz_map_info(self, info):
         info['cell_size'] = self.cell_size
         info['block_size'] = self.block_size
@@ -556,7 +572,10 @@ class PZDZI(DZI):
             return {}
         if verbose:
             print('Scanning source files.', end=' ')
-        sources = source_manager.collect(source_path, self.source_tags, source_manager.SIGNATURE_MTIME, None, verbose)
+        mode = source_manager.SIGNATURE_MTIME
+        if self.hash_method:
+            mode |= source_manager.SIGNATURE_HASH
+        sources = source_manager.collect(source_path, self.source_tags, mode, self.hash_method, verbose)
         snapshot = {}
         if len(self.source_tags) == 1:
             snapshot = sources.get(self.source_tags[0])
@@ -568,15 +587,38 @@ class PZDZI(DZI):
                         snapshot[coord] = sig
                         continue
                     # Keep the newest signature when multiple tags contribute.
-                    cur_mtime, _ = cur
-                    mtime, _ = sig
-                    if (mtime or 0) >= (cur_mtime or 0):
-                        snapshot[coord] = sig
+                    cur_mtime, cur_sig_hash = cur
+                    mtime, sig_hash = sig
+                    latest_mtime = max(cur_mtime, mtime)
+                    snapshot[coord] = latest_mtime, source_manager.merge_sigs(cur_sig_hash, sig_hash)
+        self.filter_source_by_unit_range(snapshot)
+        snapshot_copy = snapshot.copy()
         if last_units:
+            deleted = self.filter_source_by_unit_range(last_units.map)
+            snapshot_copy.update(deleted)
+        coord_map = util.CoordMap(snapshot_copy, {'hash_method': self.hash_method})
+        util.save_coord_map(self.source_snapshot_path_wip, coord_map)
+        if last_units:
+            self.filter_source_by_unit_range(last_units.map)
             now = time.time() + 1
-            for coord, sig in last_units.items():
+            compare_hash = bool(self.hash_method) and last_units.metadata.get('hash_method') == self.hash_method
+            for coord, sig in last_units.map.items():
+                if not isinstance(coord, tuple):
+                    continue
+                # deleted source
                 if coord not in snapshot:
-                    snapshot[coord] = (now, None)
+                    snapshot[coord] = (now, 'deleted')
+                    continue
+                last_mtime, last_sig_hash = sig
+                new_mtime, new_sig_hash = snapshot[coord]
+                if compare_hash:
+                    # hash changed
+                    if last_sig_hash != new_sig_hash:
+                        snapshot[coord] = (now, new_sig_hash)
+                else:
+                    # mtime changed
+                    if last_mtime != new_mtime:
+                        snapshot[coord] = (now, new_sig_hash)
         return snapshot
 
     def get_tasks(self, verbose):
@@ -591,7 +633,6 @@ class PZDZI(DZI):
 
         last_units = util.load_coord_map(self.source_snapshot_path)
         source_units = self.get_source_snapshot(last_units, verbose)
-        util.save_coord_map(self.source_snapshot_path_wip, source_units)
 
         # get existing tiles and clean up pending tiles
         existing_tiles = self.get_existing_tiles(clear_pending=True, verbose=verbose)

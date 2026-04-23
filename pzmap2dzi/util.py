@@ -106,21 +106,33 @@ def dict_diff(left, right, keys=None, left_name='left', right_name='right'):
     return mismatch
 
 
+class CoordMap(object):
+    def __init__(self, map_dict, metadata=None):
+        self.map = map_dict
+        self.metadata = metadata or {}
+
+
 def save_coord_map(path, coord_map):
     serializable = []
-    for coord, data in coord_map.items():
+    for coord, data in coord_map.map.items():
         serializable.append([coord, data])
+    if coord_map.metadata:
+        serializable.append(['__metadata__', coord_map.metadata])
     with open(path, 'w') as f:
         json.dump(serializable, f)
 
 
 def load_coord_map(path):
     if not os.path.isfile(path):
-        return {}
+        return CoordMap({})
     coord_map = {}
     serialized = []
     with open(path, 'r') as f:
         serialized = json.load(f)
     for coord, data in serialized:
-        coord_map[tuple(coord)] = data
-    return coord_map
+        if coord == '__metadata__':
+            metadata = data
+            continue
+        key = tuple(coord) if isinstance(coord, list) else coord
+        coord_map[key] = data
+    return CoordMap(coord_map, metadata)

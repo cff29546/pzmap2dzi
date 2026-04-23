@@ -17,13 +17,65 @@ except ImportError:
 def copy_map(dst, src, cells):
     copy(dst, src, 'objects.lua')
     copy(dst, src, 'streets.xml')
-    for x, y in cells:
-        copy(dst, src, 'world_{}_{}.lotpack'.format(x, y))
-        copy(dst, src, '{}_{}.lotheader'.format(x, y))
+    for sx, sy, dx, dy in cells:
+        copy(dst, src, 'world_{}_{}.lotpack'.format(sx, sy),
+             'world_{}_{}.lotpack'.format(dx, dy))
+        copy(dst, src, '{}_{}.lotheader'.format(sx, sy),
+             '{}_{}.lotheader'.format(dx, dy))
         src_maps = os.path.join(src, 'maps')
         if os.path.isdir(src_maps):
             dst_maps = os.path.join(dst, 'maps')
-            copy(dst_maps, src_maps, 'biomemap_{}_{}.png'.format(x, y))
+            copy(dst_maps, src_maps,
+                 'biomemap_{}_{}.png'.format(sx, sy),
+                 'biomemap_{}_{}.png'.format(dx, dy))
+
+
+def _parse_coord(value, field_name):
+    if (not isinstance(value, (list, tuple))) or len(value) != 2:
+        raise ValueError('{} must be [x, y], got {}'.format(field_name, value))
+    return int(value[0]), int(value[1])
+
+
+def _expand_map_items(items):
+    output = []
+    for item in items:
+        if isinstance(item, (list, tuple)):
+            x, y = _parse_coord(item, 'cell')
+            output.append((x, y, x, y))
+            continue
+
+        if not isinstance(item, dict):
+            raise ValueError('map item must be [x, y] or dict, got {}'.format(item))
+
+        src = _parse_coord(item.get('src'), 'src')
+        has_dst = 'dst' in item
+        has_offset = 'offset' in item
+        if has_dst and has_offset:
+            raise ValueError('dst and offset cannot both be present: {}'.format(item))
+
+        if has_dst:
+            dst = _parse_coord(item.get('dst'), 'dst')
+        elif has_offset:
+            ox, oy = _parse_coord(item.get('offset'), 'offset')
+            dst = (src[0] + ox, src[1] + oy)
+        else:
+            dst = src
+
+        size = item.get('size', [1, 1])
+        width, height = _parse_coord(size, 'size')
+        if width < 1 or height < 1:
+            raise ValueError('size must be [width>=1, height>=1], got {}'.format(size))
+
+        # Expand area with dx in [0, width), dy in [0, height).
+        for dx in range(width):
+            for dy in range(height):
+                output.append((
+                    src[0] + dx,
+                    src[1] + dy,
+                    dst[0] + dx,
+                    dst[1] + dy,
+                ))
+    return output
 
 
 def copy_conf(dst, src):
@@ -67,15 +119,13 @@ if __name__ == '__main__':
 
     apply_change(conf_path, case.get('preprocess', {}))
     map_path = main.get_map_path(conf_yaml, 'default')
-    version_info = lotheader.get_version_info(map_path, True)
-    if version_info and version_info.get('version') == 1:
-        version = 'B42'
-    else:
-        version = 'B41'
+    version_info = lotheader.get_version_info(map_path)
+    version = version_info.get('pz_version', 'unknown')
 
     apply_change(conf_path, case.get('conf', {}))
     apply_change(conf_path, case.get('conf', {}).get(version, {}))
 
     maps = case.get('maps', {}).get(version, {})
     for name, cells in maps.items():
-        copy_map(os.path.join(args.output, name), map_path, cells)
+        expanded_cells = _expand_map_items(cells)
+        copy_map(os.path.join(args.output, name), map_path, expanded_cells)

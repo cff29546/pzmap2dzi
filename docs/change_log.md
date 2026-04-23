@@ -1,5 +1,18 @@
 # Change log
 
+# 2026-04-24: 1.1.11 + UI 1.1.13
+
+* Improve incremental render change detection
+  * Add `hash_method` config option to detect source changes via content hashing
+  * Adjust empty tile handling
+  * Improve cell range handling
+  * Fixed stale tile detection and cleanup logic
+* Refactor version/layer detection
+* Improve map clipping and mark filtering in the web viewer
+  * Add rectangle cover utilities to the web viewer
+  * Properly clip marks for mod map areas
+* Update tests and configuration
+
 # 2026-04-11: 1.1.10 + UI 1.1.12
 
 * Add zombie count marks

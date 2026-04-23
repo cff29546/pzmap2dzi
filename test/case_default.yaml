@@ -10,6 +10,7 @@ conf:
         render_conf:
             enable_cache: true
             break_key: <f9>
+            cell_range(save): all
 
     B41:
         conf.yaml:

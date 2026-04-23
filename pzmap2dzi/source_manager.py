@@ -223,6 +223,7 @@ def patterns_by_names(names):
     wanted = set(names)
     return [p for p in default_patterns() if p.output_name in wanted]
 
+
 def collect(root_path, tag_names, signature_mode, hash_algo='sha256', progress=True):
     collector = SignatureCollector(
         patterns_by_names(tag_names),
@@ -234,3 +235,25 @@ def collect(root_path, tag_names, signature_mode, hash_algo='sha256', progress=T
     for tag in tag_names:
         result.setdefault(tag, None)
     return result
+
+
+def merge_sigs(sigs1, sigs2):
+    if not sigs1:
+        return sigs2
+    if not sigs2:
+        return sigs1
+    # combine two ordered list of strings and ensure order
+    # use merge sort
+    merged = []
+    i, j = 0, 0
+    while i < len(sigs1) and j < len(sigs2):
+        if sigs1[i] < sigs2[j]:
+            merged.append(sigs1[i])
+            i += 1
+        else:
+            merged.append(sigs2[j])
+            j += 1
+    merged.extend(sigs1[i:])
+    merged.extend(sigs2[j:])
+    return merged
+

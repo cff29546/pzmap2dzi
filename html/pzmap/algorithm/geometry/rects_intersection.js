@@ -11,7 +11,7 @@ function intersect(r1, r2) {
 }
 
 function intersectNC(r1, r2) {
-    // Intersection check, not including corner only intersections.
+    // Intersection check, not including corner only intersections, but including edge only intersections.
     const xmin = Math.max(r1.x, r2.x);
     const xmax = Math.min(r1.x + r1.width, r2.x + r2.width);
     const ymin = Math.max(r1.y, r2.y);
@@ -19,10 +19,29 @@ function intersectNC(r1, r2) {
     return (xmin < xmax && ymin < ymax) || (xmin == xmax && ymin < ymax) || (xmin < xmax && ymin == ymax);
 }
 
+function intersectNENC(r1, r2) {
+    // Intersection check, not including edge only or corner only intersections.
+    const xmin = Math.max(r1.x, r2.x);
+    const xmax = Math.min(r1.x + r1.width, r2.x + r2.width);
+    const ymin = Math.max(r1.y, r2.y);
+    const ymax = Math.min(r1.y + r1.height, r2.y + r2.height);
+    return (xmin < xmax && ymin < ymax);
+}
+
+function intersectNE(r1, r2) {
+    // Intersection check, not including edge only intersections, but including corner only intersections.
+    const xmin = Math.max(r1.x, r2.x);
+    const xmax = Math.min(r1.x + r1.width, r2.x + r2.width);
+    const ymin = Math.max(r1.y, r2.y);
+    const ymax = Math.min(r1.y + r1.height, r2.y + r2.height);
+    return (xmin < xmax && ymin < ymax) || (xmin == xmax && ymin == ymax);
+}
+
+
 export function getNeighboursN2(rects, options = {}) {
     // naive O(n^2) approach.
-    const { noCorner = false } = options;
-    const check = noCorner ? intersectNC : intersect;
+    const { noCorner = false, noEdge = false } = options;
+    const check = noEdge ? (noCorner ? intersectNENC : intersectNE) : (noCorner ? intersectNC : intersect);
 
     const neighbours = rects.map(() => []);
     for (let i = 0; i < rects.length; i++) {
@@ -64,13 +83,13 @@ function buildEvents(rects, options = {}) {
         events.y.sort(cmpArray);
         events.ycost = 0;
     }
-    if (!x || !y) return events;
+    if (!x || !y) return [events, start];
 
     for (const ax of ['x', 'y']) {
         let active = 0;
         let cost = 0;
         for (const event of events[ax]) {
-            if (event[1] === 0) { // type == start
+            if (event[1] === start) { // type == start
                 cost += active;
                 active++;
             } else { // end
@@ -80,24 +99,25 @@ function buildEvents(rects, options = {}) {
         events[ax + 'cost'] = cost;
     }
 
-    return events;
+    return [events, start];
 }
 
 export function getNeighboursN2Opt(rects, options = {}) {
     // Optimized O(n^2) approach.
     // Select the axis with the least number of intersection checks.
-    const { axis = 'xy', noCorner = false } = options;
+    const { axis = 'xy', noCorner = false, noEdge = false } = options;
     if (axis !== 'xy' && axis !== 'x' && axis !== 'y') {
         throw new Error('Invalid axis option. Use "xy", "x", or "y".');
     }
-    const check = noCorner ? intersectNC : intersect;
+    const check = noEdge ? (noCorner ? intersectNENC : intersectNE) : (noCorner ? intersectNC : intersect);
     const neighbours = rects.map(() => []);
-    const axisEvents = buildEvents(rects, { axis: axis }); // start first
+    const endFirst = noEdge && noCorner; // End first if edge-only and corner-only intersection is not considered, to reduce the number of checks.
+    const [axisEvents, startType] = buildEvents(rects, { axis: axis, endFirst: endFirst });
 
     const events = (axisEvents.xcost > axisEvents.ycost) ? axisEvents.y : axisEvents.x;
     const active = new Set();
     for (const [pos, type, index] of events) {
-        if (type === 0) { // start
+        if (type === startType) { // start
             for (const j of active) {
                 if (check(rects[index], rects[j])) {
                     neighbours[index].push(j);
@@ -180,10 +200,11 @@ export function getNeighboursSweepLine(rects, options = {}) {
     // This algorithm has O(m log n) complexity.
     // Where n = rects.length and m = number of intersections.
     // Reference: https://www.cs.princeton.edu/courses/archive/fall05/cos226/lectures/geosearch.pdf
-    const {btreeOrder = 6, noCorner = false} = options;
+    const {btreeOrder = 6, noCorner = false, noEdge = false} = options;
     const active = new BTree(btreeOrder, cmpArray, null, aux);
     const neighbours = rects.map(() => []);
-    const events = buildEvents(rects, { axis: 'x', endFirst: true }).x; // end events first
+    const [axisEvents, startType] = buildEvents(rects, { axis: 'x', endFirst: true }); // end events first
+    const events = axisEvents.x;
     let lastPos = -Infinity;
     const ending = new Set();
     for (const [pos, type, index] of events) {
@@ -199,17 +220,22 @@ export function getNeighboursSweepLine(rects, options = {}) {
             }
             ending.clear();
         }
-        if (type === 1) { // start
+        if (type === startType) { // start
             const r = rects[index];
             const node = [r.y, r.y + r.height, index];
             const [res, border_res] = searchIntersection(active, node);
             for (const i of res) {
-                neighbours[index].push(i);
-                neighbours[i].push(index);
+                 // non-border + ending == edge intersection
+                if (!(noEdge && ending.has(i))) {
+                    neighbours[index].push(i);
+                    neighbours[i].push(index);
+                }
             }
+            // corner intersections
             for (const i of border_res) {
-                // border + ending == corner intersection
-                if (!(noCorner && ending.has(i))) {
+                // border + ending == corner intersection; otherwise edge-only intersection
+                const isCorner = ending.has(i);
+                if (!((noCorner && isCorner) || (noEdge && !isCorner))) {
                     neighbours[index].push(i);
                     neighbours[i].push(index);
                 }
@@ -401,26 +427,6 @@ export function mergeSegments2D(segs, output=null) {
             output.push(seg);
         }
     }
-    return output;
-
-    for (const p of output) {
-        compactPolygon(p);
-    }
-    let maxArea = -1;
-    let maxIndex = -1;
-    for (let i = 0; i < output.length; i++) {
-        const seg = output[i];
-        const area = bboxArea(seg);
-        if (area > maxArea) {
-            maxArea = area;
-            maxIndex = i;
-        }
-    }
-    if (maxIndex >= 0) {
-        const maxSeg = output.splice(maxIndex, 1);
-        output.push(maxSeg[0]);
-    }
-
     return output;
 }
 

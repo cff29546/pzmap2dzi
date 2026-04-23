@@ -256,11 +256,10 @@ def render_saves(cmd, conf, maps, map_name):
     if conf['save_games'] == 'all':
         from pzmap2dzi import lotheader
         from pzmap2dzi.render_impl.save import get_save_version, match_version
-        from pzmap2dzi.pzdzi import PZDZI
         map_conf = maps[map_name]
         map_path = map_conf['map_path'].format(**dict(conf, **map_conf))
-        version_info = lotheader.get_version_info(map_path, True)
-        map_version = PZDZI.PZ_VERSION.get(version_info['version'], 'Unknown')
+        version_info = lotheader.get_version_info(map_path)
+        map_version = version_info['pz_version']
         save_root = os.path.expandvars(conf.get('save_game_root'))
         if not save_root or not os.path.isdir(save_root):
             print('invalid save_game_root: {}'.format(save_root))

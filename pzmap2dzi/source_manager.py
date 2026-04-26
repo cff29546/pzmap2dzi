@@ -1,8 +1,8 @@
 import os
 import re
-import sys
 import hashlib
-from dataclasses import dataclass
+
+from . import util
 
 SIGNATURE_NONE = 0
 SIGNATURE_MTIME = 1
@@ -11,12 +11,14 @@ SIGNATURE_PATH = 4
 SIGNATURE_MAX = SIGNATURE_MTIME | SIGNATURE_HASH | SIGNATURE_PATH
 
 
-@dataclass(frozen=True)
 class PathPattern:
-    output_name: str
-    pattern: re.Pattern
-    output_type: str
-    parser: callable
+    __slots__ = ('output_name', 'pattern', 'output_type', 'parser')
+
+    def __init__(self, output_name, pattern, output_type, parser):
+        self.output_name = output_name
+        self.pattern = pattern
+        self.output_type = output_type
+        self.parser = parser
 
 
 class SignatureAggregate:
@@ -72,15 +74,6 @@ class SignatureCollector:
             print('{} files detected.'.format(file_count))
         return folders, file_count
 
-    def _print_progress(self, prefix, current, total, state):
-        if not self.progress or total <= 0:
-            return state
-        percent = (current * 100) // total
-        if percent > state:
-            print('{}: {: >3}%'.format(prefix, percent), end='\r')
-            return percent
-        return state
-
     def collect(self, root_path):
         folders, total = self._collect_raw_paths(root_path)
         output_defs = {}
@@ -96,6 +89,7 @@ class SignatureCollector:
                 'max_level': -1,
             }
 
+        progress_display = util.ProgressDisplay('Scanning files: {percent: >3}%') if self.progress else None
         progress_state = -1
         index = 0
         for root, file_names in folders:
@@ -104,7 +98,11 @@ class SignatureCollector:
                 rel_root = ''
             for file_name in file_names:
                 index += 1
-                progress_state = self._print_progress('Scanning files', index, total, progress_state)
+                if progress_display and total > 0:
+                    percent = (index * 100) // total
+                    if percent > progress_state:
+                        progress_display.update(percent=percent)
+                        progress_state = percent
                 mtime = None
                 digest = None
                 abs_path = None
@@ -156,8 +154,8 @@ class SignatureCollector:
                     else:
                         raise ValueError('Unknown output type: {}'.format(pattern.output_type))
 
-        if self.progress:
-            print('Scanning files: 100%')
+        if progress_display:
+            progress_display.finish(percent=100)
 
         result = {}
         for name, out in output_defs.items():

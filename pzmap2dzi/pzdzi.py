@@ -2,7 +2,6 @@ from PIL import Image
 import os
 import sys
 import re
-import json
 import time
 import datetime
 from . import util, mptask, scheduling, geometry, lotheader, source_manager
@@ -267,7 +266,7 @@ class DZI(object):
 
     def get_existing_tiles(self, clear_pending, verbose):
         if verbose:
-            print('Scanning existing tiles.', end=' ')
+            print('Scanning existing tiles.')
         existing = source_manager.collect(self.path, ['tiles', 'pending'], source_manager.SIGNATURE_MTIME, None, verbose)
         pending = self.normalize_layered_tile_map(existing['pending'])
         existing_tiles = self.normalize_layered_tile_map(existing['tiles'])
@@ -328,10 +327,11 @@ class DZI(object):
 
     def remove_stale_tiles(self, existing_tiles, stale_coords, verbose):
         total = len(stale_coords)
+        progress_display = util.ProgressDisplay('Cleaning stale tiles: {progress} / {total}' if verbose else '')
         for progress, (level, tx, ty) in enumerate(stale_coords, start=1):
-            if verbose:
-                print('Cleaning stale tiles: {} / {}'.format(progress, total), end='\r')
+            progress_display.update(progress=progress, total=total)
             self.delete_tile_all_layers(existing_tiles, level, tx, ty)
+        progress_display.finish(progress=total, total=total)
 
     def add_thumbnail_tasks(self, tasks_by_level, completed_by_level, verbose):
         # tasks_by_level only have bottom level populated, add thumbnail tasks for upper levels if needed
@@ -417,7 +417,7 @@ class DZI(object):
             render.render(self)
             if verbose:
                 time_used = time.time() - start
-                print('time used', str(datetime.timedelta(0, time_used)))
+                print('Time used: {}'.format(str(datetime.timedelta(0, time_used))))
         no_image = hasattr(render, 'NO_IMAGE') and render.NO_IMAGE
         if no_image:
             if verbose:
@@ -515,7 +515,7 @@ class PZDZI(DZI):
                 uw = (ex - 1) // self.source_unit_size - ux + 1
                 uh = (ey - 1) // self.source_unit_size - uy + 1
                 self.unit_range.append((ux, uy, uw, uh))
-        print('Unit range:', self.unit_range if self.unit_range else 'all')
+        print('Unit range: {}'.format(self.unit_range if self.unit_range else 'all'))
 
     def filter_source_by_unit_range(self, coord_map):
         if not self.unit_range:
@@ -571,7 +571,7 @@ class PZDZI(DZI):
         if not self.source_tags:
             return {}
         if verbose:
-            print('Scanning source files.', end=' ')
+            print('Scanning source files.')
         mode = source_manager.SIGNATURE_MTIME
         if self.hash_method:
             mode |= source_manager.SIGNATURE_HASH
@@ -640,7 +640,7 @@ class PZDZI(DZI):
         completed_sigs = self.get_completed_signatures(existing_tiles)
         tasks = self.compute_incremental_tasks(source_units, self.source_unit_size, completed_sigs)
         tasks_by_level, completed_by_level, stale_coords = tasks
-        print('Stale tiles:', len(stale_coords), 'Affected tiles:', sum(len(t) for t in tasks_by_level))
+        print('Stale tiles: {}, Affected tiles: {}'.format(len(stale_coords), sum(len(t) for t in tasks_by_level)))
 
         if self.delete_stale_tiles and stale_coords:
             self.remove_stale_tiles(existing_tiles, stale_coords, verbose)

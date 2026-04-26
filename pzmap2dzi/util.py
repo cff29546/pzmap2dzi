@@ -1,3 +1,4 @@
+from __future__ import print_function
 import struct
 import os
 import re
@@ -136,3 +137,33 @@ def load_coord_map(path):
         key = tuple(coord) if isinstance(coord, list) else coord
         coord_map[key] = data
     return CoordMap(coord_map, metadata)
+
+
+class ProgressDisplay(object):
+    def __init__(self, template, finish_template=None):
+        self.template = template
+        self.finish_template = finish_template
+        self.last_length = 0
+
+    def _update(self, template, **kwargs):
+        if not template:
+            # convert falsey template to empty string to ensure format won't fail
+            template = ''
+            if self.last_length == 0:
+                return
+        text = template.format(**kwargs)
+        current_length = len(text)
+        if self.last_length > current_length:
+            text = text.ljust(self.last_length)
+        print(text, end='\r')
+        self.last_length = current_length
+
+    def update(self, **kwargs):
+        self._update(self.template, **kwargs)
+
+    def finish(self, **kwargs):
+        template = self.template if self.finish_template is None else self.finish_template
+        self._update(template, **kwargs)
+        if template or self.last_length > 0:
+            print()
+            self.last_length = 0

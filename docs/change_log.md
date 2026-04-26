@@ -1,5 +1,10 @@
 # Change log
 
+# 2026-04-26: 1.1.12 + UI 1.1.13
+
+* Improve console progress display
+* Fix python 2 compatibility
+
 # 2026-04-24: 1.1.11 + UI 1.1.13
 
 * Improve incremental render change detection

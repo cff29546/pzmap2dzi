@@ -98,8 +98,8 @@ class DZI(object):
         w, h = self.pyramid[level]
         if x <= w and y <= h:
             return im
-        w = self.tile_size - max(0, x - w)
-        h = self.tile_size - max(0, y - h)
+        w = max(0, self.tile_size - max(0, x - w))
+        h = max(0, self.tile_size - max(0, y - h))
         return im.crop((0, 0, w, h))
 
     def mark_empty(self, level, tx, ty, layer):

@@ -119,19 +119,43 @@ render_conf:
     # supported hash functions from hashlib: e.g. md5, sha1, sha256, etc.
     hash_method: null
 
-    # A list of cell ranges to render or 'all' to render all cells.
+    # A list of cell ranges to determine the DZI image boundary
     # Each cell range can be specified in two formats:
     #     [x_min, y_min, width, height]
     #     or
-    #     [x, y] equal to [x, y, 1, 1]
-    # examples:
+    #     [x, y] (equal to [x, y, 1, 1])
+    #
+    # Special values:
+    #     auto (default): automatically detect the cell range based on current map data, which is the default value.
+    #     all_mod_maps: use the combined cell range of current map and all mod maps
+    #         useful when you want to render save games with mod maps located outside of the vanilla map boundary
+    # Examples:
+    # default B42 map range:
+    #     dzi_cell_range:
+    #         - [0, 18, 45, 45]
+    #         - [45, 3, 13, 60]
+    #         - [58, 0, 20, 63]
+    dzi_cell_range[default]: all_mod_maps
+    dzi_cell_range: auto
+
+    # A list of cell ranges to render
+    # Use similar format as dzi_cell_range, but it only affects the final render output, not the DZI pyramid building.
+    # It is used to render a subset of cells from the DZI pyramid built for the whole map.
+    # Special value:
+    #     all (default): render all cells in the DZI pyramid
+    # Examples:
     # render cells in rect (30, 30) to (50, 50) inclusively for default map
-    #     cell_range[default]:
+    #     render_cell_range[default]:
     #         - [30, 30, 21, 21]
     # render cell (30, 30) only for default map
-    #     cell_range[default]:
+    #     render_cell_range[default]:
     #         - [30, 30]
-    cell_range: all
+    # it is possible to use different settings for specific maps or render jobs, e.g.:
+    #     render_cell_range[Bedford Falls](zombie):
+    #         - [30, 30, 21, 21]
+    #     render_cell_range[Bedford Falls](save):
+    #         - [30, 30]
+    render_cell_range: all
 
     # discard bottom levels to save space at the cost of zoom in resolution
     #

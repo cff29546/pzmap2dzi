@@ -1,5 +1,18 @@
 # Change log
 
+# 2026-05-22: 1.1.14 + UI 1.1.13
+
+* Improve map range configuration
+  * Split DZI output boundary selection from render filtering with `dzi_cell_range` and `render_cell_range`, deprecating the old `cell_range` option
+  * Add `all_mod_maps` boundary mode so base/save renders can include cells from configured overlay maps
+  * Allow explicit rectangle ranges to drive both isometric and top-view output bounds
+* Improve map path and header scanning robustness
+
+
+# 2026-05-21: 1.1.13 + UI 1.1.13
+
+* Fix crash when rendering out-of-bounds tile
+
 # 2026-04-26: 1.1.12 + UI 1.1.13
 
 * Improve console progress display

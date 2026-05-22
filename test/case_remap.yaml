@@ -3,13 +3,13 @@ conf:
     B41:
         conf.yaml:
             render_conf:
-                cell_range[default]:
+                render_cell_range[default]:
                     - [26, 38, 2, 2]
 
     B42:
         conf.yaml:
             render_conf:
-                cell_range[default]:
+                render_cell_range[default]:
                     - [31, 44, 2, 2]
 maps:
     B41:

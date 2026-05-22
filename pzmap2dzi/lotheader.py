@@ -23,6 +23,8 @@ HEADER_FILE_PATTERN = re.compile('(\\d+)_(\\d+)\\.lotheader$')
 
 def scan_headers(path):
     headers = set()
+    if not os.path.isdir(path):
+        return headers
     for f in os.listdir(path):
         m = HEADER_FILE_PATTERN.match(f)
         if not m:

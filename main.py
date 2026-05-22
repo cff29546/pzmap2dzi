@@ -83,6 +83,14 @@ def parse_map(conf_path):
         maps.update(load_path(map_conf_path))
     dft = load_yaml(os.path.join(conf_path, conf['map_conf_default']))
     maps = set_default(maps, dft)
+    conf['maps_path'] = {}
+    map_names = conf['mod_maps']if conf.get('mod_maps') else []
+    for map_name in map_names + [conf['base_map']]:
+        m = maps.get(map_name, None)
+        if not m:
+            print('mod map [{}] not found in map_conf'.format(map_name))
+            continue
+        conf['maps_path'][map_name] = m['map_path'].format(**dict(conf, **m))
     return conf, maps
 
 
@@ -145,21 +153,26 @@ def get_conf(options, name, cmd, key, default):
 
 
 CONF_KEY_PATTERN = re.compile(r'(?P<key>[a-zA-Z0-9_]+?)(?:\[(?P<name>[a-zA-Z0-9_]*?)\])?(?:\((?P<cmd>[a-zA-Z0-9_]*?)\))?$')
-def copy_options(src, dst, map_name, cmd):
+def copy_options(src, dst, map_name, cmd, key_type='raw', overwrite=False):
     if isinstance(src, list):
-        return [copy_options(v, None, map_name, cmd) for v in src]
+        return [copy_options(v, None, map_name, cmd, key_type, overwrite) for v in src]
     if not isinstance(src, dict):
         return src
     options = dst if dst is not None else {}
     for raw_key in src:
-        m = CONF_KEY_PATTERN.match(raw_key)
-        if m:
-            key = m.group('key')
-            if key not in options:
-                value = get_conf(src, map_name, cmd, key, src.get(raw_key))
-                if isinstance(value, dict) or isinstance(value, list):
-                    value = copy_options(value, None, map_name, cmd)
-                options[key] = value
+        key = raw_key
+        if key_type == 'conf':
+            m = CONF_KEY_PATTERN.match(raw_key)
+            if m:
+                key = m.group('key')
+            else:
+                continue
+        if key in options and not overwrite:
+            continue
+        value = get_conf(src, map_name, cmd, key, src.get(raw_key))
+        if isinstance(value, dict) or isinstance(value, list):
+            value = copy_options(value, None, map_name, cmd, key_type, overwrite)
+        options[key] = value
     return options
 
 
@@ -184,10 +197,10 @@ def render_map(cmd, conf, maps, map_name, map_type=None):
         'map_conf': 'DO_NOT_COPY',
         'mod_maps': 'DO_NOT_COPY',
     }
-    copy_options(conf['render_conf'], options, map_name, cmd)
-    copy_options(conf, options, map_name, cmd)
+    copy_options(conf['render_conf'], options, map_name, cmd, 'conf')
+    copy_options(conf, options, map_name, cmd, 'raw')
     map_conf = maps[map_name]
-    map_path = map_conf['map_path'].format(**dict(conf, **map_conf))
+    map_path = conf['maps_path'][map_name]
     rename_options(options)
     options['input'] = map_path
 

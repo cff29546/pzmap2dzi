@@ -235,3 +235,11 @@ def rect_cover(tile_set):
         for y, l in last:
             rects.append([lastx - length + 1, y, length, l])
     return rects
+
+def all_points_in_rects(rects):
+    points = set()
+    for x, y, w, h in rects:
+        for i in range(w):
+            for j in range(h):
+                points.add((x + i, y + j))
+    return points

@@ -6,11 +6,11 @@ conf:
     B41:
         conf.yaml:
             render_conf:
-                cell_range[default]:
+                render_cell_range[default]:
                     - [22, 17, 1, 1]
 
     B42:
         conf.yaml:
             render_conf:
-                cell_range[default]:
+                render_cell_range[default]:
                     - [26, 20, 1, 1]

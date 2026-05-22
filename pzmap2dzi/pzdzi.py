@@ -55,6 +55,21 @@ def align_origin(origin, align):
     return align * (origin // align)
 
 
+def normalize_rects(rects):
+    if not isinstance(rects, list):
+        return []
+    normalized = []
+    for rect in rects:
+        if len(rect) == 2:
+            normalized.append(rect + [1, 1])
+            continue
+        if len(rect) == 4:
+            normalized.append(rect)
+            continue
+        print('Invalid rect: {}'.format(rect))
+    return normalized
+
+
 class DZI(object):
     def __init__(self, w, h, **options):
         self.w = w
@@ -446,7 +461,6 @@ class PZDZI(DZI):
     def pz_init(self, path, **options):
         version_info = lotheader.get_version_info(path)
         self.pz_version = version_info['pz_version']
-        self.cells = lotheader.scan_headers(path)
         self.cell_size_in_block = version_info['cell_size_in_block']
         self.block_size = version_info['block_size']
         self.cell_size = version_info['cell_size']
@@ -476,7 +490,17 @@ class PZDZI(DZI):
         if options.get('verbose'):
             print('PZ version: {} , layer range [{}, {})'.format(
                   self.pz_version, self.minlayer, self.maxlayer))
-        self.rect_cover = geometry.rect_cover(self.cells)
+        dzi_cell_range = options.get('dzi_cell_range', 'auto')
+        cell_range = normalize_rects(dzi_cell_range)
+        if not cell_range:
+            self.cells = lotheader.scan_headers(path)
+            cells = None
+            if dzi_cell_range == 'all_mod_maps':
+                cells = set().union(*[lotheader.scan_headers(m) for m in options.get('maps_path', {}).values()])
+            self.cell_range = geometry.rect_cover(cells if cells else self.cells)
+        else:
+            self.cell_range = cell_range
+            self.cells = geometry.all_points_in_rects(cell_range)
 
         # incremental rendering options
         self.incremental_mtime_epsilon = float(options.get('incremental_render_mtime_epsilon_sec', 1.0))
@@ -496,16 +520,13 @@ class PZDZI(DZI):
         if not isinstance(source_tags, list):
             source_tags = [source_tags]
         self.source_tags = source_tags
-        cell_range = options.get('cell_range', 'all')
-        self.init_unit_range(cell_range)
+        render_cell_range = options.get('render_cell_range', 'all')
+        self.init_unit_range(normalize_rects(render_cell_range))
 
-    def init_unit_range(self, cell_range):
+    def init_unit_range(self, cell_rects):
         self.unit_range = []
-        if cell_range != 'all':
-            for rect in cell_range:
-                if len(rect) == 2:
-                    rect.extend([1, 1])
-                x, y, w, h = rect
+        if cell_rects:
+            for x, y, w, h in cell_rects:
                 sx = x * self.cell_size
                 sy = y * self.cell_size
                 ex = sx + w * self.cell_size
@@ -546,7 +567,7 @@ class PZDZI(DZI):
         info['git_branch'] = self.git_branch
         info['git_commit'] = self.git_commit
         info['legends'] = self.legends
-        info['cell_rects'] = self.rect_cover
+        info['cell_rects'] = self.cell_range
         return info
 
     def is_source_empty(self, cx, cy):
@@ -709,10 +730,10 @@ class IsoDZI(PZDZI):
 
         assert self.tile_size % self.sqr_width == 0
         assert self.tile_size % self.sqr_height == 0
-        assert len(self.cells) > 0
+        assert len(self.cell_range) > 0
         gxmin, gymin, gxmax, gymax = [None] * 4
-        for cx, cy in self.cells:
-            left, top, right, bottom = self.cell_grid_bound(cx, cy)
+        for cx, cy, cw, ch in self.cell_range:
+            left, top, right, bottom = self.cell_grid_bound(cx, cy, cw, ch)
             if gxmin is None:
                 gxmin = left
                 gymin = top
@@ -786,11 +807,11 @@ class IsoDZI(PZDZI):
         bottom = sx2 + sy2
         return left, top, right, bottom
 
-    def cell_grid_bound(self, cx, cy):
+    def cell_grid_bound(self, cx, cy, cw, ch):
         sxmin = cx * self.cell_size
         symin = cy * self.cell_size
-        sxmax = sxmin + self.cell_size - 1
-        symax = symin + self.cell_size - 1
+        sxmax = sxmin + cw * self.cell_size - 1
+        symax = symin + ch * self.cell_size - 1
         return self.square_grid_bound(sxmin, symin, sxmax, symax)
 
     def square_rect2tiles_rough(self, sx, sy, w, h):
@@ -939,8 +960,11 @@ class TopDZI(PZDZI):
         self.pz_init(map_path, **options)
         self.square_size = options.get('top_view_square_size', 1)
 
-        cxmax, cymax = map(max, zip(*self.cells))
-        cxmin, cymin = map(min, zip(*self.cells))
+        assert len(self.cell_range) > 0
+        cxmin = min(x for x, y, w, h in self.cell_range)
+        cymin = min(y for x, y, w, h in self.cell_range)
+        cxmax = max(x + w for x, y, w, h in self.cell_range) - 1
+        cymax = max(y + h for x, y, w, h in self.cell_range) - 1
 
         self.cxo = align_origin(cxmin, self.align_tiles)
         self.cyo = align_origin(cymin, self.align_tiles)

@@ -10,18 +10,18 @@ conf:
         render_conf:
             enable_cache: true
             break_key: <f9>
-            cell_range(save): all
+            render_cell_range(save): all
 
     B41:
         conf.yaml:
             render_conf:
-                cell_range[default]:
+                render_cell_range[default]:
                     - [26, 38, 1, 2]
 
     B42:
         conf.yaml:
             render_conf:
-                cell_range[default]:
+                render_cell_range[default]:
                     - [31, 44, 1, 2]
 
 maps:

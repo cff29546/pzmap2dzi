@@ -1,5 +1,6 @@
 from . import base
 from ..plants import jumbo_tree_defs
+from .. import util
 import os
 import re
 import sys
@@ -7,6 +8,8 @@ import requests
 import zipfile
 import importlib
 import struct
+import time
+import traceback
 
 try:
     from functools import lru_cache
@@ -16,6 +19,8 @@ except ImportError:
 OLD_BLOCK_NAME = re.compile(r'^map_(\d+)_(\d+)\.bin$')
 NEW_BLOCK_NAME = re.compile(r'^(\d+)\.bin$')
 def scan_blocks(save_game_path, first_only=False):
+    if not os.path.isdir(save_game_path):
+        return {}, None
     blocks = {}
     path_type = 'map/map_{}_{}.bin'
     map_dir = os.path.join(save_game_path, 'map')
@@ -165,6 +170,36 @@ class SaveGameBase(base.TextureRender):
         self.lib_loader = LibLoader(parser_path)
         self.init_in_worker = False
 
+        # dump options
+        self.dump_failed_chunks = options.get('save_game_dump_failed_chunks', False)
+        timestamp = time.strftime('%Y%m%d_%H%M%S', time.localtime())
+        dump_path = os.path.join(
+            options['output_root'], 'dump', 'failed_chunks',
+            save_game, 'run_{}'.format(timestamp)
+        )
+        self.dump_path = os.path.normpath(dump_path)
+
+    def _dump_failed_block(self, block_path, x, y, error, trace):
+        target_name ='map_{}_{}.bin'.format(x, y)
+        target_path = os.path.normpath(os.path.join(self.dump_path, target_name))
+        log_name = 'map_{}_{}.log'.format(x, y)
+        log_path = os.path.normpath(os.path.join(self.dump_path, log_name))
+        lock_name = '{}_{}.lock'.format(x, y)
+        lock_path = os.path.normpath(os.path.join(self.dump_path, '.locks', lock_name))
+        with util.SimpleLock(lock_path) as lock:
+            if lock.acquired:
+                if not os.path.exists(target_path):
+                    if self.dump_failed_chunks:
+                        print('dumping failed chunk wx={} wy={} to {}'.format(x, y, target_path))
+                        util.primitive_copy_file(block_path, target_path)
+                    else:
+                        with open(target_path, 'w') as f:
+                            # create empty file as a marker
+                            pass
+                    with open(log_path, 'w') as f:
+                        f.write('Error: {}\n\n'.format(error))
+                        f.write('Traceback:\n{}'.format(trace))
+
     def update_options(self, options):
         options['render_margin'] = 'large' if self.use_jumbo_tree else 'normal'
         options['source_tags'] = ['save']
@@ -176,7 +211,13 @@ class SaveGameBase(base.TextureRender):
         block_path = self.path_template.format(x, y)
         if not os.path.exists(block_path):
             return None
-        return self.utils.load_chunk(block_path, self.save_version)
+        try:
+            block = self.utils.load_chunk(block_path, self.save_version)
+            return block
+        except Exception as e:
+            trace = traceback.format_exc()
+            self._dump_failed_block(block_path, x, y, e, trace)
+            return None
 
     def init_dzi(self, dzi):
         version, path_template = get_save_version(self.save_game)
@@ -211,10 +252,21 @@ class SaveGameBase(base.TextureRender):
         jumbo_tree_file_number = 5 if self.save_version == 41 else 6
         self.tiledef.update(jumbo_tree_defs(jumbo_tree_file_number))
         world_dict_path = os.path.normpath(os.path.join(self.save_game, 'WorldDictionary.bin'))
-        world_dict_sprites = self.utils.load_world_dict_sprites(world_dict_path, self.save_version)
-        self.tiledef.update(world_dict_sprites)
+        try:
+            world_dict_sprites = self.utils.load_world_dict_sprites(world_dict_path, self.save_version)
+            self.tiledef.update(world_dict_sprites)
+        except Exception as e:
+            print('Failed to load world dictionary sprites: {}'.format(e))
         self.load_block_cached = lru_cache(maxsize=128)(self.load_block)
         self.init_in_worker = True
+
+    def failed_sources(self):
+        failed_chunks = scan_blocks(self.dump_path)[0].keys()
+        if len(failed_chunks) > 0:
+            total_chunks = len(scan_blocks(self.save_game)[0])
+            print('{}/{} chunk(s) failed to render'.format(len(failed_chunks), total_chunks))
+            print('Check failure chunk(s) and log at: {}'.format(os.path.abspath(self.dump_path)))
+        return failed_chunks
 
 
 class SaveGameRender(SaveGameBase):
@@ -231,9 +283,11 @@ class SaveGameRender(SaveGameBase):
         if not sprites:
             return
         for s in sprites:
-            tile_name = self.tiledef.get(s)
-            if not tile_name:
+            if s not in self.tiledef:
                 print('missing tiledef for sprite: {}'.format(s))
+                self.tiledef[s] = ''
+            tile_name = self.tiledef[s]
+            if not tile_name:
                 continue
             tex = self.tl.get_by_name(tile_name)
             if tex:

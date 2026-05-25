@@ -1,4 +1,5 @@
 from __future__ import print_function
+import shutil
 import struct
 import os
 import re
@@ -167,3 +168,96 @@ class ProgressDisplay(object):
         if template or self.last_length > 0:
             print()
             self.last_length = 0
+
+
+class SimpleLock(object):
+    """Atomic per-key mutex using directory creation.
+
+    Usage (manual acquire/release):
+        lock = SimpleLock(lock_path)
+        while True:
+            if lock.acquire():
+                try:
+                    # exclusively own this key; do work here
+                finally:
+                    lock.release()
+                break
+            else:
+                # failed to acquire lock; another process owns it
+                time.sleep(1)
+
+    Usage (with statement syntax):
+        with SimpleLock(lock_path) as locked:
+            if locked:
+                # exclusively own this key; do work here
+
+    `lock_path` is the path to be atomically created. Its parent must exist
+
+    CAUTION: This simple method is potentially unsafe.
+        If the process that owns the lock crashes or fails to release it
+        there will be no automatic release and resulting DEADLOCK.
+        Manual cleanup will be required to remove the lock directory to recover.
+    """
+
+    def __init__(self, lock_path):
+        self.lock_path = lock_path
+        self.acquired = False
+
+    def acquire(self):
+        if not ensure_folder(os.path.dirname(self.lock_path)):
+            return False
+        if self.acquired:
+            return True
+        try:
+            os.mkdir(self.lock_path)
+            self.acquired = True
+        except OSError:
+            # failed to acquire lock; permissions/io issues, or another process owns it
+            self.acquired = False
+        return self.acquired
+
+    def release(self):
+        if self.acquired:
+            try:
+                os.rmdir(self.lock_path)
+            except Exception:
+                # failed to release lock (permissions, io, etc);
+                # potentially unrecoverable DEADLOCK;
+                print('WARNING: Failed to release lock at {}'.format(self.lock_path))
+            self.acquired = False
+
+    def __enter__(self):
+        self.acquire()
+        return self
+
+    def __exit__(self, *args):
+        self.release()
+
+def primitive_copy_file(src, dst):
+    pid = os.getpid()
+    dst_dir = os.path.normpath(os.path.dirname(dst))
+    dst_base = os.path.basename(dst)
+    tmp_base = '{}.tmp.{}'.format(dst_base, pid)
+    tmp_path = os.path.join(dst_dir, tmp_base)
+    success = True
+    try:
+        ensure_folder(dst_dir)
+    except Exception as e:
+        success = False
+    if success:
+        try:
+            shutil.copyfile(src, tmp_path)
+        except Exception as e:
+            success = False
+    if success:
+        try:
+            os.rename(tmp_path, dst)
+        except Exception as e:
+            success = False
+    # cleanup tmp file if it still exists
+    if os.path.isfile(tmp_path):
+        try:
+            os.remove(tmp_path)
+        except Exception as e:
+            pass
+    return success

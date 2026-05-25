@@ -446,15 +446,24 @@ class DZI(object):
         worker = scheduling.TopologicalDziWorker(self, cache_prefix)
         task = mptask.Task(worker, schd, profile)
         task.run((tasks_by_level, completed_by_level), n)
+        interrupted = False
         if schd.stop:
             if verbose:
                 print('Render interrupted: {}'.format(schd.stop))
-            return False
+            interrupted = True
+        failed_sources = []
+        if hasattr(render, 'failed_sources'):
+            failed_sources = render.failed_sources()
         if hasattr(self, 'post_process'):
-            self.post_process()
+            self.post_process(failed_sources, interrupted)
         if verbose:
-            print('Done')
-        return True
+            if interrupted:
+                print('Render interrupted')
+            elif failed_sources:
+                print('Done with issues')
+            else:
+                print('Done')
+        return not interrupted and not failed_sources
 
 
 class PZDZI(DZI):
@@ -587,6 +596,7 @@ class PZDZI(DZI):
 
     def get_source_snapshot(self, last_units, verbose):
         source_path = getattr(self.render, self.source_path, None)
+        now = time.time() + 1
         if not source_path:
             return {}
         if not self.source_tags:
@@ -621,8 +631,13 @@ class PZDZI(DZI):
         util.save_coord_map(self.source_snapshot_path_wip, coord_map)
         if last_units:
             self.filter_source_by_unit_range(last_units.map)
-            now = time.time() + 1
             compare_hash = bool(self.hash_method) and last_units.metadata.get('hash_method') == self.hash_method
+            # Force newly appeared sources (not present in last snapshot)
+            # to look changed so incremental mode will render them.
+            last_coords = set(coord for coord in last_units.map if isinstance(coord, tuple))
+            for coord, (new_mtime, new_sig_hash) in list(snapshot.items()):
+                if coord not in last_coords:
+                    snapshot[coord] = (now, new_sig_hash)
             for coord, sig in last_units.map.items():
                 if not isinstance(coord, tuple):
                     continue
@@ -669,12 +684,19 @@ class PZDZI(DZI):
         self.remove_skipped_tasks(tasks_by_level, completed_by_level, verbose)
         return tasks_by_level, completed_by_level
 
-    def post_process(self):
-        # post process after all tiles are rendered
-        self.finalize_snapshot()
+    def post_process(self, failed_sources, interrupted):
+        self.finalize_snapshot(failed_sources, interrupted)
 
-    def finalize_snapshot(self):
-        if os.path.isfile(self.source_snapshot_path_wip):
+    def finalize_snapshot(self, failed_sources, interrupted):
+        if failed_sources:
+            # load the wip snapshot and remove entries of failed sources so that they will be treated as changed in the next render
+            if os.path.isfile(self.source_snapshot_path_wip):
+                snapshot = util.load_coord_map(self.source_snapshot_path_wip)
+                for coord in failed_sources:
+                    if coord in snapshot.map:
+                        del snapshot.map[coord]
+                util.save_coord_map(self.source_snapshot_path_wip, snapshot)
+        if not interrupted and os.path.isfile(self.source_snapshot_path_wip):
             if os.path.isfile(self.source_snapshot_path):
                 try:
                     os.remove(self.source_snapshot_path)
@@ -684,6 +706,7 @@ class PZDZI(DZI):
                 os.rename(self.source_snapshot_path_wip, self.source_snapshot_path)
             except Exception:
                 print('WARNING: failed to finalize source snapshot')
+        
 
 
 class IsoDZI(PZDZI):

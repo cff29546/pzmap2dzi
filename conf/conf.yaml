@@ -323,3 +323,6 @@ render_conf:
     # the downloaded parser will be cached in save_game_parser_path for future use
     # if left empty, it will default to '<output_path>/lib'
     save_game_parser_path:
+
+    # dump chunks failed to parse during save game rendering for debugging
+    save_game_dump_failed_chunks: true

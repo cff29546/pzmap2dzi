@@ -49,3 +49,7 @@ pzmap2dzi is a command-line tool for Windows that converts Project Zomboid map d
 pzmap2dzi is maintained in spare time, and your support helps keep development active with new features, performance improvements, and compatibility updates for newer game builds.
 
 [![Become a Supporter](https://img.shields.io/badge/Support-pzmap2dzi-orange)](https://ko-fi.com/cff29546)
+
+## Acknowledgements
+
+- Special thanks to *Nark0t1k Kavalash* for testing and feedback.

@@ -81,8 +81,8 @@ render_conf:
     verbose: true
     # show profiling infomation
     profile: false
-    # thread count
-    worker_count: 16
+    # thread count, use 'auto' to set to cpu count
+    worker_count: auto
     # set hotkey to stop render (rerun render to resume)
     # hotkey examples:
     #     <ctrl>+<alt>+a    ctrl + alt + a

@@ -4,7 +4,7 @@ import sys
 import re
 import time
 import datetime
-from . import util, mptask, scheduling, geometry, lotheader, source_manager
+from . import mptask, util, scheduling, geometry, lotheader, source_manager
 
 DZI_TEMPLATE = '''<?xml version="1.0" encoding="UTF-8"?>
 <Image xmlns="http://schemas.microsoft.com/deepzoom/2008" TileSize="{tile_size}" Overlap="0" Format="{format}">
@@ -444,7 +444,8 @@ class DZI(object):
         schd = scheduling.TopologicalDziScheduler(self, break_key, verbose)
         cache_prefix = 'pzdzi.{}.'.format(os.getpid())
         worker = scheduling.TopologicalDziWorker(self, cache_prefix)
-        task = mptask.Task(worker, schd, profile)
+        profile_path = self.path if profile else ''
+        task = mptask.Task(worker, schd, profile_path)
         task.run((tasks_by_level, completed_by_level), n)
         interrupted = False
         if schd.stop:

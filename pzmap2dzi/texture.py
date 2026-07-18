@@ -4,12 +4,14 @@ from PIL.PngImagePlugin import PngInfo
 import PIL
 import io
 import os
+import re
 import struct
 import time
 import yaml
 import hashlib
+
 if __package__ is not None:
-    from . import binfile, util, mptask, plants
+    from . import mptask, binfile, util, plants
 
 try:
     from . import shared_memory_image
@@ -306,7 +308,7 @@ class TextureLibrary(object):
             tasks = list(self.lib.items())
         if not tasks:
             return
-        t = mptask.Task(SaveImg(path), mptask.SplitScheduler(True))
+        t = mptask.Task(SaveImg(path), True)
         t.run(tasks, parallel)
         with open(os.path.join(path, 'hash.yaml'), 'w') as f:
             f.write(yaml.safe_dump(self.hash))

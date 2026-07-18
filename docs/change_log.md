@@ -1,5 +1,13 @@
 # Change log
 
+# 2026-07-19: 1.1.16 + UI 1.1.13
+
+* Optimize multi-thread rendering framework
+
+# 2026-05-25: 1.1.15 + UI 1.1.13
+
+* Add fail dump output for save game rendering
+
 # 2026-05-22: 1.1.14 + UI 1.1.13
 
 * Improve map range configuration

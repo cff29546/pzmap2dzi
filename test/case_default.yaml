@@ -8,6 +8,7 @@ conf:
         use_depend_texture_only: true
         mod_maps: [custom]
         render_conf:
+            profile: true
             enable_cache: true
             break_key: <f9>
             render_cell_range(save): all

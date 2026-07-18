@@ -119,6 +119,9 @@ def unpack(args):
     mod_maps = conf['mod_maps'] if conf.get('mod_maps') else []
     dep = get_dep(conf, maps, mod_maps + [conf['base_map'], 'default'])
 
+    parallel = conf['render_conf']['worker_count']
+    if parallel == 'auto':
+        parallel = os.cpu_count() or 1
     for d in dep:
         if maps[d].get('texture', False) is False:
             continue
@@ -131,7 +134,7 @@ def unpack(args):
                     if re.match(pattern, name):
                         tl.add_pack(os.path.join(path, name))
                         break
-            tl.save_all(output, conf['render_conf']['worker_count'])
+            tl.save_all(output, parallel)
         else:
             print('invalid texture_path: {}'.format(path))
 
@@ -234,7 +237,9 @@ def render_map(cmd, conf, maps, map_name, map_type=None):
     options['git_branch'] = VERSION.get('git_branch', '')
     options['git_commit'] = VERSION.get('git_commit', '')
     dzi = DZI(options['input'], **options)
-    worker_count = options.get('worker_count', 16)
+    worker_count = options.get('worker_count', 'auto')
+    if worker_count == 'auto':
+        worker_count = os.cpu_count() or 1
     break_key = options.get('break_key', '')
     verbose = options.get('verbose', False)
     profile = options.get('profile', False)

@@ -3,7 +3,7 @@ from PIL import Image, ImageDraw
 import sys
 import time
 import datetime
-from . import mptask, lru, util
+from . import lru, mptask, util
 try:
     from . import shared_memory_image
 except ImportError:
@@ -45,49 +45,30 @@ class TopologicalDziScheduler(object):
         self.verbose = verbose
         self.cache_limit = dzi.cache_limit
         self.dzi = dzi
+        self.stop_key = stop_key
         self.image_size = 4 * (dzi.tile_size ** 2)
         self.cache_size = self.cache_limit * 1024 * 1024 // self.image_size
         self.cache_used = 0
         self.cache_max = 0
         self.hk = None
-        if stop_key and hotkey:
-            self.hk = hotkey.listener([stop_key])
 
-    def info(self):
-        if self.verbose:
-            info = 'job: {}/{} '.format(self.done, self.total)
-            info += 'worker: {}/{} '.format(sum(self.active), self.n)
-            if self.dzi.cache_enabled:
-                mb = self.image_size * self.cache_used / 1024 / 1024
-                info += 'cache: {:.2f} '.format(mb)
-                if self.cache_limit:
-                    info += ' / {} '.format(self.cache_limit)
-                info += 'MB'
-            info += '    '
-            print(info, end='\r')
-
-    def release_cache(self, workers, key, method):
-        if key:
-            hit_key, value = self.lru.pop(key)
-        else:
-            hit_key, value = self.lru.pop()
-        if hit_key:
-            wid, layer_map = value
-            worker = workers[wid]
-            if worker:
-                worker.push_msg((method, hit_key))
-            self.cache_used -= sum(layer_map)
-
-    def init(self, task_info, n):
+    def init(self, context, task_info):
+        self.context = context
+        context.set_auto_stop_worker(False)
         self.start_time = time.time()
         self.stop = False
         if self.verbose:
             print('Planning tasks')
+        if self.stop_key and hotkey:
+            self.hk = hotkey.listener([self.stop_key])
+        n = context.coordinator.n
         self.n = n
+        self.done_worker = 0
+        self.active_worker = n
         self.active = [1] * n
+        self.stopped = [0] * n
         self.gets = [0] * n
         self.hits = [0] * n
-        self.last_job = [None] * n
         tasks, done = task_info
         self.total = 0
         self.done = 0
@@ -114,31 +95,64 @@ class TopologicalDziScheduler(object):
             print('Working')
         return True
 
-    def on_result(self, workers, wid, state, result):
-        if state == 'result':
-            if result[0] == 'hold':
-                hold, mem_size, gets, hits = result
-                self.active[wid] = 0
-                self.gets[wid] = gets
-                self.hits[wid] = hits
-            else:
-                self.done += 1
-                if self.dzi.cache_enabled:
-                    level, tx, ty, layer_map = result
-                    key = level, tx, ty
-                    self.lru.save(key, (wid, layer_map))
-                    self.cache_used += sum(layer_map)
-                    if self.cache_used > self.cache_max:
-                        self.cache_max = self.cache_used
-                    if self.get_thumbnail_task(key) is None:
-                        self.release_cache(workers, key, 'save')
-                    for key in depend_task(level, tx, ty):
-                        self.release_cache(workers, key, 'drop')
+    def release_cache(self, key, method):
+        if key:
+            hit_key, value = self.lru.pop(key)
+        else:
+            hit_key, value = self.lru.pop()
+        if hit_key:
+            wid, layer_map = value
+            if self.stopped[wid] == 0:
+                self.context.send_msg(wid, (method, hit_key))
+            self.cache_used -= sum(layer_map)
 
-                    if self.cache_size:
-                        while self.cache_used > self.cache_size:
-                            self.release_cache(workers, None, 'save')
-        self.info()
+    def shutdown(self):
+        if self.dzi.cache_enabled:
+            while self.lru.count > 0:
+                self.release_cache(None, 'save')
+        self.context.stop_all_workers()
+        if self.hk:
+            self.hk.stop()
+            self.hk = None
+
+    def on_result(self, wid, job, result):
+        if result[0] == 'summary':
+            _, gets, hits = result
+            self.done_worker += 1
+            self.gets[wid] = gets
+            self.hits[wid] = hits
+            if self.done_worker == self.n:
+                self.shutdown()
+        else:
+            self.done += 1
+            level, x, y, layer_map = result
+            self.done_task.add((level, x, y))
+            key = self.get_thumbnail_task((level, x, y))
+            if key is not None:
+                self.dep[key] -= 1
+                if self.dep[key] == 0:
+                    del self.dep[key]
+                    self.splits[wid].append(key)
+            if self.dzi.cache_enabled:
+                tx, ty = x, y
+                key = level, tx, ty
+                self.lru.save(key, (wid, layer_map))
+                self.cache_used += sum(layer_map)
+                if self.cache_used > self.cache_max:
+                    self.cache_max = self.cache_used
+                if self.get_thumbnail_task(key) is None:
+                    self.release_cache(key, 'save')
+                for key in depend_task(level, tx, ty):
+                    self.release_cache(key, 'drop')
+
+                if self.cache_size:
+                    while self.cache_used > self.cache_size:
+                        self.release_cache(None, 'save')
+
+    def on_failed(self, wid, job, error):
+        print('worker[{}] error[{}]'.format(wid, error))
+        self.stop = 'error'
+        self.shutdown()
 
     def get_thumbnail_task(self, key):
         level, x, y = key
@@ -166,47 +180,44 @@ class TopologicalDziScheduler(object):
             layer_maps.append(lm)
         return layer_maps
 
-    def on_empty(self, workers, wid, state, result):
-        if self.stop:
-            return None
-        if state == 'error':
-            print('worker[{}] error[{}]'.format(wid, result))
-            self.stop = 'error'
+    def on_worker_ready(self, wid):
+        if not self.active[wid]:
             return None
         if self.hk and self.hk.peek():
             self.stop = 'hotkey'
-            return None
-        job = 'hold'
-        if state == 'ready' and len(self.splits[wid]) > 0:
-            job = self.splits[wid].pop()
-        if state in 'result':
-            if result[0] == 'hold':
-                return None if result[1] == 0 else 'hold'
-            level, x, y, layer_map = result
-            self.done_task.add((level, x, y))
-            key = self.get_thumbnail_task((level, x, y))
-            if key is not None:
-                self.dep[key] -= 1
-                if self.dep[key] == 0:
-                    del self.dep[key]
-                    self.splits[wid].append(key)
+
+        job = 'summary'
+        if not self.stop:
             if len(self.splits[wid]) == 0:
                 mptask.rebalance(self.splits, wid)
             if len(self.splits[wid]) > 0:
+                self.active[wid] = 1
                 job = self.splits[wid].pop()
-
-        if job != 'hold':
-            job = job + (self.get_layer_maps(job),)
-        self.last_job[wid] = job
+                job = job + (self.get_layer_maps(job),)
+        if job == 'summary':
+            self.active[wid] = 0
+            self.active_worker -= 1
         return job
 
+    def on_worker_stopped(self, wid):
+        self.stopped[wid] = 1
+
+    def update_status(self):
+        if not self.verbose:
+            return None
+        info = 'job: {}/{} '.format(self.done, self.total)
+        info += 'worker: {}/{} '.format(self.active_worker, self.n)
+        if self.dzi.cache_enabled:
+            mb = self.image_size * self.cache_used / 1024 / 1024
+            info += 'cache: {:.2f} '.format(mb)
+            if self.cache_limit:
+                info += ' / {} '.format(self.cache_limit)
+            info += 'MB'
+        return info
+
     def cleanup(self):
-        self.hk = None
-        self.active = [0]
-        self.info()
-        print('')
         time_used = time.time() - self.start_time
-        print('time used', str(datetime.timedelta(0, time_used)))
+        print('time used: {}'.format(str(datetime.timedelta(0, time_used))))
         if self.dzi.cache_enabled:
             mb = self.image_size * self.cache_max / 1024 / 1024
             print('cache max used: {:.2f} MB'.format(mb))
@@ -289,7 +300,7 @@ class TopologicalDziWorker(object):
         self.gets = 0
         self.hits = 0
 
-    def init(self):
+    def init(self, context=None):
         return True
 
     def on_msg(self, msg):
@@ -309,10 +320,8 @@ class TopologicalDziWorker(object):
             self.mem.release(index)
 
     def on_job(self, job):
-        if job == 'hold':
-            time.sleep(0.1)
-            mem_size = len(self.cache_map)
-            return 'hold', mem_size, self.gets, self.hits
+        if job == 'summary':
+            return 'summary', self.gets, self.hits
         level, x, y, sub_layer_maps = job
         size = (self.dzi.tile_size, self.dzi.tile_size)
         is_base = (level == self.dzi.levels - 1)

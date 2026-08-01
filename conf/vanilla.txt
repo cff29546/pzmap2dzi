@@ -6,6 +6,7 @@ default:
     texture_files:
         - Tiles2x[.]floor.pack
         - JumboTrees2x[.]pack
+        - JumboTreesBigs2x[.]pack
         - Overlays2x[.]pack
         - Tiles2x[.]pack
 

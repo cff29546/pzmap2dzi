@@ -21,7 +21,8 @@ output_route: map_data/
 
 # defult map or texture description fields
 # (relative from this config file location)
-map_conf_default: default.txt
+# for b41, use default_b41.txt
+map_conf_default: default_b42.txt
 # maps and textures description files
 # (relative from this config file location)
 map_conf:

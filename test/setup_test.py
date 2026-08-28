@@ -80,7 +80,8 @@ def _expand_map_items(items):
 
 def copy_conf(dst, src):
     copy(dst, src, 'conf.yaml')
-    copy(dst, src, 'default.txt')
+    copy(dst, src, 'default_b41.txt')
+    copy(dst, src, 'default_b42.txt')
     copy(dst, src, 'vanilla.txt')
 
 

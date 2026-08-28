@@ -720,9 +720,9 @@ class IsoDZI(PZDZI):
     # normal texture size      w:128 h:256
     TEXTURE_WIDTH = 128
     TEXTURE_HEIGHT = 256
-    # jumbo tree texutre size  w:384 h:512
-    LARGE_TEXTURE_WIDTH = 384
-    LARGE_TEXTURE_HEIGHT = 512
+    # max texture size 1024x1024 (e.g. jumbo-xl trees)
+    MAX_TEXTURE_WIDTH = 1024
+    MAX_TEXTURE_HEIGHT = 1024
 
     def get_sqr_center(self, gx, gy):
         ox = gx * IsoDZI.GRID_WIDTH
@@ -739,11 +739,13 @@ class IsoDZI(PZDZI):
         # always assume large texture for output size calculation
         # to ensure alignment between base map and overlays
         self.output_margin = self.get_output_margin()
-        self.render_margin = options.get('render_margin')
-        if isinstance(self.render_margin, str):
-            texture_size = self.render_margin.lower()
-            self.render_margin = self.get_texture_render_margin(texture_size == 'large')
-        # if render margin is a falsy value, (0, 0, 0, 0) will be used
+        render_margin = options.get('render_margin')
+        if render_margin == 'texture':
+            self.render_margin = self.get_texture_render_margin(IsoDZI.MAX_TEXTURE_WIDTH, IsoDZI.MAX_TEXTURE_HEIGHT)
+        elif isinstance(render_margin, (list, tuple)) and len(render_margin) == 4:
+            self.render_margin = tuple(render_margin)
+        else:
+            self.render_margin = (0, 0, 0, 0)
         self.affected_margin = self.render2affected(self.render_margin, 'render')
         self.affected_margin_single_layers = self.render2affected(self.render_margin, 'single')
         if options.get('debug'):
@@ -783,7 +785,7 @@ class IsoDZI(PZDZI):
 
     def get_output_margin(self):
         # largest affected area of a square from its center in grid coordinates
-        render_margin = self.get_texture_render_margin(True)
+        render_margin = self.get_texture_render_margin(IsoDZI.MAX_TEXTURE_WIDTH, IsoDZI.MAX_TEXTURE_HEIGHT)
         return self.render2affected(render_margin, 'output')
 
     def render2affected(self, margin, layer_range='render'):
@@ -804,14 +806,9 @@ class IsoDZI(PZDZI):
             top -= maxlayer * IsoDZI.GRID_HEIGHT_PER_LAYER
         return left, top, right, bottom
 
-    def get_texture_render_margin(self, use_large_texture=None):
+    def get_texture_render_margin(self, texture_width, texture_height):
         # source outside of a tile that may affect the tile in grid coordinates on the same layer
-        texture_width = IsoDZI.TEXTURE_WIDTH
-        texture_height = IsoDZI.TEXTURE_HEIGHT
-        if use_large_texture:
-            texture_width = IsoDZI.LARGE_TEXTURE_WIDTH
-            texture_height = IsoDZI.LARGE_TEXTURE_HEIGHT
-        width = (texture_width // 2) // IsoDZI.GRID_WIDTH - 1
+        width = (texture_width // 2 - 1) // IsoDZI.GRID_WIDTH
         left = -width
         right = width
         top = 0

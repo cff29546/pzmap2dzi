@@ -397,10 +397,21 @@ function init(callback=null) {
                 if (callback) {
                     p = Promise.all([p, callback()]);
                 }
+                focusInitialPosition();
                 p.then(() => { resolve(e); });
             });
         });
     });
+}
+
+function focusInitialPosition() {
+    const x = parseInt(g.query_string.x);
+    const y = parseInt(g.query_string.y);
+    const z = parseInt(g.query_string.z) || 0;
+    const zoom = Number(g.query_string.zoom) || 16;
+    if (Number.isSafeInteger(x) && Number.isSafeInteger(y) && Number.isSafeInteger(z) && zoom > 0) {
+        c.zoomTo(x, y, z, zoom);
+    }
 }
 
 function forceRedraw() {

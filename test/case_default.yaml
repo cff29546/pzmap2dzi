@@ -8,6 +8,7 @@ conf:
         use_depend_texture_only: true
         mod_maps: [custom]
         render_conf:
+            debug: true
             profile: true
             enable_cache: true
             break_key: <f9>

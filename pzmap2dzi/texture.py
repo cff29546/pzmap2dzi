@@ -134,6 +134,14 @@ class Texture(object):
         metadata.add_text('oy', str(self.oy))
         self.im.save(path, pnginfo=metadata)
 
+    def get_affected_area(self):
+        w, h = self.im.size
+        left = max(0, -self.ox)
+        top = max(0, -self.oy)
+        right = max(0, self.ox + w)
+        bottom = max(0, self.oy + h)
+        return left, top, right, bottom
+
 
 class TextureLibrary(object):
     @staticmethod
@@ -149,17 +157,20 @@ class TextureLibrary(object):
     def __init__(self, texture_path=[], cache_name='',
                  page_mode=False, page_size=1024):
         self.texture_path = texture_path
-        self.use_cache = True if cache_name else False
+        self.use_shared_memory_cache = True if cache_name else False
         self.page_mode = page_mode
         self.page_size = page_size
         self.page = []
         self.page_buffer = None
         self.mapping = {}
         self.mem = None
-        if self.use_cache and shared_memory_image:
+        if self.use_shared_memory_cache and shared_memory_image:
             prefix = 'tl.{}.{}'.format(os.getpid(), cache_name)
             self.mem = shared_memory_image.ImageSharedMemory(prefix, 32)
-        self.lib = {}
+        self.raw_cache = {} # including filtered
+        self.local_cache = {} # cache with filtered texture removed
+        self.filters = []
+        self.blend_mapping = {}
         self.init_hash()
 
     def init_hash(self):
@@ -169,6 +180,16 @@ class TextureLibrary(object):
             if os.path.isfile(hash_file):
                 with io.open(hash_file, 'r') as f:
                     self.hash.update(yaml.safe_load(f) or {})
+
+    def add_texture_filters(self, filters):
+        for f in filters:
+            self.filters.append(re.compile(f))
+
+    def save_to_local_cache(self, name, texture):
+        self.raw_cache[name] = texture
+        if self.is_name_filtered(name):
+            texture = None
+        self.local_cache[name] = texture
 
     def add_pack(self, path, debug=False):
         if not os.path.isfile(path):
@@ -194,25 +215,11 @@ class TextureLibrary(object):
                 ox -= ow >> 1
                 oy -= oh
                 texture = Texture(im.crop((x, y, x + w, y + h)), (ox, oy))
-                if debug and self.lib.get(name, None):
+                if debug and self.local_cache.get(name, None):
                     print('Conflict texture: {}'.format(name))
-                self.lib[name] = texture
+                self.save_to_local_cache(name, texture)
                 if self.page_mode:
                     self.mapping[name] = page_id, x, y, w, h, ox, oy
-
-    def add_from_pz_path(self, pzmain, debug=False):
-        files = [
-            'Erosion.pack',
-            'ApCom.pack',
-            'RadioIcons.pack',
-            'ApComUI.pack',
-            'JumboTrees2x.pack',
-            'Tiles2x.floor.pack',
-            'Tiles2x.pack',
-        ]
-        packs = os.path.join(pzmain, 'media', 'texturepacks')
-        for f in files:
-            self.add_pack(os.path.join(packs, f), debug)
 
     def set_texture_path(self, path):
         self.texture_path = path
@@ -225,7 +232,7 @@ class TextureLibrary(object):
                 if im:
                     return Texture(im)
 
-    def load_from_cache(self, name):
+    def load_from_shared_memory(self, name):
         t = None
         if self.mem is not None:
             im = self.mem.load(name, size_func=TextureLibrary.get_size)
@@ -235,7 +242,7 @@ class TextureLibrary(object):
                 t = Texture(im, (ox, oy))
         return t
 
-    def save_to_cache(self, name, t):
+    def save_to_shared_memory(self, name, t):
         if self.mem is not None:
             cached_im = self.mem.create(name, *t.im.size)
             if cached_im:
@@ -246,7 +253,7 @@ class TextureLibrary(object):
                 extra[0] = 1
 
             # free current and reload using shared memory
-            cached = self.load_from_cache(name)
+            cached = self.load_from_shared_memory(name)
             if cached:
                 return cached
         return t
@@ -279,23 +286,42 @@ class TextureLibrary(object):
                         buf_im.paste(im, (0, 0))
 
     def load_texture(self, name):
-        t = self.load_from_cache(name)
+        t = self.load_from_shared_memory(name)
 
         if t is None:
-            t = self.load_raw_texture(name)
+            if name in self.blend_mapping:
+                t = self.blend_textures(self.blend_mapping[name])
+            else:
+                t = self.load_raw_texture(name)
             if t is not None:
-                t = self.save_to_cache(name, t)
+                t = self.save_to_shared_memory(name, t)
 
-        if t is None:
-            print('missing texture [{}]'.format(name))
-        self.lib[name] = t
+        return t
+
+    def is_name_filtered(self, name):
+        for f in self.filters:
+            if f.match(name):
+                return True
+        return False
+
+
+    def get_by_name_ignore_filter(self, name):
+        if name in self.raw_cache:
+            return self.raw_cache[name]
+
+        t = self.load_texture(name)
+        self.save_to_local_cache(name, t)
         return t
 
     def get_by_name(self, name):
-        if name in self.lib:
-            return self.lib[name]
+        if name in self.local_cache:
+            return self.local_cache[name]
 
-        return self.load_texture(name)
+        t = self.load_texture(name)
+        if t is None:
+            print('Missing texture [{}]'.format(name))
+        self.save_to_local_cache(name, t)
+        return self.local_cache[name]
 
     def save_all(self, path, parallel=1):
         if not util.ensure_folder(path):
@@ -305,7 +331,7 @@ class TextureLibrary(object):
             with open(os.path.join(path, 'mapping.yaml'), 'w') as f:
                 f.write(yaml.safe_dump(self.mapping))
         else:
-            tasks = list(self.lib.items())
+            tasks = list(filter(lambda x: x[1], self.local_cache.items()))
         if not tasks:
             return
         t = mptask.Task(SaveImg(path), True)
@@ -313,25 +339,48 @@ class TextureLibrary(object):
         with open(os.path.join(path, 'hash.yaml'), 'w') as f:
             f.write(yaml.safe_dump(self.hash))
 
+    def get_affected_area(self, names, apply_filters=True):
+        l, u, r, b = 0, 0, 0, 0
+        for name in names:
+            if apply_filters:
+                t = self.get_by_name(name)
+            else:
+                t = self.get_by_name_ignore_filter(name)
+            if t:
+                left, top, right, bottom = t.get_affected_area()
+                l = max(l, left)
+                r = max(r, right)
+                u = max(u, top)
+                b = max(b, bottom)
+        return l, u, r, b
+
     def blend_textures(self, names):
-        w, h = 384, 512
-        im = Image.new('RGBA', (w, h))
+        l, u, r, b = self.get_affected_area(names, False)
+        w = 2 * max(l, r)
+        h = u
+        im = Image.new('RGBA', (w, h + b))
         x = w >> 1
         y = h
         for name in names:
-            t = self.get_by_name(name)
+            t = self.get_by_name_ignore_filter(name)
             if t:
                 t.render(im, x, y)
         return Texture(im, (-x, -y))
 
-    def config_plants(self, conf):
+    def register_blend_name(self, name, texture_names):
+        self.blend_mapping[name] = texture_names
+
+    def config_plants(self, conf, register_only=True):
         pi = plants.PlantsInfo(conf)
         for key, names in pi.mapping.items():
-            self.lib[key] = self.blend_textures(names)
+            self.register_blend_name(key, names)
+            if not register_only:
+                self.get_by_name(key)
 
     def __del__(self):
         if self.mem is not None:
-            self.lib = {}
+            self.local_cache = {}
+            self.raw_cache = {}
             self.mem.clear()
 
 
@@ -351,14 +400,11 @@ if __name__ == '__main__':
     parser.add_argument('-d', '--debug', action='store_true')
     parser.add_argument('-t', '--test-plants', action='store_true')
     parser.add_argument('-m', '--mp', type=int, default=1)
-    parser.add_argument('-z', '--pz-path', type=str, default='')
     parser.add_argument('-p', '--page-mode', action='store_true')
     parser.add_argument('packs', nargs=argparse.REMAINDER)
     args = parser.parse_args()
 
     lib = TextureLibrary(page_mode=args.page_mode)
-    if args.pz_path:
-        lib.add_from_pz_path(args.pz_path, args.debug)
     for pack_path in args.packs:
         lib.add_pack(pack_path, args.debug)
     if args.test_plants:
@@ -368,6 +414,6 @@ if __name__ == '__main__':
             'large_bush': True,
             'tree_size': 3,
             'jumbo_tree_size': 5,
-        })
+        }, False)
     lib.save_all(args.output, args.mp)
     # lib.save_pages(args.output)

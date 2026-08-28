@@ -21,18 +21,19 @@ class TextureRender(object):
         plants_conf = options.get('plants_conf', {})
 
         self.tl = texture.TextureLibrary(texture_path, cache_name)
+        texture_filters = options.get('texture_filters', [])
+        if texture_filters:
+            self.tl.add_texture_filters(texture_filters)
         self.tl.config_plants(plants_conf)
 
 
 class BaseRender(TextureRender):
     def __init__(self, **options):
         self.input = options.get('input')
-        plants_conf = options.get('plants_conf', {})
-        self.use_jumbo_tree = plants_conf.get('jumbo_tree_size', 3) > 3
         TextureRender.__init__(self, **options)
 
     def update_options(self, options):
-        options['render_margin'] = 'large' if self.use_jumbo_tree else 'normal'
+        options['render_margin'] = 'texture'
         return options
 
     def square(self, im_getter, dzi, ox, oy, sx, sy, layer):
@@ -49,8 +50,6 @@ class BaseRender(TextureRender):
             tex = self.tl.get_by_name(t)
             if tex:
                 tex.render(im_getter.get(), ox, oy)
-            else:
-                print('missing tile: {}'.format(t))
 
 
 def color_from_sums(color_sums):

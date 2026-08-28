@@ -21,7 +21,7 @@ def get_used_tiles(path):
 def get_pack_textures(path):
     tl = texture.TextureLibrary()
     tl.add_pack(path)
-    return tl.lib.keys()
+    return tl.local_cache.keys()
 
 
 if __name__ == '__main__':

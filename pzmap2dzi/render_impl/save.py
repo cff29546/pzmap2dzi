@@ -153,8 +153,6 @@ class SaveGameBase(base.TextureRender):
     OLD_BLOCK_NAME = re.compile(r'map_(\d+)_(\d+).bin')
     NEW_BLOCK_NAME = re.compile(r'(\d+).bin')
     def __init__(self, **options):
-        options.setdefault('plants_conf', {}).setdefault('jumbo_tree_size', 4)
-        self.use_jumbo_tree = options['plants_conf']['jumbo_tree_size'] > 3
         base.TextureRender.__init__(self, **options)
         self.pz_root = options.get('pz_root')
         self.mod_root = options.get('mod_root')
@@ -201,7 +199,7 @@ class SaveGameBase(base.TextureRender):
                         f.write('Traceback:\n{}'.format(trace))
 
     def update_options(self, options):
-        options['render_margin'] = 'large' if self.use_jumbo_tree else 'normal'
+        options['render_margin'] = 'texture'
         options['source_tags'] = ['save']
         options['source_path'] = 'save_game'
         options['source_unit_size'] = 'block'

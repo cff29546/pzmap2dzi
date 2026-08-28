@@ -58,7 +58,7 @@ def build_mock_isodzi(
 
     # Keep margin behavior consistent with IsoDZI defaults.
     dzi.output_margin = dzi.get_output_margin()
-    dzi.render_margin = dzi.get_texture_render_margin(True)
+    dzi.render_margin = dzi.get_texture_render_margin(IsoDZI.MAX_TEXTURE_WIDTH, IsoDZI.MAX_TEXTURE_HEIGHT)
     # if render margin is a falsy value, (0, 0, 0, 0) will be used
     dzi.affected_margin = dzi.render2affected(dzi.render_margin, 'output')
     dzi.affected_margin_single_layers = dzi.render2affected(dzi.render_margin, 'single')

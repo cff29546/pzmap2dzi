@@ -226,6 +226,13 @@ render_conf:
         # 1 to 11   the unified tree type
         unify_tree_type: 0
 
+    # texture filtering
+    # contains a list of texture name regex patterns that will NOT be used in the render process
+    # example: skip jumbo tree textures
+    #     texture_filters:
+    #         - '.*JUMBO.*'
+    texture_filters: []
+
     # square color method in top view mode
     # supported method:
     # base: only use the color of the floor tile

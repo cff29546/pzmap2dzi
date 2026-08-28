@@ -560,7 +560,8 @@ export class Map {
                     visible_zoom_level: o.defaultValue.visible_zoom_level || 0,
                 } };
             });
-            const worker = new Worker('pzmap/mark/loader.js', { type: "module" });
+            const workerUrl = new URL('mark/loader.js', import.meta.url);
+            const worker = new Worker(workerUrl, { type: 'module' });
             worker.postMessage([r, buildIndexOptions]);
             worker.onmessage = (e) => {
                 const [r, indexes] = e.data;
@@ -574,6 +575,9 @@ export class Map {
                 }
                 this.redrawMarks(g.overlays);
                 worker.terminate();
+            };
+            worker.onerror = (e) => {
+                console.log('loader worker error.');
             };
             return Promise.resolve(this);
         };

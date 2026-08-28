@@ -1,5 +1,21 @@
 # Change log
 
+# 2026-08-28: 1.1.17 + UI 1.1.14
+
+* Add texture filtering to skip textures by name pattern
+  * New `texture_filters` config option (regex list) under `render_conf` to exclude textures from rendering, e.g. jumbo tree textures (`'.*JUMBO.*'`)
+  * Filtered textures are still available for plant blending internally
+* Generalize large texture support
+  * Replace fixed jumbo-tree texture size (384x512) with a unified max texture size (1024x1024)
+  * Simplify render margin configuration: `texture` mode uses the max texture margin, explicit 4-value margins are supported, anything else defaults to no margin
+  * Base and save renders always use the max texture margin so base map and overlays stay aligned
+* Refactor texture library caching
+  * Split the texture cache into raw and filtered views so plant blending is lazy and sized to actual content
+  * Compute blended plant texture size from the affected area of its parts instead of a fixed canvas
+* Fix mark loader worker URL resolution in the web viewer and add worker error handling
+* Add map focus by query string parameters (`?x=&y=&z=&zoom=`)
+* Update tests and validation scripts for the texture cache changes
+
 # 2026-07-19: 1.1.16 + UI 1.1.13
 
 * Optimize multi-thread rendering framework
